@@ -1,0 +1,15 @@
+{
+    "test": "Ate",
+    "avatar": {
+        "filePath": "/defaults/character.glb",
+        "args": {
+            "height": 1.7
+        }
+    },
+    "terrain": {
+        "filePath": "/defaults/character.glb",
+        "args": {
+            "height": 1.7
+        }
+    }
+}
