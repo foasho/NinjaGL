@@ -1,15 +1,17 @@
 {
     "test": "Ate",
     "avatar": {
-        "filePath": "/defaults/character.glb",
+        "filePath": "defaults/venti.glb",
         "args": {
-            "height": 1.7
+            "height": 0.5,
+            "isCenter": true,
+            "isVRM": false
         }
     },
     "terrain": {
-        "filePath": "/defaults/character.glb",
+        "filePath": "defaults/terrain.glb",
         "args": {
-            "height": 1.7
+            "mapSize": 64
         }
     }
 }

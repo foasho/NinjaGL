@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@next/font": "13.1.6",
+    "@pixiv/three-vrm": "^1.0.8",
     "@react-three/drei": "^9.56.18",
     "@react-three/fiber": "^8.11.0",
     "@types/node": "18.13.0",

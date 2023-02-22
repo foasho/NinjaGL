@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationMixer, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
 import { IInputMovement } from "./NaniwaProps";
 import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./Intersects";
 import { Face } from "./Octree";
@@ -23,10 +23,12 @@ let translateScoped = new Vector3();
 let translate = new Vector3();
 
 interface IAnimStateProps {
-	Name   : any;
-	Enter  : any;
-	Exit   : any;
-	Update : any;
+	Name     : string;
+	Enter    : any;
+	Exit     : any;
+	Update   : any;
+	CleanUp? : any;
+	Finished?: any;
 }
 
 export class AvatarController {
@@ -127,6 +129,7 @@ export class AvatarController {
 			this.AddState(this.animMapper.walk, this.walkState());
 			this.AddState(this.animMapper.run, this.runState());
 			this.AddState(this.animMapper.jump, this.jumpState());
+			if (this.animMapper.action) this.AddState(this.animMapper.action, this.actionState());
 			// 初期はIdleに設定
 			this.SetState(this.animMapper.idle);
 			this.isAnimation = true;
@@ -703,6 +706,9 @@ export class AvatarController {
 				else if (input.jump) {
 					this.SetState(this.animMapper.jump);
 				}
+				else if (input.action){
+					this.SetState(this.animMapper.action);
+				}
 				this.mixer.update(timeDelta);
 			},
 		};
@@ -739,7 +745,7 @@ export class AvatarController {
 			},
 			Exit   : () => {},
 			Update : (timeDelta: number, input: IInputMovement) => {
-				this.mixer.update(timeDelta);
+				this.mixer.update(timeDelta * 0.1);
 				if (input.forward || input.backward) {
 					if (input.dash) {
 						this.SetState(this.animMapper.run);
@@ -811,6 +817,53 @@ export class AvatarController {
 				}
 				this.SetState(this.animMapper.idle);
 			}
+		}
+	}
+
+	/**
+	 * クリック時のアクション
+	 */
+	actionState(): IAnimStateProps {
+		return {
+			Name  : this.animMapper.action,
+			Enter : (prevState: IAnimStateProps) => {
+				const animation = this.animations.find(a => a.name == this.animMapper.action);
+				const curAction = this.mixer.clipAction(animation);
+				const cleanup = () => {
+					this.currentState.Finished = true;
+					curAction.getMixer().removeEventListener("finished", cleanup);
+					this.SetState(this.animMapper.idle);
+				}
+				curAction.getMixer().addEventListener('finished', cleanup);
+				if (prevState) {
+					const prevAnimation = this.animations.find(a => a.name == prevState.Name);
+					const prevAction = this.mixer.clipAction(prevAnimation);
+					curAction.reset();  
+					curAction.setLoop(LoopOnce, 1);
+					curAction.clampWhenFinished = true;
+					curAction.crossFadeFrom(prevAction, 0.2, true);
+					curAction.play();
+				} else {
+					curAction.play();
+				}
+			},
+			CleanUp: () => {
+				// this.mixer.removeEventListener("finished", () => this.currentState.Finished = false);
+			},
+			Exit  : () => {
+				if (this.currentState.CleanUp){
+					this.currentState.CleanUp();
+				}
+			},
+			Update: (_, input: IInputMovement) => {
+				console.log(input.action);
+				// if (this.currentState && this.currentState.Finished){
+				// 	this.currentState.Finished = false;
+				// 	this.currentState.Exit();
+				// 	this.SetState(this.animMapper.idle);
+				// }
+			},
+			Finished: false
 		}
 	}
 

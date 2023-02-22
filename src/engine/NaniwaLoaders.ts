@@ -15,6 +15,7 @@ import {
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { SimplifyModifier } from "three/examples/jsm/modifiers/SimplifyModifier";
 import { generateUUID } from "three/src/math/MathUtils";
+import { VRMLoaderPlugin } from '@pixiv/three-vrm';
 
 /**
  * 基本的な3Dオブジェクトのロード
@@ -326,6 +327,8 @@ export interface IAvatarLoaderProps {
     filePath : string;
     height   : number;
     isCenter?: boolean;
+    isVRM?   : boolean;
+    onLoadCallback?: (key: string, size: number) => void;
 }
 
 export interface IAvatarData {
@@ -333,14 +336,24 @@ export interface IAvatarData {
 }
 
 export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarData> => {
+    const key = generateUUID();
+    const loader = new GLTFLoader();
+    if (props.isVRM){
+        loader.register((parser) => {
+            return new VRMLoaderPlugin(parser);
+        });
+    }
     return new Promise((resolve) => {
-        const loader = new GLTFLoader();
         loader.load(
             props.filePath,
             async (gltf: GLTF) => {
-                console.log("GLTFモデルの初期値確認");
+                console.log("Avatar:GLTFモデルの初期値確認");
                 console.log(gltf);
+                if (props.isVRM){
+                    gltf = gltf.userData.vrm;
+                }
                 // サイズを取得する
+                const boundingBox = new Box3();
                 let totalSize = new Vector3();
                 if (props.height){
                     let idx = 0;
@@ -348,10 +361,20 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
                         if ( node.isMesh && idx == 0 ) {
                             node.geometry.computeBoundingBox();
                             let box = node.geometry.boundingBox;
+                            node.castShadow = true;
+                            node.receiveShadow = true;
                             box.getSize(totalSize);
+                            boundingBox.expandByObject(node);
                             idx++;
                         }
+                        else if (node.isObject3D){
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                            node.updateWorldMatrix(true, true)
+                            const boundingBox = new Box3().setFromObject(node, true);
+                        }
                     });
+                    gltf.scene.traverseAncestors
 
                     const nh = totalSize.y;
                     const ns = props.height / nh;
@@ -365,7 +388,8 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
                 }
 
                 if (props.isCenter){
-                    gltf.scene.position.add(new Vector3(0, -totalSize.y/2, 0));
+                    const height = props.height? props.height: totalSize.y;
+                    gltf.scene.position.add(new Vector3(0, -height/2, 0));
                 }
 
                 console.log("正常にモデルのロードが完了しました。");
@@ -378,6 +402,9 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
             },
             (xhr: any) => {
                 // ロード率を計算してCallbackで返す　後日記述
+                if (props.onLoadCallback){
+                    props.onLoadCallback(key, xhr.loaded);
+                }
             },
             (err: any) => {
                 console.log(err);
@@ -396,6 +423,7 @@ export interface IGLTFLoadProps {
     filePath : string;
     posType  : "center";
     height?  : number;
+    onLoadCallback?: (key: string, size: number) => void;
 }
 
 /**
@@ -404,7 +432,7 @@ export interface IGLTFLoadProps {
  * @returns 
  */
 export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}> => {
-    
+    const key = generateUUID();
     return new Promise((resolve) => {
         const loader = new GLTFLoader();
         loader.load(
@@ -461,7 +489,12 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
 
                 return resolve({gltf: gltf})
             },
-            async (xhr) => {},
+            (xhr) => {
+                // ロード率を計算してCallbackで返す　後日記述
+                if (props.onLoadCallback){
+                    props.onLoadCallback(key, xhr.loaded);
+                }
+            },
             async (err) => {
                 console.log("モデル読み込みエラ―");
                 console.log(err);

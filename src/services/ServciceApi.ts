@@ -31,7 +31,8 @@ export const sapi = axios.create({
 // )
 
 export interface IApiProps {
-    route: string
+    route : string;
+    queryObject?: { [key: string]: string | number };
 }
 
 /**
@@ -40,8 +41,20 @@ export interface IApiProps {
  * @returns 
  */
 export const reqApi = async (props: IApiProps): Promise<any> => {
+    let query = "";
+    if (props.queryObject){
+        query = "?";
+        Object.keys(props.queryObject).map((key: string, idx: number) => {
+            if (idx > 0){
+                query += "&";
+            }
+            query += encodeURIComponent(key);
+            query += "=";
+            query += encodeURIComponent(props.queryObject[key]);
+        });
+    }
     return await sapi.get(
-        BASE_URL + props.route
+        BASE_URL + props.route  + query
     )
     // return null
 }

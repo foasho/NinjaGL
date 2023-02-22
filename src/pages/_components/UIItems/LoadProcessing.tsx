@@ -1,14 +1,25 @@
-import { NaniwaEngineContext } from "@/engine/NaniwaEngineManager"
-import { useContext, useEffect, useRef, useState } from "react"
+import { loadingText, loadPer, NaniwaEngineContext, totalFileSize } from "@/engine/NaniwaEngineManager"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 export const LoadProcessing = () => {
-    const ref = useRef();
-    const [per, setPer] = useState<number>();
+    const [per, setPer] = useState<number>(0);
     const engine = useContext(NaniwaEngineContext);
+    const [timer, setTimer] = useState<NodeJS.Timer>()
+
+    const setPercentage = () => {
+        if (engine.nowLoading){
+            setPer(loadPer);
+        }
+        else {
+            clearInterval(timer)
+            setTimer(null);
+        }
+    }
 
     useEffect(() => {
-        setPer(engine.loadPer);
-    }, [engine.loadPer])
+        const _timer = setInterval(() => { setPercentage() }, 100)
+        setTimer(_timer)
+    }, [])
 
     return (
     <>
@@ -21,7 +32,8 @@ export const LoadProcessing = () => {
                     height: "100vh",
                     width: "100vw",
                     top: "0",
-                    left: "0"
+                    left: "0",
+                    background: "#000000"
                 }
             }>
                 <div style={
@@ -32,16 +44,17 @@ export const LoadProcessing = () => {
                         top: "50%",
                         left: "50%", 
                         transform: "translate(-50%,-50%)",
-                        textAlign: "center"
+                        textAlign: "center",
+                        color: "#ffffff"
                     }
                 }>
                     <div>
                         test
-                        {engine.loadPer}
-                        サイズ: {engine.totalFileSize}
+                        {per}
+                        サイズ: {totalFileSize}
                     </div>
                     <div>
-                        {engine.loadingText}
+                        {loadingText}
                     </div>
                 </div>
             </div>

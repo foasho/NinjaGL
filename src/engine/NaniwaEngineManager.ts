@@ -1,11 +1,11 @@
 import { World } from "./World";
 import { Octree } from "./Octree";
-import { } from "./NaniwaLoaders";
+import { AvatarLoader, TerrainLoader } from "./NaniwaLoaders";
 import { IInputMovement, IObjectManagement } from "./NaniwaProps";
 import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { convertToGB } from "@/commons/functional";
-import { Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
 
 export interface INaniwaEngineProps {
@@ -13,8 +13,15 @@ export interface INaniwaEngineProps {
     jsonPath ? : string;
 }
 
-const storageDir = "/assets";
+let nowLoadedFiles   : {[key: string]: number} = { "sample": 0 }; 
+export let totalFileSize    : number = 1;
+export let loadPer          : number = 0;
+export let loadingText      : string = "ファイルサイズを取得中...";
+
+const assetsDir = "assets";
 export class NaniwaEngine {
+    nowLoading       : boolean = false;
+    loadCompleted    : boolean = false;
     deviceType: "mobile" | "tablet" | "desktop" = "mobile";
     useGPU    : boolean = false;
     worldSize : [number, number, number] = [64, 64, 64];
@@ -23,25 +30,20 @@ export class NaniwaEngine {
         usedHeap      : 0,
         availableHeap : 0
     }
-    nowLoading  : boolean = false;
-    totalFileSize    : number = 0;
-    loadPer     : number = 0;
-    loadingText : string = "ファイルサイズを取得中...";
     oms : IObjectManagement[] = [];
 
     world  : World;
     octree : Octree;
     avatar : AvatarController;
+    camera : PerspectiveCamera | OrthographicCamera;
 
     constructor(props?: INaniwaEngineProps){
         this.detectDevice();
         this.detectGPU();
         this.updateAvailableMemory();
-        const L = this.getOctreeL();
         if (props && props.worldSize) this.worldSize = props.worldSize;
-        let jsonPath = "savedata/default.json";
-        this.importConfigJson(jsonPath);
         this.world = new World();
+        const L = this.getOctreeL();
         this.octree = new Octree({
             min: new Vector3(
                 -this.worldSize[0]/2,
@@ -106,7 +108,7 @@ export class NaniwaEngine {
      * Octreeの段階数(L)を取得
      */
     getOctreeL(): number{
-        const maxL = 8;
+        const maxL = 7;
         let n = 0;
         let l = this.worldSize[0];
         for(l; l>1; l=l/2){
@@ -146,52 +148,148 @@ export class NaniwaEngine {
      */
     async importConfigJson(path: string){
         this.nowLoading = true;
+        totalFileSize = 1;
+        nowLoadedFiles = {};
         const res = await reqApi({route: path});
-        console.log(res.data);
         if (res.data){
-            Object.keys(res.data).map(async (key: string) => {
-                if (key == "avatar" || key == "terrain"){
-                    const obj: IObjectManagement = {
-                        type: key,
-                        filePath: res.data[key].filePath,
-                        args: res.data[key].args
-                    }
-                    const size = await this.getFileSize(obj.filePath);
-                    console.log("DEBUG size", size);
-                    this.oms.push(obj);
-                }
-                else if (key == "objects"){
-                    const objs = res.data[key];
-                    Object.keys(objs).map((key: string) => {
+            const resSize = await reqApi(
+                {route: `/api/filesize`, queryObject: { jsonPath: `${path}` } }
+            );
+            totalFileSize = resSize.data.size;
+            const keys = Object.keys(res.data);
+            await (async () => {
+                for await (const key of keys) {
+                    if (key == "avatar" || key == "terrain"){
+                        let object: Object3D;
+                        let animations: AnimationClip[] = [];
+                        let mixer: AnimationMixer = null;
+                        if (key == "avatar"){
+                            const { gltf } = await AvatarLoader(
+                                { 
+                                    filePath: `${assetsDir}/${res.data[key].filePath}`,
+                                    height: res.data[key].args.height,
+                                    isCenter: res.data.avatar.args.isCenter? res.data.avatar.args.isCenter: false,
+                                    isVRM: res.data.avatar.args.isVRM? res.data.avatar.args.isVRM: false,
+                                    onLoadCallback: this.loadingFileState
+                                }
+                            );
+                            object = gltf.scene;
+                            animations = gltf.animations;
+                            mixer = new AnimationMixer(gltf.scene);
+                        }
+                        else {
+                            const { gltf } = await TerrainLoader(
+                                {
+                                    filePath: `${assetsDir}/${res.data[key].filePath}`,
+                                    posType: "center",
+                                    
+                                    onLoadCallback: this.loadingFileState
+                                }
+                            );
+                            object = gltf.scene;
+                            // 物理世界に適応させる
+                            this.octree.importThreeGLTF(key, gltf)
+                        }
                         const obj: IObjectManagement = {
-                            type: "object",
-                            args: res.data[key].args
+                            type       : key,
+                            object     : object,
+                            args       : res.data[key].args,
+                            mixer      : mixer,
+                            animations : animations
                         }
                         this.oms.push(obj);
-                    });
+                    }
+                    else if (key == "objects"){
+                        const objs = res.data[key];
+                        await Promise.all(
+                            Object.keys(objs).map(async (key: string) => {
+                                const obj: IObjectManagement = {
+                                    type: "object",
+                                    args: res.data[key].args
+                                }
+                                this.oms.push(obj);
+                            })
+                        )
+                    }
                 }
-            });
-
-            (async () => {
 
             })()
+
         }
+        console.log("CHECK");
         this.nowLoading = false;
+        this.loadCompleted = true;
     }
 
     /**
-     * ファイルサイズを取得する
+     * ロード状況を更新する
      */
-    async getFileSize(path: string): Promise<number>{
-        return new Promise((resolve) => {
-            fetch(storageDir+path)
-            .then(response => {
-                const contentLength = response.headers.get('content-length');
-                console.log("CHECK, ", contentLength);
-                return resolve(Number(contentLength));
-            });
-        })
+    loadingFileState(key: string, updateSize: number){
+        if (nowLoadedFiles){
+            nowLoadedFiles[key] = updateSize;
+            // 最後に集計してPercentageを更新する
+            let totalSize = 0;
+            Object.keys(nowLoadedFiles).map((key) => {
+                totalSize += nowLoadedFiles[key];
+            })
+            loadPer = 100 * Number((totalSize/totalFileSize).toFixed(2));
+            console.log("全体のロード%の確認: ", loadPer);
+        }
     }
+
+    getAvatarObject(): IObjectManagement{
+        return this.oms.find(om => om.type == "avatar");
+    }
+
+    /**
+     * アバターをセットする
+     */
+    setAvatar(threeMesh: Mesh){
+        const avatarObject = this.getAvatarObject();
+        if (avatarObject){
+            this.avatar = new AvatarController(
+                threeMesh, 
+                avatarObject.args.height/2,
+                avatarObject.animations,
+                avatarObject.mixer,
+                {
+                    idle: "Idle",
+                    run : "Run",
+                    walk: "Walk",
+                    jump : "Jump",
+                    action : "Punch",
+                }
+            );
+            // 物理世界に対応させる
+            this.world.addAvatar(this.avatar);
+            if (this.camera){
+                this.avatar.setCamera(this.camera);
+            }
+        }
+    }
+
+    /**
+     * アバター用カメラをセットする
+     * @param camera 
+     */
+    setAvatarCamera(camera: PerspectiveCamera | OrthographicCamera){
+        this.camera = camera;
+        if (this.avatar){
+            this.avatar.setCamera(this.camera);
+        }
+    }
+
+    /**
+     * 地形データを取得する
+     */
+    getTerrain():IObjectManagement {
+        return this.oms.find(om => om.type == "terrain");
+    }
+
+    frameUpdate(timeDelta: number, input: IInputMovement){
+        if (this.world) this.world.step(timeDelta, input);
+    }
+
 }
 
 export const NaniwaEngineContext = createContext<NaniwaEngine>(null);
