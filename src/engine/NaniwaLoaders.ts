@@ -9,9 +9,10 @@ import {
     MeshStandardMaterial,
     Euler,
     Vector3,
-    AnimationClip
+    AnimationClip,
+    Quaternion
 } from "three";
-
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { SimplifyModifier } from "three/examples/jsm/modifiers/SimplifyModifier";
 import { generateUUID } from "three/src/math/MathUtils";
@@ -32,7 +33,7 @@ export interface IAutoGLTFLoaderProps {
     maxIteration?: number;            // 一度に削減する数
     rotation?    : Euler;             // 回転を加えるかどうか　デフォルト: 90 * Math.PI / 180;
     isCenter?    : boolean;           // 基準点を中心にするかどうか
-    onCallback?  : (e?: any) => void; 
+    onLoadCallback?: (key: string, size: number) => void;
 }
 
 // 親コンポーネントに返す値
@@ -420,9 +421,9 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
  * 地形データのロード
  */
 export interface IGLTFLoadProps {
-    filePath : string;
-    posType  : "center";
-    height?  : number;
+    filePath  : string;
+    posType   : "center";
+    mapSize?  : number;
     onLoadCallback?: (key: string, size: number) => void;
 }
 
@@ -434,33 +435,39 @@ export interface IGLTFLoadProps {
 export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}> => {
     const key = generateUUID();
     return new Promise((resolve) => {
-        const loader = new GLTFLoader();
+        const loader = new GLTFLoader()
+            .setCrossOrigin('anonymous')
+            .setMeshoptDecoder(MeshoptDecoder);
         loader.load(
             props.filePath,
             async (gltf) => {
-                console.log("地形GLTFモデルの中身の確認");
-                console.log(gltf.scene);
-
-                gltf.scene.updateMatrixWorld();// 回転情報なども同期
-                gltf.scene.traverse((node: Mesh) => { 
+                const scene = gltf.scene || gltf.scenes[0];
+                scene.updateMatrixWorld();// 回転情報なども同期
+                scene.traverse((node: Mesh) => { 
                     if ((node as Mesh).isMesh){
                         if (node.geometry){
                             node.updateMatrix();
                             node.geometry.applyMatrix4(node.matrix);
-                            node.geometry.computeVertexNormals();
+                            // --- 見た目上の回転を正として、回転率を0に戻す
+                            node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
+                            node.rotation.set(0, 0, 0);
+                            // ----
                             node.castShadow = true;
                             node.receiveShadow = true;
                         }
                     }
                 });
 
+                // テスト
+                // gltf.scene.rotation.set(-Math.PI/2, 0, 0);
+
                 // サイズを取得する
                 let totalSize = new Vector3();
 
                 // 高さを取得して利用のスケールに適応させる
-                if (props.height){
+                if (props.mapSize){
                     let idx = 0;
-                    gltf.scene.traverse(( node: any ) => {
+                    scene.traverse(( node: any ) => {
                         if ( node.isMesh && idx == 0 ) {
                             node.geometry.computeBoundingBox();
                             let box = node.geometry.boundingBox;
@@ -470,10 +477,10 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
                         }
                     });
 
-                    const nh = totalSize.y;
-                    const ns = props.height / nh;
+                    const nh = totalSize.x;
+                    const ns = props.mapSize / nh;
                     console.log("デフォルトサイズ: ", nh, "スケールサイズ: ", ns);
-                    gltf.scene.scale.set(
+                    scene.scale.set(
                         ns, 
                         ns, 
                         ns
@@ -481,9 +488,9 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
                     
                 }
 
-                if (props.posType == "center" && props.height){
+                if (props.posType == "center" && props.mapSize){
                     // 高さを中心座標にずらす
-                    gltf.scene.position.copy(new Vector3(0, -props.height/2, 0));
+                    scene.position.copy(new Vector3(0, -props.mapSize/2, 0));
                 }
                 
 

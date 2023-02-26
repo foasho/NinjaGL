@@ -34,7 +34,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
             }
         });
         await Promise.all(filePathes.map(async (filePath: string) => {
-            const file = await stat(`./public/assets/${filePath}`);
+            const file = await stat(`./public/${filePath}`);
             size += file.size;
         }));
         res.status(200).json({ size: size });

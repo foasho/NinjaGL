@@ -6,19 +6,20 @@ import { NaniwaCanvas } from "./NaniwaCanvas";
 import { NaniwaUI } from "./NaniwaUI";
 
 export const Main = () => {
-    // const [jsonPath, setJsonPath] = useState<string>();
     const [state, setState] = useState<INaniwaProps>(InitNaniwa);
     const [engine, setEngine] = useState<NaniwaEngine>();
 
     useEffect(() => {
         setEngine(new NaniwaEngine());
+        return () => {
+            setEngine(null);
+        }
     }, []);
+
+    console.log("再生成");
 
     return (
         <>
-            <div>
-                {/* aaaa */}
-            </div>
             {state.mode == "edit" &&
             <>
                 <a>調整中</a>

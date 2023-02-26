@@ -1,26 +1,32 @@
 import { useEffect, useState } from "react";
-import { reqApi } from "../services/ServciceApi";
+import { TerrainMakerCanvas } from "./_components/TerrainMaker/TerrainMakerCanvas";
+import { TerrainMakerContext, TerrainMakerManager} from "./_components/TerrainMaker/TerrainMakerManager";
+import { TerrainMakerUI } from "./_components/TerrainMaker/TerrainMakerUI";
 
-const TerrainMakeComponent = () => {
-    const [data, setData] = useState<any>();
+const TerrainMakerComponent = () => {
+    const [terrainManager, setTerrainManager] = useState<TerrainMakerManager>();
     useEffect(() => {
-        reqApi({route: "/api/hello"}).then((data) => {
-            console.log("data check");
-            console.log(data);
-            if (data.status == 200){
-                setData(data.data.message);
-            }
-        })
+        setTerrainManager(new TerrainMakerManager());
+        return () => {
+            setTerrainManager(null);
+        }
     }, [])
-
     return (
         <>
-            <div>
-            <h1>Hello, Next.js!</h1>
-            <p>Data: {data}</p>
-            </div>
+            <TerrainMakerContext.Provider value={terrainManager}>
+                {terrainManager &&
+                <>
+                    <div>
+                        <TerrainMakerUI/>
+                    </div>
+                    <div style={{ height: "100vh" }} onContextMenu={() => {return false}}>
+                        <TerrainMakerCanvas/>
+                    </div>
+                </>
+                }
+            </TerrainMakerContext.Provider>
         </>
     )
 }
 
-export default TerrainMakeComponent;
+export default TerrainMakerComponent;

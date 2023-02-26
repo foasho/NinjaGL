@@ -5,15 +5,16 @@ export interface INaniwaProps {
 }
 
 export interface IInputMovement {
-    forward   : boolean;
-    backward  : boolean;
-    left      : boolean;
-    right     : boolean;
-    jump      : boolean;
-    dash      : boolean;
-    action    : boolean;
-    prevDrag? : Vector2; // カメラ向きに利用（あとで実装）
-    currDrag? : Vector2; // カメラ向きに利用（あとで実装）
+    forward    : boolean;
+    backward   : boolean;
+    left       : boolean;
+    right      : boolean;
+    jump       : boolean;
+    dash       : boolean;
+    action     : boolean;
+    prevDrag?  : Vector2; // カメラ向きに利用（あとで実装）
+    currDrag?  : Vector2; // カメラ向きに利用（あとで実装）
+    deviceType : "mobile" | "tablet" | "desktop";
 }
 
 export interface IObjectManagement {

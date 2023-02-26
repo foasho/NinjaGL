@@ -1,17 +1,52 @@
 {
     "test": "Ate",
+    "init": {
+        "mapSize": 128
+    },
     "avatar": {
-        "filePath": "defaults/venti.glb",
+        "filePath": "assets/defaults/default-man.glb",
         "args": {
-            "height": 0.5,
+            "height": 1.7,
             "isCenter": true,
-            "isVRM": false
+            "isVRM": false,
+            "animMapper": {
+                "idle": "Idle",
+                "run" : "Run",
+                "walk": "Walk",
+                "jump" : "Jump",
+                "action" : "Kick"
+            }
         }
     },
     "terrain": {
-        "filePath": "defaults/terrain.glb",
+        "filePath": "assets/defaults/myterrain.glb",
         "args": {
-            "mapSize": 64
+            "mapSize": 128
         }
-    }
+    },
+    "ui": [
+        {
+            "icons": [
+                {
+                    "template": "bs",
+                    "name": "BsHandbagFill",
+                    "style": "top: 10px; right: 10px; color: #ffffff;",
+                    "events": [
+                        {
+                            "type": "click"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "sounds": [
+        {
+            "filePath": "mp3/grassRun.mp3",
+            "volume": 0.5,
+            "loop": true,
+            "trigAnim": "walk",
+            "stopAnim": "Idle"
+        }
+    ]
 }

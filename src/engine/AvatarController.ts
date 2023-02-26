@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationMixer, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
 import { IInputMovement } from "./NaniwaProps";
 import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./Intersects";
 import { Face } from "./Octree";
@@ -92,6 +92,11 @@ export class AvatarController {
 	animations    : AnimationClip[] = [];
 	animMapper    : {[key: string]: string};
 	mixer         : AnimationMixer;
+
+	/**
+	 * サウンド
+	 */
+	sounds       : ISoundProps [] = [];
     
     _events: () => void;
 
@@ -121,10 +126,6 @@ export class AvatarController {
 			this.animations = animations;
 			this.animMapper = animMapper;
 			this.mixer = mixer;
-			// Object.keys(this.animMapper).map((key) => {
-				
-			// });
-			// test
 			this.AddState(this.animMapper.idle, this.idleState());
 			this.AddState(this.animMapper.walk, this.walkState());
 			this.AddState(this.animMapper.run, this.runState());
@@ -134,6 +135,19 @@ export class AvatarController {
 			this.SetState(this.animMapper.idle);
 			this.isAnimation = true;
 		}
+
+		// Soundsをセットする
+		// test
+		const sd = {
+            filePath: "mp3/grassWalk.mp3",
+            volume: 0.5,
+            loop: true,
+            trigAnim: "walk",
+            stopAnim: "Idle"
+        };
+		this.setSound({ key: "test", filePath: sd.filePath, volume: sd.volume, loop: sd.loop  });
+		// soundsData.map
+		
 
 		this._events = () => {
 
@@ -709,7 +723,6 @@ export class AvatarController {
 				else if (input.action){
 					this.SetState(this.animMapper.action);
 				}
-				this.mixer.update(timeDelta);
 			},
 		};
 	}
@@ -717,9 +730,11 @@ export class AvatarController {
 	 * [歩くAnimation]
 	 */
 	walkState(): IAnimStateProps {
+		const actType = "walk";
 		return {
-			Name   : this.animMapper.walk,
+			Name   : this.animMapper[actType],
 			Enter  : (prevState: IAnimStateProps) => {
+				this.playSound("test");
 				const animation = this.animations.find(a => a.name == this.animMapper.walk);
 				if (!animation){
 					throw `${this.animMapper.idle}というアニメーションが見つかりません`;
@@ -743,9 +758,12 @@ export class AvatarController {
 					curAction.play();
 				}
 			},
-			Exit   : () => {},
+			Exit   : () => {
+				console.log("終了しました");
+				this.stopSound("test");
+
+			},
 			Update : (timeDelta: number, input: IInputMovement) => {
-				this.mixer.update(timeDelta * 0.1);
 				if (input.forward || input.backward) {
 					if (input.dash) {
 						this.SetState(this.animMapper.run);
@@ -805,17 +823,32 @@ export class AvatarController {
 			Enter  : (prevState: IAnimStateProps) => {
 				const animation = this.animations.find(a => a.name == this.animMapper.jump);
 				const curAction = this.mixer.clipAction(animation);
-				curAction.play();
+				const cleanup = () => {
+					this.currentState.Finished = true;
+					curAction.getMixer().removeEventListener("finished", cleanup);
+					this.SetState(this.animMapper.idle);
+				}
+				curAction.getMixer().addEventListener('finished', cleanup);
+				if (prevState) {
+					const prevAnimation = this.animations.find(a => a.name == prevState.Name);
+					const prevAction = this.mixer.clipAction(prevAnimation);
+					curAction.reset();  
+					curAction.setLoop(LoopOnce, 1);
+					curAction.clampWhenFinished = true;
+					curAction.crossFadeFrom(prevAction, 0.2, true);
+					curAction.play();
+				} else {
+					curAction.play();
+				}
 			},
 			Exit   : () => {},
 			Update : (_, input: IInputMovement) => {
-				if (input.forward || input.backward) {
-					if (!input.dash) {
-					  	this.SetState(this.animMapper.walk);
-					}
-					return;
+				if (this.isJumping){
+					console.log("check");
 				}
-				this.SetState(this.animMapper.idle);
+				else {
+					this.SetState(this.animMapper.idle);
+				}
 			}
 		}
 	}
@@ -847,24 +880,105 @@ export class AvatarController {
 					curAction.play();
 				}
 			},
-			CleanUp: () => {
-				// this.mixer.removeEventListener("finished", () => this.currentState.Finished = false);
-			},
+			CleanUp: () => {},
 			Exit  : () => {
 				if (this.currentState.CleanUp){
 					this.currentState.CleanUp();
 				}
 			},
 			Update: (_, input: IInputMovement) => {
-				console.log(input.action);
-				// if (this.currentState && this.currentState.Finished){
-				// 	this.currentState.Finished = false;
-				// 	this.currentState.Exit();
-				// 	this.SetState(this.animMapper.idle);
-				// }
 			},
 			Finished: false
 		}
 	}
 
+	/**
+	 * サウンドをセットする
+	 */
+	async setSound(params: ISetSoundOption){
+		if (!this.sounds.find(s => s.key == params.key)){
+			const listener = new AudioListener();
+			// this.camera.add(listener);
+			const sound = new Audio(listener);
+			const audioLoader = new AudioLoader();
+			audioLoader.load(
+				params.filePath,
+				(buffer) =>  {
+					sound.setBuffer(buffer);
+					sound.setLoop(params.loop);
+					sound.setVolume(params.volume);
+					sound.pause();
+				}
+			)
+			this.sounds.push({
+				key: params.key,
+				sound: sound,
+				loop: params.loop,
+				filePath: params.filePath,
+				volume: params.volume
+			})
+		}
+	}
+
+	/**
+	 * サウンドを更新
+	 */
+	updateSound(params: IUpdateSoundOption){
+		const sound = this.sounds.find(s => s.key == params.key);
+		if (sound){
+			if (params.volume){
+				sound.sound.setVolume(params.volume);
+			}
+			if (params.loop !== undefined){
+				sound.sound.setLoop(params.loop);
+			}
+		}
+	}
+
+	/**
+	 * 特定のサウンドを鳴らせる
+	 */
+	playSound(key: string){
+		const sound = this.sounds.find(s => s.key == key);
+		if (sound && !sound.sound.isPlaying){
+			sound.sound.play();
+		}
+	}
+
+	/**
+	 * 特定のサウンドを止める
+	 */
+	stopSound(key: string){
+		const sound = this.sounds.find(s => s.key == key);
+		if (sound){
+			sound.sound.pause();
+		}
+	}
+
+	/**
+	 * 特定のtrig
+	 */
+
+}
+
+interface ISoundProps {
+	key      : string;
+	sound    : Audio;
+	loop     : boolean;
+	volume   : number;
+	filePath : string;
+}
+
+interface ISetSoundOption {
+	key      : string;
+	filePath : string; 
+	loop     : boolean;
+	volume   : number;
+}
+
+interface IUpdateSoundOption {
+	key       : string;
+	filePath? : string; 
+	loop?     : boolean;
+	volume?   : number;
 }

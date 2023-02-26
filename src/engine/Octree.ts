@@ -80,10 +80,7 @@ export class Octree extends Box3 {
      */
     importThreeMesh(name: string, threeMesh: Mesh){
         threeMesh.updateMatrix();
-        // var geometryId = threeMesh.geometry.uuid;
-        // var geometory = threeMesh.geometry.clone();
         var geometory = threeMesh.geometry;
-        // geometory.uuid = MathUtils.generateUUID();
         geometory.applyMatrix4(threeMesh.matrix);
         geometory.computeVertexNormals();
         if (geometory instanceof BufferGeometry){
@@ -99,7 +96,6 @@ export class Octree extends Box3 {
     importGeometories(name: string, geometries: BufferGeometry[]){
         geometries.map((geometry) => {
             var geometryId = geometry.uuid;
-            // if (geometry.index !== undefined){
             if (geometry.index){
                 var indices = geometry.index.array;
                 var positions = geometry.attributes.position.array;
@@ -181,6 +177,7 @@ export class Octree extends Box3 {
                 }
             }
         });
+        console.log(geometries);
         this.importGeometories(name, geometries);
         return geometries;
     }

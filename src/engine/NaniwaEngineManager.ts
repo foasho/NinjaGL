@@ -1,12 +1,13 @@
 import { World } from "./World";
 import { Octree } from "./Octree";
-import { AvatarLoader, TerrainLoader } from "./NaniwaLoaders";
+import { AutoGltfLoader, AvatarLoader, TerrainLoader } from "./NaniwaLoaders";
 import { IInputMovement, IObjectManagement } from "./NaniwaProps";
 import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { convertToGB } from "@/commons/functional";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
+import { useInputControl } from "./InputControls";
 
 export interface INaniwaEngineProps {
     worldSize?: [number, number, number];
@@ -18,20 +19,18 @@ export let totalFileSize    : number = 1;
 export let loadPer          : number = 0;
 export let loadingText      : string = "ファイルサイズを取得中...";
 
-const assetsDir = "assets";
 export class NaniwaEngine {
     nowLoading       : boolean = false;
     loadCompleted    : boolean = false;
     deviceType: "mobile" | "tablet" | "desktop" = "mobile";
     useGPU    : boolean = false;
-    worldSize : [number, number, number] = [64, 64, 64];
+    worldSize : [number, number, number] = [128, 128, 128];
     memory    : { totalHeap: number, usedHeap: number, availableHeap: number } = {
         totalHeap     : 0,
         usedHeap      : 0,
         availableHeap : 0
     }
     oms : IObjectManagement[] = [];
-
     world  : World;
     octree : Octree;
     avatar : AvatarController;
@@ -144,6 +143,11 @@ export class NaniwaEngine {
     }
 
     /**
+     * Octreeを再セット
+     */
+
+
+    /**
      * 設定JSONファイルをImportする
      */
     async importConfigJson(path: string){
@@ -166,7 +170,7 @@ export class NaniwaEngine {
                         if (key == "avatar"){
                             const { gltf } = await AvatarLoader(
                                 { 
-                                    filePath: `${assetsDir}/${res.data[key].filePath}`,
+                                    filePath: `${res.data[key].filePath}`,
                                     height: res.data[key].args.height,
                                     isCenter: res.data.avatar.args.isCenter? res.data.avatar.args.isCenter: false,
                                     isVRM: res.data.avatar.args.isVRM? res.data.avatar.args.isVRM: false,
@@ -177,18 +181,24 @@ export class NaniwaEngine {
                             animations = gltf.animations;
                             mixer = new AnimationMixer(gltf.scene);
                         }
-                        else {
+                        else if (key == "terrain") {
                             const { gltf } = await TerrainLoader(
                                 {
-                                    filePath: `${assetsDir}/${res.data[key].filePath}`,
+                                    filePath: `${res.data[key].filePath}`,
                                     posType: "center",
-                                    
                                     onLoadCallback: this.loadingFileState
                                 }
                             );
+                            // const { gltf, simModObj } = await AutoGltfLoader(
+                            //     {
+                            //         filePath: `${res.data[key].filePath}`,
+                            //         onLoadCallback: this.loadingFileState
+                            //     }
+                            // );
                             object = gltf.scene;
                             // 物理世界に適応させる
-                            this.octree.importThreeGLTF(key, gltf)
+                            this.octree.importThreeGLTF(key, gltf);
+                            // this.octree.importThreeObj3D(key, simModObj);
                         }
                         const obj: IObjectManagement = {
                             type       : key,
@@ -216,7 +226,6 @@ export class NaniwaEngine {
             })()
 
         }
-        console.log("CHECK");
         this.nowLoading = false;
         this.loadCompleted = true;
     }
@@ -252,13 +261,7 @@ export class NaniwaEngine {
                 avatarObject.args.height/2,
                 avatarObject.animations,
                 avatarObject.mixer,
-                {
-                    idle: "Idle",
-                    run : "Run",
-                    walk: "Walk",
-                    jump : "Jump",
-                    action : "Punch",
-                }
+                avatarObject.args.animMapper
             );
             // 物理世界に対応させる
             this.world.addAvatar(this.avatar);
@@ -286,6 +289,11 @@ export class NaniwaEngine {
         return this.oms.find(om => om.type == "terrain");
     }
 
+    /**
+     * フレームによる更新
+     * @param timeDelta 
+     * @param input 
+     */
     frameUpdate(timeDelta: number, input: IInputMovement){
         if (this.world) this.world.step(timeDelta, input);
     }
