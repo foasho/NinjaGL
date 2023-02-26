@@ -442,7 +442,7 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
             props.filePath,
             async (gltf) => {
                 const scene = gltf.scene || gltf.scenes[0];
-                scene.updateMatrixWorld();// 回転情報なども同期
+                // scene.updateMatrixWorld();// 回転情報なども同期
                 scene.traverse((node: Mesh) => { 
                     if ((node as Mesh).isMesh){
                         if (node.geometry){
