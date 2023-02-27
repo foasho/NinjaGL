@@ -1,5 +1,5 @@
 import { AnimationClip, AnimationMixer, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
-import { IInputMovement } from "./NaniwaProps";
+import { IInputMovement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from "./NaniwaProps";
 import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./Intersects";
 import { Face } from "./Octree";
 import { World } from "./World";
@@ -32,7 +32,6 @@ interface IAnimStateProps {
 }
 
 export class AvatarController {
-
     /**
      * 初期値
      */
@@ -68,9 +67,7 @@ export class AvatarController {
 	 * キーボード入力用変数
 	 */
 	isMoveKeyHolding   : boolean = false;
-	// frontAngle         : number = 0; // radian(0 ~ 2π)
 	frontAngle         : -1 | 0 | 1 = 0; // (-1 or 1  or 1)
-	// prevAngle          : number = this.frontAngle; // 1フレーム前のAngle
 	prevAngle          : -1 | 0 | 1 = 0; // (-1 or 1  or 1)
 	frontQuatanion     : Quaternion = new Quaternion;
 	
@@ -85,7 +82,7 @@ export class AvatarController {
 
 	// カメラ情報
 	camera        : PerspectiveCamera | OrthographicCamera;
-	cameraOffset  : Vector3 = new Vector3(0, 1., -2);
+	cameraOffset  : Vector3 = new Vector3(0, .5, -2);
 
 	// アニメーション情報
 	isAnimation   : boolean = false;;
@@ -100,7 +97,14 @@ export class AvatarController {
     
     _events: () => void;
 
-	constructor( object3d: Object3D, radius: number, animations?: AnimationClip[], mixer?: AnimationMixer, animMapper?: {[key: string]: string} ) {
+	constructor(
+		object3d: Object3D,
+		radius: number, 
+		animations?: AnimationClip[], 
+		mixer?: AnimationMixer, 
+		animMapper?: {[key: string]: string},
+		sounds?: any,
+	) {
 		this.isCharacterController = true;
 		this.object = object3d;
 		this.center = this.object.position.clone();
@@ -137,17 +141,18 @@ export class AvatarController {
 		}
 
 		// Soundsをセットする
-		// test
-		const sd = {
-            filePath: "mp3/grassWalk.mp3",
-            volume: 0.5,
-            loop: true,
-            trigAnim: "walk",
-            stopAnim: "Idle"
-        };
-		this.setSound({ key: "test", filePath: sd.filePath, volume: sd.volume, loop: sd.loop  });
-		// soundsData.map
-		
+		if (sounds && sounds.length > 0){
+			sounds.map((sd) => {
+				this.setSound({ 
+					key: sd.key, 
+					filePath: sd.filePath, 
+					volume: sd.volume, 
+					loop: sd.loop, 
+					trigAnim: sd.trigAnim, 
+					stopAnim: sd.stopAnim
+				});
+			});
+		}
 
 		this._events = () => {
 
@@ -734,7 +739,7 @@ export class AvatarController {
 		return {
 			Name   : this.animMapper[actType],
 			Enter  : (prevState: IAnimStateProps) => {
-				this.playSound("test");
+				this.playSoundByAnim(actType);
 				const animation = this.animations.find(a => a.name == this.animMapper.walk);
 				if (!animation){
 					throw `${this.animMapper.idle}というアニメーションが見つかりません`;
@@ -759,9 +764,7 @@ export class AvatarController {
 				}
 			},
 			Exit   : () => {
-				console.log("終了しました");
-				this.stopSound("test");
-
+				this.stopSoundByAnim(actType);
 			},
 			Update : (timeDelta: number, input: IInputMovement) => {
 				if (input.forward || input.backward) {
@@ -778,9 +781,11 @@ export class AvatarController {
 	 * [走るAnimation]
 	 */
 	runState(): IAnimStateProps {
+		const actType = "run";
 		return {
 			Name   : this.animMapper.run,
 			Enter  : (prevState: IAnimStateProps) => {
+				this.playSoundByAnim(actType);
 				const animation = this.animations.find(a => a.name == this.animMapper.run);
 				const curAction = this.mixer.clipAction(animation);
 				if (prevState) {
@@ -801,7 +806,9 @@ export class AvatarController {
 					curAction.play();
 				}
 			},
-			Exit   : () => {},
+			Exit   : () => {
+				this.stopSoundByAnim(actType);
+			},
 			Update : (_, input: IInputMovement) => {
 				if (input.forward || input.backward) {
 					if (!input.dash) {
@@ -915,7 +922,9 @@ export class AvatarController {
 				sound: sound,
 				loop: params.loop,
 				filePath: params.filePath,
-				volume: params.volume
+				volume: params.volume,
+				trigAnim: params.trigAnim,
+				stopAnim: params.stopAnim
 			})
 		}
 	}
@@ -956,29 +965,23 @@ export class AvatarController {
 	}
 
 	/**
-	 * 特定のtrig
+	 * 特定のAnimのサウンドをONにする
 	 */
+	playSoundByAnim(anim: string){
+		const sounds = this.sounds.filter(s => s.trigAnim == anim);
+		sounds.map((sound) => {
+			this.playSound(sound.key);
+		});
+	}
 
-}
+	/**
+	 * 特定のAnimのサウンドをOFFにする
+	 */
+	stopSoundByAnim(anim: string){
+		const sounds = this.sounds.filter(s => s.stopAnim == anim);
+		sounds.map((sound) => {
+			this.stopSound(sound.key);
+		});
+	}
 
-interface ISoundProps {
-	key      : string;
-	sound    : Audio;
-	loop     : boolean;
-	volume   : number;
-	filePath : string;
-}
-
-interface ISetSoundOption {
-	key      : string;
-	filePath : string; 
-	loop     : boolean;
-	volume   : number;
-}
-
-interface IUpdateSoundOption {
-	key       : string;
-	filePath? : string; 
-	loop?     : boolean;
-	volume?   : number;
 }

@@ -1,11 +1,23 @@
 {
-    "test": "Ate",
     "init": {
-        "mapSize": 128
+        "physics": {
+            "octree": "auto"
+        },
+        "mapSize": 128,
+        "backmusics": [
+                {
+                "key": "backmusic",
+                "filePath": "mp3/background.mp3",
+                "volume": 0.02,
+                "loop": true
+            }
+        ]
     },
     "avatar": {
         "filePath": "assets/defaults/default-man.glb",
         "args": {
+            "initPosition": [30, 10, -30],
+            "initRotateDegY": -50,
             "height": 1.7,
             "isCenter": true,
             "isVRM": false,
@@ -15,7 +27,25 @@
                 "walk": "Walk",
                 "jump" : "Jump",
                 "action" : "Kick"
-            }
+            },
+            "sounds": [
+                {
+                    "key": "grassWalk",
+                    "filePath": "mp3/grassWalk.mp3",
+                    "volume": 0.5,
+                    "loop": true,
+                    "trigAnim": "walk",
+                    "stopAnim": "walk"
+                },
+                {
+                    "key": "grassRun",
+                    "filePath": "mp3/grassRun.mp3",
+                    "volume": 0.5,
+                    "loop": true,
+                    "trigAnim": "run",
+                    "stopAnim": "run"
+                }
+            ]
         }
     },
     "terrain": {
@@ -26,10 +56,21 @@
     },
     "ui": [
         {
+            "touchController": {
+                "template": "default",
+                "style": "top: 10px; left: 10px;"
+            },
+            "radioButton": {
+                "key": "radio1",
+                "name": "ラジオボタン",
+                "style": "bottom: 10px; right: 10px;",
+                "selects": []
+            },
             "icons": [
                 {
+                    "key": "icon1",
                     "template": "bs",
-                    "name": "BsHandbagFill",
+                    "type": "BsHandbagFill",
                     "style": "top: 10px; right: 10px; color: #ffffff;",
                     "events": [
                         {
@@ -40,13 +81,41 @@
             ]
         }
     ],
-    "sounds": [
+    "sky": {
+        "distance": 450000,
+        "inclination": 0,
+        "subPosition": [0, 1, 0],
+        "azimuth": 0.25
+    },
+    "lights": [
         {
-            "filePath": "mp3/grassRun.mp3",
-            "volume": 0.5,
-            "loop": true,
-            "trigAnim": "walk",
-            "stopAnim": "Idle"
+            "key": "light1",
+            "name": "光源1",
+            "type": "ambient",
+            "color": "#ffffff",
+            "castShadow": true
+        },
+        {
+            "key": "light2",
+            "name": "光源2",
+            "type": "point",
+            "color": "#ffffff",
+            "distance": 100,
+            "intensity": 0.8,
+            "position": [0, 50, 0],
+            "castShadow": true
+        },
+        {
+            "key": "light3",
+            "name": "光源3",
+            "type": "spot",
+            "color": "#ffffff",
+            "angle": 45,
+            "distance": 100,
+            "intensity": 0.8,
+            "position": [64, 32, 64],
+            "castShadow": true
         }
-    ]
+    ],
+    "scripts": []
 }

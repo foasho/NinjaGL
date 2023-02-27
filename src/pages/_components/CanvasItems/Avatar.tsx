@@ -14,7 +14,6 @@ export const Avatar = () => {
     // 初回ロード時にAvatarObjectをセットする 
     useEffect(() => {
         if (engine.getAvatarObject()){
-            ref.current.position.copy(new Vector3(0, 10, 0));
             engine.setAvatar(ref.current);
         }
     }, []);

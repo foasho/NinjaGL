@@ -12,7 +12,10 @@ export const Main = () => {
     useEffect(() => {
         setEngine(new NaniwaEngine());
         return () => {
-            setEngine(null);
+            if (engine){
+                engine.allClear();
+                setEngine(null);
+            }
         }
     }, []);
 

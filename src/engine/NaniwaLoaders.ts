@@ -10,7 +10,8 @@ import {
     Euler,
     Vector3,
     AnimationClip,
-    Quaternion
+    Quaternion,
+    MeshPhongMaterial
 } from "three";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
@@ -441,6 +442,7 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
         loader.load(
             props.filePath,
             async (gltf) => {
+                console.log("地形ファイルの読み込み");
                 const scene = gltf.scene || gltf.scenes[0];
                 // scene.updateMatrixWorld();// 回転情報なども同期
                 scene.traverse((node: Mesh) => { 
@@ -466,9 +468,11 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
 
                 // 高さを取得して利用のスケールに適応させる
                 if (props.mapSize){
+                    console.log("マップサイズの変更");
                     let idx = 0;
                     scene.traverse(( node: any ) => {
                         if ( node.isMesh && idx == 0 ) {
+                            // node.updateMatrix();
                             node.geometry.computeBoundingBox();
                             let box = node.geometry.boundingBox;
                             // let size = new Vector3();
@@ -480,17 +484,17 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{gltf: GLTF}
                     const nh = totalSize.x;
                     const ns = props.mapSize / nh;
                     console.log("デフォルトサイズ: ", nh, "スケールサイズ: ", ns);
-                    scene.scale.set(
-                        ns, 
-                        ns, 
-                        ns
-                    );
+                    // scene.scale.set(
+                    //     ns,
+                    //     1, 
+                    //     ns
+                    // );
                     
                 }
 
                 if (props.posType == "center" && props.mapSize){
                     // 高さを中心座標にずらす
-                    scene.position.copy(new Vector3(0, -props.mapSize/2, 0));
+                    // scene.position.copy(new Vector3(0, -totalSize.y/2, 0));
                 }
                 
 

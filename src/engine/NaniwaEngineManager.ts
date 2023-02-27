@@ -1,11 +1,11 @@
 import { World } from "./World";
 import { Octree } from "./Octree";
 import { AutoGltfLoader, AvatarLoader, TerrainLoader } from "./NaniwaLoaders";
-import { IInputMovement, IObjectManagement } from "./NaniwaProps";
+import { IInputMovement, IObjectManagement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from "./NaniwaProps";
 import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { convertToGB } from "@/commons/functional";
-import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler } from "three";
 import { reqApi } from "@/services/ServciceApi";
 import { useInputControl } from "./InputControls";
 
@@ -22,7 +22,7 @@ export let loadingText      : string = "ファイルサイズを取得中...";
 export class NaniwaEngine {
     nowLoading       : boolean = false;
     loadCompleted    : boolean = false;
-    deviceType: "mobile" | "tablet" | "desktop" = "mobile";
+    deviceType: "mobile" | "tablet" | "desktop" = "desktop";
     useGPU    : boolean = false;
     worldSize : [number, number, number] = [128, 128, 128];
     memory    : { totalHeap: number, usedHeap: number, availableHeap: number } = {
@@ -35,8 +35,14 @@ export class NaniwaEngine {
     octree : Octree;
     avatar : AvatarController;
     camera : PerspectiveCamera | OrthographicCamera;
+    backmusics : ISoundProps [] = [];
 
-    constructor(props?: INaniwaEngineProps){
+    constructor(){}
+
+    /**
+     * セットアップ
+     */
+    allSetup(props?: INaniwaEngineProps){
         this.detectDevice();
         this.detectGPU();
         this.updateAvailableMemory();
@@ -57,6 +63,22 @@ export class NaniwaEngine {
             maxDepth: L
         });
         this.world.addOctree(this.octree);
+    }
+
+    /**
+     * すべての情報をクリアにする
+     */
+    allClear(){
+        this.nowLoading = false;
+        this.loadCompleted = false;
+        this.useGPU = false;
+        this.world = null;
+        this.octree = null;
+        this.oms = [];
+        this.avatar = null;
+        this.camera = null;
+        this.removeSoundAll();
+        this.backmusics = [];
     }
 
     /**
@@ -163,7 +185,15 @@ export class NaniwaEngine {
             const keys = Object.keys(res.data);
             await (async () => {
                 for await (const key of keys) {
-                    if (key == "avatar" || key == "terrain"){
+                    if (key == "init"){
+                        if (res.data[key]["backmusics"]) {
+                            const objs = res.data[key]["backmusics"];
+                            objs.map((obj) => {
+                                this.setSound(obj);
+                            })
+                        }
+                    }
+                    else if (key == "avatar" || key == "terrain"){
                         let object: Object3D;
                         let animations: AnimationClip[] = [];
                         let mixer: AnimationMixer = null;
@@ -186,6 +216,7 @@ export class NaniwaEngine {
                                 {
                                     filePath: `${res.data[key].filePath}`,
                                     posType: "center",
+                                    mapSize: res.data[key].args.mapSize,
                                     onLoadCallback: this.loadingFileState
                                 }
                             );
@@ -221,6 +252,7 @@ export class NaniwaEngine {
                             })
                         )
                     }
+                    
                 }
 
             })()
@@ -256,12 +288,29 @@ export class NaniwaEngine {
     setAvatar(threeMesh: Mesh){
         const avatarObject = this.getAvatarObject();
         if (avatarObject){
+            if (avatarObject.args.initPosition){
+                threeMesh.position.set(
+                    avatarObject.args.initPosition[0], 
+                    avatarObject.args.initPosition[1], 
+                    avatarObject.args.initPosition[2]
+                );
+            }
+            if (avatarObject.args.initRotateDegY){
+                threeMesh.quaternion.copy(
+                    new Quaternion().setFromEuler(new Euler(
+                        0,
+                        MathUtils.degToRad(avatarObject.args.initRotateDegY),
+                        0
+                    ))
+                );
+            }
             this.avatar = new AvatarController(
                 threeMesh, 
                 avatarObject.args.height/2,
                 avatarObject.animations,
                 avatarObject.mixer,
-                avatarObject.args.animMapper
+                avatarObject.args.animMapper,
+                avatarObject.args.sounds
             );
             // 物理世界に対応させる
             this.world.addAvatar(this.avatar);
@@ -288,6 +337,97 @@ export class NaniwaEngine {
     getTerrain():IObjectManagement {
         return this.oms.find(om => om.type == "terrain");
     }
+
+    /**
+     * そらデータを取得する
+     */
+    getSky():IObjectManagement {
+        return this.oms.find(om => om.type == "sky");
+    }
+
+    /**
+     * 光源データを取得する
+     */
+    getLights():IObjectManagement[] {
+        return this.oms.filter(om => om.type == "light");
+    }
+
+    /**
+	 * サウンドをセットする
+	 */
+	setSound(params: ISetSoundOption){
+		if (!this.backmusics.find(s => s.key == params.key)){
+            console.log("ppamras check");
+            console.log(params);
+			const listener = new AudioListener();
+			const sound = new Audio(listener);
+			const audioLoader = new AudioLoader();
+			audioLoader.load(
+				params.filePath,
+				(buffer) =>  {
+					sound.setBuffer(buffer);
+					sound.setLoop(params.loop);
+					sound.setVolume(params.volume);
+					sound.play();
+				}
+			)
+			this.backmusics.push({
+				key: params.key,
+				sound: sound,
+				loop: params.loop,
+				filePath: params.filePath,
+				volume: params.volume,
+				trigAnim: params.trigAnim,
+				stopAnim: params.stopAnim
+			})
+		}
+	}
+
+	/**
+	 * サウンドを更新
+	 */
+	updateSound(params: IUpdateSoundOption){
+		const sound = this.backmusics.find(s => s.key == params.key);
+		if (sound){
+			if (params.volume){
+				sound.sound.setVolume(params.volume);
+			}
+			if (params.loop !== undefined){
+				sound.sound.setLoop(params.loop);
+			}
+		}
+	}
+
+	/**
+	 * 特定のサウンドを鳴らせる
+	 */
+	playSound(key: string){
+		const sound = this.backmusics.find(s => s.key == key);
+		if (sound && !sound.sound.isPlaying){
+            console.log("サウンド開始", key);
+            console.log(sound.sound);
+			sound.sound.play();
+		}
+	}
+
+	/**
+	 * 特定のサウンドを止める
+	 */
+	stopSound(key: string){
+		const sound = this.backmusics.find(s => s.key == key);
+		if (sound){
+			sound.sound.pause();
+		}
+	}
+    /**
+	 * すべてのサウンドを止める
+	 */
+	removeSoundAll(){
+        this.backmusics.map((sound) => {
+            sound.sound.pause();
+            sound.sound.remove();
+        });
+	}
 
     /**
      * フレームによる更新
