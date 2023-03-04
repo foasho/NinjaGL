@@ -31,7 +31,7 @@ export const sapi = axios.create({
 // )
 
 export interface IApiProps {
-    route : string;
+    route : "filesize";
     queryObject?: { [key: string]: string | number };
 }
 
@@ -54,7 +54,7 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
         });
     }
     return await sapi.get(
-        BASE_URL + props.route  + query
+        BASE_URL + "/api/" +props.route  + query
     )
     // return null
 }

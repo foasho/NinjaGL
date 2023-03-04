@@ -1,5 +1,5 @@
-import { manualKeyState, useInputControl } from "@/engine/InputControls";
-import { NaniwaEngineContext } from "@/engine/NaniwaEngineManager";
+import { manualKeyState, useInputControl } from "@/engine/core/InputControls";
+import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
 import { useFrame } from "@react-three/fiber"
 import { useContext } from "react";
 

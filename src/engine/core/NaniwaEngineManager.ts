@@ -21,6 +21,7 @@ export let loadPer          : number = 0;
 export let loadingText      : string = "ファイルサイズを取得中...";
 
 export class NaniwaEngine {
+    jsonPath : string = null;
     nowLoading       : boolean = false;
     loadCompleted    : boolean = false;
     deviceType: "mobile" | "tablet" | "desktop" = "desktop";
@@ -38,6 +39,8 @@ export class NaniwaEngine {
     camera : PerspectiveCamera | OrthographicCamera;
     backmusics : ISoundProps [] = [];
     shader : NaniwaShader = new NaniwaShader();
+    viewableKeys: string[] = []; // 可視化管理
+    moveOrderKeys: string[] = []; // 動態管理
 
     constructor(){}
 
@@ -81,6 +84,13 @@ export class NaniwaEngine {
         this.camera = null;
         this.removeSoundAll();
         this.backmusics = [];
+    }
+
+    /**
+     * 設定JSONファイルをセットする
+     */
+    setJson(jsonPath: string){
+        this.jsonPath = jsonPath;
     }
 
     /**
@@ -170,117 +180,129 @@ export class NaniwaEngine {
      * Octreeを再セット
      */
 
+    /**
+     * 単純にJsonファイルを読み込む
+     * @param path 
+     * @returns 
+     */
+    async loadJson(path: string): Promise<any>{
+        return new Promise((resolve) => {
+            fetch(path)
+            .then(response => response.json())
+            .then(result => {
+                return resolve(result);
+            });
+        })
+    }
+
 
     /**
      * 設定JSONファイルをImportする
      */
-    async importConfigJson(path: string){
+    async importConfigJson(){
+        const path = this.jsonPath? this.jsonPath: "savedata/default.json";
         this.nowLoading = true;
         totalFileSize = 1;
         nowLoadedFiles = {};
-        const res = await reqApi({route: path});
-        if (res.data){
-            const resSize = await reqApi(
-                {route: `/api/filesize`, queryObject: { jsonPath: `${path}` } }
-            );
-            totalFileSize = resSize.data.size;
-            const keys = Object.keys(res.data);
-            await (async () => {
-                for await (const key of keys) {
-                    if (key == "init"){
-                        if (res.data[key]["backmusics"]) {
-                            const objs = res.data[key]["backmusics"];
-                            objs.map((obj) => {
-                                this.setSound(obj);
-                            })
-                        }
+        const jsonData = await this.loadJson(path);
+        const keys = Object.keys(jsonData);
+        await (async () => {
+            for await (const key of keys) {
+                if (key == "init"){
+                    if (jsonData[key]["backmusics"]) {
+                        const objs = jsonData[key]["backmusics"];
+                        objs.map((obj) => {
+                            this.setSound(obj);
+                        })
                     }
-                    else if (key == "avatar" || key == "terrain"){
-                        let object: Object3D;
-                        let animations: AnimationClip[] = [];
-                        let mixer: AnimationMixer = null;
-                        if (key == "avatar"){
-                            const { gltf } = await AvatarLoader(
-                                { 
-                                    filePath: `${res.data[key].filePath}`,
-                                    height: res.data[key].args.height,
-                                    isCenter: res.data.avatar.args.isCenter? res.data.avatar.args.isCenter: false,
-                                    isVRM: res.data.avatar.args.isVRM? res.data.avatar.args.isVRM: false,
-                                    onLoadCallback: this.loadingFileState
-                                }
-                            );
-                            object = gltf.scene;
-                            animations = gltf.animations;
-                            mixer = new AnimationMixer(gltf.scene);
-                        }
-                        else if (key == "terrain") {
-                            const { gltf } = await TerrainLoader(
-                                {
-                                    filePath: `${res.data[key].filePath}`,
-                                    posType: "center",
-                                    mapSize: res.data[key].args.mapSize,
-                                    onLoadCallback: this.loadingFileState
-                                }
-                            );
-                            // const { gltf, simModObj } = await AutoGltfLoader(
-                            //     {
-                            //         filePath: `${res.data[key].filePath}`,
-                            //         onLoadCallback: this.loadingFileState
-                            //     }
-                            // );
-                            object = gltf.scene;
-                            // 物理世界に適応させる
-                            this.octree.importThreeGLTF(key, gltf);
-                            // this.octree.importThreeObj3D(key, simModObj);
-                        }
-                        const obj: IObjectManagement = {
-                            type       : key,
-                            object     : object,
-                            args       : res.data[key].args,
-                            mixer      : mixer,
-                            animations : animations
-                        }
-                        this.oms.push(obj);
+                }
+                else if (key == "avatar" || key == "terrain"){
+                    let object: Object3D;
+                    let animations: AnimationClip[] = [];
+                    let mixer: AnimationMixer = null;
+                    if (key == "avatar"){
+                        const { gltf } = await AvatarLoader(
+                            { 
+                                filePath: `${jsonData[key].filePath}`,
+                                height: jsonData[key].args.height,
+                                isCenter: jsonData.avatar.args.isCenter? jsonData.avatar.args.isCenter: false,
+                                onLoadCallback: this.loadingFileState
+                            }
+                        );
+                        object = gltf.scene;
+                        animations = gltf.animations;
+                        mixer = new AnimationMixer(gltf.scene);
                     }
-                    else if (key == "objects"){
-                        const objs = res.data[key];
-                        await Promise.all(
-                            Object.keys(objs).map(async (key: string) => {
-                                const obj: IObjectManagement = {
-                                    type: "object",
-                                    args: res.data[key].args
-                                }
-                                this.oms.push(obj);
-                            })
-                        )
+                    else if (key == "terrain") {
+                        const { gltf } = await TerrainLoader(
+                            {
+                                filePath: `${jsonData[key].filePath}`,
+                                posType: "center",
+                                mapSize: jsonData[key].args.mapSize,
+                                onLoadCallback: this.loadingFileState
+                            }
+                        );
+                        // const { gltf, simModObj } = await AutoGltfLoader(
+                        //     {
+                        //         filePath: `${res.data[key].filePath}`,
+                        //         onLoadCallback: this.loadingFileState
+                        //     }
+                        // );
+                        object = gltf.scene;
+                        // 物理世界に適応させる
+                        this.octree.importThreeGLTF(key, gltf);
+                        // this.octree.importThreeObj3D(key, simModObj);
                     }
-                    else if (key == "sky"){
-                        const obj: IObjectManagement = {
-                            type: key,
-                            args: res.data[key]
-                        }
-                        this.oms.push(obj);
+                    const obj: IObjectManagement = {
+                        type       : key,
+                        visiable   : true,
+                        object     : object,
+                        args       : jsonData[key].args,
+                        mixer      : mixer,
+                        animations : animations
                     }
-                    else if (key == "lights"){
-                        const objs = res.data[key];
-                        objs.map((_obj) => {
+                    this.oms.push(obj);
+                }
+                else if (key == "objects"){
+                    const objs = jsonData[key];
+                    await Promise.all(
+                        Object.keys(objs).map(async (key: string) => {
                             const obj: IObjectManagement = {
-                                type: "light",
-                                args: _obj
+                                type: "object",
+                                args: jsonData[key].args,
+                                visiable: true
                             }
                             this.oms.push(obj);
                         })
-                    }
-                    else if (key == "scripts"){}
-                    else if (key == "shaderFiles"){
-                        const fileNames = res.data[key];
-                        await this.shader.load(fileNames);
-                    }
+                    )
                 }
+                else if (key == "sky"){
+                    const obj: IObjectManagement = {
+                        type: key,
+                        args: jsonData[key],
+                        visiable: true
+                    }
+                    this.oms.push(obj);
+                }
+                else if (key == "lights"){
+                    const objs = jsonData[key];
+                    objs.map((_obj) => {
+                        const obj: IObjectManagement = {
+                            type: "light",
+                            args: _obj,
+                            visiable: true
+                        }
+                        this.oms.push(obj);
+                    })
+                }
+                else if (key == "scripts"){}
+                else if (key == "shaderFiles"){
+                    const fileNames = jsonData[key];
+                    await this.shader.load(fileNames);
+                }
+            }
 
-            })()
-
-        }
+        })()
         this.nowLoading = false;
         this.loadCompleted = true;
     }
@@ -328,6 +350,7 @@ export class NaniwaEngine {
                 );
             }
             this.avatar = new AvatarController(
+                this,
                 threeMesh, 
                 avatarObject.args.height/2,
                 avatarObject.animations,
@@ -453,12 +476,39 @@ export class NaniwaEngine {
 	}
 
     /**
+     * 
+     */
+    setLayerNumber(){}
+
+    /**
+     * 特定のPositionからレイヤー番号を取得する
+     */
+    getLayerNumber(){}
+
+    /**
+     * 全てのオブジェクトを取得する
+     */
+    getAllObjects(): Object3D[]{
+        const objects = this.oms.filter(om => om.object);
+        return objects.map(obj => obj.object);
+    }
+    /**
+     * 可視上のオブジェクトを全て取得する
+     */
+    getAllVisiableObjects(): Object3D[]{
+        const objects = this.oms.filter(om => (om.object && om.visiable));
+        return objects.map(obj => obj.object);
+    }
+
+    /**
      * フレームによる更新
      * @param timeDelta 
      * @param input 
      */
     frameUpdate(timeDelta: number, input: IInputMovement){
         if (this.world) this.world.step(timeDelta, input);
+        // 動態管理をリフレッシュする
+        this.moveOrderKeys = [];
     }
 
 }

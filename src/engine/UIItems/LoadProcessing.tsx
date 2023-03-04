@@ -1,4 +1,4 @@
-import { loadingText, loadPer, NaniwaEngineContext, totalFileSize } from "@/engine/NaniwaEngineManager"
+import { loadingText, loadPer, NaniwaEngineContext, totalFileSize } from "@/engine/core/NaniwaEngineManager"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 export const LoadProcessing = () => {

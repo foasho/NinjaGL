@@ -38,6 +38,7 @@
             height: 100%;
             background-color: #333;
             max-width: 200px;
+            // border: solid 1px #000;
             .hierarchyArea {
                 padding: 5px 12px;
                 .hierarchyOpen {
@@ -57,14 +58,20 @@
             background-color: #000;
             display: flex;
             flex-direction: column;
+            // border: solid 1px #000;
+            .viewselect {
+                flex: 1;
+                color: #fff;
+                background-color: #333;
+            }
             .viewport {
-                flex: 3;
-                color: #f00;
+                flex: 18;
                 background-color: #fff;
             }
             .contentsbrowser {
-                flex: 1;
-                color: #f00;
+                flex: 6;
+                color: #fff;
+                background-color: #333;
             }
         }
         .inspector {
@@ -73,6 +80,7 @@
             height: 100%;
             max-width: 200px;
             background-color: #333;
+            // border: solid 1px #000;
         }
     }
 }

@@ -1,5 +1,5 @@
-import { initInput, manualKeyState, setManualInput } from "@/engine/InputControls";
-import { NaniwaEngineContext } from "@/engine/NaniwaEngineManager";
+import { initInput, manualKeyState, setManualInput } from "@/engine/core/InputControls";
+import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
 import { useContext, useEffect, useState } from "react";
 import { MdOutlineGames } from "react-icons/md";
 import { Vector2 } from "three";

@@ -1,7 +1,6 @@
-import { NaniwaEngineContext } from "@/engine/NaniwaEngineManager"
+import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager"
 import { Canvas } from "@react-three/fiber"
 import { useContext, useEffect, useState } from "react"
-import { PCFShadowMap, PCFSoftShadowMap } from "three"
 import { Avatar } from "./CanvasItems/Avatar"
 import { Camera } from "./CanvasItems/Camera"
 import { NEnvironment } from "./CanvasItems/NEnvironment"
@@ -16,8 +15,7 @@ export const NaniwaCanvas = () => {
         (async () => {
             if (!engine.loadCompleted){
                 engine.allSetup();
-                let jsonPath = "savedata/default.json";
-                await engine.importConfigJson(jsonPath);
+                await engine.importConfigJson();
             }
             setReady(engine.loadCompleted)
         })();

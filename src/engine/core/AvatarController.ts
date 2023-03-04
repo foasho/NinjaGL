@@ -1,8 +1,9 @@
-import { AnimationClip, AnimationMixer, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Raycaster, Vector2, Vector3 } from "three";
 import { IInputMovement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from "./NaniwaProps";
 import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./Intersects";
 import { Face } from "./Octree";
 import { World } from "./World";
+import { NaniwaEngine } from "./NaniwaEngineManager";
 
 /**
  * ベース: https://github.com/yomotsu/meshwalk
@@ -35,8 +36,10 @@ export class AvatarController {
     /**
      * 初期値
      */
+	parent: NaniwaEngine;
     isCharacterController : boolean = true;
     object                : Object3D;
+	objectUUIDs           : string[] = [];
     center                : Vector3;
     radius                : number;
 	world                 : World;
@@ -71,7 +74,6 @@ export class AvatarController {
 	prevAngle          : -1 | 0 | 1 = 0; // (-1 or 1  or 1)
 	frontQuatanion     : Quaternion = new Quaternion;
 	
-
     // 過去動作入力データ
     isFirstUpdate : boolean = true;
     wasGrounded   : boolean; // 着地していたか
@@ -83,6 +85,7 @@ export class AvatarController {
 	// カメラ情報
 	camera        : PerspectiveCamera | OrthographicCamera;
 	cameraOffset  : Vector3 = new Vector3(0, .5, -2);
+	raycaster     : Raycaster  = new Raycaster();
 
 	// アニメーション情報
 	isAnimation   : boolean = false;;
@@ -98,6 +101,7 @@ export class AvatarController {
     _events: () => void;
 
 	constructor(
+		parent: NaniwaEngine,
 		object3d: Object3D,
 		radius: number, 
 		animations?: AnimationClip[], 
@@ -153,6 +157,15 @@ export class AvatarController {
 				});
 			});
 		}
+
+		this.object.traverse((node: Mesh) => {
+			if (node.uuid){
+				this.objectUUIDs.push(node.uuid);
+			}
+		})
+
+		// 親の依存関係も保持しておく
+		this.parent = parent;
 
 		this._events = () => {
 
@@ -624,13 +637,30 @@ export class AvatarController {
 		// カメラがついてる場合は、理想位置に更新する
 		if (this.camera){
 			// OrbitCameraと同期する予定
-			if (true){
-				const idealOffset = this._CalculateIdealOffset();
-				const idealLookat = this._CalculateIdealLookat();
-				const t = 1.0 - Math.pow(0.001, timeDelta);
-				const newPosition = this.camera.position.clone().lerp(idealOffset, t);
-				// var lookAtVector = new Vector3(this.camera.matrix[8], this.camera.matrix[9], this.camera.matrix[10]);
-				// const newLookAt = lookAtVector.lerp(idealLookat, t);
+			const idealOffset = this._CalculateIdealOffset();
+			const idealLookat = this._CalculateIdealLookat();
+			const t = 1.0 - Math.pow(0.001, timeDelta);
+			const newPosition = this.camera.position.clone().lerp(idealOffset, t);
+			/**
+			 * カメラを移動させる前に、カメラとアバターの間に衝突物を確認し、
+			 * - 衝突していれば、カメラを衝突物の前まで移動させる。
+			 * - 衝突してなければ、そのままカメラを移動する。
+			 */
+			const cameraPosition = newPosition.clone();
+			const objectPosition = this.object.position.clone();
+			const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
+			const distance = cameraPosition.distanceTo(objectPosition);
+			const objects = this.parent.getAllObjects();
+			this.raycaster.set(newPosition, direction);
+			this.raycaster.far = distance - this.radius;
+			this.raycaster.near = 0.1;
+			const intersects = this.raycaster.intersectObjects(objects, true);
+			if (intersects.length > 0){
+				const intersect = intersects[0];
+				this.camera.position.copy(intersect.point);
+				this.camera.lookAt(idealLookat);
+			}
+			else {
 				this.camera.position.copy(newPosition);
 				this.camera.lookAt(idealLookat);
 			}

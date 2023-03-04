@@ -1,7 +1,7 @@
 
 
-import { useInputControl } from "@/engine/InputControls";
-import { NaniwaEngineContext } from "@/engine/NaniwaEngineManager";
+import { useInputControl } from "@/engine/core/InputControls";
+import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";

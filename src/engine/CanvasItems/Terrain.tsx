@@ -1,4 +1,4 @@
-import { NaniwaEngineContext } from "@/engine/NaniwaEngineManager"
+import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager"
 import { useContext, useEffect, useState } from "react"
 import { Object3D } from "three";
 

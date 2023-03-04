@@ -1,5 +1,6 @@
 import styles from "@/App.module.scss";
-import { useState } from "react";
+import { NaniwaEditor } from "@/components/NaniwaEditor/MainViewer";
+import { useState, useEffect } from "react";
 
 /**
 * エディタ表示
@@ -34,7 +35,23 @@ export const ResponsiveContainer = (props: IResponsiveContainer) => (
     </>
 )
 
+interface IAssetFiles {
+    name: string;
+    type: "image" | "gltf" | "mp3" | "json" | "javascript" | "other";
+    size: number;
+}
+
 const NaniwaEditorComponent = () => {
+
+    const [viewSelect, setViewSelect] = useState<"mainview"|"terrainmaker"|"gltfviewer"|"scripteditor"|"shadereditor">("mainview");
+
+    const [assetFiles, setAssetFiles] = useState<IAssetFiles[]>([]);
+    
+    useEffect(() => {
+        (async () => {
+            // アセットファイルをすべて読み取る
+        })()
+    }, []);
 
     return (
         <>
@@ -59,16 +76,39 @@ const NaniwaEditorComponent = () => {
                                 '-閉じる'
                             </div>
                             <div className={styles.hierarchyTree}>
-                                
+
                             </div>
                         </div>
                     </div>
                     <div className={styles.contents}>
+                        <div className={styles.viewselect}>
+
+                        </div>
                         <div className={styles.viewport}>
-                            ビューポート
+                            {viewSelect == "mainview" &&
+                                <>
+                                    <NaniwaEditor/>
+                                </>
+                            }
+                            {viewSelect == "terrainmaker" &&
+                                <>
+                                </>
+                            }
+                            {viewSelect == "gltfviewer" &&
+                                <>
+                                </>
+                            }
+                            {viewSelect == "scripteditor" &&
+                                <>
+                                </>
+                            }
+                            {viewSelect == "shadereditor" &&
+                                <>
+                                </>
+                            }
                         </div>
                         <div className={styles.contentsbrowser}>
-                            コンテンツブラウザ
+                            
                         </div>
                     </div>
                     <div className={styles.inspector}>

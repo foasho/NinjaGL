@@ -19,6 +19,7 @@ export interface IInputMovement {
 
 export interface IObjectManagement {
     type          : "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
+	visiable      : boolean;
     args          : any;
     rules?        : any;
     object?       : Object3D;
