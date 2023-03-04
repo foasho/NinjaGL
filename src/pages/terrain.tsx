@@ -1,7 +1,7 @@
+import { TerrainMakerCanvas } from "@/components/TerrainMaker/TerrainMakerCanvas";
+import { TerrainMakerContext, TerrainMakerManager } from "@/components/TerrainMaker/TerrainMakerManager";
+import { TerrainMakerUI } from "@/components/TerrainMaker/TerrainMakerUI";
 import { useEffect, useState } from "react";
-import { TerrainMakerCanvas } from "./_components/TerrainMaker/TerrainMakerCanvas";
-import { TerrainMakerContext, TerrainMakerManager} from "./_components/TerrainMaker/TerrainMakerManager";
-import { TerrainMakerUI } from "./_components/TerrainMaker/TerrainMakerUI";
 
 const TerrainMakerComponent = () => {
     const [terrainManager, setTerrainManager] = useState<TerrainMakerManager>();

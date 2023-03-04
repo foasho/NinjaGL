@@ -8,6 +8,7 @@ import { convertToGB } from "@/commons/functional";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler } from "three";
 import { reqApi } from "@/services/ServciceApi";
 import { useInputControl } from "./InputControls";
+import { NaniwaShader } from "./NaniwaShader";
 
 export interface INaniwaEngineProps {
     worldSize?: [number, number, number];
@@ -36,6 +37,7 @@ export class NaniwaEngine {
     avatar : AvatarController;
     camera : PerspectiveCamera | OrthographicCamera;
     backmusics : ISoundProps [] = [];
+    shader : NaniwaShader = new NaniwaShader();
 
     constructor(){}
 
@@ -252,7 +254,28 @@ export class NaniwaEngine {
                             })
                         )
                     }
-                    
+                    else if (key == "sky"){
+                        const obj: IObjectManagement = {
+                            type: key,
+                            args: res.data[key]
+                        }
+                        this.oms.push(obj);
+                    }
+                    else if (key == "lights"){
+                        const objs = res.data[key];
+                        objs.map((_obj) => {
+                            const obj: IObjectManagement = {
+                                type: "light",
+                                args: _obj
+                            }
+                            this.oms.push(obj);
+                        })
+                    }
+                    else if (key == "scripts"){}
+                    else if (key == "shaderFiles"){
+                        const fileNames = res.data[key];
+                        await this.shader.load(fileNames);
+                    }
                 }
 
             })()

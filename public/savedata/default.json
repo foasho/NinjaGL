@@ -117,5 +117,9 @@
             "castShadow": true
         }
     ],
-    "scripts": []
+    "scripts": [],
+    "shaderFiles": [
+        "samplefrag.glsl",
+        "samplevertex.glsl"
+    ]
 }
