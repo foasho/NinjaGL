@@ -8,18 +8,20 @@ import {
     GiBroadsword,
     GiJumpAcross
 } from "react-icons/gi";
-import Style from "styled-jsx/style"
+import styled from "styled-components";
 
 export interface INaniwaIconProps {
-    key?       : string;
-    templates? : "bs" | "gi",
+    id?       : string;
+    template?  : "bs" | "gi",
     type?      : "BsHandbagFill" | "BsFillBookmarkStarFill" |
         "GiSpinningSword" | "GiBroadsword" | "GiJumpAcross";
     style?     : string;
-    events?    : { [key: string]: any }[];
+    script?    : string;
 }
 
-export interface INaniwaIconsProps {}
+export interface INaniwaIconsProps {
+    icons: INaniwaIconProps[];
+}
 
 const generateKey = (): string => {
     const length = 12;
@@ -33,13 +35,13 @@ const generateKey = (): string => {
 }
 
 const CreateIcon = (prop: INaniwaIconProps) => {
-    let icon;
+    let icon: JSX.Element;
     const idName = generateKey() + "nicon";
-    if (prop.templates){
-        if (prop.templates == "gi"){
+    if (prop.template){
+        if (prop.template == "gi"){
             switch (prop.type) {
-                case "BsHandbagFill":
-                    icon = <BsHandbagFill/>
+                case "GiSpinningSword":
+                    icon = <GiSpinningSword/>
                     break;
                 case "GiBroadsword":
                     icon = <GiBroadsword/>
@@ -49,42 +51,54 @@ const CreateIcon = (prop: INaniwaIconProps) => {
                     break;
             }
         }
+        else if (prop.template == "bs"){
+            switch (prop.type) {
+                case "BsHandbagFill":
+                    icon = <BsHandbagFill/>
+                    break;
+                case "BsFillBookmarkStarFill":
+                    icon = <BsFillBookmarkStarFill/>
+                default:
+                    break;
+            }
+        }
     } 
 
     useEffect(() => {
         if (icon){
-
+            if (prop.script && prop.script.length > 0){
+                try {
+                    const Icon = document.getElementById(prop.id);
+                    eval(prop.script);
+                } catch (error) {
+                    console.error("Icon表示エラー");
+                }
+            }
         }
         return () => {
-            if (icon){}
+            icon = null;
         }
-    }, [])
+    }, []);
+
+    const IconA = styled.a`${prop.style}`
+
     return (
         <>
             {icon &&
             <>
-                <a id={idName}>
+                <IconA id={prop.id}>
                     {icon}
-                </a>
-                {prop.style &&
-                    <style jsx={true}>
-                        {
-                            `#${idName} { ${prop.style} }`
-                        }
-                    </style>
-                }
+                </IconA>
             </>
             }
         </>
     )
 }
 
-export const NaniwaIcons = (props: INaniwaIconProps[]) => {
-    console.log("Iconsを表示します");
-    console.log(props);
+export const NaniwaIcons = (props: INaniwaIconsProps) => {
     return (
         <>
-            {props.map((prop) => {
+            {props.icons.map((prop) => {
                 return (
                     <CreateIcon {...prop}/>
                 )

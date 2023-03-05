@@ -67,15 +67,11 @@
             },
             "icons": [
                 {
-                    "key": "icon1",
+                    "id": "icon1",
                     "template": "bs",
                     "type": "BsHandbagFill",
-                    "style": "top: 10px; right: 10px; color: #ffffff;",
-                    "events": [
-                        {
-                            "type": "click"
-                        }
-                    ]
+                    "style": "position: fixed; top: 10px; right: 10px; color: #ffffff; cursor: pointer; font-size: 30px;",
+                    "script": "Icon.onclick = () => { window.alert('クリックされたよ') }"
                 }
             ]
     },

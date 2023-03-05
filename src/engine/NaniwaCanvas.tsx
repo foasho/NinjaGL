@@ -6,8 +6,8 @@ import { Camera } from "./CanvasItems/Camera"
 import { NEnvironment } from "./CanvasItems/NEnvironment"
 import { System } from "./CanvasItems/System"
 import { Terrain } from "./CanvasItems/Terrain"
-
-export let isCanvasSetup = false;
+import { NaniwaUI } from "./NaniwaUI"
+import { LoadProcessing } from "./UIItems/LoadProcessing"
 
 export const NaniwaCanvas = () => {
     const [ready, setReady] = useState<boolean>(false)
@@ -17,18 +17,11 @@ export const NaniwaCanvas = () => {
         const setup = async () => {
             if (engine && !engine.loadCompleted){
                 engine.allSetup();
-                // engine.nowLoading = true;
                 await engine.importConfigJson();
-                // engine.nowLoading = false;
-                engine.loadCompleted = true;
                 setReady(true);
-                return true;
             }
-            return false;
         }
-        setup().then((res) => {
-            isCanvasSetup = res;
-        });
+        setup();
         return () => {
             if (ready){
                 setReady(false);
@@ -53,6 +46,10 @@ export const NaniwaCanvas = () => {
                     </>
                 }
             </Canvas>
+            {(ready && engine) &&
+                <NaniwaUI/>
+            }
+            <LoadProcessing/>
         </>
     )
 }

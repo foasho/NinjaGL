@@ -316,7 +316,7 @@ export class NaniwaEngine {
         })()
         console.log("--- 全設定ファイルの読み込み完了 ---");
         this.nowLoading = false;
-        // this.loadCompleted = true;
+        this.loadCompleted = true;
     }
 
     /**
