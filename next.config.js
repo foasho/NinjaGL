@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,// trueにすると2回レンダーされる
 }
 
 module.exports = nextConfig

@@ -11,11 +11,12 @@ import {
 import Style from "styled-jsx/style"
 
 export interface INaniwaIconProps {
-    templates?: "bs" | "gi",
-    name?     : "BsHandbagFill" | "BsFillBookmarkStarFill" |
+    key?       : string;
+    templates? : "bs" | "gi",
+    type?      : "BsHandbagFill" | "BsFillBookmarkStarFill" |
         "GiSpinningSword" | "GiBroadsword" | "GiJumpAcross";
-    style?    : string;
-    events?   : { [key: string]: any }[];
+    style?     : string;
+    events?    : { [key: string]: any }[];
 }
 
 export interface INaniwaIconsProps {}
@@ -36,7 +37,7 @@ const CreateIcon = (prop: INaniwaIconProps) => {
     const idName = generateKey() + "nicon";
     if (prop.templates){
         if (prop.templates == "gi"){
-            switch (prop.name) {
+            switch (prop.type) {
                 case "BsHandbagFill":
                     icon = <BsHandbagFill/>
                     break;
@@ -79,6 +80,8 @@ const CreateIcon = (prop: INaniwaIconProps) => {
 }
 
 export const NaniwaIcons = (props: INaniwaIconProps[]) => {
+    console.log("Iconsを表示します");
+    console.log(props);
     return (
         <>
             {props.map((prop) => {

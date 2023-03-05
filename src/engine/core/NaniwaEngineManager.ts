@@ -13,6 +13,8 @@ import { NaniwaShader } from "./NaniwaShader";
 export interface INaniwaEngineProps {
     worldSize?: [number, number, number];
     jsonPath ? : string;
+    layerGrid? : number;
+
 }
 
 let nowLoadedFiles   : {[key: string]: number} = { "sample": 0 }; 
@@ -22,6 +24,9 @@ export let loadingText      : string = "ファイルサイズを取得中...";
 
 export class NaniwaEngine {
     jsonPath : string = null;
+    layerGrid: number = 8;
+    layerLength: number = 3; 
+    possibleLayers: number[] = [];
     nowLoading       : boolean = false;
     loadCompleted    : boolean = false;
     deviceType: "mobile" | "tablet" | "desktop" = "desktop";
@@ -41,6 +46,7 @@ export class NaniwaEngine {
     shader : NaniwaShader = new NaniwaShader();
     viewableKeys: string[] = []; // 可視化管理
     moveOrderKeys: string[] = []; // 動態管理
+    ui: any = null; // UIリスト
 
     constructor(){}
 
@@ -68,6 +74,7 @@ export class NaniwaEngine {
             maxDepth: L
         });
         this.world.addOctree(this.octree);
+        this.possibleLayers = [...Array((this.layerGrid * this.layerGrid))].map((_, idx) => { return idx + 1 });
     }
 
     /**
@@ -200,6 +207,7 @@ export class NaniwaEngine {
      * 設定JSONファイルをImportする
      */
     async importConfigJson(){
+        if (this.loadCompleted || this.nowLoading) return null;
         const path = this.jsonPath? this.jsonPath: "savedata/default.json";
         this.nowLoading = true;
         totalFileSize = 1;
@@ -254,9 +262,9 @@ export class NaniwaEngine {
                         // this.octree.importThreeObj3D(key, simModObj);
                     }
                     const obj: IObjectManagement = {
-                        type       : key,
-                        visiable   : true,
-                        object     : object,
+                        type         : key,
+                        visiableType : "force",
+                        object       : object,
                         args       : jsonData[key].args,
                         mixer      : mixer,
                         animations : animations
@@ -270,7 +278,7 @@ export class NaniwaEngine {
                             const obj: IObjectManagement = {
                                 type: "object",
                                 args: jsonData[key].args,
-                                visiable: true
+                                visiableType: "auto"
                             }
                             this.oms.push(obj);
                         })
@@ -280,7 +288,7 @@ export class NaniwaEngine {
                     const obj: IObjectManagement = {
                         type: key,
                         args: jsonData[key],
-                        visiable: true
+                        visiableType: "force"
                     }
                     this.oms.push(obj);
                 }
@@ -290,7 +298,7 @@ export class NaniwaEngine {
                         const obj: IObjectManagement = {
                             type: "light",
                             args: _obj,
-                            visiable: true
+                            visiableType: "force"
                         }
                         this.oms.push(obj);
                     })
@@ -300,11 +308,15 @@ export class NaniwaEngine {
                     const fileNames = jsonData[key];
                     await this.shader.load(fileNames);
                 }
+                else if (key == "ui"){
+                    this.ui = jsonData[key];
+                }
             }
 
         })()
+        console.log("--- 全設定ファイルの読み込み完了 ---");
         this.nowLoading = false;
-        this.loadCompleted = true;
+        // this.loadCompleted = true;
     }
 
     /**
@@ -323,6 +335,9 @@ export class NaniwaEngine {
         }
     }
 
+    /**
+     * アバターのオブジェクトマネジメントを取得
+     */
     getAvatarObject(): IObjectManagement{
         return this.oms.find(om => om.type == "avatar");
     }
@@ -403,8 +418,6 @@ export class NaniwaEngine {
 	 */
 	setSound(params: ISetSoundOption){
 		if (!this.backmusics.find(s => s.key == params.key)){
-            console.log("ppamras check");
-            console.log(params);
 			const listener = new AudioListener();
 			const sound = new Audio(listener);
 			const audioLoader = new AudioLoader();
@@ -450,8 +463,6 @@ export class NaniwaEngine {
 	playSound(key: string){
 		const sound = this.backmusics.find(s => s.key == key);
 		if (sound && !sound.sound.isPlaying){
-            console.log("サウンド開始", key);
-            console.log(sound.sound);
 			sound.sound.play();
 		}
 	}
@@ -465,6 +476,7 @@ export class NaniwaEngine {
 			sound.sound.pause();
 		}
 	}
+
     /**
 	 * すべてのサウンドを止める
 	 */
@@ -476,14 +488,58 @@ export class NaniwaEngine {
 	}
 
     /**
-     * 
+     * 現在のレイヤーから可視する周辺のレイヤー番号を取得する
      */
-    setLayerNumber(){}
+    getActiveLayers(layerNum: number){
+        const l = this.layerLength; // 監視グリッドエリア範囲
+        const g = this.layerGrid;   // グリッド数
+        const n = layerNum;        // 現在レイヤー
+
+        const r = n % g;// 現在レイヤーの列番号
+        const c = Math.ceil(n/g);// 現在レイヤーの行番号
+        const layers = [n];
+
+        [...Array(l)].map((_, idx) => {
+            const i = idx + 1;
+            // 中心
+            layers.push((c -1 - i)*g + r);
+            layers.push((c -1 + i)*g + r);
+            layers.push((c -1)*g + (r - i));
+            layers.push((c -1)*g + (r + i ));
+            
+            // 周辺
+            [...Array(l - i)].map((_none, _idx) => {
+                const _i = _idx + 1;
+                layers.push((c-1 - _i)*g + (r - _i ));
+                layers.push((c-1 + _i)*g + (r - _i ));
+                layers.push((c-1 - _i)*g + (r + _i ));
+                layers.push((c-1 + _i)*g + (r + _i ));
+            });
+            
+        });
+
+        // はみ出たレイヤーは削除する
+        const availableLayers = layers.filter(layerNo => this.possibleLayers.includes(layerNo));
+        return availableLayers;
+    }
 
     /**
      * 特定のPositionからレイヤー番号を取得する
      */
-    getLayerNumber(){}
+    getLayerNumber(pos: Vector3){
+        const layerXLen = this.worldSize[0] / this.layerGrid;
+        const layerZLen = this.worldSize[1] / this.layerGrid;
+        const cx = this.worldSize[0] / 2;
+        const cz = this.worldSize[1] / 2;
+        if (cx < Math.abs(pos.x)) return null; // ワールド範囲外X方向
+        if (cz < Math.abs(pos.z)) return null; // ワールド範囲外Z方向
+        const px = pos.x + cx;
+        const pz = pos.z + cz;
+        const r = Math.ceil(px / layerXLen);
+        const c = Math.ceil((this.worldSize[1] - pz) / layerZLen);
+        const layer = (c-1) * this.layerGrid + r;
+        return layer;
+    }
 
     /**
      * 全てのオブジェクトを取得する
@@ -492,13 +548,46 @@ export class NaniwaEngine {
         const objects = this.oms.filter(om => om.object);
         return objects.map(obj => obj.object);
     }
+
     /**
      * 可視上のオブジェクトを全て取得する
      */
     getAllVisiableObjects(): Object3D[]{
-        const objects = this.oms.filter(om => (om.object && om.visiable));
+        const objects = this.oms.filter(om => {
+            let isVisible = false;
+            if (om.object && om.visiableType == "force") return true;
+            if (om.object && om.visiableType == "auto"){
+                if (om.layerNum !== undefined){
+
+                    return true;
+                }
+            }
+            return isVisible;
+        });
         return objects.map(obj => obj.object);
     }
+
+    /**
+     * 可視上オブジェクトの更新
+     */
+    updateViewableObject(){
+        if (this.camera){
+            const nowLayerNum = this.getLayerNumber(this.camera.position);
+            const visibleLayers = this.getActiveLayers(nowLayerNum);
+            visibleLayers.map((layerNum) => {
+                // this.camera.layers.enable(layerNum);
+            });
+            const disableLayers = this.possibleLayers;
+            disableLayers.map((layerNum) => {
+                // this.camera.layers.disable(layerNum);
+            });
+        }
+    }
+
+    /**
+     * 動作オブジェクトの更新
+     */
+
 
     /**
      * フレームによる更新
@@ -506,9 +595,12 @@ export class NaniwaEngine {
      * @param input 
      */
     frameUpdate(timeDelta: number, input: IInputMovement){
-        if (this.world) this.world.step(timeDelta, input);
-        // 動態管理をリフレッシュする
-        this.moveOrderKeys = [];
+        if (this.loadCompleted){
+            this.updateViewableObject();
+            if (this.world) this.world.step(timeDelta, input);
+            // 動態管理をリフレッシュする
+            this.moveOrderKeys = [];
+        }
     }
 
 }

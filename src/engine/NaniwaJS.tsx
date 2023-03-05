@@ -12,9 +12,7 @@ export interface INaniwaJSProps {
 }
 
 export const NaniwaJS = (props: INaniwaJSProps) => {
-    const [state, setState] = useState<INaniwaProps>(InitNaniwa);
     const [engine, setEngine] = useState<NaniwaEngine>();
-
     useEffect(() => {
         const _engine = new NaniwaEngine();
         if (props.jsonPath && props.jsonPath.length > 3){
@@ -22,23 +20,19 @@ export const NaniwaJS = (props: INaniwaJSProps) => {
         }
         setEngine(_engine);
         return () => {
-            if (engine){
-                engine.allClear();
-                setEngine(null);
-            }
+            // if (engine){
+            //     engine.allClear();
+            //     setEngine(null);
+            // }
         }
     }, []);
 
-    console.log("再生成");
+    if (engine){
+        console.log("Engine生成");
+    }
 
     return (
         <>
-            {state.mode == "edit" &&
-            <>
-                <a>調整中</a>
-            </>
-            }
-            {state.mode == "play" &&
             <div style={{ height: "100vh" }}>
                 {engine &&
                     <NaniwaEngineContext.Provider value={engine}>
@@ -47,7 +41,6 @@ export const NaniwaJS = (props: INaniwaJSProps) => {
                     </NaniwaEngineContext.Provider>
                 }
             </div>
-            }
         </>
     )
 }

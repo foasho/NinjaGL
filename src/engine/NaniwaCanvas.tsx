@@ -7,29 +7,39 @@ import { NEnvironment } from "./CanvasItems/NEnvironment"
 import { System } from "./CanvasItems/System"
 import { Terrain } from "./CanvasItems/Terrain"
 
+export let isCanvasSetup = false;
+
 export const NaniwaCanvas = () => {
     const [ready, setReady] = useState<boolean>(false)
     const engine = useContext(NaniwaEngineContext)
 
     useEffect(() => {
-        (async () => {
-            if (!engine.loadCompleted){
+        const setup = async () => {
+            if (engine && !engine.loadCompleted){
                 engine.allSetup();
+                // engine.nowLoading = true;
                 await engine.importConfigJson();
+                // engine.nowLoading = false;
+                engine.loadCompleted = true;
+                setReady(true);
+                return true;
             }
-            setReady(engine.loadCompleted)
-        })();
+            return false;
+        }
+        setup().then((res) => {
+            isCanvasSetup = res;
+        });
         return () => {
             if (ready){
                 setReady(false);
             }
         }
-    }, [engine.loadCompleted]);
+    }, []);
 
     return (
         <>
             <Canvas shadows dpr={window.devicePixelRatio}>
-                {ready &&
+                {(ready && engine) &&
                     <>
                         <System/>
                         <Terrain/>
@@ -37,7 +47,11 @@ export const NaniwaCanvas = () => {
                         <Camera/>
                     </>
                 }
-                <NEnvironment/>
+                {engine &&
+                    <>
+                        <NEnvironment/>
+                    </>
+                }
             </Canvas>
         </>
     )

@@ -84,7 +84,8 @@ export class AvatarController {
 
 	// カメラ情報
 	camera        : PerspectiveCamera | OrthographicCamera;
-	cameraOffset  : Vector3 = new Vector3(0, .5, -2);
+	cameraOffset  : Vector3 = new Vector3(-1, 1, -3.5);
+	cameraLookAtOffset  : Vector3 = new Vector3(0, 1.5, 4);
 	raycaster     : Raycaster  = new Raycaster();
 
 	// アニメーション情報
@@ -650,15 +651,21 @@ export class AvatarController {
 			const objectPosition = this.object.position.clone();
 			const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
 			const distance = cameraPosition.distanceTo(objectPosition);
-			const objects = this.parent.getAllObjects();
-			this.raycaster.set(newPosition, direction);
-			this.raycaster.far = distance - this.radius;
-			this.raycaster.near = 0.1;
-			const intersects = this.raycaster.intersectObjects(objects, true);
-			if (intersects.length > 0){
-				const intersect = intersects[0];
-				this.camera.position.copy(intersect.point);
-				this.camera.lookAt(idealLookat);
+			const objects = this.parent.getAllVisiableObjects();
+			if (objects.length > 0){
+				this.raycaster.set(newPosition, direction);
+				this.raycaster.far = distance - this.radius;
+				this.raycaster.near = 0.1;
+				const intersects = this.raycaster.intersectObjects(objects, true);
+				if (intersects.length > 0){
+					const intersect = intersects[0];
+					this.camera.position.copy(intersect.point);
+					this.camera.lookAt(idealLookat);
+				}
+				else {
+					this.camera.position.copy(newPosition);
+					this.camera.lookAt(idealLookat);
+				}
 			}
 			else {
 				this.camera.position.copy(newPosition);
@@ -680,13 +687,13 @@ export class AvatarController {
 	 * ベース:https://github.com/simondevyoutube/ThreeJS_Tutorial_ThirdPersonCamera
 	 */
 	_CalculateIdealOffset() {
-		const idealOffset = new Vector3(-1.5, 2, -3);
+		const idealOffset = new Vector3().copy(this.cameraOffset);
 		idealOffset.applyQuaternion(this.object.quaternion.clone());
 		idealOffset.add(this.object.position.clone());
 		return idealOffset;
 	}
 	_CalculateIdealLookat() {
-		const idealLookat = new Vector3(0, 1, 5);
+		const idealLookat = new Vector3().copy(this.cameraLookAtOffset);
 		idealLookat.applyQuaternion(this.object.quaternion.clone());
 		idealLookat.add(this.object.position.clone());
 		return idealLookat;

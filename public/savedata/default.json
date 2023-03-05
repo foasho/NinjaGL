@@ -54,8 +54,7 @@
             "mapSize": 128
         }
     },
-    "ui": [
-        {
+    "ui": {
             "touchController": {
                 "template": "default",
                 "style": "top: 10px; left: 10px;"
@@ -79,8 +78,7 @@
                     ]
                 }
             ]
-        }
-    ],
+    },
     "sky": {
         "distance": 450000,
         "inclination": 0,

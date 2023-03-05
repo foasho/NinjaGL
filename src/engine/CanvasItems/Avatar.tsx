@@ -20,11 +20,11 @@ export const Avatar = () => {
 
     return (
         <>
-            <>
+            {engine.getAvatarObject() &&
                 <mesh ref={ref}>
                     <primitive object={engine.getAvatarObject().object} />
                 </mesh>
-            </>
+            }
         </>
     )
 }
