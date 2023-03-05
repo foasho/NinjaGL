@@ -15,24 +15,12 @@ export const sapi = axios.create({
     // withCredentials: true
 });
 
-// seaapi.interceptors.request.use(
-//     async (config: any | AxiosRequestConfig) => {
-//         try {
-//             if (process.env.REACT_APP_ENV == "prod") {
-//                 config.params["API_KEY"] = "";
-//                 return config;
-//             }
-//         }
-//         catch (e) {
-//             console.log("Token No Set");
-//         }
-//         return config;
-//     }
-// )
-
 export interface IApiProps {
-    route : "filesize";
+    route : "filesize" | "uploadgltf" | "assets";
     queryObject?: { [key: string]: string | number };
+    method?: "GET" | "POST";
+    contentType?: "json" | "form";
+    formData?: FormData;
 }
 
 /**
@@ -53,8 +41,32 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
             query += encodeURIComponent(props.queryObject[key]);
         });
     }
-    return await sapi.get(
-        BASE_URL + "/api/" +props.route  + query
-    )
-    // return null
+    if (props.method === undefined || props.method == "GET"){
+        return await sapi.get(
+            BASE_URL + "/api/" +props.route  + query
+        )
+    }
+    else {
+        if (props.contentType == "form"){
+            const formApi = axios.create({
+                baseURL: BASE_URL,
+                timeout: 300000,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    // 'Access-Control-Allow-Origin': '*'
+                },
+                // withCredentials: true
+            });
+            await formApi.post(
+                "/api/" +props.route  + query,
+                props.formData
+            )
+        }
+        else {
+            sapi.options( BASE_URL, { headers:{'Content-Type': 'application/json;charset=utf-8'} });
+        }
+        return await sapi.post(
+            "/api/" +props.route  + query
+        )
+    }
 }

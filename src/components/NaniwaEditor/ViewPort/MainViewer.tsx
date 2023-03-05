@@ -2,7 +2,7 @@ import { Environment, OrbitControls } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 
 
-export const NaniwaEditor = () => {
+export const MainViewer = () => {
     return (
         <div style={{ height: "100%" }}>
             <Canvas camera={ { position: [5, 5, -10] } }>

@@ -54,6 +54,7 @@
             "mapSize": 128
         }
     },
+    "objects": [],
     "ui": {
             "touchController": {
                 "template": "default",

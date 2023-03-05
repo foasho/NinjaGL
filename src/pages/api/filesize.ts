@@ -1,45 +1,42 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { stat, readFile } from "fs/promises";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { stat, readFile, readdir } from "fs/promises";
 import path from "path";
+import fs from 'fs';
 
 type Data = {
     size   : number;
-    error? : string;
-    name?  : string;
+    isFile : boolean;
+    isDirectory: boolean;
+    name   : string;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
-    const { jsonPath } = req.query;
-    let size: number = 0;
-    if (jsonPath){
-        let jsonData: string;
-        const data = await readFile(`./public/${jsonPath}`);
-        jsonData = data.toString();
-        const jsonObj = JSON.parse(jsonData);
-        const filePathes = [];
-        Object.keys(jsonObj).map((key) => {
-            const obj = jsonObj[key];
-            if (obj instanceof Array){
-                Object.keys(obj).map((k) => {
-                    const o = obj[k];
-                    if (o.filePath){
-                        filePathes.push(o.filePath);
-                    }
-                })
-            }
-            else {
-                if (obj.filePath){
-                    filePathes.push(obj.filePath);
-                }
-            }
-        });
-        await Promise.all(filePathes.map(async (filePath: string) => {
-            const file = await stat(`./public/${filePath}`);
-            size += file.size;
-        }));
-        res.status(200).json({ size: size });
+type FileList = {
+    files: Data[];
+    error? : string;
+}
+
+// ストレージパス
+const STORAGE_PATH = "./public";
+
+export default async (req: NextApiRequest, res: NextApiResponse<FileList>) => {
+    const { routePath } = req.query;
+    console.log("routePath");
+    console.log(routePath);
+    if (routePath){
+        const files = await readdir(`${STORAGE_PATH}${routePath}`);
+        const fileList = files.map((fileName) => {
+            const filePath = path.join(STORAGE_PATH+routePath, fileName);
+            const fileStat = fs.statSync(filePath);
+            return {
+                size: fileStat.size,
+                name: fileName,
+                isFile: fileStat.isFile(),
+                isDirectory: fileStat.isDirectory(),
+            };
+        })
+        res.status(200).json({ files: fileList, error: null });
     }
     else {
-        res.status(400).json({ error: 'JsonPath Error', size: 0 });
+        res.status(400).json({ error: 'JsonPath Error', files: [] });
     }
 };
