@@ -5,46 +5,28 @@ import { BsHandbagFill } from "react-icons/bs";
 import { TouchMove } from "./UIItems/TouchMove";
 import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
 import { NaniwaIcons } from "./uis/NaniwaIcons";
-import { isCanvasSetup } from "./NaniwaCanvas";
 
 export const NaniwaUI = () => {
     const [ready, setReady] = useState<boolean>(false);
     const engine = useContext(NaniwaEngineContext);
-    const [ui, setUI] = useState(engine.ui);
-    
-    useEffect(() => {
-        console.log("Iconsをセットするよん");
-        console.log(engine.ui);
-        console.log(engine.loadCompleted);
-        if (engine && engine.loadCompleted){
-            setUI(engine.ui);
-        }
-        setReady(engine.loadCompleted)
-        return () => {
-            if (ready){
-                setReady(false);
-            }
-        }
-    }, [isCanvasSetup]);
+
+    const ui = engine.ui;
+    console.log(ui.icons);
 
     return (
         <>
-            <LoadProcessing/>
-            {ready &&
-                <>
+            <div style={{ position: "fixed", zIndex: 99999 }}>
                 {engine.deviceType == "mobile" || engine.deviceType == "tablet" &&
                     <TouchMove/>
                 }
-                {ui &&
+                {ui.icons &&
                     <>
-                        {ui.icons && 
-                            <NaniwaIcons {...ui.icons} />
+                        {ui.icons.length > 0 && 
+                            <NaniwaIcons icons={ui.icons} />
                         }
                     </>
                 }
-                </>
-            }
-            
+            </div>
         </>
     )
 }

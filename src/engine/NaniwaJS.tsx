@@ -27,17 +27,12 @@ export const NaniwaJS = (props: INaniwaJSProps) => {
         }
     }, []);
 
-    if (engine){
-        console.log("Engine生成");
-    }
-
     return (
         <>
             <div style={{ height: "100vh" }}>
                 {engine &&
                     <NaniwaEngineContext.Provider value={engine}>
                         <NaniwaCanvas/>
-                        <NaniwaUI/>
                     </NaniwaEngineContext.Provider>
                 }
             </div>
