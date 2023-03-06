@@ -8,7 +8,7 @@ import { EffectComposer, Selection, Select, Outline } from "@react-three/postpro
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
 export const GLTFViewer = () => {
-    
+    const editor = useContext(NaniwaEditorContext);
     const ref = useRef();
     const [scene, setScene] = useState<Object3D>(null)
 
@@ -19,6 +19,7 @@ export const GLTFViewer = () => {
         const loader = new GLTFLoader();
         loader.load(URL.createObjectURL(file), (gltf) => {
             setScene(gltf.scene);
+            editor.gltfViewerObj = gltf.scene;
         });
     }
 
@@ -26,6 +27,11 @@ export const GLTFViewer = () => {
         e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
     };
     
+    useEffect(() => {
+        if(editor.gltfViewerObj){
+            setScene(editor.gltfViewerObj);
+        }
+    }, []);
 
     return (
         <>
@@ -81,7 +87,6 @@ const ViewControlComponent = (props: IViewControl) => {
     }
 
     useEffect(() => {
-        editor.selectObject = ref.current;
         document.addEventListener("mousemove", onMouseMove);
         return () => {
             document.removeEventListener("mousemove", onMouseMove);

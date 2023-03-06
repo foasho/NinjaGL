@@ -18,6 +18,8 @@ export interface IInputMovement {
 }
 
 export interface IObjectManagement {
+	id?           : string;
+	name?         : string;
     type          : "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
 	visiableType  : "auto" | "force" | "none";
 	layerNum?     : number;
