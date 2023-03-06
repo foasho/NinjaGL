@@ -3,9 +3,10 @@ import { GLTFViewer } from "@/components/NaniwaEditor/ViewPort/GLTFViewer";
 import { MainViewer } from "@/components/NaniwaEditor/ViewPort/MainViewer";
 import { NaniwaEditorContext, NaniwaEditorManager } from "@/components/NaniwaEditor/NaniwaEditorManager";
 import { useState, useEffect, useContext } from "react";
-import { Vector3 } from "three";
+import { Object3D, Vector3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
 import { ContentViewer } from "./ViewPort/ContentViewer";
+import { PivotControls } from "@react-three/drei";
 
 export interface IFileProps {
     size: number;
@@ -27,19 +28,19 @@ export const NaniwaEditor = () => {
     }
 
     const changePosition = (e, xyz: "x"|"y"|"z") => {
-        if (editor.selectObject){
-            const newPosition = new Vector3().copy(editor.position);
-            if (xyz == "x"){
-                newPosition.setX(Number(e.target.value));
-            }
-            else if (xyz == "y"){
-                newPosition.setY(Number(e.target.value));
-            }
-            else if (xyz == "z") {
-                newPosition.setZ(Number(e.target.value));
-            }
-            editor.position.copy(newPosition);
-        }
+        // if (editor.selectObject){
+        //     const newPosition = new Vector3().copy(editor.position);
+        //     if (xyz == "x"){
+        //         newPosition.setX(Number(e.target.value));
+        //     }
+        //     else if (xyz == "y"){
+        //         newPosition.setY(Number(e.target.value));
+        //     }
+        //     else if (xyz == "z") {
+        //         newPosition.setZ(Number(e.target.value));
+        //     }
+        //     editor.position.copy(newPosition);
+        // }
     }
 
     useEffect(() => {
@@ -53,11 +54,11 @@ export const NaniwaEditor = () => {
         })
     }, []);
 
-    useEffect(() => {
-        if (editor.selectObject){
-            setPosition(editor.position);
-        }
-    }, [editor.selectObject]);
+    // useEffect(() => {
+    //     if (editor.selectObject){
+    //         setPosition(editor.position);
+    //     }
+    // }, [editor.selectObject]);
 
     return (
         <>
