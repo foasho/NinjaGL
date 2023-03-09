@@ -5,8 +5,9 @@ import {
     BsFileImage,
     BsFolder
 } from "react-icons/bs";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { reqApi } from "@/services/ServciceApi";
+import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
 const getExtension = (filename: string) => {
     return filename.split('.').pop().toLowerCase();
@@ -17,10 +18,17 @@ const isImage = (filename: string) => {
     return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
 }
 
+const gltf_icon = "fileicons/gltf.png";
+const isGLTF = (filename: string) => {
+    const ext = getExtension(filename);
+    return ['glb', 'gltf'].includes(ext);
+}
+
 export const ContentViewer = (props: IFileProps) => {
     const idName = `file-${props.name}`;
     let icon: JSX.Element;
     let tooltipTimer: NodeJS.Timeout = null;
+    const editor = useContext(NaniwaEditorContext);
     const tooltip = document.createElement('div')
     if (props.isFile){
         if (isImage(props.name)){
@@ -30,6 +38,13 @@ export const ContentViewer = (props: IFileProps) => {
                 </>
             )
             
+        }
+        if (isGLTF(props.name)){
+            icon = (
+                <>
+                    <img src={gltf_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                </>
+            )
         }
     }
     else if (props.isDirectory){
@@ -68,12 +83,18 @@ export const ContentViewer = (props: IFileProps) => {
         tooltip.style.display = "none";
     }
 
-    const onClick = () => {
+    const onDoubleClick = () => {
         if (props.isDirectory){
-            const newRoute = "/"+props.name;
-            // reqApi({route: "filesize", queryObject: { routePath: newRoute }}).then(() => {});
+            const newRoute = editor.assetRoute+"/"+props.name;
+            editor.assetRoute = newRoute;
+            if (props.onDoubleClick){
+                props.onDoubleClick("directory", newRoute);
+            }
         }
     }
+
+    const onDragStart = () => {}
+    const onDragEnd = () => {}
 
     useEffect(() => {
         tooltip.innerText = `ファイル名:${props.name} \n サイズ:${props.size}`;
@@ -95,10 +116,12 @@ export const ContentViewer = (props: IFileProps) => {
         <>
             
             <div 
-                onClick={() => onClick()}
+                onDoubleClick={(e) => onDoubleClick()}
                 className={styles.tooltip}
                 onMouseOver={(e) => onHover(e)}
                 onMouseOut={(e) => onMouseOut(e)}
+                onDragStart={(e) => onDragStart()}
+                onDragEnd={(e) => onDragEnd()}
                 style={{ maxWidth: "50px", textAlign: "center", display: "inline-block", padding: "5px" }}
 
             >
