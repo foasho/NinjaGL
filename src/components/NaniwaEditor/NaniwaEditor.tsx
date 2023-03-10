@@ -2,17 +2,24 @@ import styles from "@/App.module.scss";
 import { GLTFViewer } from "@/components/NaniwaEditor/ViewPort/GLTFViewer";
 import { MainViewer } from "@/components/NaniwaEditor/ViewPort/MainViewer";
 import { NaniwaEditorContext, NaniwaEditorManager } from "@/components/NaniwaEditor/NaniwaEditorManager";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { Object3D, Vector3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
 import { ContentViewer } from "./ViewPort/ContentViewer";
 import { PivotControls } from "@react-three/drei";
+import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { ScriptEditor } from "./ViewPort/ScriptEditor";
+import { AiFillHome } from "react-icons/ai";
+import { TerrainMaker } from "./ViewPort/TerrainMaker";
+import { TerrainInspector } from "./Inspector/TerrainInspector";
+import { MainViewInspector } from "./Inspector/MainViewInspector";
 
 export interface IFileProps {
     size: number;
     isFile: boolean;
     isDirectory: boolean;
     name: string;
+    onDoubleClick?: (type: string, value: string) => void;
 }
 
 export const NaniwaEditor = () => {
@@ -20,6 +27,7 @@ export const NaniwaEditor = () => {
     const [viewSelect, setViewSelect] = useState<"mainview"|"terrainmaker"|"gltfviewer"|"scripteditor"|"shadereditor">("mainview");
     const [files, setFiles] = useState<IFileProps[]>([]);
     const [position, setPosition] = useState<Vector3>(new Vector3(0, 0, 0));
+    const [selectOMs, setSelectOMs] = useState<IObjectManagement[]>([]);
 
     const changeView = (viewType: "mainview"|"terrainmaker"|"gltfviewer"|"scripteditor"|"shadereditor") => {
         if (viewSelect !== viewType){
@@ -46,19 +54,61 @@ export const NaniwaEditor = () => {
     useEffect(() => {
         // アセットをロードする
         reqApi({route: "filesize", queryObject: { routePath: "/" }}).then((res) => {
-            console.log("ロードする");
-            console.log(res);
             if (res.status == 200){
                 setFiles(res.data.files);
             }
         })
     }, []);
 
-    // useEffect(() => {
-    //     if (editor.selectObject){
-    //         setPosition(editor.position);
-    //     }
-    // }, [editor.selectObject]);
+    const onDoubleClick = (type: "directory"|"gltf"|"js", path: string) => {
+        if (type == "directory"){
+            reqApi({route: "filesize", queryObject: { routePath: path }}).then((res) => {
+                if (res.status == 200){
+                    editor.assetRoute = (path != "/")? path: "";
+                    setFiles(res.data.files);
+                }
+            })
+        }
+    }
+
+    const onMoveDic = (value: string) => {
+        const routes = editor.assetRoute.split("/");
+        let path = "";
+        if (value.length > 0){
+            for (const route of routes){
+                if (route.length > 0){
+                    path += `/${route}`;
+                    if (route == value){
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            path = "/";
+        }
+        reqApi({route: "filesize", queryObject: { routePath: path }}).then((res) => {
+            if (res.status == 200){
+                editor.assetRoute = (path != "/")? path: "";
+                setFiles(res.data.files);
+            }
+        })
+    }
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            myFrame();
+        }, 1000 / 10);
+        return () => clearInterval(interval);
+    }, [selectOMs.length])
+
+    const myFrame = () => {
+        const _selectOMs = editor.getSelectObjects();
+        if (selectOMs.length !== _selectOMs.length){
+            console.log("確認");
+            setSelectOMs(_selectOMs);
+        }
+    }
 
     return (
         <>
@@ -130,6 +180,7 @@ export const NaniwaEditor = () => {
                             }
                             {viewSelect == "terrainmaker" &&
                                 <>
+                                    <TerrainMaker/>
                                 </>
                             }
                             {viewSelect == "gltfviewer" &&
@@ -139,6 +190,7 @@ export const NaniwaEditor = () => {
                             }
                             {viewSelect == "scripteditor" &&
                                 <>
+                                    <ScriptEditor/>
                                 </>
                             }
                             {viewSelect == "shadereditor" &&
@@ -147,51 +199,48 @@ export const NaniwaEditor = () => {
                             }
                         </div>
                         <div className={styles.contentsbrowser}>
+                            <div className={styles.pathName}>
+                                <div className={styles.title}>
+                                    コンテンツブラウザ
+                                    <span className={styles.home} onClick={() => onMoveDic("")}>
+                                        <AiFillHome />
+                                    </span>
+                                </div>
+                                {editor.assetRoute.split("/").map((route) => {
+                                    if (route.length == 0){
+                                        return <></>
+                                    }
+                                    return (
+                                        <span className={styles.route} onClick={() => onMoveDic(route)}>
+                                            /{route}
+                                        </span>
+                                    )
+                                })}
+                            </div>
                             {files.map((file) => {
                                 return (
-                                    <ContentViewer {...file} />
+                                    <ContentViewer {...file} onDoubleClick={onDoubleClick} />
                                 )
                             })}
                         </div>
                     </div>
                     <div className={styles.inspector}>
-                        {(viewSelect == "gltfviewer" || viewSelect == "mainview") &&
+                        {viewSelect == "mainview" &&
                             <>
-                                <div className={styles.position}>
-                                    <div className={styles.title}>
-                                        位置
-                                    </div>
-                                    <div className={styles.name}>
-                                        <div>X</div>
-                                        <div>Y</div>
-                                        <div>Z</div>
-                                    </div>
-                                    <div className={styles.inputContainer}>
-                                        <input type="number" placeholder="0" value={position.x} onChange={(e) => changePosition(e, "x")}/>
-                                        <input type="number" placeholder="0" value={position.y} onChange={(e) => changePosition(e, "y")}/>
-                                        <input type="number" placeholder="0" value={position.z} onChange={(e) => changePosition(e, "z")}/>
-                                    </div>
-                                </div>
-                                <div className={styles.rotation}>
-                                    <div className={styles.title}>
-                                        回転
-                                    </div>
-                                    <div className={styles.name}>
-                                        <div>X</div>
-                                        <div>Y</div>
-                                        <div>Z</div>
-                                    </div>
-                                    <div className={styles.inputContainer}>
-                                        <input type="number" placeholder="0"/>
-                                        <input type="number" placeholder="0"/>
-                                        <input type="number" placeholder="0"/>
-                                    </div>
-                                </div>
+                                {selectOMs.map((om) => {
+                                    return <MainViewInspector om={om} />
+                                })}
                             </>
                         }
-                        <>
-                            
-                        </>
+                        {viewSelect == "scripteditor" && 
+                            <>
+                            </>
+                        }
+                        {viewSelect == "terrainmaker" &&
+                            <>
+                                <TerrainInspector/>
+                            </>
+                        }
                     </div>
                 </div>
             </div>
