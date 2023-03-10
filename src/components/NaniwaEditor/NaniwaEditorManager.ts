@@ -1,16 +1,28 @@
 import { Euler, Object3D, Vector3 } from "three";
 import { createContext } from "react";
 import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { TerrainMakerManager } from "../TerrainMaker/TerrainMakerManager";
 
 export class NaniwaEditorManager {
     mode: "position"| "scale" = "position";
     oms: IObjectManagement[] = [];
     selectedIds: string[] = [];
     gltfViewerObj: Object3D;
+    /**
+     * コンテンツブラウザ
+     */
     fileSelect: string = "";
     assetRoute: string = "";
-
-    constructor(){}
+    contentsSelect: boolean = false;
+    contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" = null;
+    contentsSelectPath: string = "";// コンテンツブラウザ内のItemを選択した時にパスを設定する
+    /**
+     * 地形メーカー
+     */
+    terrainManager: TerrainMakerManager;
+    constructor(){
+        this.terrainManager = new TerrainMakerManager();
+    }
 
     setPosition(id: string, position: Vector3){
         const target = this.oms.find(om => om.id == id);
@@ -67,6 +79,16 @@ export class NaniwaEditorManager {
         const newArr = this.selectedIds.filter(sid => sid !== id)
         this.selectedIds = newArr
     }
+
+    /**
+     * 設定ファイルを読み込む
+     */
+    importSettingJson(){}
+
+    /**
+     * 設定ファイルを吐き出す
+     */
+    exportSettingJson(){}
 }
 
 export const NaniwaEditorContext = createContext<NaniwaEditorManager>(null);

@@ -10,18 +10,44 @@ import { IObjectManagement } from "@/engine/core/NaniwaProps";
 export const MainViewer = () => {
     const camRef = useRef<any>();
     const editor = useContext(NaniwaEditorContext);
-    const [oms, setOMs] = useState<IObjectManagement[]>([])
+    const [oms, setOMs] = useState<IObjectManagement[]>([]);
+    let rightHold = false; // 右クリック中かどうか
     
     const handleDrop = (e) => {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        console.log("アップロードテスト");
-        console.log(e);
         const loader = new GLTFLoader();
-        loader.load(URL.createObjectURL(file), (gltf) => {
-            editor.setObjectManagement(gltf.scene.clone());
-            setOMs([...editor.oms]);
-        });
+        if (!editor.contentsSelect){
+            const file = e.dataTransfer.files[0];
+            console.log("アップロードテスト");
+            console.log(e);  
+            loader.load(URL.createObjectURL(file), (gltf) => {
+                editor.setObjectManagement(gltf.scene.clone());
+                setOMs([...editor.oms]);
+            });
+        }
+        else {
+            loader.load(
+                editor.contentsSelectPath,
+                async (gltf) => {
+                    const scene = gltf.scene || gltf.scenes[0] as Object3D;
+                    scene.traverse((node: Mesh) => { 
+                        if ((node as Mesh).isMesh){
+                            if (node.geometry){
+                                node.castShadow = true;
+                                node.receiveShadow = true;
+                            }
+                        }
+                    });
+                    editor.setObjectManagement(scene.clone());
+                    setOMs([...editor.oms]);
+                },
+                (xhr) => {},
+                async (err) => {
+                    console.log("モデル読み込みエラ―");
+                    console.log(err);
+                }
+            )
+        }
     }
 
     const enabledCamera = (trig: boolean) => {
@@ -52,7 +78,9 @@ export const MainViewer = () => {
                 <OrbitControls makeDefault={true} ref={camRef}/>
                 <gridHelper args={[4096, 4096]}/>
                 {oms.map(om => {
-                    return <MyObject om={om} onStopCamera={enabledCamera} />
+                    if (om.type == "object"){
+                        return <MyObject om={om} onStopCamera={enabledCamera} />
+                    }
                 })}
             </Canvas>
         </div>
@@ -64,6 +92,11 @@ interface IMyObject {
     onStopCamera: (value: boolean) => void;
 }
 
+/**
+ * 基本的なオブジェクトのみ
+ * @param props 
+ * @returns 
+ */
 const MyObject = (props: IMyObject) => {
     const object: Object3D = props.om.object;
     object.traverse((node: any) => {
@@ -94,8 +127,11 @@ const MyObject = (props: IMyObject) => {
 
     const onClick = (e, value: boolean) => {
         if (value){
-            editor.selectObject(uuid);
-            setVisible(true);
+            // 選択できるのは１つのみにする
+            if (!editor.selectedIds.includes(uuid)){
+                editor.selectObject(uuid);
+                setVisible(true);
+            }
         }
         else {
             if (e.type == "click" &&!handleDrag.current){
@@ -132,6 +168,9 @@ const MyObject = (props: IMyObject) => {
             <PivotControls 
                 scale={len*0.5}
                 visible={visible} 
+                disableAxes={!visible}
+                disableSliders={!visible}
+                disableRotations={!visible}
                 onDrag={(e) => onDrag(e)}
                 onDragStart={() => onDragStart()}
                 onDragEnd={() => onDragEnd()}
@@ -149,3 +188,7 @@ const MyObject = (props: IMyObject) => {
         </>
     )
 }
+
+/**
+ * 
+ */

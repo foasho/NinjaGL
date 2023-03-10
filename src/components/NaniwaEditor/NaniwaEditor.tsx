@@ -9,6 +9,10 @@ import { ContentViewer } from "./ViewPort/ContentViewer";
 import { PivotControls } from "@react-three/drei";
 import { IObjectManagement } from "@/engine/core/NaniwaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
+import { AiFillHome } from "react-icons/ai";
+import { TerrainMaker } from "./ViewPort/TerrainMaker";
+import { TerrainInspector } from "./Inspector/TerrainInspector";
+import { MainViewInspector } from "./Inspector/MainViewInspector";
 
 export interface IFileProps {
     size: number;
@@ -56,14 +60,39 @@ export const NaniwaEditor = () => {
         })
     }, []);
 
-    const onDoubleClick = (type: "directory"|"gltf"|"js", value: string) => {
+    const onDoubleClick = (type: "directory"|"gltf"|"js", path: string) => {
         if (type == "directory"){
-            reqApi({route: "filesize", queryObject: { routePath: value }}).then((res) => {
+            reqApi({route: "filesize", queryObject: { routePath: path }}).then((res) => {
                 if (res.status == 200){
+                    editor.assetRoute = (path != "/")? path: "";
                     setFiles(res.data.files);
                 }
             })
         }
+    }
+
+    const onMoveDic = (value: string) => {
+        const routes = editor.assetRoute.split("/");
+        let path = "";
+        if (value.length > 0){
+            for (const route of routes){
+                if (route.length > 0){
+                    path += `/${route}`;
+                    if (route == value){
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            path = "/";
+        }
+        reqApi({route: "filesize", queryObject: { routePath: path }}).then((res) => {
+            if (res.status == 200){
+                editor.assetRoute = (path != "/")? path: "";
+                setFiles(res.data.files);
+            }
+        })
     }
 
     useEffect(() => {
@@ -151,6 +180,7 @@ export const NaniwaEditor = () => {
                             }
                             {viewSelect == "terrainmaker" &&
                                 <>
+                                    <TerrainMaker/>
                                 </>
                             }
                             {viewSelect == "gltfviewer" &&
@@ -169,6 +199,24 @@ export const NaniwaEditor = () => {
                             }
                         </div>
                         <div className={styles.contentsbrowser}>
+                            <div className={styles.pathName}>
+                                <div className={styles.title}>
+                                    コンテンツブラウザ
+                                    <span className={styles.home} onClick={() => onMoveDic("")}>
+                                        <AiFillHome />
+                                    </span>
+                                </div>
+                                {editor.assetRoute.split("/").map((route) => {
+                                    if (route.length == 0){
+                                        return <></>
+                                    }
+                                    return (
+                                        <span className={styles.route} onClick={() => onMoveDic(route)}>
+                                            /{route}
+                                        </span>
+                                    )
+                                })}
+                            </div>
                             {files.map((file) => {
                                 return (
                                     <ContentViewer {...file} onDoubleClick={onDoubleClick} />
@@ -180,7 +228,7 @@ export const NaniwaEditor = () => {
                         {viewSelect == "mainview" &&
                             <>
                                 {selectOMs.map((om) => {
-                                    return <Inspector om={om} />
+                                    return <MainViewInspector om={om} />
                                 })}
                             </>
                         }
@@ -190,101 +238,10 @@ export const NaniwaEditor = () => {
                         }
                         {viewSelect == "terrainmaker" &&
                             <>
+                                <TerrainInspector/>
                             </>
                         }
                     </div>
-                </div>
-            </div>
-        </>
-    )
-}
-
-interface IInspector {
-    om: IObjectManagement;
-}
-const Inspector = (props: IInspector) => {
-    const editor = useContext(NaniwaEditorContext);
-    const refPosX = useRef<HTMLInputElement>();
-    const refPosY = useRef<HTMLInputElement>();
-    const refPosZ = useRef<HTMLInputElement>();
-    const refRotX = useRef<HTMLInputElement>();
-    const refRotY = useRef<HTMLInputElement>();
-    const refRotZ = useRef<HTMLInputElement>();
-    const refScaX = useRef<HTMLInputElement>();
-    const refScaY = useRef<HTMLInputElement>();
-    const refScaZ = useRef<HTMLInputElement>();
-    const { object } = props.om;
-    const uuid = object.uuid;
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            myFrame();
-        }, 1000 / 10);
-        return () => clearInterval(interval);
-    }, [])
-
-    const myFrame = () => {
-        const position = editor.getPosition(uuid);
-        if (position){
-            refPosX.current.value = position.x.toString();
-            refPosY.current.value = position.y.toString();
-            refPosZ.current.value = position.z.toString();
-        }
-        const rotation = editor.getRotation(uuid);
-        if (rotation){
-            refRotX.current.value = rotation.x.toString();
-            refRotY.current.value = rotation.y.toString();
-            refRotZ.current.value = rotation.z.toString();
-        }
-    }
-
-    const changePosition = (e, xyz) => {}
-
-    return (
-        <>
-            <div className={styles.position}>
-                <div className={styles.title}>
-                    位置
-                </div>
-                <div className={styles.name}>
-                    <div>X</div>
-                    <div>Y</div>
-                    <div>Z</div>
-                </div>
-                <div className={styles.inputContainer}>
-                    <input ref={refPosX} type="number" placeholder="0" value={object.position.x} onChange={(e) => changePosition(e, "x")}/>
-                    <input ref={refPosY} type="number" placeholder="0" value={object.position.y} onChange={(e) => changePosition(e, "y")}/>
-                    <input ref={refPosZ} type="number" placeholder="0" value={object.position.z} onChange={(e) => changePosition(e, "z")}/>
-                </div>
-            </div>
-            <div className={styles.rotation}>
-                <div className={styles.title}>
-                    回転
-                </div>
-                <div className={styles.name}>
-                    <div>X</div>
-                    <div>Y</div>
-                    <div>Z</div>
-                </div>
-                <div className={styles.inputContainer}>
-                    <input ref={refRotX} type="number" placeholder="0"/>
-                    <input ref={refRotY} type="number" placeholder="0"/>
-                    <input ref={refRotZ} type="number" placeholder="0"/>
-                </div>
-            </div>
-            <div className={styles.scale}>
-                <div className={styles.title}>
-                    スケール
-                </div>
-                <div className={styles.name}>
-                    <div>X</div>
-                    <div>Y</div>
-                    <div>Z</div>
-                </div>
-                <div className={styles.inputContainer}>
-                    <input ref={refScaX} type="number" placeholder="0" value={object.scale.x}/>
-                    <input ref={refScaY} type="number" placeholder="0" value={object.scale.y}/>
-                    <input ref={refScaZ} type="number" placeholder="0" value={object.scale.z}/>
                 </div>
             </div>
         </>

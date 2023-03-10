@@ -82,9 +82,32 @@
                 color: #fff;
                 background-color: #333;
                 padding: 15px;
-
+                .pathName {
+                    user-select: none;
+                    .title {
+                        display: inline-block;
+                        font-size: 20px;
+                        font-weight: bold;
+                        padding-right: 10px;
+                        .home {
+                            padding-left: 3px;
+                            padding-right: 2px;
+                            cursor: pointer;
+                        }
+                    }
+                    .route {
+                        cursor: pointer;
+                        padding: 2px 3px;
+                        letter-spacing: 2px;
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
+                }
                 .tooltip {
                     position: relative;
+                    user-select: none;
+                    
                 } 
                 .tooltip:before {
                     content: attr(data-text);
@@ -103,7 +126,16 @@
                 .tooltip:hover:before {
                     display: block;
                 }
-                  
+                .itemName {
+                    font-size: 10px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    line-height: 1;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2; /* 表示する行数 */
+                    white-space: pre;
+                }
             }
         }
         .inspector {
@@ -210,6 +242,26 @@
                         width: calc(25.33% - 10px);
                         margin-right: 10px;
                     }
+                }
+            }
+
+            // 地形メーカー
+            .terrainui {
+                color: #fff;
+                .mode {
+                    display: block;
+                }
+                .type {
+                    display: block;
+                }
+                .wire {
+                    display: block;
+                }
+                .strength {
+                    display: block;
+                }
+                .range {
+                    display: block;
                 }
             }
         }
