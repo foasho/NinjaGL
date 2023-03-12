@@ -1,15 +1,16 @@
-# 
+# NaniwaJS
 
+## 構成
+- NaniwaEditor: 汎用ゲームエンジンライクなUIエディタ
+- NaniwaJS: エンジンで作成したReact実行ライブラリ
+
+## エディタの実行
 ```
+npm install
 npm run dev
 ```
 
-# 残りタスク
-- エディタ作成
-
-
-# ゲーム性
-- 他人
-- 廃墟
-- パロディ
-- 探索
+## ビルド
+```
+npm run build --save_path=myproject.json
+```
