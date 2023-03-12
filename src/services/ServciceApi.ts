@@ -48,18 +48,15 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
     }
     else {
         if (props.contentType == "form"){
-            const formApi = axios.create({
-                baseURL: BASE_URL,
-                timeout: 300000,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    // 'Access-Control-Allow-Origin': '*'
-                },
-                // withCredentials: true
-            });
-            await formApi.post(
+            return await axios.post(
                 "/api/" +props.route  + query,
-                props.formData
+                props.formData,
+                {
+                    timeout: 300000,
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
             )
         }
         else {

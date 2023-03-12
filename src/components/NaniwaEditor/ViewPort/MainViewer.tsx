@@ -5,48 +5,75 @@ import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 import { IObjectManagement } from "@/engine/core/NaniwaProps";
-
+import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 
 export const MainViewer = () => {
     const camRef = useRef<any>();
     const editor = useContext(NaniwaEditorContext);
     const [oms, setOMs] = useState<IObjectManagement[]>([]);
-    let rightHold = false; // 右クリック中かどうか
     
     const handleDrop = (e) => {
         e.preventDefault();
         const loader = new GLTFLoader();
         if (!editor.contentsSelect){
             const file = e.dataTransfer.files[0];
-            console.log("アップロードテスト");
-            console.log(e);  
             loader.load(URL.createObjectURL(file), (gltf) => {
-                editor.setObjectManagement(gltf.scene.clone());
+                editor.setObjectManagement({
+                    id: gltf.scene.clone().uuid,
+                    type: "object",
+                    visiableType: "auto",
+                    args: null,
+                    object: gltf.scene
+                });
                 setOMs([...editor.oms]);
             });
         }
         else {
-            loader.load(
-                editor.contentsSelectPath,
-                async (gltf) => {
-                    const scene = gltf.scene || gltf.scenes[0] as Object3D;
-                    scene.traverse((node: Mesh) => { 
-                        if ((node as Mesh).isMesh){
-                            if (node.geometry){
-                                node.castShadow = true;
-                                node.receiveShadow = true;
+            const type = editor.contentsSelectType;
+            if (
+                type == "gltf" ||
+                type == "ter"
+            ){
+                loader.load(
+                    editor.contentsSelectPath,
+                    async (gltf) => {
+                        const scene = gltf.scene || gltf.scenes[0] as Object3D;
+                        scene.traverse((node: Mesh) => { 
+                            if ((node as Mesh).isMesh){
+                                if (node.geometry){
+                                    node.castShadow = true;
+                                    node.receiveShadow = true;
+                                }
                             }
+                        });
+                        if (type == "gltf"){
+                            editor.setObjectManagement({
+                                id: scene.clone().uuid,
+                                type: "object",
+                                visiableType: "auto",
+                                args: {},
+                                object: scene
+                            });
+                            setOMs([...editor.oms]);
                         }
-                    });
-                    editor.setObjectManagement(scene.clone());
-                    setOMs([...editor.oms]);
-                },
-                (xhr) => {},
-                async (err) => {
-                    console.log("モデル読み込みエラ―");
-                    console.log(err);
-                }
-            )
+                        if (type == "ter"){
+                            editor.setObjectManagement({
+                                id: scene.clone().uuid,
+                                type: "terrain",
+                                visiableType: "force",
+                                args: {},
+                                object: scene
+                            });
+                            setOMs([...editor.oms]);
+                        }
+                    },
+                    (xhr) => {},
+                    async (err) => {
+                        console.log("モデル読み込みエラ―");
+                        console.log(err);
+                    }
+                )
+            }
         }
     }
 
@@ -79,7 +106,10 @@ export const MainViewer = () => {
                 <gridHelper args={[4096, 4096]}/>
                 {oms.map(om => {
                     if (om.type == "object"){
-                        return <MyObject om={om} onStopCamera={enabledCamera} />
+                        return <MyObject om={om} onStopCamera={enabledCamera} isHelper={true} />
+                    }
+                    else if (om.type == "terrain"){
+                        return <MyTerrain om={om} isHelper={true} />
                     }
                 })}
             </Canvas>
@@ -90,6 +120,7 @@ export const MainViewer = () => {
 interface IMyObject {
     om: IObjectManagement;
     onStopCamera: (value: boolean) => void;
+    isHelper: boolean;
 }
 
 /**
@@ -189,6 +220,47 @@ const MyObject = (props: IMyObject) => {
     )
 }
 
+interface IMyTerrain {
+    om: IObjectManagement;
+    isHelper: boolean;
+}
+
+
 /**
- * 
+ * 地形データの選択
  */
+const MyTerrain = (props: IMyTerrain) => {
+    const object: Object3D = props.om.object;
+    const uuid = object.uuid;
+    const editor = useContext(NaniwaEditorContext);
+    const [enabled, setEnabled] = useState<boolean>(true)
+    const onClick = (e, value: boolean) => {
+        setEnabled(value);
+        if (value){
+            editor.selectedIds.push(uuid);
+        }
+        else {
+            editor.unSelectObject(uuid);
+        }
+    }
+    return (
+        <>
+            <Selection>
+                <EffectComposer enabled={enabled} autoClear={false}>
+                    <Outline visibleEdgeColor={0x00ff00} hiddenEdgeColor={0x00ff00} edgeStrength={1000} />
+                </EffectComposer>
+                <Select enabled>
+                    <primitive 
+                        object={object} 
+                        onClick={(e) => {
+                            onClick(e, true)
+                        }}
+                        onPointerMissed={(e) => {
+                            onClick(e, false)
+                        }}
+                    />
+                </Select>
+            </Selection>
+        </>
+    )
+}

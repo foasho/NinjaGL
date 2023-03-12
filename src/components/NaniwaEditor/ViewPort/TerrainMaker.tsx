@@ -13,13 +13,15 @@ import {
     SpotLight as SL,
     Color,
     DoubleSide,
-    MathUtils
+    MathUtils,
+    Euler
 } from "three";
+import { useInputControl } from "@/engine/core/InputControls";
 
 const TerrainMakeComponent = () => {
     const editor = useContext(NaniwaEditorContext);
     const terrainManager = editor.terrainManager;
-
+    const input = useInputControl("desktop");
     /**
      * 初期値
      */
@@ -28,17 +30,18 @@ const TerrainMakeComponent = () => {
     const matRef = useRef<MeshStandardMaterial>();
     const lightRef = useRef<SL>();
     const gridRef = useRef<GridHelper>();
-    const mouse = new Vector2();
+    // const mouse = new Vector2();
     const raycaster = new Raycaster();
-    const { camera } = useThree();
+    const { camera, mouse } = useThree();
     camera.position.set(
         terrainManager.mapSize / 2,
         terrainManager.mapSize / 2,
         -terrainManager.mapSize / 2
     );
     terrainManager.camera = camera;
-    let isReverse = false;
+    let isReverse = useRef<boolean>(false);
     let isGrid = false;
+    
 
     const getVertexes = (intersects: Intersection[], radius: number): { indexes: number[], values: number[] } => {
         const nearVertices: number[] = []; // 範囲内の頂点
@@ -72,8 +75,8 @@ const TerrainMakeComponent = () => {
         };
     }
     const onMouseMove = (event) => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        // mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        // mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         if (terrainManager.isMouseDown && terrainManager.mode == "edit"){
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(ref.current);
@@ -99,16 +102,16 @@ const TerrainMakeComponent = () => {
     }
     const onMouseUp = () => {
         terrainManager.isMouseDown = false;
-        isReverse = false;
+        isReverse.current = false;
     }
     const onKeyDown = (event) => {
         if (event.code.toString() == "ShiftLeft") {
-            isReverse = true;
+            isReverse.current = true;
         }
     }
     const onKeyUp = (event) => {
         if (event.code.toString() == "ShiftLeft") {
-            isReverse = false;
+            isReverse.current = false;
         }
     }
     
@@ -130,6 +133,35 @@ const TerrainMakeComponent = () => {
     }, []);
 
     useFrame((_, delta) => {
+        if (isReverse.current){
+            const st = 1;
+            var cameraDirection = new Vector3();
+            camera.getWorldDirection(cameraDirection);
+            var cameraPosition = camera.position.clone();
+            if (input.forward){
+                cameraPosition.add(cameraDirection.multiplyScalar(st));
+                camera.position.copy(cameraPosition);
+            }
+            if (input.backward){
+                cameraPosition.sub(cameraDirection.multiplyScalar(st));
+                camera.position.copy(cameraPosition);
+            }
+            if (input.right){
+                var cameraRight = new Vector3();
+                cameraRight.crossVectors(cameraDirection, camera.up).normalize();
+                cameraPosition.add(cameraRight.multiplyScalar(st));
+                camera.position.copy(cameraPosition);
+                var cameraTarget = cameraPosition.clone().add(cameraDirection);
+                camera.lookAt(cameraTarget); // カメラの注視点を更新
+            }
+            if (input.left){
+                var cameraLeft = new Vector3();
+                cameraLeft.crossVectors(cameraDirection, camera.up).normalize();
+                cameraPosition.sub(cameraLeft.multiplyScalar(st));
+                camera.position.copy(cameraPosition);
+                camera.lookAt(cameraPosition.clone().add(cameraDirection));
+            }
+        }
         if (terrainManager.mode == "edit"){
             camRef.current.enabled = false;
         }
@@ -196,7 +228,7 @@ export const TerrainMaker = () => {
         <>
             {terrainManager &&
             <>
-                <div style={{ height: "100%" }} onContextMenu={() => {return false}}>
+                <div style={{ height: "100%", width: "100%" }} onContextMenu={() => {return false}}>
                     <TerrainMakerCanvas/>
                 </div>
             </>

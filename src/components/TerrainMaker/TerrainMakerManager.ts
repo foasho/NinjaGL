@@ -4,6 +4,8 @@ import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/
 
 export class TerrainMakerManager {
     mode: "edit" | "view" = "view";
+    brash: "normal" | "flat" | "paint" = "normal";
+    cache: Object3D;
     terrainMesh: Mesh;
     color : string = "#00ff00";
     isMouseDown: boolean = false;
@@ -36,6 +38,10 @@ export class TerrainMakerManager {
         else this.mode = "view";
     }
 
+    setMode (mode: "view" | "edit"){
+        this.mode = mode;
+    }
+
     changeWireFrame(){
         this.wireFrame = !this.wireFrame;
     }
@@ -61,35 +67,39 @@ export class TerrainMakerManager {
     }
 
     /**
-     * GLB出力
+     * GLB出力 -> Glob
      * @param filename 
      */
-    async exportTerrainMesh(filename: string){
+    async exportTerrainMesh(filename?: string): Promise<Blob>{
         if (this.terrainMesh){
             const obj3d = new Object3D();
             obj3d.add(this.terrainMesh.clone());
-            var exporter = new GLTFExporter();
-            const options: GLTFExporterOptions = {
-                trs: false,
-                onlyVisible: true,
-                binary: true,
-                maxTextureSize: 4096
-            };
-            exporter.parse(
-                obj3d,
-                (result) => {
-                    if (result instanceof ArrayBuffer){
-                        this.saveArrayBuffer(result, filename);
+            
+            return new Promise((resolve) => {
+                var exporter = new GLTFExporter();
+                const options: GLTFExporterOptions = {
+                    trs: false,
+                    onlyVisible: true,
+                    binary: true,
+                    maxTextureSize: 4096
+                };
+                exporter.parse(
+                    obj3d,
+                    (result) => {
+                        if (result instanceof ArrayBuffer){
+                            return resolve(this.saveArrayBuffer(result, filename));
+                        }
+                        else {
+                            const output = JSON.stringify( result, null, 2 );
+                            return resolve(this.saveString(output, filename));
+                        }
+                    },
+                    (error: ErrorEvent) => {
+                        console.log(`出力中エラー: ${error.toString()}`);
                     }
-                    else {
-                        const output = JSON.stringify( result, null, 2 );
-                        this.saveString(output, filename);
-                    }
-                },
-                (error: ErrorEvent) => {
-                    console.log(`出力中エラー: ${error.toString()}`);
-                }
-            );
+                );
+            });
+            
         }
         else console.log("地形データが存在していません");
     }
@@ -102,12 +112,14 @@ export class TerrainMakerManager {
         link.remove();
     }
 
-    saveString(text: string, filename: string){
-        this.save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+    saveString(text: string, filename?: string): Blob{
+        // this.save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+        return new Blob( [ text ], { type: 'text/plain' } );
     }
 
-    saveArrayBuffer(buffer: ArrayBuffer, filename: string){
-        this.save(new Blob([buffer], { type: "application/octet-stream" }), filename);
+    saveArrayBuffer(buffer: ArrayBuffer, filename?: string): Blob{
+        // this.save(new Blob([buffer], { type: "application/octet-stream" }), filename);
+        return new Blob([buffer], { type: "application/octet-stream" });
     }
 }
 

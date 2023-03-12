@@ -42,6 +42,12 @@ const isJS = (filename: string) => {
     return ['js'].includes(ext);
 }
 
+const terrain_icon = "fileicons/terrain.png";
+const isTerrain = (filename: string) => {
+    const ext = getExtension(filename);
+    return ['ter'].includes(ext);
+}
+
 
 export const ContentViewer = (props: IFileProps) => {
     const idName = `file-${props.name}`;
@@ -49,7 +55,7 @@ export const ContentViewer = (props: IFileProps) => {
     let tooltipTimer: NodeJS.Timeout = null;
     const editor = useContext(NaniwaEditorContext);
     const tooltip = document.createElement('div');
-    let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" = null;
+    let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" = null;
     if (props.isFile){
         if (isImage(props.name)){
             icon = (
@@ -90,6 +96,14 @@ export const ContentViewer = (props: IFileProps) => {
                 </>
             )
             contentsSelectType = "js";
+        }
+        else if (isTerrain(props.name)){
+            icon = (
+                <>
+                    <img src={terrain_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                </>
+            )
+            contentsSelectType = "ter";
         }
         // どれにも該当しない場合は表示しない
         else {
@@ -143,11 +157,13 @@ export const ContentViewer = (props: IFileProps) => {
 
     const onDragStart = () => {
         console.log("選択", props.name);
+        editor.contentsSelectType = contentsSelectType;
         editor.contentsSelectPath = `${editor.assetRoute}/${props.name}`;
         editor.contentsSelect = true;
     }
     const onDragEnd = () => {
         console.log("解除", props.name);
+        editor.contentsSelectType = null;
         editor.contentsSelectPath = "";
         editor.contentsSelect = false;
     }
@@ -170,9 +186,7 @@ export const ContentViewer = (props: IFileProps) => {
 
     return  (
         <>
-            
             <div 
-
                 onDoubleClick={(e) => onDoubleClick()}
                 className={styles.tooltip}
                 onMouseOver={(e) => onHover(e)}

@@ -1,7 +1,20 @@
-import { Euler, Object3D, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Euler, Object3D, Vector3 } from "three";
 import { createContext } from "react";
 import { IObjectManagement } from "@/engine/core/NaniwaProps";
 import { TerrainMakerManager } from "../TerrainMaker/TerrainMakerManager";
+
+interface ISetObjectManagement {
+    id?           : string;
+	name?         : string;
+    type          : "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
+	visiableType  : "auto" | "force" | "none";
+	layerNum?     : number;
+    args?         : any;
+    rules?        : any;
+    object?       : Object3D;
+    animations?   : AnimationClip[];
+    mixer?        : AnimationMixer;
+}
 
 export class NaniwaEditorManager {
     mode: "position"| "scale" = "position";
@@ -14,7 +27,7 @@ export class NaniwaEditorManager {
     fileSelect: string = "";
     assetRoute: string = "";
     contentsSelect: boolean = false;
-    contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" = null;
+    contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" = null;
     contentsSelectPath: string = "";// コンテンツブラウザ内のItemを選択した時にパスを設定する
     /**
      * 地形メーカー
@@ -41,28 +54,22 @@ export class NaniwaEditorManager {
 
     getPosition(id: string){
         const target = this.oms.find(om => om.id == id);
-        if (!target) return null;
+        if (!target || !target.args.rotation){
+            return new Vector3(0, 0, 0);
+        }
         return target.args.position;
     }
 
     getRotation(id: string){
         const target = this.oms.find(om => om.id == id);
+        if (!target || !target.args.rotation){
+            return new Euler(0, 0, 0);
+        }
         return target.args.rotation;
     }
 
-    setObjectManagement = (object: Object3D) => {
-        this.oms.push(
-            {
-                id: object.uuid,
-                object: object,
-                visiableType: "auto",
-                type: "object",
-                args: {
-                    position: null,
-                    rotation: null
-                }
-            }
-        );
+    setObjectManagement = (props: IObjectManagement) => {
+        this.oms.push(props);
     }
 
     getSelectObjects = () => {
