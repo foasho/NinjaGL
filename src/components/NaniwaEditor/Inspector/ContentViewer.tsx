@@ -5,7 +5,7 @@ import {
     BsFileImage,
     BsFolder
 } from "react-icons/bs";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
@@ -48,19 +48,31 @@ const isTerrain = (filename: string) => {
     return ['ter'].includes(ext);
 }
 
+const formatBytes = (bytes: number, decimals = 2): string => {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 
 export const ContentViewer = (props: IFileProps) => {
     const idName = `file-${props.name}`;
     let icon: JSX.Element;
     let tooltipTimer: NodeJS.Timeout = null;
+    let tooltip = useRef<HTMLDivElement>();
     const editor = useContext(NaniwaEditorContext);
-    const tooltip = document.createElement('div');
     let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" = null;
     if (props.isFile){
         if (isImage(props.name)){
             icon = (
                 <>
-                    <img src={`${editor.assetRoute}/${props.name}`} style={{maxWidth: "50px", height: "30%" }} />
+                    <img src={`${editor.assetRoute}/${props.name}`} className={styles.iconImg} />
                 </>
             )
             contentsSelectType = "image";
@@ -68,7 +80,7 @@ export const ContentViewer = (props: IFileProps) => {
         else if (isGLTF(props.name)){
             icon = (
                 <>
-                    <img src={gltf_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                    <img src={gltf_icon} className={styles.iconImg} data-path={props.name} />
                 </>
             )
             contentsSelectType = "gltf";
@@ -76,7 +88,7 @@ export const ContentViewer = (props: IFileProps) => {
         else if (isMP3(props.name)){
             icon = (
                 <>
-                    <img src={mp3_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                    <img src={mp3_icon} className={styles.iconImg} data-path={props.name} />
                 </>
             )
             contentsSelectType = "mp3";
@@ -84,7 +96,7 @@ export const ContentViewer = (props: IFileProps) => {
         else if (isGLSL(props.name)){
             icon = (
                 <>
-                    <img src={glsl_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                    <img src={glsl_icon} className={styles.iconImg} data-path={props.name} />
                 </>
             )
             contentsSelectType = "glsl";
@@ -92,7 +104,7 @@ export const ContentViewer = (props: IFileProps) => {
         else if (isJS(props.name)){
             icon = (
                 <>
-                    <img src={js_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                    <img src={js_icon} className={styles.iconImg} data-path={props.name} />
                 </>
             )
             contentsSelectType = "js";
@@ -100,7 +112,7 @@ export const ContentViewer = (props: IFileProps) => {
         else if (isTerrain(props.name)){
             icon = (
                 <>
-                    <img src={terrain_icon} style={{maxWidth: "50px", height: "30%" }} data-path={props.name} />
+                    <img src={terrain_icon} className={styles.iconImg} data-path={props.name} />
                 </>
             )
             contentsSelectType = "ter";
@@ -112,7 +124,7 @@ export const ContentViewer = (props: IFileProps) => {
     }
     else if (props.isDirectory){
         icon = (
-            <a  style={{maxWidth: "50px", height: "30%", fontSize: "30px" }}>
+            <a className={styles.iconImg}>
                 <BsFolder/>
             </a>
         )
@@ -120,30 +132,33 @@ export const ContentViewer = (props: IFileProps) => {
 
     const viewTooltip = () => {
         console.log("表示するよん");
-        tooltip.style.display = "block";
+        tooltip.current.style.display = "block";
+        if (icon && props.isFile){
+            console.log("実際に表示");
+            
+        }
     }
 
     const onHover = (e) => {
         if (icon){
             if (props.isFile){
                 if (tooltipTimer){
-                    clearInterval(tooltipTimer)
-                    tooltipTimer = null;
+                    clearTimeout(tooltipTimer)
                 }
-                
-                tooltip.style.left = e.clientX;
-                tooltip.style.top = "-60px";
-                tooltipTimer = setTimeout(viewTooltip, 3000);
+                tooltip.current.style.left = e.clientX;
+                let top = e.clientY;
+                tooltip.current.style.top = `${top+10}px`;
+                tooltipTimer = setTimeout(viewTooltip, 1500);
             }
         }
     }
 
     const onMouseOut = (e) => {
         if (tooltipTimer){
-            clearInterval(tooltipTimer)
-            tooltipTimer = null;
+            clearTimeout(tooltipTimer)
         }
-        tooltip.style.display = "none";
+        tooltip.current.style.display = "none";
+        console.log("非表示にする");
     }
 
     const onDoubleClick = () => {
@@ -168,35 +183,31 @@ export const ContentViewer = (props: IFileProps) => {
         editor.contentsSelect = false;
     }
 
-    useEffect(() => {
-        tooltip.innerText = `ファイル名:${props.name} \n サイズ:${props.size}`;
-        tooltip.style.padding = "10px";
-        tooltip.style.color = "#fff";
-        tooltip.style.background = "#000";
-        tooltip.style.zIndex = "99999";
-        tooltip.style.position = "absolute";
-        tooltip.style.display = "none";
-        tooltip.style.fontSize = "10px";
-        tooltip.style.width = "200px";
-        if (icon && props.isFile){
-            const ele = document.getElementById(idName);
-            ele.appendChild(tooltip);
-        }
-    }, [])
-
     return  (
         <>
             <div 
                 onDoubleClick={(e) => onDoubleClick()}
-                className={styles.tooltip}
-                onMouseOver={(e) => onHover(e)}
-                onMouseOut={(e) => onMouseOut(e)}
+                className={styles.itemCard}
                 onDragStart={(e) => onDragStart()}
                 onDragEnd={(e) => onDragEnd()}
-                style={{ maxWidth: "50px", textAlign: "center", display: "inline-block", padding: "5px" }}
             >
-                <div className={styles.tooltip} id={idName}></div>
-                {icon}
+                <div 
+                    className={styles.tooltip} 
+                    ref={tooltip}
+                >
+                    <strong>ファイル名</strong><br/>
+                    {props.name}
+                    <br/>
+                    <strong>サイズ</strong><br/>
+                    {formatBytes(props.size)}
+                </div>
+                <div 
+                    className={styles.icon}
+                    onMouseOver={(e) => onHover(e)}
+                    onMouseOut={(e) => onMouseOut(e)}
+                >
+                    {icon}
+                </div>
                 <div className={styles.itemName}>
                     {props.name}
                 </div>

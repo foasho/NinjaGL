@@ -5,14 +5,16 @@ import { NaniwaEditorContext, NaniwaEditorManager } from "@/components/NaniwaEdi
 import { useState, useEffect, useContext, useRef } from "react";
 import { Object3D, Vector3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
-import { ContentViewer } from "./ViewPort/ContentViewer";
+import { ContentViewer } from "./Inspector/ContentViewer";
 import { PivotControls } from "@react-three/drei";
 import { IObjectManagement } from "@/engine/core/NaniwaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
-import { AiFillHome } from "react-icons/ai";
+import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMaker } from "./ViewPort/TerrainMaker";
 import { TerrainInspector } from "./Inspector/TerrainInspector";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
+import { HierarchyTree } from "./Hierarchy/HierarchyTree";
+import { BsPlay } from "react-icons/bs";
 
 export interface IFileProps {
     size: number;
@@ -27,6 +29,7 @@ export const NaniwaEditor = () => {
     const [viewSelect, setViewSelect] = useState<"mainview"|"terrainmaker"|"gltfviewer"|"scripteditor"|"shadereditor">("mainview");
     const [files, setFiles] = useState<IFileProps[]>([]);
     const [position, setPosition] = useState<Vector3>(new Vector3(0, 0, 0));
+    const [oms, setOMs] = useState<IObjectManagement[]>([]);
     const [selectOMs, setSelectOMs] = useState<IObjectManagement[]>([]);
 
     const changeView = (viewType: "mainview"|"terrainmaker"|"gltfviewer"|"scripteditor"|"shadereditor") => {
@@ -100,13 +103,16 @@ export const NaniwaEditor = () => {
             myFrame();
         }, 1000 / 10);
         return () => clearInterval(interval);
-    }, [selectOMs.length])
+    }, [selectOMs.length, oms.length])
 
     const myFrame = () => {
         const _selectOMs = editor.getSelectObjects();
         if (selectOMs.length !== _selectOMs.length){
-            console.log("確認");
             setSelectOMs(_selectOMs);
+        }
+        const OMs = editor.oms;
+        if (oms.length !== OMs.length){
+            setOMs(OMs);
         }
     }
 
@@ -115,25 +121,80 @@ export const NaniwaEditor = () => {
             <div className={styles.editor}>
                 <div className={styles.appBar}>
                     <ul className={styles.nav}>
-                        <li className={styles.navItem}>
-                            <a>ファイル</a>
-                        </li>
-                        <li className={styles.navItem}>
+                        <li className={`${styles.navItem} ${styles.left}`}>
                             <a>言語(JP)</a>
                         </li>
-                        <li className={styles.navItem}>
+                        <li className={`${styles.navItem} ${styles.left}`}>
                             <a>Github</a>
+                        </li>
+                        <li className={`${styles.navItem} ${styles.left}`}>
+                            <a>各種設定</a>
+                        </li>
+                        <li className={`${styles.navCenter}`}>
+                            <a className={styles.item}>
+                                NaniwaJS SamppleProject01
+                            </a>
+                        </li>
+                        <li className={`${styles.navItem} ${styles.right}`}>
+                            <a className={styles.save}>
+                                <span className={styles.icon}>
+                                    <AiFillSave/>
+                                </span>
+                                Save
+                            </a>
+                        </li>
+                        <li className={`${styles.navItem} ${styles.right}`}>
+                            <a className={styles.play}>
+                                <span className={styles.icon}>
+                                    <BsPlay/>
+                                </span>
+                                Play
+                            </a>
                         </li>
                     </ul>
                 </div>
                 <div className={styles.mainContents}>
                     <div className={styles.hierarchy}>
                         <div className={styles.hierarchyArea}>
-                            <div className={styles.hierarchyOpen}>
-                                '-閉じる'
-                            </div>
                             <div className={styles.hierarchyTree}>
-
+                                <HierarchyTree oms={oms} />
+                            </div>
+                        </div>
+                        <div className={styles.contentsbrowser}>
+                            <div className={styles.pathName}>
+                                <div className={styles.title}>
+                                    コンテンツブラウザ
+                                    <span className={styles.home} onClick={() => onMoveDic("")}>
+                                        <AiFillHome />
+                                    </span>
+                                </div>
+                                {editor.assetRoute.split("/").map((route) => {
+                                    if (route.length == 0){
+                                        return <></>
+                                    }
+                                    return (
+                                        <span className={styles.route} onClick={() => onMoveDic(route)}>
+                                            /{route}
+                                        </span>
+                                    )
+                                })}
+                            </div>
+                            <div className={styles.itemContainer}>
+                                {files.map((file) => {
+                                    return (
+                                        <ContentViewer {...file} onDoubleClick={onDoubleClick} />
+                                    )
+                                })}
+                            </div>
+                        </div>
+                        <div className={styles.createObj}>
+                            <div className={styles.title}>
+                                <span className={styles.icon}>
+                                    <AiOutlinePlus/>
+                                </span>
+                                <span className={styles.name}>
+                                    新しいオブジェクト
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -198,31 +259,7 @@ export const NaniwaEditor = () => {
                                 </>
                             }
                         </div>
-                        <div className={styles.contentsbrowser}>
-                            <div className={styles.pathName}>
-                                <div className={styles.title}>
-                                    コンテンツブラウザ
-                                    <span className={styles.home} onClick={() => onMoveDic("")}>
-                                        <AiFillHome />
-                                    </span>
-                                </div>
-                                {editor.assetRoute.split("/").map((route) => {
-                                    if (route.length == 0){
-                                        return <></>
-                                    }
-                                    return (
-                                        <span className={styles.route} onClick={() => onMoveDic(route)}>
-                                            /{route}
-                                        </span>
-                                    )
-                                })}
-                            </div>
-                            {files.map((file) => {
-                                return (
-                                    <ContentViewer {...file} onDoubleClick={onDoubleClick} />
-                                )
-                            })}
-                        </div>
+                        
                     </div>
                     <div className={styles.inspector}>
                         {viewSelect == "mainview" &&

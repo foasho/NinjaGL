@@ -21,6 +21,7 @@ export class NaniwaEditorManager {
     oms: IObjectManagement[] = [];
     selectedIds: string[] = [];
     gltfViewerObj: Object3D;
+    wireFrameColor = "#43D9D9";
     /**
      * コンテンツブラウザ
      */
@@ -39,22 +40,28 @@ export class NaniwaEditorManager {
 
     setPosition(id: string, position: Vector3){
         const target = this.oms.find(om => om.id == id);
-        target.args.position = new Vector3().copy(position);
+        if (target){
+            target.args.position = new Vector3().copy(position);
+        }
     }
 
     setScale(id: string, scale: Vector3){
         const target = this.oms.find(om => om.id == id);
-        target.args.scale = new Vector3().copy(scale);
+        if (target){
+            target.args.scale = new Vector3().copy(scale);
+        }
     }
 
     setRotation(id: string, rotation: Euler){
         const target = this.oms.find(om => om.id == id);
-        target.args.rotation = new Euler().copy(rotation);
+        if (target){
+            target.args.rotation = new Euler().copy(rotation);
+        }
     }
 
     getPosition(id: string){
         const target = this.oms.find(om => om.id == id);
-        if (!target || !target.args.rotation){
+        if (!target || !target.args.position){
             return new Vector3(0, 0, 0);
         }
         return target.args.position;
@@ -75,6 +82,12 @@ export class NaniwaEditorManager {
     getSelectObjects = () => {
         const data = this.oms.filter(om => this.selectedIds.includes(om.object.uuid))
         return data;
+    }
+
+    getObjectById(id: string){
+        const data = this.oms.find(om => om.id == id);
+        if (!data) return null;
+        return data.object;
     }
 
     selectObject(id: string){

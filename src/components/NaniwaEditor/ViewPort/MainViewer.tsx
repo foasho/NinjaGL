@@ -1,5 +1,5 @@
 import { Environment, OrbitControls, PivotControls, Sky } from "@react-three/drei";
-import { Box3, Euler, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from "three";
+import { Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -19,7 +19,7 @@ export const MainViewer = () => {
             const file = e.dataTransfer.files[0];
             loader.load(URL.createObjectURL(file), (gltf) => {
                 editor.setObjectManagement({
-                    id: gltf.scene.clone().uuid,
+                    id: gltf.scene.uuid,
                     type: "object",
                     visiableType: "auto",
                     args: null,
@@ -48,17 +48,20 @@ export const MainViewer = () => {
                         });
                         if (type == "gltf"){
                             editor.setObjectManagement({
-                                id: scene.clone().uuid,
+                                id: scene.uuid,
                                 type: "object",
                                 visiableType: "auto",
-                                args: {},
+                                args: {
+                                    position: new Vector3(0, 0, 0),
+                                    rotation: new Euler(0, 0, 0)
+                                },
                                 object: scene
                             });
                             setOMs([...editor.oms]);
                         }
                         if (type == "ter"){
                             editor.setObjectManagement({
-                                id: scene.clone().uuid,
+                                id: scene.uuid,
                                 type: "terrain",
                                 visiableType: "force",
                                 args: {},
@@ -101,7 +104,7 @@ export const MainViewer = () => {
                     inclination={0}
                     azimuth={0}
                 />
-                <directionalLight />
+                {/* <directionalLight /> */}
                 <OrbitControls makeDefault={true} ref={camRef}/>
                 <gridHelper args={[4096, 4096]}/>
                 {oms.map(om => {
@@ -129,6 +132,7 @@ interface IMyObject {
  * @returns 
  */
 const MyObject = (props: IMyObject) => {
+    const itemsRef = useRef([]);
     const object: Object3D = props.om.object;
     object.traverse((node: any) => {
         if (node.isMesh && node instanceof Mesh){
@@ -181,23 +185,43 @@ const MyObject = (props: IMyObject) => {
 
     const onDrag = (e) => {
         // 位置/回転率の確認
+        const position = new Vector3().setFromMatrixPosition(e);
+        const rotation = new Euler().setFromRotationMatrix(e);
+        const scale = new Vector3().setFromMatrixScale(e);
         if (editor.mode == "position"){
-            const position = new Vector3().setFromMatrixPosition(e);
             editor.setPosition(uuid, position);
         }
         else if (editor.mode == "scale"){
-            const scale = new Vector3().setFromMatrixScale(e);
             editor.setScale(uuid, scale);
         }
-        const rotation = new Euler().setFromRotationMatrix(e);
         editor.setRotation(uuid, rotation);
         handleDrag.current = true;
+        itemsRef.current.map(item => {
+            item.position.copy(position);
+            item.rotation.copy(rotation);
+            item.scale.copy(scale);
+        })
     }
+
+    const lineSegs = [];
+    object.traverse((node) => {
+        if (node instanceof Mesh){
+            // nodeの回転率を戻す
+            node.updateMatrix();
+            node.geometry.applyMatrix4(node.matrix);
+            const wire = new WireframeGeometry(node.geometry);
+            const colorMat = new LineBasicMaterial({color: editor.wireFrameColor});
+            const lineSeg = new LineSegments(wire, colorMat);
+            lineSeg.rotation.copy(editor.getRotation(uuid));
+            lineSeg.position.copy(editor.getPosition(uuid));
+            lineSegs.push(lineSeg);
+        }
+    });
 
     return (
         <>
             <PivotControls 
-                scale={len*0.5}
+                scale={len}
                 visible={visible} 
                 disableAxes={!visible}
                 disableSliders={!visible}
@@ -216,6 +240,9 @@ const MyObject = (props: IMyObject) => {
                     }}
                 />
             </PivotControls>
+            {lineSegs.map((lineSeg, index) => {
+                return <primitive ref={el => (itemsRef.current[index] = el)} object={lineSeg} />
+            })}
         </>
     )
 }
@@ -234,6 +261,7 @@ const MyTerrain = (props: IMyTerrain) => {
     const uuid = object.uuid;
     const editor = useContext(NaniwaEditorContext);
     const [enabled, setEnabled] = useState<boolean>(true)
+    const [helper, setHelper] = useState<boolean>(true)
     const onClick = (e, value: boolean) => {
         setEnabled(value);
         if (value){
@@ -243,6 +271,23 @@ const MyTerrain = (props: IMyTerrain) => {
             editor.unSelectObject(uuid);
         }
     }
+
+    const lineSegs = [];
+    object.traverse((node) => {
+        if (node instanceof Mesh){
+            // nodeの回転率を戻す
+            node.updateMatrix();
+            node.geometry.applyMatrix4(node.matrix);
+            node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
+            node.rotation.set(0, 0, 0);
+            const wire = new WireframeGeometry(node.geometry);
+            const colorMat = new LineBasicMaterial({color: editor.wireFrameColor});
+            const lineSeg = new LineSegments(wire, colorMat);
+            lineSegs.push(lineSeg);
+        }
+    });
+    
+
     return (
         <>
             <Selection>
@@ -261,6 +306,9 @@ const MyTerrain = (props: IMyTerrain) => {
                     />
                 </Select>
             </Selection>
+            {lineSegs.map((lineSeg) => {
+                return <primitive object={lineSeg} />
+            })}
         </>
     )
 }
