@@ -1,7 +1,7 @@
 
 
 export const GLTFViewComponent = () => {
-    return (
-        <></>
-    )
+  return (
+    <></>
+  )
 }

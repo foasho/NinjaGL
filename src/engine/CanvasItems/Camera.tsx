@@ -9,15 +9,15 @@ import { Mesh, Object3D } from "three";
 
 
 export const Camera = () => {
-    const ref = useRef<Mesh>();
-    const engine = useContext(NaniwaEngineContext)
-    const { camera } = useThree();
-    useEffect(() => {
-        engine.setAvatarCamera(camera);
-    }, [])
-    return (
-        <>
-            <OrbitControls makeDefault={true}/>
-        </>
-    )
+  const ref = useRef<Mesh>();
+  const engine = useContext(NaniwaEngineContext)
+  const { camera } = useThree();
+  useEffect(() => {
+    engine.setAvatarCamera(camera);
+  }, [])
+  return (
+    <>
+      <OrbitControls makeDefault={true} />
+    </>
+  )
 }

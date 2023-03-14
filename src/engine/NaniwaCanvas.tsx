@@ -10,46 +10,46 @@ import { NaniwaUI } from "./NaniwaUI"
 import { LoadProcessing } from "./UIItems/LoadProcessing"
 
 export const NaniwaCanvas = () => {
-    const [ready, setReady] = useState<boolean>(false)
-    const engine = useContext(NaniwaEngineContext)
+  const [ready, setReady] = useState<boolean>(false)
+  const engine = useContext(NaniwaEngineContext)
 
-    useEffect(() => {
-        const setup = async () => {
-            if (engine && !engine.loadCompleted){
-                engine.allSetup();
-                await engine.importConfigJson();
-                setReady(true);
-            }
-        }
-        setup();
-        return () => {
-            if (ready){
-                setReady(false);
-            }
-        }
-    }, []);
+  useEffect(() => {
+    const setup = async () => {
+      if (engine && !engine.loadCompleted) {
+        engine.allSetup();
+        await engine.importConfigJson();
+        setReady(true);
+      }
+    }
+    setup();
+    return () => {
+      if (ready) {
+        setReady(false);
+      }
+    }
+  }, []);
 
-    return (
-        <>
-            <Canvas shadows dpr={window.devicePixelRatio}>
-                {(ready && engine) &&
-                    <>
-                        <System/>
-                        <Terrain/>
-                        <Avatar/>
-                        <Camera/>
-                    </>
-                }
-                {engine &&
-                    <>
-                        <NEnvironment/>
-                    </>
-                }
-            </Canvas>
-            {(ready && engine) &&
-                <NaniwaUI/>
-            }
-            <LoadProcessing/>
-        </>
-    )
+  return (
+    <>
+      <Canvas shadows dpr={window.devicePixelRatio}>
+        {(ready && engine) &&
+          <>
+            <System />
+            <Terrain />
+            <Avatar />
+            <Camera />
+          </>
+        }
+        {engine &&
+          <>
+            <NEnvironment />
+          </>
+        }
+      </Canvas>
+      {(ready && engine) &&
+        <NaniwaUI />
+      }
+      <LoadProcessing />
+    </>
+  )
 }

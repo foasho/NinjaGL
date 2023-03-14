@@ -1,8 +1,8 @@
-export interface IOthersProps {}
+export interface IOthersProps { }
 
 export const Others = () => {
-    return (
-        <>
-        </>
-    )
+  return (
+    <>
+    </>
+  )
 }

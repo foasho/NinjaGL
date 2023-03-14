@@ -5,26 +5,26 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Mesh, Object3D, Vector3 } from "three";
 
 
-export interface IAvatarProps{}
+export interface IAvatarProps { }
 
 export const Avatar = () => {
-    const ref = useRef<Mesh>();
-    const engine = useContext(NaniwaEngineContext)
+  const ref = useRef<Mesh>();
+  const engine = useContext(NaniwaEngineContext)
 
-    // 初回ロード時にAvatarObjectをセットする 
-    useEffect(() => {
-        if (engine.getAvatarObject()){
-            engine.setAvatar(ref.current);
-        }
-    }, []);
+  // 初回ロード時にAvatarObjectをセットする 
+  useEffect(() => {
+    if (engine.getAvatarObject()) {
+      engine.setAvatar(ref.current);
+    }
+  }, []);
 
-    return (
-        <>
-            {engine.getAvatarObject() &&
-                <mesh ref={ref}>
-                    <primitive object={engine.getAvatarObject().object} />
-                </mesh>
-            }
-        </>
-    )
+  return (
+    <>
+      {engine.getAvatarObject() &&
+        <mesh ref={ref}>
+          <primitive object={engine.getAvatarObject().object} />
+        </mesh>
+      }
+    </>
+  )
 }

@@ -7,28 +7,28 @@ import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
 import { NaniwaIcons } from "./uis/NaniwaIcons";
 
 export const NaniwaUI = () => {
-    const [ready, setReady] = useState<boolean>(false);
-    const engine = useContext(NaniwaEngineContext);
+  const [ready, setReady] = useState<boolean>(false);
+  const engine = useContext(NaniwaEngineContext);
 
-    const ui = engine.ui;
-    console.log(ui.icons);
+  const ui = engine.ui;
+  console.log(ui.icons);
 
-    return (
-        <>
-            <div style={{ position: "fixed", zIndex: 99999 }}>
-                {engine.deviceType == "mobile" || engine.deviceType == "tablet" &&
-                    <TouchMove/>
-                }
-                {ui.icons &&
-                    <>
-                        {ui.icons.length > 0 && 
-                            <NaniwaIcons icons={ui.icons} />
-                        }
-                    </>
-                }
-            </div>
-        </>
-    )
+  return (
+    <>
+      <div style={{ position: "fixed", zIndex: 99999 }}>
+        {engine.deviceType == "mobile" || engine.deviceType == "tablet" &&
+          <TouchMove />
+        }
+        {ui.icons &&
+          <>
+            {ui.icons.length > 0 &&
+              <NaniwaIcons icons={ui.icons} />
+            }
+          </>
+        }
+      </div>
+    </>
+  )
 }
 
 `

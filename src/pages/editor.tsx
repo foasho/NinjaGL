@@ -7,24 +7,24 @@ import { Vector3 } from "three";
 import { NaniwaEditor } from "@/components/NaniwaEditor/NaniwaEditor";
 
 const NaniwaEditorComponent = () => {
-    const [editor, setEditor] = useState<NaniwaEditorManager>(null);
-    
-    useEffect(() => {
-        setEditor(new NaniwaEditorManager());
-        return () => {
-            setEditor(null);
-        }
-    }, [false]);
+  const [editor, setEditor] = useState<NaniwaEditorManager>(null);
 
-    return (
-        <>
-            <NaniwaEditorContext.Provider value={editor}>
-                {editor &&
-                    <NaniwaEditor/>
-                }
-            </NaniwaEditorContext.Provider>
-        </>
-    )
+  useEffect(() => {
+    setEditor(new NaniwaEditorManager());
+    return () => {
+      setEditor(null);
+    }
+  }, [false]);
+
+  return (
+    <>
+      <NaniwaEditorContext.Provider value={editor}>
+        {editor &&
+          <NaniwaEditor />
+        }
+      </NaniwaEditorContext.Provider>
+    </>
+  )
 }
 
 
