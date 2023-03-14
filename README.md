@@ -1,5 +1,7 @@
 # NaniwaJS
 
+Image
+
 ## 構成
 - NaniwaEditor: 汎用ゲームエンジンライクなUIエディタ
 - NaniwaJS: エンジンで作成したReact実行ライブラリ
