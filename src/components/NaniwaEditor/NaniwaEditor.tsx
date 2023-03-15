@@ -21,6 +21,7 @@ import { generateUUID } from "three/src/math/MathUtils";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
+import { ShaderEditor } from "./ViewPort/ShaderEditor";
 
 export interface IFileProps {
   size: number;
@@ -275,6 +276,7 @@ export const NaniwaEditor = () => {
               }
               {viewSelect == "shadereditor" &&
                 <>
+                  <ShaderEditor />
                 </>
               }
             </div>

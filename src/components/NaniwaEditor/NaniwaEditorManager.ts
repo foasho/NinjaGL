@@ -3,6 +3,7 @@ import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IObjectManagement, IUIManagement } from "@/engine/core/NaniwaProps";
 import { TerrainMakerManager } from "../TerrainMaker/TerrainMakerManager";
+import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 
 interface ISetObjectManagement {
   id?: string;
@@ -45,7 +46,7 @@ export class NaniwaEditorManager {
   fileSelect: string = "";
   assetRoute: string = "";
   contentsSelect: boolean = false;
-  contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" = null;
+  contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" = null;
   contentsSelectPath: string = "";// コンテンツブラウザ内のItemを選択した時にパスを設定する
   /**
    * 地形メーカー
@@ -258,6 +259,41 @@ export class NaniwaEditorManager {
   setUI(){
   }
 
+  /**
+   * 特定のObjectをBlobに変換する
+   */
+  convertObjectToBlob = (scene): Promise<Blob> => {
+      return new Promise((resolve) => {
+        var exporter = new GLTFExporter();
+        const options: GLTFExporterOptions = {
+          binary: true,
+          maxTextureSize: 4096,
+          animations: scene.animations,
+          includeCustomExtensions: true
+        };
+        exporter.parse(
+          scene,
+          (result) => {
+            if (result instanceof ArrayBuffer) {
+              return resolve(this.saveArrayBuffer(result));
+            }
+            else {
+              const output = JSON.stringify(result, null, 2);
+              return resolve(this.saveString(output));
+            }
+          },
+          (error: ErrorEvent) => {
+            console.log(`出力中エラー: ${error.toString()}`);
+          }
+        , options);
+      });
+  }
+  saveString(text: string): Blob {
+    return new Blob([text], { type: 'text/plain' });
+  }
+  saveArrayBuffer(buffer: ArrayBuffer): Blob {
+    return new Blob([buffer], { type: "application/octet-stream" });
+  }
 
 
   /**

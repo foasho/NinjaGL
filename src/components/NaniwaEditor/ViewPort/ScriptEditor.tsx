@@ -55,21 +55,21 @@ export const ScriptEditor = (props: IScriptEditor) => {
       <div className={styles.navigation}>
       </div>
       <div style={{ height: "100%", width: "100%", background: "#838383" }}>
-      <MonacoEditor
-        height="100%"
-        width="100%"
-        language="javascript"
-        theme="vs-dark"
-        value={code.current}
-        onChange={handleEditorChange}
-        options={{
-          selectOnLineNumbers: true,
-          roundedSelection: false,
-          readOnly: false,
-          cursorStyle: 'line',
-          automaticLayout: true,
-        }}
-      />
+        <MonacoEditor
+          height="100%"
+          width="100%"
+          language="javascript"
+          theme="vs-dark"
+          value={code.current}
+          onChange={handleEditorChange}
+          options={{
+            selectOnLineNumbers: true,
+            roundedSelection: false,
+            readOnly: false,
+            cursorStyle: 'line',
+            automaticLayout: true,
+          }}
+        />
       </div>
     </>
   )

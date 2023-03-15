@@ -77,7 +77,7 @@ export const ContentViewer = (props: IFileProps) => {
   let tooltipTimer: NodeJS.Timeout = null;
   let tooltip = useRef<HTMLDivElement>();
   const editor = useContext(NaniwaEditorContext);
-  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" = null;
+  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" = null;
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
@@ -129,6 +129,14 @@ export const ContentViewer = (props: IFileProps) => {
         </>
       )
       contentsSelectType = "ter";
+    }
+    else if (isAvatar(props.name)) {
+      icon = (
+        <>
+          <img src={ava_icon} className={styles.iconImg} data-path={props.name} />
+        </>
+      )
+      contentsSelectType = "avt";
     }
     // どれにも該当しない場合は表示しない
     else {
