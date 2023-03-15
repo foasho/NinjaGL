@@ -18,6 +18,9 @@ import { BsPlay } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { generateUUID } from "three/src/math/MathUtils";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { PlayerInspector } from "./Inspector/PlayerInspector";
 
 export interface IFileProps {
   size: number;
@@ -113,6 +116,19 @@ export const NaniwaEditor = () => {
     Swal.fire("注意", "現在ゲームテンプレートの準備中です。");
   }
 
+  const onSave = () => {
+    toast('保存しました!!', {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+  }
+
   return (
     <>
       <div className={styles.editor}>
@@ -135,7 +151,7 @@ export const NaniwaEditor = () => {
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.save}>
+              <a className={styles.save} onClick={() => onSave()}>
                 <span className={styles.icon}>
                   <AiFillSave />
                 </span>
@@ -277,6 +293,11 @@ export const NaniwaEditor = () => {
             {viewSelect == "terrainmaker" &&
               <>
                 <TerrainInspector />
+              </>
+            }
+            {viewSelect == "playereditor" &&
+              <>
+                <PlayerInspector/>
               </>
             }
           </div>

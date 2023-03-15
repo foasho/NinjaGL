@@ -1,10 +1,8 @@
 import styles from "@/App.module.scss";
-import { GLTFViewer } from "@/components/NaniwaEditor/ViewPort/GLTFViewer";
-import { MainViewer } from "@/components/NaniwaEditor/ViewPort/MainViewer";
 import { NaniwaEditorContext, NaniwaEditorManager } from "@/components/NaniwaEditor/NaniwaEditorManager";
 import { useState, useEffect } from "react";
-import { Vector3 } from "three";
 import { NaniwaEditor } from "@/components/NaniwaEditor/NaniwaEditor";
+import { ToastContainer } from "react-toastify";
 
 const NaniwaEditorComponent = () => {
   const [editor, setEditor] = useState<NaniwaEditorManager>(null);
@@ -23,6 +21,11 @@ const NaniwaEditorComponent = () => {
           <NaniwaEditor />
         }
       </NaniwaEditorContext.Provider>
+      <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          style={{zIndex:999999}}
+        />
     </>
   )
 }

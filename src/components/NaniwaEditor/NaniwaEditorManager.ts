@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationMixer, Euler, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Euler, Group, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IObjectManagement, IUIManagement } from "@/engine/core/NaniwaProps";
@@ -17,11 +17,24 @@ interface ISetObjectManagement {
   mixer?: AnimationMixer;
 }
 
+interface IPlayerManager {
+  type: "avatar" | "other" | "npc";
+  selectAnim: string;
+  height: number;
+  animations: AnimationClip[];
+  object: Object3D | Group ;
+  animMapper: { [key: string]: string };
+  sounds: { [key: string]: string }[];
+  args:  { [key: string]: any };
+  
+}
+
 export class NaniwaEditorManager {
   oms: IObjectManagement[] = []; //Canvas表示系
   uis: IUIManagement[] = [];// 操作UI系
   attr: {[key: string] : any} = {};//その他任意属性
   camera: OrbitControlsImpl;
+  onmessage = () => {}
   /**
    * コンテンツブラウザ
    */
@@ -38,15 +51,59 @@ export class NaniwaEditorManager {
    * 地形メーカー
    */
   terrainManager: TerrainMakerManager;
+  /**
+   * プレイヤーパラメータ
+   */
+  playerManager: IPlayerManager = {
+    type: "avatar",
+    selectAnim: null,
+    height: 1.7,
+    animations: [],
+    object: null,
+    animMapper: null,
+    sounds: [],
+    args: {}
+  }
+
   constructor() {
     this.terrainManager = new TerrainMakerManager();
   }
+  
 
   /**
    * カメラをセット
    */
   setCamera = (camera: OrbitControlsImpl) => {
     this.camera = camera;
+  }
+
+  /**
+   * playerManagerをセット
+   * @returns playerManager
+   */
+  setPlayerManager = (pm: IPlayerManager) => {
+    this.playerManager = pm;
+  }
+
+  /**
+   * playerManagerを返す
+   * @returns playerManager
+   */
+  getPlayerManager = () => {
+    return this.playerManager;
+  }
+
+  /**
+   * アニメーションを選択
+   */
+  setSelectPlayerAnimation = (animName: string) => {
+    this.playerManager.selectAnim = animName
+  }
+   /**
+   * アニメーションを変更
+   */
+  getSelectPlayerAnimation = () => {
+    return this.playerManager.selectAnim;
   }
 
   /**
