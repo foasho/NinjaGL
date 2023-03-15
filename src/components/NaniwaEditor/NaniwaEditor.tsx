@@ -100,9 +100,22 @@ export const NaniwaEditor = () => {
     })
   }
 
+  /**
+   * 新しいオブジェクトを追加する
+   */
   const onClickNewObject = async () => {
-    const value = await showSelectNewObjectDialog();
-    console.log(value);
+    const data = await showSelectNewObjectDialog();
+    console.log(data);
+    // ここに光源を追加する処理をかく
+    // 流れ: oms.push -> MainView内のLightsを追加し、oms.lengthを監視
+  }
+
+  const onClickSelectLang = () => {
+    Swal.fire("注意", "現在は日本語のみ対応です。\nCurrently, we only support Japanese.");
+  }
+
+  const onClickSelectTemplate = () => {
+    Swal.fire("注意", "現在ゲームテンプレートの準備中です。");
   }
 
   useEffect(() => {
@@ -129,17 +142,19 @@ export const NaniwaEditor = () => {
         <div className={styles.appBar}>
           <ul className={styles.nav}>
             <li className={`${styles.navItem} ${styles.left}`}>
-              <a>言語(JP)</a>
+              <a onClick={() => onClickSelectLang()}>言語(JP)</a>
             </li>
             <li className={`${styles.navItem} ${styles.left}`}>
-              <a>Github</a>
+              <a onClick={() => window.open("https://github.com/foasho/naniwajs", "_blank")}>
+                Github
+              </a>
             </li>
             <li className={`${styles.navItem} ${styles.left}`}>
-              <a>各種設定</a>
+              <a onClick={() => onClickSelectTemplate()}>テンプレート</a>
             </li>
             <li className={`${styles.navCenter}`}>
               <a className={styles.item}>
-                NaniwaJS SamppleProject01
+                NaniwaJS
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>

@@ -297,11 +297,12 @@
                     user-select: none;
                     cursor: pointer;
                     .icon {
-                        padding-right: 3px;
-                        font-size: 16px;
+                        padding-right: 6px;
+                        font-size: 18px;
+                        vertical-align: middle;
                     }
                     .name {
-                        vertical-align: top;
+                        
                     }
                     &:hover{
                         background-color: #6e6b6b;
