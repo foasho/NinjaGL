@@ -1,12 +1,9 @@
 import styles from "@/App.module.scss";
 import { IObjectManagement } from "@/engine/core/NaniwaProps";
-import { useRef, useContext, useEffect } from "react";
+import { useRef, useContext, useEffect, useState } from "react";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
-export interface IMainViewInspector {
-  om: IObjectManagement;
-}
-export const MainViewInspector = (props: IMainViewInspector) => {
+export const MainViewInspector = () => {
   const editor = useContext(NaniwaEditorContext);
   const refPosX = useRef<HTMLInputElement>();
   const refPosY = useRef<HTMLInputElement>();
@@ -17,39 +14,41 @@ export const MainViewInspector = (props: IMainViewInspector) => {
   const refScaX = useRef<HTMLInputElement>();
   const refScaY = useRef<HTMLInputElement>();
   const refScaZ = useRef<HTMLInputElement>();
-  const { object } = props.om;
-  const uuid = object.uuid;
+  const [selectOM, setSelectOM] = useState<IObjectManagement>(null);
+  const id = selectOM? selectOM.id: null;
 
   useEffect(() => {
     const interval = setInterval(() => {
       myFrame();
     }, 1000 / 10);
     return () => clearInterval(interval);
-  }, [])
+  }, [selectOM])
 
   const myFrame = () => {
-    const position = editor.getPosition(uuid);
-    if (position && props.om.type == "object") {
-      refPosX.current.value = position.x.toString();
-      refPosY.current.value = position.y.toString();
-      refPosZ.current.value = position.z.toString();
+    if (id){
+      const position = editor.getPosition(id);
+      if (position && selectOM.type == "object") {
+        refPosX.current.value = position.x.toString();
+        refPosY.current.value = position.y.toString();
+        refPosZ.current.value = position.z.toString();
+      }
+      const rotation = editor.getRotation(id);
+      if (rotation && selectOM.type == "object") {
+        refRotX.current.value = rotation.x.toString();
+        refRotY.current.value = rotation.y.toString();
+        refRotZ.current.value = rotation.z.toString();
+      }
     }
-    const rotation = editor.getRotation(uuid);
-    if (rotation && props.om.type == "object") {
-      refRotX.current.value = rotation.x.toString();
-      refRotY.current.value = rotation.y.toString();
-      refRotZ.current.value = rotation.z.toString();
+    if (selectOM != editor.getSelectOM()){
+      setSelectOM(editor.getSelectOM());
     }
   }
 
   const changePosition = (e, xyz) => { }
 
-  console.log("object確認");
-  console.log(props.om.type);
-
   return (
     <>
-      {props.om.type == "object" &&
+      {(selectOM && selectOM.type == "object") &&
         <>
           <div className={styles.position}>
             <div className={styles.title}>
@@ -61,9 +60,9 @@ export const MainViewInspector = (props: IMainViewInspector) => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refPosX} type="number" placeholder="0" value={object.position.x} onChange={(e) => changePosition(e, "x")} />
-              <input ref={refPosY} type="number" placeholder="0" value={object.position.y} onChange={(e) => changePosition(e, "y")} />
-              <input ref={refPosZ} type="number" placeholder="0" value={object.position.z} onChange={(e) => changePosition(e, "z")} />
+              <input ref={refPosX} type="number" placeholder="0" value={selectOM.object.position.x} onChange={(e) => changePosition(e, "x")} />
+              <input ref={refPosY} type="number" placeholder="0" value={selectOM.object.position.y} onChange={(e) => changePosition(e, "y")} />
+              <input ref={refPosZ} type="number" placeholder="0" value={selectOM.object.position.z} onChange={(e) => changePosition(e, "z")} />
             </div>
           </div>
           <div className={styles.rotation}>
@@ -91,16 +90,22 @@ export const MainViewInspector = (props: IMainViewInspector) => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refScaX} type="number" placeholder="0" value={object.scale.x} />
-              <input ref={refScaY} type="number" placeholder="0" value={object.scale.y} />
-              <input ref={refScaZ} type="number" placeholder="0" value={object.scale.z} />
+              <input ref={refScaX} type="number" placeholder="0" value={selectOM.object.scale.x} />
+              <input ref={refScaY} type="number" placeholder="0" value={selectOM.object.scale.y} />
+              <input ref={refScaZ} type="number" placeholder="0" value={selectOM.object.scale.z} />
             </div>
           </div>
         </>
       }
-      {props.om.type == "light" &&
-        <></>
+      {(selectOM && selectOM.type == "light") &&
+        <>
+
+        </>
       }
     </>
   )
+}
+
+const StaticInspector = () => {
+
 }

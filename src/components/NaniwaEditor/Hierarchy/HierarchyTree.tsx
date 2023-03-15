@@ -1,16 +1,33 @@
 import styles from "@/App.module.scss";
 import { IObjectManagement } from "@/engine/core/NaniwaProps"
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { BsBox } from "react-icons/bs";
+import { BsBox, BsLightbulbFill } from "react-icons/bs";
 import { MdTerrain } from "react-icons/md";
 import Swal from "sweetalert2";
+import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
-interface IHierarchyTree {
-  oms: IObjectManagement[];
-}
+export const HierarchyTree = () => {
+  const editor = useContext(NaniwaEditorContext);
+  const [oms, setOMs] = useState<IObjectManagement[]>([]);
+  const [selectOM, setSelectOM] = useState<IObjectManagement>();
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      myFrame();
+    }, 1000 / 10);
+    return () => clearInterval(interval);
+  }, [oms, selectOM])
 
-export const HierarchyTree = (props: IHierarchyTree) => {
+  const myFrame = () => {
+    if (oms.length !== editor.getObjectManagements().length) {
+      setOMs(editor.getObjectManagements());
+    }
+    // selectOMが変わったら再レンダ
+    if (selectOM !== editor.getSelectOM()){
+      setSelectOM(editor.getSelectOM());
+    }
+  }
 
   return (
     <>
@@ -19,9 +36,13 @@ export const HierarchyTree = (props: IHierarchyTree) => {
           オブジェクト一覧
         </div>
         <div className={styles.tree}>
-          {props.oms.map((om, idx) => {
+          {oms.map((om, idx) => {
+            let isSelect = false;
+            if (selectOM == om){
+              isSelect = true;
+            }
             return (
-              <TreeItem om={om} index={idx} />
+              <TreeItem om={om} index={idx} isSelect={isSelect} />
             )
           })}
         </div>
@@ -33,16 +54,22 @@ export const HierarchyTree = (props: IHierarchyTree) => {
 interface ITreeItem {
   index: number;
   om: IObjectManagement;
+  isSelect: boolean;
 }
 const TreeItem = (prop: ITreeItem) => {
+  const ref = useRef<HTMLDivElement>();
+  const editor = useContext(NaniwaEditorContext);
   let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
     lineStyle = styles.darkLine;
   }
   const [name, setName] = useState<string>("未設定オブジェクト");
-  let typeIcon = (<BsBox />);
+  let typeIcon = (<BsBox />); // デフォルトObject型
   if (prop.om.type == "terrain") {
     typeIcon = (<MdTerrain />);
+  }
+  else if (prop.om.type == "light"){
+    typeIcon = (<BsLightbulbFill/>)
   }
   let visibleIcon = (<AiFillEye />);
   if (prop.om.visiableType == "none") {
@@ -78,13 +105,27 @@ const TreeItem = (prop: ITreeItem) => {
     });
   }
 
+  const onClick = () => {
+    if (ref.current.classList.contains(styles.select)){
+      editor.unSelectObject(prop.om.id);
+    }
+    else {
+      editor.selectObject(prop.om.id);
+    }
+  }
+
+  let className = `${styles.treeNode} ${lineStyle}`;
+  if (prop.isSelect){
+    className += ` ${styles.select}`
+  }
+
   return (
     <>
-      <div className={`${styles.treeNode} ${lineStyle}`}>
+      <div className={className} ref={ref}>
         <div className={styles.type}>
           {typeIcon}
         </div>
-        <div className={styles.name} onDoubleClick={changeName}>
+        <div className={styles.name} onClick={onClick} onDoubleClick={changeName}>
           {name}
         </div>
         <div className={styles.visible}>

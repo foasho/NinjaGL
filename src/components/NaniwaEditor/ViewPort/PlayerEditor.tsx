@@ -7,7 +7,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
-export const GLTFViewer = () => {
+export const PlayerEditor = () => {
   const editor = useContext(NaniwaEditorContext);
   const ref = useRef();
   const [scene, setScene] = useState<Object3D>(null)
@@ -47,7 +47,8 @@ export const GLTFViewer = () => {
           <>
             <div style={{ background: "#121212", height: "100%", position: "relative" }}>
               <div style={{ color: "#fff", fontWeight: "bold", position: "absolute", width: "100%", textAlign: "center", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                ドラッグ＆ドロップでGLTFモデルを<br />
+                アバターモデルの選択もしくは<br />
+                ドラッグ＆ドロップで任意のGLTFを<br />
                 アップロードしてください
               </div>
             </div>

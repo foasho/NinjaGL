@@ -1,6 +1,7 @@
-import { AnimationClip, AnimationMixer, Euler, Object3D, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Euler, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { IObjectManagement, IUIManagement } from "@/engine/core/NaniwaProps";
 import { TerrainMakerManager } from "../TerrainMaker/TerrainMakerManager";
 
 interface ISetObjectManagement {
@@ -17,14 +18,17 @@ interface ISetObjectManagement {
 }
 
 export class NaniwaEditorManager {
-  mode: "position" | "scale" = "position";
-  oms: IObjectManagement[] = [];
-  selectedIds: string[] = [];
-  gltfViewerObj: Object3D;
-  wireFrameColor = "#43D9D9";
+  oms: IObjectManagement[] = []; //Canvas表示系
+  uis: IUIManagement[] = [];// 操作UI系
+  attr: {[key: string] : any} = {};//その他任意属性
+  camera: OrbitControlsImpl;
   /**
    * コンテンツブラウザ
    */
+  mode: "position" | "scale" | "rotation" = "position";
+  selectedId: string = null;
+  gltfViewerObj: Object3D;
+  wireFrameColor = "#43D9D9";
   fileSelect: string = "";
   assetRoute: string = "";
   contentsSelect: boolean = false;
@@ -38,6 +42,18 @@ export class NaniwaEditorManager {
     this.terrainManager = new TerrainMakerManager();
   }
 
+  /**
+   * カメラをセット
+   */
+  setCamera = (camera: OrbitControlsImpl) => {
+    this.camera = camera;
+  }
+
+  /**
+   * 特定のObjectのPositionを変更
+   * @param id 
+   * @param position 
+   */
   setPosition(id: string, position: Vector3) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
@@ -45,6 +61,11 @@ export class NaniwaEditorManager {
     }
   }
 
+  /**
+   * 特定のObjectのScaleを変更
+   * @param id 
+   * @param position
+   */
   setScale(id: string, scale: Vector3) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
@@ -52,6 +73,11 @@ export class NaniwaEditorManager {
     }
   }
 
+  /**
+   * 特定のObjectのRotationを変更
+   * @param id 
+   * @param rotation
+   */
   setRotation(id: string, rotation: Euler) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
@@ -59,6 +85,11 @@ export class NaniwaEditorManager {
     }
   }
 
+  /**
+   * 特定のオブジェクトのPositionを取得
+   * @param id 
+   * @returns 
+   */
   getPosition(id: string) {
     const target = this.oms.find(om => om.id == id);
     if (!target || !target.args.position) {
@@ -67,6 +98,11 @@ export class NaniwaEditorManager {
     return target.args.position;
   }
 
+  /**
+   * 特定のオブジェクトの回転率を取得
+   * @param id 
+   * @returns 
+   */
   getRotation(id: string) {
     const target = this.oms.find(om => om.id == id);
     if (!target || !target.args.rotation) {
@@ -75,30 +111,97 @@ export class NaniwaEditorManager {
     return target.args.rotation;
   }
 
+  /**
+   * 全てのOMを取得
+   */
+  getObjectManagements = (): IObjectManagement[] => {
+    return this.oms;
+  }
+
+  /**
+   * OMの追加
+   * @param props 
+   */
   setObjectManagement = (props: IObjectManagement) => {
     this.oms.push(props);
   }
 
-  getSelectObjects = () => {
-    const data = this.oms.filter(om => this.selectedIds.includes(om.object.uuid))
+  /**
+   * 選択中のOMを取得する
+   * @returns 
+   */
+  getSelectOM = (): IObjectManagement => {
+    const data = this.oms.find(om => this.selectedId == om.id)
     return data;
   }
 
-  getObjectById(id: string) {
+  /**
+   * 全てのStaticObjectを取得する
+   * @returns 
+   */
+  getStaticObjects = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "object");
+    return data;
+  }
+
+  /**
+   * 全てのLightを取得する
+   * @returns 
+   */
+  getLights = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "light");
+    return data;
+  }
+
+  /**
+   * Terrainを取得する
+   * @returns 
+   */
+  getTerrain = (): IObjectManagement => {
+    const data = this.oms.find(om => om.type == "terrain");
+    return data;
+  }
+
+  /**
+   * カメラを停止稼働の切り替え
+   */
+  setEnabledCamera = (trig: boolean) => {
+    this.camera.enabled = trig;
+  }
+
+  /**
+   * カメラの状態を取得
+   */
+  getEnabledCamera = (): boolean => {
+    return this.camera.enabled;
+  };
+
+  getObjectById = (id: string): Object3D => {
     const data = this.oms.find(om => om.id == id);
     if (!data) return null;
     return data.object;
   }
+  selectObject = (id: string) => {
+    this.selectedId = id;
+  }
+  unSelectObject = (id: string) => {
+    this.selectedId = null;
+  }
 
-  selectObject(id: string) {
-    if (!this.selectedIds.includes(id)) {
-      this.selectedIds.push(id);
-    }
+  /**
+   * 全てのUIを取得する
+   */
+  getAllUIs = () => {
+    return this.uis;
   }
-  unSelectObject(id: string) {
-    const newArr = this.selectedIds.filter(sid => sid !== id)
-    this.selectedIds = newArr
+
+  /**
+   * 特定のUIをセットする
+   */
+  setUI(){
   }
+
+
 
   /**
    * 設定ファイルを読み込む

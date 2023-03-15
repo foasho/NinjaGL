@@ -4,6 +4,9 @@ export interface INaniwaProps {
   mode: "play" | "edit"
 }
 
+/**
+ * 入力系のInputパラメータ
+ */
 export interface IInputMovement {
   forward: boolean;
   backward: boolean;
@@ -17,8 +20,11 @@ export interface IInputMovement {
   deviceType: "mobile" | "tablet" | "desktop";
 }
 
+/**
+ * Canvas上に表示されるもの
+ */
 export interface IObjectManagement {
-  id?: string;
+  id: string;
   name?: string;
   type: "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
   visiableType: "auto" | "force" | "none";
@@ -26,8 +32,20 @@ export interface IObjectManagement {
   args: any;
   rules?: any;
   object?: Object3D;
+  physics: "none" | "aabb" | "along" | "select";
   animations?: AnimationClip[];
   mixer?: AnimationMixer;
+}
+
+/**
+ * 操作系UI上に表示されるもの
+ */
+export interface IUIManagement {
+  type: "touchController" | "radioButton" | "icon";
+  id: string;
+  name?: string;
+  styles?: string;
+  args?: string;
 }
 
 export interface ISoundProps {

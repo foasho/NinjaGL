@@ -75,8 +75,6 @@ const TerrainMakeComponent = () => {
     };
   }
   const onMouseMove = (event) => {
-    // mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    // mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     if (terrainManager.isMouseDown && terrainManager.mode == "edit") {
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObject(ref.current);
@@ -89,7 +87,7 @@ const TerrainMakeComponent = () => {
           let position = object.geometry.attributes.position;
           position.setZ(
             index,
-            (position.getZ(index) + (terrainManager.power * value * (isReverse ? -1 : 1)))
+            (position.getZ(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
           );
           position.needsUpdate = true;
         });

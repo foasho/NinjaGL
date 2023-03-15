@@ -1,5 +1,5 @@
 import styles from "@/App.module.scss";
-import { GLTFViewer } from "@/components/NaniwaEditor/ViewPort/GLTFViewer";
+import { PlayerEditor } from "@/components/NaniwaEditor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/components/NaniwaEditor/ViewPort/MainViewer";
 import { NaniwaEditorContext, NaniwaEditorManager } from "@/components/NaniwaEditor/NaniwaEditorManager";
 import { useState, useEffect, useContext, useRef } from "react";
@@ -17,6 +17,7 @@ import { HierarchyTree } from "./Hierarchy/HierarchyTree";
 import { BsPlay } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
+import { generateUUID } from "three/src/math/MathUtils";
 
 export interface IFileProps {
   size: number;
@@ -28,32 +29,13 @@ export interface IFileProps {
 
 export const NaniwaEditor = () => {
   const editor = useContext(NaniwaEditorContext);
-  const [viewSelect, setViewSelect] = useState<"mainview" | "terrainmaker" | "gltfviewer" | "scripteditor" | "shadereditor">("mainview");
+  const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
   const [files, setFiles] = useState<IFileProps[]>([]);
-  const [position, setPosition] = useState<Vector3>(new Vector3(0, 0, 0));
-  const [oms, setOMs] = useState<IObjectManagement[]>([]);
-  const [selectOMs, setSelectOMs] = useState<IObjectManagement[]>([]);
 
-  const changeView = (viewType: "mainview" | "terrainmaker" | "gltfviewer" | "scripteditor" | "shadereditor") => {
+  const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
       setViewSelect(viewType);
     }
-  }
-
-  const changePosition = (e, xyz: "x" | "y" | "z") => {
-    // if (editor.selectObject){
-    //     const newPosition = new Vector3().copy(editor.position);
-    //     if (xyz == "x"){
-    //         newPosition.setX(Number(e.target.value));
-    //     }
-    //     else if (xyz == "y"){
-    //         newPosition.setY(Number(e.target.value));
-    //     }
-    //     else if (xyz == "z") {
-    //         newPosition.setZ(Number(e.target.value));
-    //     }
-    //     editor.position.copy(newPosition);
-    // }
   }
 
   useEffect(() => {
@@ -108,6 +90,19 @@ export const NaniwaEditor = () => {
     console.log(data);
     // ここに光源を追加する処理をかく
     // 流れ: oms.push -> MainView内のLightsを追加し、oms.lengthを監視
+    if (data.type == "light"){
+      editor.setObjectManagement(
+        {
+          id: generateUUID(),
+          type: "light",
+          args: {
+            type: data.value
+          },
+          physics: "none",
+          visiableType: "auto",
+        }
+      )
+    }
   }
 
   const onClickSelectLang = () => {
@@ -116,24 +111,6 @@ export const NaniwaEditor = () => {
 
   const onClickSelectTemplate = () => {
     Swal.fire("注意", "現在ゲームテンプレートの準備中です。");
-  }
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      myFrame();
-    }, 1000 / 10);
-    return () => clearInterval(interval);
-  }, [selectOMs.length, oms.length])
-
-  const myFrame = () => {
-    const _selectOMs = editor.getSelectObjects();
-    if (selectOMs.length !== _selectOMs.length) {
-      setSelectOMs(_selectOMs);
-    }
-    const OMs = editor.oms;
-    if (oms.length !== OMs.length) {
-      setOMs(OMs);
-    }
   }
 
   return (
@@ -179,7 +156,7 @@ export const NaniwaEditor = () => {
           <div className={styles.hierarchy}>
             <div className={styles.hierarchyArea}>
               <div className={styles.hierarchyTree}>
-                <HierarchyTree oms={oms} />
+                <HierarchyTree />
               </div>
             </div>
             <div className={styles.contentsbrowser}>
@@ -230,16 +207,22 @@ export const NaniwaEditor = () => {
                   メインビュー
                 </a>
                 <a
+                  onClick={() => changeView("debugplay")}
+                  style={viewSelect == "debugplay" ? { background: '#fff', color: "#838383" } : {}}
+                >
+                  プレイビュー
+                </a>
+                <a
                   onClick={() => changeView("terrainmaker")}
                   style={viewSelect == "terrainmaker" ? { background: '#fff', color: "#838383" } : {}}
                 >
                   地形メーカー
                 </a>
                 <a
-                  onClick={() => changeView("gltfviewer")}
-                  style={viewSelect == "gltfviewer" ? { background: '#fff', color: "#838383" } : {}}
+                  onClick={() => changeView("playereditor")}
+                  style={viewSelect == "playereditor" ? { background: '#fff', color: "#838383" } : {}}
                 >
-                  GLTFビューア
+                  プレイヤービュー
                 </a>
                 <a
                   onClick={() => changeView("scripteditor")}
@@ -256,19 +239,17 @@ export const NaniwaEditor = () => {
               </div>
             </div>
             <div className={styles.viewport}>
-              {viewSelect == "mainview" &&
-                <>
-                  <MainViewer />
-                </>
+              {(viewSelect == "mainview") &&
+                <MainViewer />
               }
               {viewSelect == "terrainmaker" &&
                 <>
                   <TerrainMaker />
                 </>
               }
-              {viewSelect == "gltfviewer" &&
+              {viewSelect == "playereditor" &&
                 <>
-                  <GLTFViewer />
+                  <PlayerEditor />
                 </>
               }
               {viewSelect == "scripteditor" &&
@@ -286,9 +267,7 @@ export const NaniwaEditor = () => {
           <div className={styles.inspector}>
             {viewSelect == "mainview" &&
               <>
-                {selectOMs.map((om) => {
-                  return <MainViewInspector om={om} />
-                })}
+                <MainViewInspector />
               </>
             }
             {viewSelect == "scripteditor" &&

@@ -5,9 +5,11 @@ import {
   BsFileImage,
   BsFolder
 } from "react-icons/bs";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
+import { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const getExtension = (filename: string) => {
   return filename.split('.').pop().toLowerCase();
@@ -22,6 +24,12 @@ const gltf_icon = "fileicons/gltf.png";
 const isGLTF = (filename: string) => {
   const ext = getExtension(filename);
   return ['glb', 'gltf'].includes(ext);
+}
+
+const ava_icon = "fileicons/avatar.png";
+const isAvatar = (filename: string) => {
+  const ext = getExtension(filename);
+  return ['avt'].includes(ext);
 }
 
 const mp3_icon = "fileicons/mp3.png";
@@ -60,9 +68,11 @@ const formatBytes = (bytes: number, decimals = 2): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+export const ContentBrowser = () => {
+  
+}
 
 export const ContentViewer = (props: IFileProps) => {
-  const idName = `file-${props.name}`;
   let icon: JSX.Element;
   let tooltipTimer: NodeJS.Timeout = null;
   let tooltip = useRef<HTMLDivElement>();
@@ -80,7 +90,10 @@ export const ContentViewer = (props: IFileProps) => {
     else if (isGLTF(props.name)) {
       icon = (
         <>
-          <img src={gltf_icon} className={styles.iconImg} data-path={props.name} />
+          {/* <img src={gltf_icon} className={styles.iconImg} data-path={props.name} /> */}
+          <div className={styles.iconImg}>
+            <CanvasGLTFViewer gltfUrl={`${editor.assetRoute}/${props.name}`}/>
+          </div>
         </>
       )
       contentsSelectType = "gltf";
@@ -135,7 +148,6 @@ export const ContentViewer = (props: IFileProps) => {
     tooltip.current.style.display = "block";
     if (icon && props.isFile) {
       console.log("実際に表示");
-
     }
   }
 
@@ -215,3 +227,54 @@ export const ContentViewer = (props: IFileProps) => {
     </>
   )
 }
+
+
+const CanvasGLTFViewer = ({ gltfUrl }) => {
+  const canvasRef = useRef(null);
+  const [imageUrl, setImageUrl] = useState(null);
+  useEffect(() => {
+    // シーンを作成
+    const scene = new Scene();
+
+    // カメラを作成
+    const camera = new PerspectiveCamera(
+      45,
+      1,
+      0.1,
+      1000
+    );
+    camera.position.set(0, 0, 2);
+
+    // レンダラーを作成
+    if (canvasRef.current){
+      const renderer = new WebGLRenderer({ canvas: canvasRef.current });
+      renderer.setSize(35, 35);
+  
+      // ライトを作成
+      const ambientLight = new AmbientLight(0xffffff, 0.5);
+      const directionalLight = new DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(0, 1, 1);
+      scene.add(ambientLight);
+      scene.add(directionalLight);
+  
+      // GLTFローダーを作成
+      const gltfLoader = new GLTFLoader();
+  
+      // GLTFファイルを読み込む
+      gltfLoader.load(gltfUrl, (gltf) => {
+        const model = gltf.scene;
+        scene.add(model);
+        renderer.render(scene, camera);
+        const dataUrl = canvasRef.current.toDataURL();
+        setImageUrl(dataUrl);
+      });
+    }
+  }, []);
+
+  return (
+    <>
+      {!imageUrl && <canvas ref={canvasRef} style={{background: "#fff"}}/>}
+      {imageUrl && <img src={imageUrl} alt="GLTF Model" className={styles.iconImg}/>}
+    </>
+  )
+};
