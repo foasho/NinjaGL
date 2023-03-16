@@ -11,7 +11,6 @@ export const NaniwaUI = () => {
   const engine = useContext(NaniwaEngineContext);
 
   const ui = engine.ui;
-  console.log(ui.icons);
 
   return (
     <>
@@ -19,7 +18,7 @@ export const NaniwaUI = () => {
         {engine.deviceType == "mobile" || engine.deviceType == "tablet" &&
           <TouchMove />
         }
-        {ui.icons &&
+        {(ui && ui.icons) &&
           <>
             {ui.icons.length > 0 &&
               <NaniwaIcons icons={ui.icons} />

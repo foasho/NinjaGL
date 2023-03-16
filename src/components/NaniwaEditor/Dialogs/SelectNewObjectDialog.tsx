@@ -15,6 +15,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectLight = (value: string) => {
     prop.response({ type: "light", value: value });
   }
+  const selectSky = (value: string) => {
+    prop.response({ type: "sky", value: value });
+  }
   return ReactDOM.createPortal(
     <div
       className={styles.selectNewObjectDialog}
@@ -35,8 +38,17 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 光源
               </div>
             </div>
+            <div className={styles.card} onClick={() => {setSelectType("sky")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/sky.png"/>
+              </div>
+              <div className={styles.name}>
+                空
+              </div>
+            </div>
           </>
           }
+
           {selectType == "light" &&
           <>
             <div className={styles.card} onClick={() => {selectLight("direction")}} >
@@ -65,6 +77,19 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </div>
           </>
           }
+
+          {selectType == "sky" &&
+            <>
+              <div className={styles.card} onClick={() => {selectSky("blue")}} >
+                <div className={styles.icon}>
+                  <img className={styles.img} src="fileicons/bluesky.png"/>
+                </div>
+                <div className={styles.name}>
+                  青空
+                </div>
+              </div>
+            </>
+          }
         </div>
       </div>
     </div>
@@ -74,7 +99,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light";
+  type: "light" | "sky";
   value: string;
 }
 /**

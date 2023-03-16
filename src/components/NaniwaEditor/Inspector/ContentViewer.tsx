@@ -11,6 +11,7 @@ import { NaniwaEditorContext } from "../NaniwaEditorManager";
 import { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
+
 const getExtension = (filename: string) => {
   return filename.split('.').pop().toLowerCase();
 }
@@ -21,6 +22,7 @@ const isImage = (filename: string) => {
 }
 
 const gltf_icon = "fileicons/gltf.png";
+const object_icon = "fileicons/object.png";
 const isGLTF = (filename: string) => {
   const ext = getExtension(filename);
   return ['glb', 'gltf'].includes(ext);
@@ -255,13 +257,17 @@ const CanvasGLTFViewer = ({ gltfUrl }) => {
 
     // レンダラーを作成
     if (canvasRef.current){
-      const renderer = new WebGLRenderer({ canvas: canvasRef.current });
+      const renderer = new WebGLRenderer({ 
+        canvas: canvasRef.current,
+        alpha: true,
+      });
+      renderer.setClearColor(0x888888, 1);
       renderer.setSize(35, 35);
   
       // ライトを作成
-      const ambientLight = new AmbientLight(0xffffff, 0.5);
+      const ambientLight = new AmbientLight(0xffffff, 1);
       const directionalLight = new DirectionalLight(0xffffff, 0.5);
-      directionalLight.position.set(0, 1, 1);
+      directionalLight.position.set(10, 10, 10);
       scene.add(ambientLight);
       scene.add(directionalLight);
   
@@ -281,8 +287,8 @@ const CanvasGLTFViewer = ({ gltfUrl }) => {
 
   return (
     <>
-      {!imageUrl && <canvas ref={canvasRef} style={{background: "#fff"}}/>}
-      {imageUrl && <img src={imageUrl} alt="GLTF Model" className={styles.iconImg}/>}
+      {!imageUrl && <canvas ref={canvasRef} style={{backgroundImage: `url('${object_icon}')`, backgroundSize: "cover" }}/>}
+      {imageUrl && <img src={imageUrl} alt="GLTF Model" className={styles.iconImg} />}
     </>
   )
 };

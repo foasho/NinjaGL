@@ -91,14 +91,26 @@ export const NaniwaEditor = () => {
    */
   const onClickNewObject = async () => {
     const data = await showSelectNewObjectDialog();
-    console.log(data);
-    // ここに光源を追加する処理をかく
-    // 流れ: oms.push -> MainView内のLightsを追加し、oms.lengthを監視
     if (data.type == "light"){
       editor.setObjectManagement(
         {
           id: generateUUID(),
+          name: `*${data.value}`,
           type: "light",
+          args: {
+            type: data.value
+          },
+          physics: "none",
+          visiableType: "auto",
+        }
+      )
+    }
+    else if (data.type == "sky"){
+      editor.setObjectManagement(
+        {
+          id: generateUUID(),
+          name: `*${data.value}`,
+          type: "sky",
           args: {
             type: data.value
           },

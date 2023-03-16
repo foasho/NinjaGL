@@ -4,6 +4,15 @@
     height: 100%;
     width: 100%;
 }
+// フォントをすべてMPlusRegularにする
+@font-face {
+    font-family: "MPLUSRegular";
+    src: url("/fonts/MPLUS1-Regular.ttf") format("truetype");
+}
+@font-face {
+    font-family: "MPLUSLighter";
+    src: url("/fonts/MPLUS1-Light.ttf") format("truetype");
+}
 
 @import "./pages/editor";
 @import "./components/NaniwaEditor/Dialogs/SelectNewObjectDialog";

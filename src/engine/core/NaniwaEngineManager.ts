@@ -206,7 +206,7 @@ export class NaniwaEngine {
   /**
    * 設定JSONファイルをImportする
    */
-  async importConfigJson() {
+  importConfigJson = async() => {
     if (this.loadCompleted || this.nowLoading) return null;
     const path = this.jsonPath ? this.jsonPath : "savedata/default.json";
     this.nowLoading = true;
@@ -226,8 +226,6 @@ export class NaniwaEngine {
         }
         else if (key == "avatar" || key == "terrain") {
           let object: Object3D;
-          let animations: AnimationClip[] = [];
-          let mixer: AnimationMixer = null;
           if (key == "avatar") {
             const { gltf } = await AvatarLoader(
               {
@@ -238,78 +236,91 @@ export class NaniwaEngine {
               }
             );
             object = gltf.scene;
-            animations = gltf.animations;
-            mixer = new AnimationMixer(gltf.scene);
+            const animations = gltf.animations;
+            const mixer = new AnimationMixer(gltf.scene);
+            const obj: IObjectManagement = {
+              id: jsonData[key].id,
+              type: key,
+              visiableType: "force",
+              object: object,
+              args: jsonData[key].args,
+              physics: "along",
+              animations: animations,
+              mixer: mixer
+            }
+            this.oms.push(obj);
           }
           else if (key == "terrain") {
             const { gltf } = await TerrainLoader(
               {
                 filePath: `${jsonData[key].filePath}`,
                 posType: "center",
-                mapSize: jsonData[key].args.mapSize,
                 onLoadCallback: this.loadingFileState
               }
             );
-            // const { gltf, simModObj } = await AutoGltfLoader(
-            //     {
-            //         filePath: `${res.data[key].filePath}`,
-            //         onLoadCallback: this.loadingFileState
-            //     }
-            // );
             object = gltf.scene;
             // 物理世界に適応させる
             this.octree.importThreeGLTF(key, gltf);
-            // this.octree.importThreeObj3D(key, simModObj);
+            const obj: IObjectManagement = {
+              id: jsonData[key].id,
+              type: key,
+              visiableType: "force",
+              object: object,
+              args: jsonData[key].args,
+              physics: "along"
+            }
+            this.oms.push(obj);
           }
-          const obj: IObjectManagement = {
-            type: key,
-            visiableType: "force",
-            object: object,
-            args: jsonData[key].args,
-            mixer: mixer,
-            animations: animations
-          }
-          this.oms.push(obj);
         }
-        else if (key == "objects") {
+        else if (key == "staticObjects") {
           const objs = jsonData[key];
           await Promise.all(
             Object.keys(objs).map(async (key: string) => {
+              const targetObj = objs[key];
               const obj: IObjectManagement = {
+                id: targetObj.id,
                 type: "object",
-                args: jsonData[key].args,
-                visiableType: "auto"
+                args: targetObj.args,
+                visiableType: "auto",
+                physics: targetObj.physics
               }
               this.oms.push(obj);
+              // PhysicsTypeがnoneでなければ、物理世界に入れる(今後)
+              if (obj.physics !== "none"){
+                console.log("StaticObjectの物理対応はあとで実装");
+              }
             })
           )
         }
         else if (key == "sky") {
           const obj: IObjectManagement = {
+            id: jsonData[key].id,
+            name: jsonData[key].name,
             type: key,
             args: jsonData[key],
-            visiableType: "force"
+            visiableType: "force",
+            physics: jsonData[key].physics
           }
           this.oms.push(obj);
         }
         else if (key == "lights") {
           const objs = jsonData[key];
-          objs.map((_obj) => {
+          Object.keys(objs).map((key: string) => {
+            const targetObj = objs[key];
             const obj: IObjectManagement = {
+              id: targetObj.id,
+              name: targetObj.name,
               type: "light",
-              args: _obj,
-              visiableType: "force"
+              args: targetObj.args,
+              visiableType: "force",
+              physics: targetObj.physics
             }
             this.oms.push(obj);
           })
         }
-        else if (key == "scripts") { }
-        else if (key == "shaderFiles") {
-          const fileNames = jsonData[key];
-          await this.shader.load(fileNames);
-        }
-        else if (key == "ui") {
-          this.ui = jsonData[key];
+        else if (key == "uis") {
+          // this.ui = jsonData[key];
+          // UI描画は調整中
         }
       }
 
@@ -345,9 +356,11 @@ export class NaniwaEngine {
   /**
    * アバターをセットする
    */
-  setAvatar(threeMesh: Mesh) {
+  setAvatar = (threeMesh: Mesh|Object3D) => {
     const avatarObject = this.getAvatarObject();
     if (avatarObject) {
+      console.log("アバターチェック");
+      console.log(avatarObject)
       if (avatarObject.args.initPosition) {
         threeMesh.position.set(
           avatarObject.args.initPosition[0],

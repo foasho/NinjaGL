@@ -27,6 +27,7 @@ export interface IObjectManagement {
   id: string;
   name?: string;
   type: "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
+  filePath?: string;
   visiableType: "auto" | "force" | "none";
   layerNum?: number;
   args: any;

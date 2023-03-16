@@ -5,6 +5,7 @@ import { NaniwaJS } from '@/engine/NaniwaJS';
 import { NextPageContext } from 'next';
 import { useRouter } from "next/router";
 
+
 const inter = Inter({ subsets: ['latin'] })
 
 function Home() {

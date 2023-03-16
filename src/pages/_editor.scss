@@ -2,6 +2,7 @@ $editorColor: #222121;
 
 .editor {
     width: auto;
+    font-family: 'MPLUSRegular', sans-serif;
     .appBar {
         width: 100%;
         height: 45px;
@@ -25,7 +26,7 @@ $editorColor: #222121;
                 padding: 10px 3px;
                 a {
                     padding: 5px 10px;
-                    border-radius: 3px;
+                    border-radius: 2px;
                     color: #fff;
                     text-decoration: none;
                     height: 100%;
@@ -80,7 +81,6 @@ $editorColor: #222121;
                 transform: translate(-50%, -50%);
                 .item {
                     font-size: 16px;
-                    font-weight: bolder;
                     padding: 5px 10px;
                     border-radius: 3px;
                     color: #fff;
@@ -89,6 +89,7 @@ $editorColor: #222121;
                     transition: all 0.3s ease-in-out;
                     cursor: pointer;
                     user-select: none;
+                    font-family: 'MPLUSLighter', sans-serif;
                 }
             }
         }
@@ -325,6 +326,7 @@ $editorColor: #222121;
                 flex: 1;
                 color: #fff;
                 background-color: #333;
+                user-select: none;
                 .select {
                     display: inline-block;
                     a {

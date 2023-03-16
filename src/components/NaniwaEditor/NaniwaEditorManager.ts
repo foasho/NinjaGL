@@ -194,6 +194,14 @@ export class NaniwaEditorManager {
   }
 
   /**
+   * 現在選択中のIDを取得
+   * @returns 
+   */
+  getSelectId = ():string => {
+    return this.selectedId;
+  }
+
+  /**
    * 全てのStaticObjectを取得する
    * @returns 
    */
@@ -217,6 +225,24 @@ export class NaniwaEditorManager {
    */
   getTerrain = (): IObjectManagement => {
     const data = this.oms.find(om => om.type == "terrain");
+    return data;
+  }
+
+   /**
+   * Avatarを取得する
+   * @returns 
+   */
+   getAvatar = (): IObjectManagement => {
+    const data = this.oms.find(om => om.type == "avatar");
+    return data;
+  }
+
+  /**
+   * 空を取得
+   * @param trig 
+   */
+  getSky = (): IObjectManagement => {
+    const data = this.oms.find(om => om.type == "sky");
     return data;
   }
 

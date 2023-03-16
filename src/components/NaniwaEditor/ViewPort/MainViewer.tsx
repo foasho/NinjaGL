@@ -9,6 +9,8 @@ import { MyLight, MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/StaticObjects";
 import { Terrain } from "./MainViewItems/Terrain";
 import { generateUUID } from "three/src/math/MathUtils";
+import { Avatar } from "./MainViewItems/Avatar";
+import { MySky } from "./MainViewItems/Sky";
 
 export const MainViewer = () => {
   const camRef = useRef<OrbitControlsImpl>();
@@ -38,7 +40,8 @@ export const MainViewer = () => {
       const type = editor.contentsSelectType;
       if (
         type == "gltf" ||
-        type == "ter"
+        type == "ter" ||
+        type == "avt"
       ) {
         loader.load(
           editor.contentsSelectPath,
@@ -55,6 +58,7 @@ export const MainViewer = () => {
             if (type == "gltf") {
               editor.setObjectManagement({
                 id: generateUUID(),
+                filePath: editor.contentsSelectPath,
                 type: "object",
                 physics: "aabb",
                 visiableType: "auto",
@@ -68,10 +72,49 @@ export const MainViewer = () => {
             if (type == "ter") {
               editor.setObjectManagement({
                 id: generateUUID(),
+                filePath: editor.contentsSelectPath,
                 type: "terrain",
                 physics: "along",
                 visiableType: "force",
                 args: {},
+                object: scene
+              });
+            }
+            if (type == "avt") {
+              editor.setObjectManagement({
+                id: generateUUID(),
+                filePath: editor.contentsSelectPath,
+                type: "avatar",
+                physics: "aabb",
+                visiableType: "force",
+                args: {
+                  height: 1.7,
+                  animMapper: {
+                    idle: "Idle",
+                    run : "Run",
+                    walk: "Walk",
+                    jump : "Jump",
+                    action : "Kick"
+                  },
+                  sounds: [
+                    {
+                      key: "grassWalk",
+                      filePath: "mp3/grassWalk.mp3",
+                      volume: 0.5,
+                      loop: true,
+                      trigAnim: "walk",
+                      stopAnim: "walk"
+                    },
+                    {
+                      key: "grassRun",
+                      filePath: "mp3/grassRun.mp3",
+                      volume: 0.5,
+                      loop: true,
+                      trigAnim: "run",
+                      stopAnim: "run"
+                    }
+                  ]
+                },
                 object: scene
               });
             }
@@ -103,18 +146,13 @@ export const MainViewer = () => {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        {/* <Sky
-          distance={450000}
-          sunPosition={[0, 1, 0]}
-          inclination={0}
-          azimuth={0}
-        /> */}
         <OrbitControls makeDefault={true} ref={camRef} />
         <gridHelper args={[4096, 4096]} />
         <MyLights/>
         <StaticObjects/>
         <Terrain/>
-        
+        <Avatar/>
+        <MySky/>
       </Canvas>
 
     </div>

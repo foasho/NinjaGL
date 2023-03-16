@@ -2,7 +2,7 @@ import styles from "@/App.module.scss";
 import { IObjectManagement } from "@/engine/core/NaniwaProps"
 import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { BsBox, BsLightbulbFill } from "react-icons/bs";
+import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
 import { MdTerrain } from "react-icons/md";
 import Swal from "sweetalert2";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
@@ -69,8 +69,12 @@ const TreeItem = (prop: ITreeItem) => {
     typeIcon = (<MdTerrain />);
   }
   else if (prop.om.type == "light"){
-    typeIcon = (<BsLightbulbFill/>)
+    typeIcon = (<BsLightbulbFill/>);
   }
+  else if (prop.om.type == "avatar"){
+    typeIcon = (<BsPersonFill/>);
+  }
+
   let visibleIcon = (<AiFillEye />);
   if (prop.om.visiableType == "none") {
     visibleIcon = (<AiFillEyeInvisible />);

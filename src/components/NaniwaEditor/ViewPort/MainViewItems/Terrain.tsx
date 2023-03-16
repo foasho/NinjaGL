@@ -50,7 +50,7 @@ export const Terrain = () => {
 
   useFrame((_, delta) => {
     if (terrain != editor.getTerrain()){
-      setTerrain(terrain);
+      setTerrain(editor.getTerrain());
     }
   });
 

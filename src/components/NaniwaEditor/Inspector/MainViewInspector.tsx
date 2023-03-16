@@ -48,7 +48,13 @@ export const MainViewInspector = () => {
 
   return (
     <>
-      {(selectOM && selectOM.type == "object") &&
+      {(
+        selectOM &&
+        (
+          selectOM.type == "object" ||
+          selectOM.type == "avatar"
+        )
+      ) &&
         <>
           <div className={styles.position}>
             <div className={styles.title}>

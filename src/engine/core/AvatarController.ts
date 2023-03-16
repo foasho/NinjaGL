@@ -524,7 +524,6 @@ export class AvatarController {
 
         this.isJumping = false;
         this.isGrounded = true;
-        // console.log( 'jump end' );
 
       }
 
@@ -541,15 +540,11 @@ export class AvatarController {
         translateScoped.subVectors(point2, point1);
 
         if (Math.abs(translate.x) > Math.abs(translateScoped.x)) {
-
           translate.x += translateScoped.x;
-
         }
 
         if (Math.abs(translate.z) > Math.abs(translateScoped.z)) {
-
           translate.z += translateScoped.z;
-
         }
 
         // break;

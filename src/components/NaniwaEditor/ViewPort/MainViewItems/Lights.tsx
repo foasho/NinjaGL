@@ -2,7 +2,7 @@ import { IObjectManagement } from "@/engine/core/NaniwaProps";
 import { PivotControls, useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useState, useRef } from "react";
-import { DirectionalLight, DirectionalLightHelper, Euler, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
+import { BoxHelper, DirectionalLight, DirectionalLightHelper, Euler, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
 import { NaniwaEditorContext } from "../../NaniwaEditorManager";
 
 
@@ -40,6 +40,7 @@ export const MyLight = (prop: ILightProps) => {
   const [helper, setHelper] = useState<boolean>(true);
   if (helper){
     if (om.args.type == "direction"){
+      useHelper(ref, BoxHelper, 'cyan')
       useHelper(ref, DirectionalLightHelper);
     }
     if (om.args.type == "spot"){
@@ -55,13 +56,11 @@ export const MyLight = (prop: ILightProps) => {
       // 選択できるのは１つのみにする
       if (editor.selectedId != id) {
         editor.selectObject(id);
-        setVisible(true);
       }
     }
     else {
       if (e.type == "click" && !handleDrag.current) {
         editor.unSelectObject(id);
-        setVisible(false);
       }
     }
   }
@@ -94,7 +93,9 @@ export const MyLight = (prop: ILightProps) => {
   }
 
   useFrame((_, delta) => {
-
+    if ( visible != (editor.getSelectId() == id)){
+      setVisible(editor.getSelectId() == id);
+    }
   })
   
   return (

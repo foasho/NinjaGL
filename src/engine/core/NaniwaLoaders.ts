@@ -424,7 +424,6 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
 export interface IGLTFLoadProps {
   filePath: string;
   posType: "center";
-  mapSize?: number;
   onLoadCallback?: (key: string, size: number) => void;
 }
 
@@ -465,38 +464,6 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{ gltf: GLTF
 
         // サイズを取得する
         let totalSize = new Vector3();
-
-        // 高さを取得して利用のスケールに適応させる
-        if (props.mapSize) {
-          console.log("マップサイズの変更");
-          let idx = 0;
-          scene.traverse((node: any) => {
-            if (node.isMesh && idx == 0) {
-              // node.updateMatrix();
-              node.geometry.computeBoundingBox();
-              let box = node.geometry.boundingBox;
-              // let size = new Vector3();
-              box.getSize(totalSize);
-              idx++;
-            }
-          });
-
-          const nh = totalSize.x;
-          const ns = props.mapSize / nh;
-          console.log("デフォルトサイズ: ", nh, "スケールサイズ: ", ns);
-          // scene.scale.set(
-          //     ns,
-          //     1, 
-          //     ns
-          // );
-
-        }
-
-        if (props.posType == "center" && props.mapSize) {
-          // 高さを中心座標にずらす
-          // scene.position.copy(new Vector3(0, -totalSize.y/2, 0));
-        }
-
 
         return resolve({ gltf: gltf })
       },
