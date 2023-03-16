@@ -183,4 +183,27 @@
             }
         }
     }
+
+    .physics {
+        margin: 15px 0px;
+        .title {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px 3px;
+        }
+        .input {
+            display: inline-block;
+            padding-left: 10px;
+            .checkbox {
+                cursor: pointer;
+                accent-color: #43D9D9;
+                transform: scale(1.2);
+                vertical-align: middle;
+            }
+        }
+        .customCheckbox {
+
+        }
+    }
 }

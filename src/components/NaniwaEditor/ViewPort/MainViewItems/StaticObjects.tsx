@@ -1,9 +1,10 @@
 import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
-import { Box3, BoxHelper, Euler, LineBasicMaterial, LineSegments, Mesh, Object3D, Vector3, WireframeGeometry } from "three";
+import { Box3, BoxHelper, Euler, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Vector3, WireframeGeometry } from "three";
 import { NaniwaEditorContext } from "../../NaniwaEditorManager";
-import { PivotControls, useHelper } from "@react-three/drei";
+import { useHelper } from "@react-three/drei";
+import { PivotControls } from "./PivoitControl";
 
 
 /**
@@ -48,7 +49,6 @@ interface IStaticObject {
  */
 const StaticObject = (props: IStaticObject) => {
   const itemsRef = useRef([]);
-  const pivotRef = useRef<any>();
   const object: Object3D = props.om.object;
   object.traverse((node: any) => {
     if (node.isMesh && node instanceof Mesh) {
@@ -56,7 +56,7 @@ const StaticObject = (props: IStaticObject) => {
       node.receiveShadow = true;
     }
   })
-  const ref = useRef();
+  const ref = useRef<Group|Object3D>();
   const editor = useContext(NaniwaEditorContext);
   const [visible, setVisible] = useState<boolean>(false);
   const handleDrag = useRef<boolean>(false);
@@ -98,24 +98,15 @@ const StaticObject = (props: IStaticObject) => {
     handleDrag.current = false;
   }
 
-  const onDrag = (e) => {
+  const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    if (editor.mode == "position") {
-      editor.setPosition(id, position);
-    }
-    else if (editor.mode == "scale") {
-      editor.setScale(id, scale);
-    }
+    editor.setPosition(id, position);
+    editor.setScale(id, scale);
     editor.setRotation(id, rotation);
     handleDrag.current = true;
-    itemsRef.current.map(item => {
-      item.position.copy(position);
-      item.rotation.copy(rotation);
-      item.scale.copy(scale);
-    })
   }
 
   const lineSegs = [];
@@ -134,40 +125,42 @@ const StaticObject = (props: IStaticObject) => {
       }
     });
   }
-  else if (props.om.physics == "aabb"){
-    useHelper(ref, BoxHelper);
+  else if (props.om.physics == "aabb" && visible){
   }
+  useHelper(visible && ref, BoxHelper);
 
   useFrame((_, delta) => {
     const isNowSelect = (editor.getSelectOM() == props.om)?true: false;
     if (visible != isNowSelect){
       setVisible(isNowSelect);
     }
+    if (ref.current){
+      console.log(ref.current.position);
+    }
   });
 
   return (
     <>
-      <PivotControls
-        scale={len}
+      <PivotControls 
+        object={visible ? ref : undefined}
         visible={visible}
-        disableAxes={!visible}
-        disableSliders={!visible}
-        disableRotations={!visible}
+        depthTest={false}
+        lineWidth={2}
+        anchor={[0, 0, 0]}
         onDrag={(e) => onDrag(e)}
         onDragStart={() => onDragStart()}
         onDragEnd={() => onDragEnd()}
-      >
-        <primitive
-          object={object}
-          ref={ref}
-          onClick={(e) => {
-            onClick(e, true)
-          }}
-          onPointerMissed={(e) => {
-            onClick(e, false)
-          }}
-        />
-      </PivotControls>
+      />
+      <primitive
+        object={object}
+        ref={ref}
+        onClick={(e) => {
+          onClick(e, true)
+        }}
+        onPointerMissed={(e) => {
+          onClick(e, false)
+        }}
+      />
       {props.om.physics == "along" &&
         <>
           {lineSegs.map((lineSeg, index) => {

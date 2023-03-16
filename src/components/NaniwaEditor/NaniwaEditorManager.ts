@@ -1,9 +1,10 @@
-import { AnimationClip, AnimationMixer, Euler, Group, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IObjectManagement, IUIManagement } from "@/engine/Core/NaniwaProps";
 import { TerrainMakerManager } from "../TerrainMaker/TerrainMakerManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
+import { rtdp } from "@/commons/functional";
 
 interface ISetObjectManagement {
   id?: string;
@@ -35,7 +36,7 @@ export class NaniwaEditorManager {
   uis: IUIManagement[] = [];// 操作UI系
   attr: {[key: string] : any} = {};//その他任意属性
   camera: OrbitControlsImpl;
-  onmessage = () => {}
+  transformDecimal: number = 2; 
   /**
    * コンテンツブラウザ
    */
@@ -108,6 +109,18 @@ export class NaniwaEditorManager {
   }
 
   /**
+   * 特定のObjectのMatrinx4を変更
+   * @param id 
+   * @param position 
+   */
+  setMatrix4(id: string, matrix: Matrix4) {
+    const target = this.oms.find(om => om.id == id);
+    if (target) {
+      target.args.matrix = matrix;
+    }
+  }
+
+  /**
    * 特定のObjectのPositionを変更
    * @param id 
    * @param position 
@@ -115,7 +128,11 @@ export class NaniwaEditorManager {
   setPosition(id: string, position: Vector3) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.args.position = new Vector3().copy(position);
+      target.args.position = new Vector3().set(
+        rtdp(position.x, this.transformDecimal),
+        rtdp(position.y, this.transformDecimal),
+        rtdp(position.z, this.transformDecimal)
+      );
     }
   }
 
@@ -127,7 +144,11 @@ export class NaniwaEditorManager {
   setScale(id: string, scale: Vector3) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.args.scale = new Vector3().copy(scale);
+      target.args.scale = new Vector3().set(
+        rtdp(scale.x, this.transformDecimal),
+        rtdp(scale.y, this.transformDecimal),
+        rtdp(scale.z, this.transformDecimal)
+      );
     }
   }
 
@@ -139,7 +160,11 @@ export class NaniwaEditorManager {
   setRotation(id: string, rotation: Euler) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.args.rotation = new Euler().copy(rotation);
+      target.args.rotation = new Euler().set(
+        rtdp(rotation.x, this.transformDecimal),
+        rtdp(rotation.y, this.transformDecimal),
+        rtdp(rotation.z, this.transformDecimal)
+      );
     }
   }
 
@@ -167,6 +192,29 @@ export class NaniwaEditorManager {
       return new Euler(0, 0, 0);
     }
     return target.args.rotation;
+  }
+
+  /**
+   * 特定のオブジェクトの回転率を取得
+   * @param id 
+   * @returns 
+   */
+  getScale(id: string) {
+    const target = this.oms.find(om => om.id == id);
+    if (!target || !target.args.scale) {
+      return new Vector3(0, 0, 0);
+    }
+    return target.args.scale;
+  }
+
+  /**
+   * 特定のOMにObejctをセットする
+   * @returns 
+   */
+  setOMofObject(id, obj){
+    if (this.oms.find(om => om.id == id)) {
+      this.oms.find(om => om.id == id).object = obj;
+    }
   }
 
   /**

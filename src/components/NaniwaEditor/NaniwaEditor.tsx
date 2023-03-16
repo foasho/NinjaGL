@@ -293,9 +293,9 @@ export const NaniwaEditor = () => {
               </div>
             </div>
             <div className={styles.viewport}>
-              {(viewSelect == "mainview") &&
+              <div style={{ display: viewSelect == "mainview" ? "block": "none", height: "100%" }}>
                 <MainViewer />
-              }
+              </div>
               {viewSelect == "debugplay" &&
                 <>
                   <DebugPlay />

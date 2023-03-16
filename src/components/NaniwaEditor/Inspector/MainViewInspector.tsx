@@ -38,6 +38,12 @@ export const MainViewInspector = () => {
         refRotY.current.value = rotation.y.toString();
         refRotZ.current.value = rotation.z.toString();
       }
+      const scale = editor.getScale(id);
+      if (scale && selectOM.type == "object") {
+        refScaX.current.value = scale.x.toString();
+        refScaY.current.value = scale.y.toString();
+        refScaZ.current.value = scale.z.toString();
+      }
     }
     if (selectOM != editor.getSelectOM()){
       setSelectOM(editor.getSelectOM());
@@ -120,6 +126,15 @@ export const MainViewInspector = () => {
                 <input type={"color"} value={"#43D9D9"}/>
                 <input type={"text"} value={"#43D9D9"} />
               </div>
+            </div>
+          </div>
+          <div className={styles.physics}>
+            <div className={styles.title}>
+              物理判定の有無
+            </div>
+            <div className={styles.input}>
+              <input type="checkbox" className={styles.checkbox} />
+              <span className={styles.customCheckbox}></span>
             </div>
           </div>
         </div>

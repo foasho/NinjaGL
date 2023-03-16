@@ -1,4 +1,4 @@
-import { Environment, OrbitControls, PivotControls, Sky } from "@react-three/drei";
+import { Environment, GizmoHelper, GizmoViewport, Html, OrbitControls, PivotControls, Sky } from "@react-three/drei";
 import { Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
@@ -11,10 +11,13 @@ import { Terrain } from "./MainViewItems/Terrain";
 import { generateUUID } from "three/src/math/MathUtils";
 import { Avatar } from "./MainViewItems/Avatar";
 import { MySky } from "./MainViewItems/Sky";
+import { BsGrid3X3 } from "react-icons/bs";
+import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 
 export const MainViewer = () => {
   const camRef = useRef<OrbitControlsImpl>();
   const editor = useContext(NaniwaEditorContext);
+  const [isGrid, setIsGrid] = useState<boolean>(true);
 
   /**
    * シーンへの直接ドラッグ＆ドロップ時
@@ -24,17 +27,20 @@ export const MainViewer = () => {
     e.preventDefault();
     const loader = new GLTFLoader();
     if (!editor.contentsSelect) {
-      const file = e.dataTransfer.files[0];
-      loader.load(URL.createObjectURL(file), (gltf) => {
-        editor.setObjectManagement({
-          id: generateUUID(),
-          type: "object",
-          visiableType: "auto",
-          args: null,
-          physics: "aabb",
-          object: gltf.scene
-        });
-      });
+      /**
+       * ここは、一度アセットに落として、表示する必要がある
+       */
+      // const file = e.dataTransfer.files[0];
+      // loader.load(URL.createObjectURL(file), (gltf) => {
+      //   editor.setObjectManagement({
+      //     id: generateUUID(),
+      //     type: "object",
+      //     visiableType: "auto",
+      //     args: null,
+      //     physics: "aabb",
+      //     object: gltf.scene
+      //   });
+      // });
     }
     else {
       const type = editor.contentsSelectType;
@@ -138,7 +144,7 @@ export const MainViewer = () => {
   }, [])
 
   return (
-    <div style={{ height: "100%" }}>
+    <div style={{ height: "100%", position: "relative" }}>
       <Canvas
         style={{ background: "black" }}
         id="mainviewcanvas"
@@ -147,14 +153,47 @@ export const MainViewer = () => {
         onDragOver={handleDragOver}
       >
         <OrbitControls makeDefault={true} ref={camRef} />
-        <gridHelper args={[4096, 4096]} />
         <MyLights/>
         <StaticObjects/>
         <Terrain/>
         <Avatar/>
         <MySky/>
+        {isGrid &&
+          <SystemHelper/>
+        }
       </Canvas>
-
+      <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
+        <a 
+          onClick={() => setIsGrid(!isGrid)}
+          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}
+        >
+          {isGrid? <MdOutlineGridOn/>: <MdOutlineGridOff/>}
+        </a>
+      </div>
     </div>
+  )
+}
+
+const SystemHelper = () => {
+  return (
+    <>
+      <gridHelper args={[4096, 4096]} />
+      <GizmoHelper alignment="top-right" margin={[100, 100]}>
+          <GizmoViewport labelColor="white" axisHeadScale={1} />
+      </GizmoHelper>
+    </>
+  )
+}
+
+const SystemUI = () => {
+  
+  return (
+    <>
+      <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
+        <a style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}>
+          <BsGrid3X3/>
+        </a>
+      </div>
+    </>
   )
 }

@@ -103,6 +103,7 @@ export const MyLight = (prop: ILightProps) => {
         {om.args.type == "spot" &&
           <>
             <PivotControls
+                scale={5}
                 visible={visible}
                 disableAxes={!visible}
                 disableSliders={!visible}
@@ -120,6 +121,7 @@ export const MyLight = (prop: ILightProps) => {
         {om.args.type == "direction" &&
           <>
             <PivotControls
+              scale={5}
               visible={visible}
               disableAxes={!visible}
               disableSliders={!visible}
@@ -138,18 +140,19 @@ export const MyLight = (prop: ILightProps) => {
         {om.args.type == "point" &&
           <>
             <PivotControls
-                visible={visible}
-                disableAxes={!visible}
-                disableSliders={!visible}
-                disableRotations={!visible}
-                onDrag={(e) => onDrag(e)}
-                onDragStart={() => onDragStart()}
-                onDragEnd={() => onDragEnd()}
-              >
-              <directionalLight 
-                ref={ref}
-                position={[0, 5, 0]}
-              />
+              scale={5}
+              visible={visible}
+              disableAxes={!visible}
+              disableSliders={!visible}
+              disableRotations={!visible}
+              onDrag={(e) => onDrag(e)}
+              onDragStart={() => onDragStart()}
+              onDragEnd={() => onDragEnd()}
+            >
+            <directionalLight 
+              ref={ref}
+              position={[0, 5, 0]}
+            />
             </PivotControls>
           </>
         }

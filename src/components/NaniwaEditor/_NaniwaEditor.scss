@@ -35,9 +35,6 @@ $editorColor: #222121;
                         font-size: 18px;
                         vertical-align: middle;
                     }
-                    .name {
-                        
-                    }
                     &:hover{
                         background-color: #6e6b6b;
 
@@ -49,10 +46,12 @@ $editorColor: #222121;
             flex: 2;
             height: 100%;
             background-color: #000;
-            display: flex;
-            flex-direction: column;
+            display: block;
+            // flex-direction: column;
             .viewselect {
-                flex: 1;
+                margin: 0;
+                height: 25px;
+                padding: 0;
                 color: #fff;
                 background-color: #333;
                 user-select: none;
@@ -67,7 +66,9 @@ $editorColor: #222121;
                 }
             }
             .viewport {
-                flex: 35;
+                margin: 0;
+                padding: 0;
+                height: calc(100% - 25px);
                 background-color: #fff;
             }
             
@@ -75,7 +76,6 @@ $editorColor: #222121;
         .inspector {
             flex: 1;
             width: 200px;
-            height: 100%;
             max-width: 200px;
             padding: 10px;
             background-color: $editorColor;
