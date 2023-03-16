@@ -861,6 +861,9 @@ export class AvatarController {
       Name: this.animMapper.jump,
       Enter: (prevState: IAnimStateProps) => {
         const animation = this.animations.find(a => a.name == this.animMapper.jump);
+        if (!animation) {
+          throw `${this.animMapper.idle}というアニメーションが見つかりません`;
+        }
         const curAction = this.mixer.clipAction(animation);
         const cleanup = () => {
           this.currentState.Finished = true;
@@ -900,6 +903,9 @@ export class AvatarController {
       Name: this.animMapper.action,
       Enter: (prevState: IAnimStateProps) => {
         const animation = this.animations.find(a => a.name == this.animMapper.action);
+        if (!animation) {
+          throw `${this.animMapper.idle}というアニメーションが見つかりません`;
+        }
         const curAction = this.mixer.clipAction(animation);
         const cleanup = () => {
           this.currentState.Finished = true;

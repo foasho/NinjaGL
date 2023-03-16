@@ -16,9 +16,9 @@ export const Avatar = () => {
   const id = avatar? avatar.id: null;
   const [enabled, setEnabled] = useState<boolean>(true)
   const [helper, setHelper] = useState<boolean>(true)
+  const handleDrag = useRef<boolean>(false);
 
   const onClick = (e, value: boolean) => {
-    console.log("Click", value);
     if (value) {
       editor.selectObject(id);
     }
@@ -55,16 +55,29 @@ export const Avatar = () => {
   useFrame((_, delta) => {
     if (avatar != editor.getAvatar()){
       setAvatar(editor.getAvatar());
-      console.log("アバターセットするでー");
     }
     if ( enabled != (editor.getSelectId() == id)){
       setEnabled(editor.getSelectId() == id);
     }
   });
 
-  const onDrag = (e) => {}
-  const onDragStart = () => {}
-  const onDragEnd = () => {}
+  const onDragStart = () => {
+    handleDrag.current = true;
+  }
+  const onDragEnd = () => {
+    handleDrag.current = false;
+  }
+
+  const onDrag = (e: Matrix4) => {
+    // 位置/回転率の確認
+    const position = new Vector3().setFromMatrixPosition(e);
+    const rotation = new Euler().setFromRotationMatrix(e);
+    const scale = new Vector3().setFromMatrixScale(e);
+    editor.setPosition(id, position);
+    editor.setScale(id, scale);
+    editor.setRotation(id, rotation);
+    handleDrag.current = true;
+  }
 
   return (
     <>
@@ -72,7 +85,7 @@ export const Avatar = () => {
         <PivotControls
           visible={enabled}
           disableAxes={false}
-          disableSliders={enabled}
+          disableSliders={false}
           disableRotations={false}
           onDrag={(e) => onDrag(e)}
           onDragStart={() => onDragStart()}
@@ -80,12 +93,12 @@ export const Avatar = () => {
         >
             <primitive
               object={avatar.object}
-              onClick={(e) => {
-                onClick(e, true)
-              }}
-              onPointerMissed={(e) => {
-                onClick(e, false)
-              }}
+              // onClick={(e) => {
+              //   onClick(e, true)
+              // }}
+              // onPointerMissed={(e) => {
+              //   onClick(e, false)
+              // }}
             />
         </PivotControls>
       }

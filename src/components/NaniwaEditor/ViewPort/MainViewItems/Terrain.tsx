@@ -21,6 +21,7 @@ export const Terrain = () => {
   if (object){
     object.traverse((node) => {
       if (node instanceof Mesh) {
+        node.receiveShadow = true;
         // nodeの回転率を戻す
         node.updateMatrix();
         node.geometry.applyMatrix4(node.matrix);
@@ -49,6 +50,7 @@ export const Terrain = () => {
       {object &&
           <primitive
             object={object}
+            // pointerEvents="none"
           />
       }
       {helper &&

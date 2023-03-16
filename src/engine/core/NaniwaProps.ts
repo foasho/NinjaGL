@@ -47,6 +47,7 @@ export interface IUIManagement {
   name?: string;
   styles?: string;
   args?: string;
+  visiableType: "view" | "none";
 }
 
 export interface ISoundProps {

@@ -1,3 +1,5 @@
+$black: #1f1f1f;
+
 // PlayerInspector
 .playerInspector {
     color: #fff;
@@ -76,18 +78,15 @@
         }
     }
     .save {
-        position: absolute;
-        bottom: 50px;
-        left: 50%;
-        transform: translate(-50%, 0);
-        width: 140px;
+        padding-top: 16px;
         text-align: center;
         .btn {
             padding: 7px 14px;
             background-color: #43D9D9;
-            color: #000000;
+            color: $black;
             border-radius: 2px;
             font-size: 12px;
+            font-weight: bold;
             user-select: none;
             .icon {
                 padding-right: 5px;

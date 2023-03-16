@@ -3,6 +3,7 @@ import { Canvas, useThree } from "@react-three/fiber"
 import { useContext, useEffect, useRef, useState } from "react"
 import { Avatar } from "./CanvasItems/Avatar"
 import { NEnvironment } from "./CanvasItems/NEnvironment"
+import { StaticObjects } from "./CanvasItems/StaticObjects"
 import { System } from "./CanvasItems/System"
 import { Terrain } from "./CanvasItems/Terrain"
 import { NaniwaUI } from "./NaniwaUI"
@@ -55,6 +56,7 @@ export const NaniwaCanvas = () => {
             <System />
             <Terrain />
             <Avatar />
+            <StaticObjects/>
           </>
         }
         {engine &&
