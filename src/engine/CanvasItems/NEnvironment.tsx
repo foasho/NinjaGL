@@ -46,6 +46,16 @@ const Light = (props: IObjectManagement) => {
       </>
     )
   }
+  else if (props.args.type == "direction") {
+    light = (
+      <>
+        <directionalLight
+          castShadow
+          position={props.args.position? props.args.position: [5, 5, 5]}
+        />
+      </>
+    )
+  }
 
   return (
     <>
@@ -58,7 +68,6 @@ export const NEnvironment = () => {
   const engine = useContext(NaniwaEngineContext);
   const sky = engine ? engine.getSky() : null;
   const lights = engine ? engine.getLights() : [];
-  console.log(sky);
   return (
     <>
       {lights.map((light) => {

@@ -11,7 +11,8 @@ import {
   Vector3,
   AnimationClip,
   Quaternion,
-  MeshPhongMaterial
+  MeshPhongMaterial,
+  Group
 } from "three";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
@@ -417,6 +418,50 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
   });
 }
 
+export interface IAvatarDataSetterProps {
+  object: Group | Object3D;
+  height: number;
+  isCenter?: boolean;
+}
+export const AvatarDataSetter = (props: IAvatarDataSetterProps) => {
+  // サイズを取得する
+  const boundingBox = new Box3();
+  let totalSize = new Vector3();
+  if (props.height) {
+    let idx = 0;
+    props.object.traverse((node: any) => {
+      if (node.isMesh && idx == 0) {
+        node.geometry.computeBoundingBox();
+        let box = node.geometry.boundingBox;
+        node.castShadow = true;
+        node.receiveShadow = true;
+        box.getSize(totalSize);
+        boundingBox.expandByObject(node);
+        idx++;
+      }
+      else if (node.isObject3D) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+        node.updateWorldMatrix(true, true)
+        const boundingBox = new Box3().setFromObject(node, true);
+      }
+    });
+    props.object.traverseAncestors
+
+    const nh = totalSize.y;
+    const ns = props.height / nh;
+    console.log("デフォルトサイズ: ", nh, "スケールサイズ: ", ns);
+    props.object.scale.set(
+      ns,
+      ns,
+      ns
+    );
+  }
+  if (props.isCenter) {
+    const height = props.height ? props.height : totalSize.y;
+    props.object.position.add(new Vector3(0, -height / 2, 0));
+  }
+}
 
 /**
  * 地形データのロード

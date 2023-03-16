@@ -83,7 +83,7 @@ export const PlayerInspector = () => {
                 title: 'ファイル名をいれてください',
                 input: 'text',
                 showCancelButton: true,
-                confirmButtonText: '実行',
+                confirmButtonText: '保存',
                 showLoaderOnConfirm: true,
                 preConfirm: async (inputStr) => {
                     console.log(inputStr, 'preConfirm起動');
