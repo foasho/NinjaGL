@@ -1,0 +1,92 @@
+$editorColor: #222121;
+
+.editor {
+    width: auto;
+    font-family: 'MPLUSRegular', sans-serif;
+    
+    .mainContents {
+        display: flex;
+        flex-direction: row;
+        margin: 0;
+        height: calc(100vh - 45px);
+        .hierarchy {
+            flex: 1;
+            height: calc(100% - 2px);
+            padding-top: 2px;
+            background-color: $editorColor;
+            max-width: 200px;
+            position: relative;
+            .createObj {
+                border-top: 2px #000000 solid;
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                .title {
+                    color: #fff;
+                    font-size: 14px;
+                    font-weight: bold;
+                    text-align: center;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                    user-select: none;
+                    cursor: pointer;
+                    .icon {
+                        padding-right: 6px;
+                        font-size: 18px;
+                        vertical-align: middle;
+                    }
+                    .name {
+                        
+                    }
+                    &:hover{
+                        background-color: #6e6b6b;
+
+                    }
+                }
+            }
+        }
+        .contents {
+            flex: 2;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            .viewselect {
+                flex: 1;
+                color: #fff;
+                background-color: #333;
+                user-select: none;
+                .select {
+                    display: inline-block;
+                    a {
+                        padding: 0 10px;
+                        font-size: 10px;
+                        border-left: 2px solid #000;
+                        cursor: pointer;
+                    }
+                }
+            }
+            .viewport {
+                flex: 35;
+                background-color: #fff;
+            }
+            
+        }
+        .inspector {
+            flex: 1;
+            width: 200px;
+            height: 100%;
+            max-width: 200px;
+            padding: 10px;
+            background-color: $editorColor;
+            color: #fff;
+            text-align: left;
+        }
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}

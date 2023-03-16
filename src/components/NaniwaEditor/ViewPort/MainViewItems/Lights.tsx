@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { PivotControls, useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useState, useRef } from "react";

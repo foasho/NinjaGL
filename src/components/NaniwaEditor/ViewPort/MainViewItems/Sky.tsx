@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/engine/core/NaniwaProps"
+import { IObjectManagement } from "@/engine/Core/NaniwaProps"
 import { Sky } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useState } from "react"

@@ -112,6 +112,7 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
     const handleClickUp = () => {
       movement.current.action = false;
     }
+    const canvas = document.getElementById("naniwajs");
     if (deviceType == "desktop") {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);

@@ -1,6 +1,7 @@
-import { useInputControl } from "@/engine/core/InputControls";
-import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
-import { useFrame } from "@react-three/fiber";
+import { useInputControl } from "@/engine/Core/InputControls";
+import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
+import { OrbitControls } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Mesh, Object3D, Vector3 } from "three";
 
@@ -9,12 +10,17 @@ export interface IAvatarProps { }
 
 export const Avatar = () => {
   const ref = useRef<Mesh>();
-  const engine = useContext(NaniwaEngineContext)
+  const engine = useContext(NaniwaEngineContext);
+  const { camera } = useThree();
 
   // 初回ロード時にAvatarObjectをセットする 
   useEffect(() => {
     if (engine.getAvatarObject()) {
-      engine.setAvatar(ref.current);
+      // 必ずカメラをセットしてからAvatarセットする
+      engine.setAvatarCamera(camera);
+      engine.setAvatar(
+        ref.current
+      );
     }
   }, []);
 
@@ -24,8 +30,8 @@ export const Avatar = () => {
         <mesh ref={ref}>
           <primitive object={engine.getAvatarObject().object} />
         </mesh>
-        // <primitive ref={ref} object={engine.getAvatarObject().object} />
       }
+      <OrbitControls makeDefault={true} />
     </>
   )
 }

@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { NaniwaEditorContext } from "../../NaniwaEditorManager";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 
 /**

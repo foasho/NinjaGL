@@ -1,7 +1,9 @@
-import { loadingText, loadPer, NaniwaEngineContext, totalFileSize } from "@/engine/core/NaniwaEngineManager"
+import { loadingText, loadPer, NaniwaEngineContext, totalFileSize } from "@/engine/Core/NaniwaEngineManager"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { Vector2 } from "three";
 
 export const LoadProcessing = () => {
+  const ref = useRef<HTMLDivElement>();
   const [per, setPer] = useState<number>(0);
   const engine = useContext(NaniwaEngineContext);
   const [timer, setTimer] = useState<NodeJS.Timer>()
@@ -14,13 +16,21 @@ export const LoadProcessing = () => {
       clearInterval(timer)
       setTimer(null);
     }
+    if (ref.current && engine.nowLoading){
+      const size = engine.getCanvasSize();
+      ref.current.style.width = size.x + "px";
+      ref.current.style.height = size.y + "px";
+    }
   }
 
   useEffect(() => {
     const _timer = setInterval(() => { setPercentage() }, 100)
     setTimer(_timer)
-  }, [])
+  }, []);
 
+  const size = engine.getCanvasSize()? engine.getCanvasSize(): new Vector2(window.innerWidth, window.innerHeight);
+  const pos = engine.getCanvasPos()? engine.getCanvasPos(): new Vector2(0, 0);
+  
   return (
     <>
       {engine.nowLoading &&
@@ -29,18 +39,19 @@ export const LoadProcessing = () => {
             {
               zIndex: "99999",
               position: "fixed",
-              height: "100vh",
-              width: "100vw",
-              top: "0",
-              left: "0",
+              top: `${pos.y}px`,
+              left: `${pos.x}px`,
+              height: `${size.y}px`,
+              width: `${size.x}px`,
               background: "#000000"
-            }
-          }>
+            }}
+            ref={ref}
+            >
             <div style={
               {
                 position: "absolute",
-                maxHeight: "80vh",
-                maxWidth: "75vw",
+                maxHeight: "80%",
+                maxWidth: "75%",
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%,-50%)",
@@ -49,8 +60,8 @@ export const LoadProcessing = () => {
               }
             }>
               <div>
-                test
-                {per}
+                {per}%
+                <br/>
                 サイズ: {totalFileSize}
               </div>
               <div>

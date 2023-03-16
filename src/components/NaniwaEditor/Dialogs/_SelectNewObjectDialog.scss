@@ -46,6 +46,31 @@
                     background-color: #cecece;
                 }
             }
+            .dropCard {
+                margin: 5px;
+                border: solid 2px #cecece;
+                border-radius: 6px;
+                padding: 10px;
+                width: 300px;
+                display: inline-block;
+                cursor: pointer;
+                .icon {
+                    text-align: center;
+                    .img {
+                        width: 60px;
+                        height: 60px;
+                        margin: auto;
+                    }
+                }
+                .name {
+                    text-align: center;
+                    color: #686868;
+                    font-weight: bold;
+                }
+                &:hover {
+                    background-color: #cecece;
+                }
+            }
         }
     }
 }

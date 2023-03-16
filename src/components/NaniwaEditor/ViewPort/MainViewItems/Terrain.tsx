@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { NaniwaEditorContext } from "../../NaniwaEditorManager";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 
 /**
@@ -15,17 +15,7 @@ export const Terrain = () => {
   const [terrain, setTerrain] = useState<IObjectManagement>(null);
   const object = terrain? terrain.object: null;
   const id = terrain? terrain.id: null;
-  const [enabled, setEnabled] = useState<boolean>(true)
   const [helper, setHelper] = useState<boolean>(true)
-  const onClick = (e, value: boolean) => {
-    setEnabled(value);
-    if (value) {
-      editor.selectObject(id);
-    }
-    else {
-      editor.unSelectObject(id);
-    }
-  }
 
   const lineSegs = [];
   if (object){
@@ -57,22 +47,9 @@ export const Terrain = () => {
   return (
     <>
       {object &&
-        <Selection>
-          <EffectComposer enabled={enabled} autoClear={false}>
-            <Outline visibleEdgeColor={0x00ff00} hiddenEdgeColor={0x00ff00} edgeStrength={1000} />
-          </EffectComposer>
-          <Select enabled>
-            <primitive
-              object={object}
-              onClick={(e) => {
-                onClick(e, true)
-              }}
-              onPointerMissed={(e) => {
-                onClick(e, false)
-              }}
-            />
-          </Select>
-        </Selection>
+          <primitive
+            object={object}
+          />
       }
       {helper &&
         <>

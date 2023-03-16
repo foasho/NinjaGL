@@ -5,7 +5,7 @@ import { IInputMovement, IObjectManagement, ISetSoundOption, ISoundProps, IUpdat
 import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { convertToGB } from "@/commons/functional";
-import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler } from "three";
+import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2 } from "three";
 import { reqApi } from "@/services/ServciceApi";
 import { useInputControl } from "./InputControls";
 import { NaniwaShader } from "./NaniwaShader";
@@ -23,7 +23,7 @@ export let loadPer: number = 0;
 export let loadingText: string = "ファイルサイズを取得中...";
 
 export class NaniwaEngine {
-  jsonPath: string = null;
+  jsonData: any = null;
   layerGrid: number = 8;
   layerLength: number = 3;
   possibleLayers: number[] = [];
@@ -42,12 +42,15 @@ export class NaniwaEngine {
   octree: Octree;
   avatar: AvatarController;
   camera: PerspectiveCamera | OrthographicCamera;
-  backmusics: ISoundProps[] = [];
+  listener: AudioListener = new AudioListener();
+  sounds: ISoundProps[] = [];
   shader: NaniwaShader = new NaniwaShader();
   viewableKeys: string[] = []; // 可視化管理
   moveOrderKeys: string[] = []; // 動態管理
   ui: any = null; // UIリスト
-
+  // Canvasのサイズ
+  canvasSize: Vector2 = new Vector2(0, 0);
+  canvasPos: Vector2 = new Vector2(0, 0);
   constructor() { }
 
   /**
@@ -80,7 +83,7 @@ export class NaniwaEngine {
   /**
    * すべての情報をクリアにする
    */
-  allClear() {
+  allClear = () => {
     this.nowLoading = false;
     this.loadCompleted = false;
     this.useGPU = false;
@@ -90,20 +93,46 @@ export class NaniwaEngine {
     this.avatar = null;
     this.camera = null;
     this.removeSoundAll();
-    this.backmusics = [];
+    this.sounds = [];
+  }
+
+  /**
+   * Canvasのサイズをセットする
+   */
+  setCanvasSize = (x: number, y: number) => {
+    this.canvasSize.set(x, y);
+  }
+  setCanvasPos = (x: number, y: number) => {
+    this.canvasPos.set(x, y);
+  }
+  /**
+   * Canvasのサイズを取得する
+   */
+  getCanvasSize = (): Vector2 => {
+    return this.canvasSize;
+  }
+  getCanvasPos = (): Vector2 => {
+    return this.canvasPos;
   }
 
   /**
    * 設定JSONファイルをセットする
    */
-  setJson(jsonPath: string) {
-    this.jsonPath = jsonPath;
+  setJson = async (jsonPath: string) => {
+    const data = await this.loadJson(jsonPath);
+    this.jsonData = data;
+  }
+  /**
+   * 直接JSONのデータをセットする
+   */
+  setJsonData = (data: any) => {
+    this.jsonData = data;
   }
 
   /**
    * 接続しているデバイス種別を検出
    */
-  detectDevice() {
+  detectDevice = () => {
     var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     var isTablet = /iPad/i.test(navigator.userAgent);
     var isPC = !isMobile && !isTablet;
@@ -118,7 +147,7 @@ export class NaniwaEngine {
   /**
    * GPUを使用して描画しているか
    */
-  detectGPU() {
+  detectGPU = () => {
     if (typeof WebGLRenderingContext !== 'undefined') {
       var canvas = document.createElement('canvas');
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -132,7 +161,7 @@ export class NaniwaEngine {
   /**
    * 利用できるメモリ量を更新
    */
-  updateAvailableMemory() {
+  updateAvailableMemory = () => {
     const _performance: any = performance;
     if (_performance && _performance.memory) {
       this.memory = {
@@ -147,7 +176,7 @@ export class NaniwaEngine {
   /**
    * Octreeの段階数(L)を取得
    */
-  getOctreeL(): number {
+  getOctreeL = (): number => {
     const maxL = 7;
     let n = 0;
     let l = this.worldSize[0];
@@ -192,7 +221,7 @@ export class NaniwaEngine {
    * @param path 
    * @returns 
    */
-  async loadJson(path: string): Promise<any> {
+  loadJson = (path: string): Promise<any> => {
     return new Promise((resolve) => {
       fetch(path)
         .then(response => response.json())
@@ -206,25 +235,17 @@ export class NaniwaEngine {
   /**
    * 設定JSONファイルをImportする
    */
-  importConfigJson = async() => {
+  importConfigJson = async():Promise<boolean> => {
     if (this.loadCompleted || this.nowLoading) return null;
-    const path = this.jsonPath ? this.jsonPath : "savedata/default.json";
+    const jsonData = this.jsonData;
+    console.log(this.jsonData);
     this.nowLoading = true;
     totalFileSize = 1;
     nowLoadedFiles = {};
-    const jsonData = await this.loadJson(path);
     const keys = Object.keys(jsonData);
     await (async () => {
       for await (const key of keys) {
-        if (key == "init") {
-          if (jsonData[key]["backmusics"]) {
-            const objs = jsonData[key]["backmusics"];
-            objs.map((obj) => {
-              this.setSound(obj);
-            })
-          }
-        }
-        else if (key == "avatar" || key == "terrain") {
+        if (key == "avatar" || key == "terrain") {
           let object: Object3D;
           if (key == "avatar") {
             const { gltf } = await AvatarLoader(
@@ -328,12 +349,13 @@ export class NaniwaEngine {
     console.log("--- 全設定ファイルの読み込み完了 ---");
     this.nowLoading = false;
     this.loadCompleted = true;
+    return true;
   }
 
   /**
    * ロード状況を更新する
    */
-  loadingFileState(key: string, updateSize: number) {
+  loadingFileState = async(key: string, updateSize: number) => {
     if (nowLoadedFiles) {
       nowLoadedFiles[key] = updateSize;
       // 最後に集計してPercentageを更新する
@@ -356,7 +378,7 @@ export class NaniwaEngine {
   /**
    * アバターをセットする
    */
-  setAvatar = (threeMesh: Mesh|Object3D) => {
+  setAvatar(threeMesh: Mesh|Object3D) {
     const avatarObject = this.getAvatarObject();
     if (avatarObject) {
       console.log("アバターチェック");
@@ -403,6 +425,8 @@ export class NaniwaEngine {
     if (this.avatar) {
       this.avatar.setCamera(this.camera);
     }
+    // Listenerをセットする
+    this.camera.add(this.listener);
   }
 
   /**
@@ -430,36 +454,23 @@ export class NaniwaEngine {
  * サウンドをセットする
  */
   setSound(params: ISetSoundOption) {
-    if (!this.backmusics.find(s => s.key == params.key)) {
-      const listener = new AudioListener();
-      const sound = new Audio(listener);
-      const audioLoader = new AudioLoader();
-      audioLoader.load(
-        params.filePath,
-        (buffer) => {
-          sound.setBuffer(buffer);
-          sound.setLoop(params.loop);
-          sound.setVolume(params.volume);
-          sound.play();
-        }
-      )
-      this.backmusics.push({
-        key: params.key,
-        sound: sound,
-        loop: params.loop,
-        filePath: params.filePath,
-        volume: params.volume,
-        trigAnim: params.trigAnim,
-        stopAnim: params.stopAnim
-      })
-    }
+    const sound = new Audio(this.listener);
+    const audioLoader = new AudioLoader();
+    audioLoader.load(
+      params.filePath,
+      (buffer) => {
+        sound.setBuffer(buffer);
+        sound.setLoop(params.loop);
+        sound.setVolume(params.volume);
+      }
+    )
   }
 
   /**
    * サウンドを更新
    */
   updateSound(params: IUpdateSoundOption) {
-    const sound = this.backmusics.find(s => s.key == params.key);
+    const sound = this.sounds.find(s => s.key == params.key);
     if (sound) {
       if (params.volume) {
         sound.sound.setVolume(params.volume);
@@ -474,7 +485,7 @@ export class NaniwaEngine {
    * 特定のサウンドを鳴らせる
    */
   playSound(key: string) {
-    const sound = this.backmusics.find(s => s.key == key);
+    const sound = this.sounds.find(s => s.key == key);
     if (sound && !sound.sound.isPlaying) {
       sound.sound.play();
     }
@@ -484,7 +495,7 @@ export class NaniwaEngine {
    * 特定のサウンドを止める
    */
   stopSound(key: string) {
-    const sound = this.backmusics.find(s => s.key == key);
+    const sound = this.sounds.find(s => s.key == key);
     if (sound) {
       sound.sound.pause();
     }
@@ -494,7 +505,7 @@ export class NaniwaEngine {
  * すべてのサウンドを止める
  */
   removeSoundAll() {
-    this.backmusics.map((sound) => {
+    this.sounds.map((sound) => {
       sound.sound.pause();
       sound.sound.remove();
     });

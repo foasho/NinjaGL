@@ -3,7 +3,7 @@ import { LoadProcessing } from "./UIItems/LoadProcessing";
 // Icons
 import { BsHandbagFill } from "react-icons/bs";
 import { TouchMove } from "./UIItems/TouchMove";
-import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
+import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
 import { NaniwaIcons } from "./uis/NaniwaIcons";
 
 export const NaniwaUI = () => {

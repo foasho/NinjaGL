@@ -1,5 +1,5 @@
 import styles from "@/App.module.scss";
-import { IObjectManagement } from "@/engine/core/NaniwaProps"
+import { IObjectManagement } from "@/engine/Core/NaniwaProps"
 import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
@@ -21,7 +21,7 @@ export const HierarchyTree = () => {
 
   const myFrame = () => {
     if (oms.length !== editor.getObjectManagements().length) {
-      setOMs(editor.getObjectManagements());
+      setOMs([...editor.getObjectManagements()]);
     }
     // selectOMが変わったら再レンダ
     if (selectOM !== editor.getSelectOM()){

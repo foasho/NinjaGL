@@ -1,0 +1,67 @@
+.hierarchyArea {
+    padding: 5px 12px;
+    min-height: 35%;
+    .hierarchyOpen {
+        color: #fff;
+        font-weight: bolder;
+        float: right;
+        padding-bottom: 10px;
+    }
+    .hierarchyTree {
+        margin: 0;
+        .title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            padding-right: 10px;
+        }
+        .tree {
+            max-height: 50%;
+            margin: 0;
+            overflow-x: none;
+            overflow-y: auto;
+            padding: 3px;
+            border: 1px solid #6e6b6b;
+            border-radius: 3px;
+            min-height: 100px;
+            .treeNode {
+                font-size: 10px;
+                padding: 0px 5px;
+                padding-top: 2px;
+                align-items: center; /* 縦方向に中央揃え */
+                // display: flex;
+                // width: 100%;
+                .type {
+                    display: inline-block;
+                    padding-right: 3px;
+                    font-size: 12px;
+                    vertical-align: middle;
+                }
+                .name {
+                    display: inline-block;
+                    cursor: pointer;
+                    user-select: none;
+                    padding-left: 3px;
+                }
+                .visible {
+                    display: inline-block;
+                    float: right;
+                    font-size: 12px;
+                    cursor: pointer;
+                    vertical-align: middle;
+                }
+            }
+            .lightLine {
+                color: #fff;
+                background-color: #797272;
+            }
+            .darkLine {
+                color: #e2e2e2;
+                background-color: #4b4848;
+            }
+            .select {
+                border: solid 1.5px #43D9D9;
+            }
+        }
+    }
+}

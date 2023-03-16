@@ -18,6 +18,10 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectSky = (value: string) => {
     prop.response({ type: "sky", value: value });
   }
+  const uploadSound = (e) => {
+    console.log("サウンドがアップロードされました");
+    console.log(e);
+  }
   return ReactDOM.createPortal(
     <div
       className={styles.selectNewObjectDialog}
@@ -44,6 +48,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
               <div className={styles.name}>
                 空
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("sound")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/sound.png"/>
+              </div>
+              <div className={styles.name}>
+                音源
               </div>
             </div>
           </>
@@ -90,6 +102,22 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
             </>
           }
+
+          {selectType == "sound" &&
+            <>
+              <div className={styles.dropCard} onDrop={(e) => {uploadSound(e)}} >
+                <div className={styles.icon}>
+                  <img className={styles.img} src="fileicons/drag-and-drop.png"/>
+                </div>
+                <div className={styles.name}>
+                  音源をアップロード<br/>
+                  もしくは、<br/>
+                  コンテンツブラウザから<br/>
+                  ドラッグ＆ドロップ<br/>
+                </div>
+              </div>
+            </>
+          }
         </div>
       </div>
     </div>
@@ -99,7 +127,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky";
+  type: "light" | "sky" | "sound";
   value: string;
 }
 /**

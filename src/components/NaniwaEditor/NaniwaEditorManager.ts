@@ -1,7 +1,7 @@
 import { AnimationClip, AnimationMixer, Euler, Group, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { IObjectManagement, IUIManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement, IUIManagement } from "@/engine/Core/NaniwaProps";
 import { TerrainMakerManager } from "../TerrainMaker/TerrainMakerManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 

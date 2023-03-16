@@ -16,7 +16,7 @@ import {
   MathUtils,
   Euler
 } from "three";
-import { useInputControl } from "@/engine/core/InputControls";
+import { useInputControl } from "@/engine/Core/InputControls";
 
 const TerrainMakeComponent = () => {
   const editor = useContext(NaniwaEditorContext);

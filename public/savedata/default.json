@@ -50,7 +50,7 @@
     },
     "terrain": {
         "id": "terrain",
-        "filePath": "assets/defaults/myterrain.glb",
+        "filePath": "assets/defaults/myterrain.ter",
         "visibleType": "force",
         "physics": "along"
     },

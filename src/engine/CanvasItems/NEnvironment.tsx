@@ -1,5 +1,5 @@
-import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
 import { useContext } from "react"
 import { MathUtils } from "three";

@@ -1,5 +1,5 @@
 import styles from "@/App.module.scss";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { useRef, useContext, useEffect, useState } from "react";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 
@@ -55,7 +55,7 @@ export const MainViewInspector = () => {
           selectOM.type == "avatar"
         )
       ) &&
-        <>
+        <div className={styles.mainInspector}>
           <div className={styles.position}>
             <div className={styles.title}>
               位置
@@ -66,9 +66,9 @@ export const MainViewInspector = () => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refPosX} type="number" placeholder="0" value={selectOM.object.position.x} onChange={(e) => changePosition(e, "x")} />
-              <input ref={refPosY} type="number" placeholder="0" value={selectOM.object.position.y} onChange={(e) => changePosition(e, "y")} />
-              <input ref={refPosZ} type="number" placeholder="0" value={selectOM.object.position.z} onChange={(e) => changePosition(e, "z")} />
+              <input ref={refPosX} type="text" placeholder="0" value={selectOM.object.position.x} onChange={(e) => changePosition(e, "x")} />
+              <input ref={refPosY} type="text" placeholder="0" value={selectOM.object.position.y} onChange={(e) => changePosition(e, "y")} />
+              <input ref={refPosZ} type="text" placeholder="0" value={selectOM.object.position.z} onChange={(e) => changePosition(e, "z")} />
             </div>
           </div>
           <div className={styles.rotation}>
@@ -81,9 +81,9 @@ export const MainViewInspector = () => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refRotX} type="number" placeholder="0" />
-              <input ref={refRotY} type="number" placeholder="0" />
-              <input ref={refRotZ} type="number" placeholder="0" />
+              <input ref={refRotX} type="text" placeholder="0" />
+              <input ref={refRotY} type="text" placeholder="0" />
+              <input ref={refRotZ} type="text" placeholder="0" />
             </div>
           </div>
           <div className={styles.scale}>
@@ -96,12 +96,33 @@ export const MainViewInspector = () => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refScaX} type="number" placeholder="0" value={selectOM.object.scale.x} />
-              <input ref={refScaY} type="number" placeholder="0" value={selectOM.object.scale.y} />
-              <input ref={refScaZ} type="number" placeholder="0" value={selectOM.object.scale.z} />
+              <input ref={refScaX} type="text" placeholder="0" value={selectOM.object.scale.x} />
+              <input ref={refScaY} type="text" placeholder="0" value={selectOM.object.scale.y} />
+              <input ref={refScaZ} type="text" placeholder="0" value={selectOM.object.scale.z} />
             </div>
           </div>
-        </>
+          <div className={styles.material}>
+            <div className={styles.title}>
+              マテリアル設定
+            </div>
+            <div className={styles.type}>
+              <div className={styles.name}>
+                種別
+              </div>
+              <div>
+              </div>
+            </div>
+            <div className={styles.color}>
+              <div className={styles.name}>
+                色
+              </div>
+              <div className={styles.pallet}>
+                <input type={"color"} value={"#43D9D9"}/>
+                <input type={"text"} value={"#43D9D9"} />
+              </div>
+            </div>
+          </div>
+        </div>
       }
       {(selectOM && selectOM.type == "light") &&
         <>

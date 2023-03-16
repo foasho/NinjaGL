@@ -1,4 +1,4 @@
-import { Object3D, Mesh, Group, Vector2, AnimationClip, AnimationMixer, Audio } from "three";
+import { Object3D, Mesh, Group, Vector2, AnimationClip, AnimationMixer, Audio, Vector3 } from "three";
 
 export interface INaniwaProps {
   mode: "play" | "edit"
@@ -26,7 +26,7 @@ export interface IInputMovement {
 export interface IObjectManagement {
   id: string;
   name?: string;
-  type: "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
+  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light";
   filePath?: string;
   visiableType: "auto" | "force" | "none";
   layerNum?: number;
@@ -55,6 +55,8 @@ export interface ISoundProps {
   loop: boolean;
   volume: number;
   filePath: string;
+  position?: Vector3;
+  
   trigAnim?: string;
   stopAnim?: string;
 }

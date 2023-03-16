@@ -5,16 +5,16 @@ import { NaniwaEditorContext, NaniwaEditorManager } from "@/components/NaniwaEdi
 import { useState, useEffect, useContext, useRef } from "react";
 import { Object3D, Vector3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
-import { ContentViewer } from "./Inspector/ContentViewer";
+import { ContentViewer } from "./Hierarchy/ContentViewer";
 import { PivotControls } from "@react-three/drei";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMaker } from "./ViewPort/TerrainMaker";
 import { TerrainInspector } from "./Inspector/TerrainInspector";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
-import { BsPlay } from "react-icons/bs";
+import { BsPlay, BsStop } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { generateUUID } from "three/src/math/MathUtils";
@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
+import { DebugPlay } from "./ViewPort/DebugPlay";
 
 export interface IFileProps {
   size: number;
@@ -119,6 +120,20 @@ export const NaniwaEditor = () => {
         }
       )
     }
+    else if (data.type == "sound"){
+      editor.setObjectManagement(
+        {
+          id: generateUUID(),
+          name: `*${data.value}`,
+          type: "sky",
+          args: {
+            type: data.value
+          },
+          physics: "none",
+          visiableType: "auto",
+        }
+      )
+    }
   }
 
   const onClickSelectLang = () => {
@@ -127,6 +142,15 @@ export const NaniwaEditor = () => {
 
   const onClickSelectTemplate = () => {
     Swal.fire("注意", "現在ゲームテンプレートの準備中です。");
+  }
+
+  const onPlayStop = () => {
+    if (viewSelect == "debugplay"){
+      setViewSelect("mainview");
+    }
+    else {
+      setViewSelect("debugplay");
+    }
   }
 
   const onSave = () => {
@@ -172,11 +196,12 @@ export const NaniwaEditor = () => {
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.play}>
+              <a className={styles.play} onClick={() => onPlayStop()}>
                 <span className={styles.icon}>
-                  <BsPlay />
+                  {viewSelect == "debugplay"? <><BsStop /></>: <><BsPlay /></>}
                 </span>
-                Play
+                  {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
+                
               </a>
             </li>
           </ul>
@@ -270,6 +295,11 @@ export const NaniwaEditor = () => {
             <div className={styles.viewport}>
               {(viewSelect == "mainview") &&
                 <MainViewer />
+              }
+              {viewSelect == "debugplay" &&
+                <>
+                  <DebugPlay />
+                </>
               }
               {viewSelect == "terrainmaker" &&
                 <>

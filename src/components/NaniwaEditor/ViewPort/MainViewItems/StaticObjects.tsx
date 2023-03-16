@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
+import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
 import { Box3, BoxHelper, Euler, LineBasicMaterial, LineSegments, Mesh, Object3D, Vector3, WireframeGeometry } from "three";

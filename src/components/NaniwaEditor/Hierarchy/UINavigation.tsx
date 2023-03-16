@@ -1,4 +1,4 @@
-import { IUIManagement } from "@/engine/core/NaniwaProps";
+import { IUIManagement } from "@/engine/Core/NaniwaProps";
 import { useState } from "react"
 import styles from "@/App.module.scss";
 

@@ -1,8 +1,7 @@
-import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager"
-import { Canvas } from "@react-three/fiber"
-import { useContext, useEffect, useState } from "react"
+import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager"
+import { Canvas, useThree } from "@react-three/fiber"
+import { useContext, useEffect, useRef, useState } from "react"
 import { Avatar } from "./CanvasItems/Avatar"
-import { Camera } from "./CanvasItems/Camera"
 import { NEnvironment } from "./CanvasItems/NEnvironment"
 import { System } from "./CanvasItems/System"
 import { Terrain } from "./CanvasItems/Terrain"
@@ -10,6 +9,7 @@ import { NaniwaUI } from "./NaniwaUI"
 import { LoadProcessing } from "./UIItems/LoadProcessing"
 
 export const NaniwaCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>();
   const [ready, setReady] = useState<boolean>(false)
   const engine = useContext(NaniwaEngineContext)
 
@@ -29,15 +29,32 @@ export const NaniwaCanvas = () => {
     }
   }, []);
 
+  const onResize = () => {
+    const cv = document.getElementById("naniwajs") as HTMLCanvasElement;
+    const width = cv.width;
+    const height = cv.height;
+    if (canvasRef.current){
+    }
+    console.log(width, height);
+    console.log(cv.clientTop, cv.clientLeft);
+    engine.setCanvasSize(width, height);
+}
+  
+  useEffect(() => {
+    const viewer = document.getElementById("naniwaviewer");
+    const rect = viewer.getBoundingClientRect();
+    engine.setCanvasSize(rect.width, rect.height);
+    engine.setCanvasPos(rect.left, rect.top);
+  }, [false]);
+
   return (
     <>
-      <Canvas shadows dpr={window.devicePixelRatio}>
+      <Canvas id="naniwajs" ref={canvasRef} shadows dpr={window.devicePixelRatio}>
         {(ready && engine) &&
           <>
             <System />
             <Terrain />
             <Avatar />
-            <Camera />
           </>
         }
         {engine &&

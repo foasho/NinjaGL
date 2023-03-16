@@ -1,0 +1,51 @@
+// 地形メーカー
+.terrainui {
+    color: #fff;
+    text-align: center;
+    .mode {
+        margin-top: 10px;
+        display: block;
+        .title {
+            font-weight: bold;
+        }
+        .select {
+            margin: 5px 3px;
+            .active {
+                padding: 5px 10px;
+                background-color: #000000;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .disable {
+                padding: 5px 10px;
+                background-color: #333;
+                border-radius: 5px;
+            }
+        }
+    }
+    .type {
+        margin-top: 10px;
+        display: block;
+    }
+    .wire {
+        margin-top: 10px;
+        display: block;
+    }
+    .strength {
+        margin-top: 10px;
+        display: block;
+    }
+    .range {
+        margin-top: 10px;
+        display: block;
+    }
+    .mapSize {
+        font-size: 12px;
+    }
+    .resolution {
+        font-size: 12px;
+    }
+    .save {
+        margin-top: 10px;
+    }
+}
