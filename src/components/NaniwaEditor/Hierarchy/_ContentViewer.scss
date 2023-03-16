@@ -3,6 +3,18 @@
     color: #fff;
     background-color: $editorColor;
     padding: 15px;
+    max-height: 35vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin; /* スクロールバーを細くする */
+    scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+    &::-webkit-scrollbar {
+        width: 4px; /* スクロールバーの幅を変更 */
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.5); /* スクロールバーの色を変更 */
+        border-radius: 3px; /* スクロールバーの丸みを追加 */
+    }
     .pathName {
         user-select: none;
         .title {
@@ -32,6 +44,7 @@
         flex-wrap: wrap;
         justify-content: space-between;
         position: relative;
+        max-height: 35vh;
         .tooltip {
             position: fixed;
             user-select: none;

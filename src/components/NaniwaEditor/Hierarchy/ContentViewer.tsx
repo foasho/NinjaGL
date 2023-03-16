@@ -246,6 +246,7 @@ const CanvasGLTFViewer = ({ gltfUrl }) => {
   const canvasRef = useRef(null);
   const [imageUrl, setImageUrl] = useState(null);
   useEffect(() => {
+
     // シーンを作成
     const scene = new Scene();
 
@@ -259,33 +260,45 @@ const CanvasGLTFViewer = ({ gltfUrl }) => {
     camera.position.set(0, 0, 2);
 
     // レンダラーを作成
-    if (canvasRef.current){
-      const renderer = new WebGLRenderer({ 
-        canvas: canvasRef.current,
-        alpha: true,
-      });
-      renderer.setClearColor(0x888888, 1);
-      renderer.setSize(35, 35);
-  
-      // ライトを作成
-      const ambientLight = new AmbientLight(0xffffff, 1);
-      const directionalLight = new DirectionalLight(0xffffff, 0.5);
-      directionalLight.position.set(10, 10, 10);
-      scene.add(ambientLight);
-      scene.add(directionalLight);
-  
-      // GLTFローダーを作成
-      const gltfLoader = new GLTFLoader();
-  
-      // GLTFファイルを読み込む
-      gltfLoader.load(gltfUrl, (gltf) => {
-        const model = gltf.scene;
-        scene.add(model);
-        renderer.render(scene, camera);
-        const dataUrl = canvasRef.current.toDataURL();
-        setImageUrl(dataUrl);
-      });
-    }
+    const cleanup = () => {
+      if (renderer) {
+        renderer.dispose();
+      }
+      if (scene) {
+        scene.clear();
+      }
+      if (camera) {
+        camera.clear();
+      }
+    };
+
+    const renderer = new WebGLRenderer({ 
+      canvas: canvasRef.current,
+      alpha: true,
+    });
+    renderer.setClearColor(0x888888, 1);
+    renderer.setSize(35, 35);
+
+    // ライトを作成
+    const ambientLight = new AmbientLight(0xffffff, 1);
+    const directionalLight = new DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(10, 10, 10);
+    scene.add(ambientLight);
+    scene.add(directionalLight);
+
+    // GLTFローダーを作成
+    const gltfLoader = new GLTFLoader();
+
+    // GLTFファイルを読み込む
+    gltfLoader.load(gltfUrl, (gltf) => {
+      const model = gltf.scene;
+      scene.add(model);
+      renderer.render(scene, camera);
+      const dataUrl = canvasRef.current.toDataURL();
+      cleanup();
+      setImageUrl(dataUrl);
+    });
+
   }, []);
 
   return (

@@ -134,9 +134,6 @@ const StaticObject = (props: IStaticObject) => {
     if (visible != isNowSelect){
       setVisible(isNowSelect);
     }
-    if (ref.current){
-      console.log(ref.current.position);
-    }
   });
 
   return (
