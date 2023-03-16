@@ -1,266 +1,199 @@
-import { Environment, OrbitControls, PivotControls, Sky } from "@react-three/drei";
-import { Box3, Euler, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from "three";
+import { Environment, GizmoHelper, GizmoViewport, Html, OrbitControls, PivotControls, Sky } from "@react-three/drei";
+import { Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
-import { IObjectManagement } from "@/engine/core/NaniwaProps";
-import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { MyLight, MyLights } from "./MainViewItems/Lights";
+import { StaticObjects } from "./MainViewItems/StaticObjects";
+import { Terrain } from "./MainViewItems/Terrain";
+import { generateUUID } from "three/src/math/MathUtils";
+import { Avatar } from "./MainViewItems/Avatar";
+import { MySky } from "./MainViewItems/Sky";
+import { BsGrid3X3 } from "react-icons/bs";
+import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 
 export const MainViewer = () => {
-    const camRef = useRef<any>();
-    const editor = useContext(NaniwaEditorContext);
-    const [oms, setOMs] = useState<IObjectManagement[]>([]);
-    
-    const handleDrop = (e) => {
-        e.preventDefault();
-        const loader = new GLTFLoader();
-        if (!editor.contentsSelect){
-            const file = e.dataTransfer.files[0];
-            loader.load(URL.createObjectURL(file), (gltf) => {
-                editor.setObjectManagement({
-                    id: gltf.scene.clone().uuid,
-                    type: "object",
-                    visiableType: "auto",
-                    args: null,
-                    object: gltf.scene
-                });
-                setOMs([...editor.oms]);
+  const camRef = useRef<OrbitControlsImpl>();
+  const editor = useContext(NaniwaEditorContext);
+  const [isGrid, setIsGrid] = useState<boolean>(true);
+
+  /**
+   * シーンへの直接ドラッグ＆ドロップ時
+   * @param e 
+   */
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const loader = new GLTFLoader();
+    if (!editor.contentsSelect) {
+      /**
+       * ここは、一度アセットに落として、表示する必要がある
+       */
+      // const file = e.dataTransfer.files[0];
+      // loader.load(URL.createObjectURL(file), (gltf) => {
+      //   editor.setObjectManagement({
+      //     id: generateUUID(),
+      //     type: "object",
+      //     visiableType: "auto",
+      //     args: null,
+      //     physics: "aabb",
+      //     object: gltf.scene
+      //   });
+      // });
+    }
+    else {
+      const type = editor.contentsSelectType;
+      if (
+        type == "gltf" ||
+        type == "ter" ||
+        type == "avt"
+      ) {
+        loader.load(
+          editor.contentsSelectPath,
+          async (gltf) => {
+            const scene = gltf.scene || gltf.scenes[0] as Object3D;
+            scene.traverse((node: Mesh) => {
+              if ((node as Mesh).isMesh) {
+                if (node.geometry) {
+                  node.castShadow = true;
+                  node.receiveShadow = true;
+                }
+              }
             });
-        }
-        else {
-            const type = editor.contentsSelectType;
-            if (
-                type == "gltf" ||
-                type == "ter"
-            ){
-                loader.load(
-                    editor.contentsSelectPath,
-                    async (gltf) => {
-                        const scene = gltf.scene || gltf.scenes[0] as Object3D;
-                        scene.traverse((node: Mesh) => { 
-                            if ((node as Mesh).isMesh){
-                                if (node.geometry){
-                                    node.castShadow = true;
-                                    node.receiveShadow = true;
-                                }
-                            }
-                        });
-                        if (type == "gltf"){
-                            editor.setObjectManagement({
-                                id: scene.clone().uuid,
-                                type: "object",
-                                visiableType: "auto",
-                                args: {},
-                                object: scene
-                            });
-                            setOMs([...editor.oms]);
-                        }
-                        if (type == "ter"){
-                            editor.setObjectManagement({
-                                id: scene.clone().uuid,
-                                type: "terrain",
-                                visiableType: "force",
-                                args: {},
-                                object: scene
-                            });
-                            setOMs([...editor.oms]);
-                        }
+            if (type == "gltf") {
+              editor.setObjectManagement({
+                id: generateUUID(),
+                filePath: editor.contentsSelectPath,
+                type: "object",
+                physics: "aabb",
+                visiableType: "auto",
+                args: {
+                  position: new Vector3(0, 0, 0),
+                  rotation: new Euler(0, 0, 0)
+                },
+                object: scene
+              });
+            }
+            if (type == "ter") {
+              editor.setObjectManagement({
+                id: generateUUID(),
+                filePath: editor.contentsSelectPath,
+                type: "terrain",
+                physics: "along",
+                visiableType: "force",
+                args: {},
+                object: scene
+              });
+            }
+            if (type == "avt") {
+              editor.setObjectManagement({
+                id: generateUUID(),
+                filePath: editor.contentsSelectPath,
+                type: "avatar",
+                physics: "aabb",
+                visiableType: "force",
+                args: {
+                  height: 1.7,
+                  animMapper: {
+                    idle: "Idle",
+                    run : "Run",
+                    walk: "Walk",
+                    jump : "Jump",
+                    action : "Kick"
+                  },
+                  sounds: [
+                    {
+                      key: "grassWalk",
+                      filePath: "mp3/grassWalk.mp3",
+                      volume: 0.5,
+                      loop: true,
+                      trigAnim: "walk",
+                      stopAnim: "walk"
                     },
-                    (xhr) => {},
-                    async (err) => {
-                        console.log("モデル読み込みエラ―");
-                        console.log(err);
+                    {
+                      key: "grassRun",
+                      filePath: "mp3/grassRun.mp3",
+                      volume: 0.5,
+                      loop: true,
+                      trigAnim: "run",
+                      stopAnim: "run"
                     }
-                )
+                  ]
+                },
+                object: scene
+              });
             }
-        }
+          },
+          (xhr) => { },
+          async (err) => {
+            console.log("モデル読み込みエラ―");
+            console.log(err);
+          }
+        )
+      }
     }
+  }
 
-    const enabledCamera = (trig: boolean) => {
-        if (camRef.current){
-            camRef.current.enabled = trig;
+  const handleDragOver = (e) => {
+    e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
+  };
+
+  useEffect(() => {
+    editor.setCamera(camRef.current);
+  }, [])
+
+  return (
+    <div style={{ height: "100%", position: "relative" }}>
+      <Canvas
+        style={{ background: "black" }}
+        id="mainviewcanvas"
+        camera={{ position: [-3, 3, -6] }}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        <OrbitControls makeDefault={true} ref={camRef} />
+        <MyLights/>
+        <StaticObjects/>
+        <Terrain/>
+        <Avatar/>
+        <MySky/>
+        {isGrid &&
+          <SystemHelper/>
         }
-    }
-
-    const handleDragOver = (e) => {
-        e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
-    };
-
-    return (
-        <div style={{ height: "100%" }}>
-            <Canvas 
-                id="mainviewcanvas"
-                camera={ { position: [-3, 3, -6] } }
-                onDrop={handleDrop} 
-                onDragOver={handleDragOver}
-            >
-                <Sky
-                    distance={450000}
-                    sunPosition={[0, 1, 0]}
-                    inclination={0}
-                    azimuth={0}
-                />
-                <directionalLight />
-                <OrbitControls makeDefault={true} ref={camRef}/>
-                <gridHelper args={[4096, 4096]}/>
-                {oms.map(om => {
-                    if (om.type == "object"){
-                        return <MyObject om={om} onStopCamera={enabledCamera} isHelper={true} />
-                    }
-                    else if (om.type == "terrain"){
-                        return <MyTerrain om={om} isHelper={true} />
-                    }
-                })}
-            </Canvas>
-        </div>
-    )
+      </Canvas>
+      <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
+        <a 
+          onClick={() => setIsGrid(!isGrid)}
+          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}
+        >
+          {isGrid? <MdOutlineGridOn/>: <MdOutlineGridOff/>}
+        </a>
+      </div>
+    </div>
+  )
 }
 
-interface IMyObject {
-    om: IObjectManagement;
-    onStopCamera: (value: boolean) => void;
-    isHelper: boolean;
+const SystemHelper = () => {
+  return (
+    <>
+      <gridHelper args={[4096, 4096]} />
+      <GizmoHelper alignment="top-right" margin={[75, 75]}>
+          <GizmoViewport labelColor="white" axisHeadScale={1} />
+      </GizmoHelper>
+    </>
+  )
 }
 
-/**
- * 基本的なオブジェクトのみ
- * @param props 
- * @returns 
- */
-const MyObject = (props: IMyObject) => {
-    const object: Object3D = props.om.object;
-    object.traverse((node: any) => {
-        if (node.isMesh && node instanceof Mesh){
-            node.castShadow = true;
-            node.receiveShadow = true;
-        }
-    })
-
-    const editor = useContext(NaniwaEditorContext);
-    const [visible, setVisible] = useState<boolean>(false);
-    const handleDrag = useRef<boolean>(false);
-    // UUID
-    const uuid = object.uuid;
-
-    // Get Size
-    const size = new Box3().setFromObject(object);
-    let len = 1;
-    if ((size.max.x - size.min.x) > len){
-        len = (size.max.x - size.min.x);
-    }
-    if ((size.max.y - size.min.y) > len){
-        len = (size.max.y - size.min.y);
-    }
-    if ((size.max.z - size.min.z) > len){
-        len = (size.max.z - size.min.z);
-    }
-
-    const onClick = (e, value: boolean) => {
-        if (value){
-            // 選択できるのは１つのみにする
-            if (!editor.selectedIds.includes(uuid)){
-                editor.selectObject(uuid);
-                setVisible(true);
-            }
-        }
-        else {
-            if (e.type == "click" &&!handleDrag.current){
-                editor.unSelectObject(uuid);
-                setVisible(false); 
-            }
-        }
-    }
-
-    const onDragStart = () => {
-        handleDrag.current = true;
-    }
-    const onDragEnd = () => {
-        handleDrag.current = false;
-    }
-
-    const onDrag = (e) => {
-        // 位置/回転率の確認
-        if (editor.mode == "position"){
-            const position = new Vector3().setFromMatrixPosition(e);
-            editor.setPosition(uuid, position);
-        }
-        else if (editor.mode == "scale"){
-            const scale = new Vector3().setFromMatrixScale(e);
-            editor.setScale(uuid, scale);
-        }
-        const rotation = new Euler().setFromRotationMatrix(e);
-        editor.setRotation(uuid, rotation);
-        handleDrag.current = true;
-    }
-
-    return (
-        <>
-            <PivotControls 
-                scale={len*0.5}
-                visible={visible} 
-                disableAxes={!visible}
-                disableSliders={!visible}
-                disableRotations={!visible}
-                onDrag={(e) => onDrag(e)}
-                onDragStart={() => onDragStart()}
-                onDragEnd={() => onDragEnd()}
-            >
-                <primitive 
-                    object={object}
-                    onClick={(e) => {
-                        onClick(e, true)
-                    }}
-                    onPointerMissed={(e) => {
-                        onClick(e, false)
-                    }}
-                />
-            </PivotControls>
-        </>
-    )
-}
-
-interface IMyTerrain {
-    om: IObjectManagement;
-    isHelper: boolean;
-}
-
-
-/**
- * 地形データの選択
- */
-const MyTerrain = (props: IMyTerrain) => {
-    const object: Object3D = props.om.object;
-    const uuid = object.uuid;
-    const editor = useContext(NaniwaEditorContext);
-    const [enabled, setEnabled] = useState<boolean>(true)
-    const onClick = (e, value: boolean) => {
-        setEnabled(value);
-        if (value){
-            editor.selectedIds.push(uuid);
-        }
-        else {
-            editor.unSelectObject(uuid);
-        }
-    }
-    return (
-        <>
-            <Selection>
-                <EffectComposer enabled={enabled} autoClear={false}>
-                    <Outline visibleEdgeColor={0x00ff00} hiddenEdgeColor={0x00ff00} edgeStrength={1000} />
-                </EffectComposer>
-                <Select enabled>
-                    <primitive 
-                        object={object} 
-                        onClick={(e) => {
-                            onClick(e, true)
-                        }}
-                        onPointerMissed={(e) => {
-                            onClick(e, false)
-                        }}
-                    />
-                </Select>
-            </Selection>
-        </>
-    )
+const SystemUI = () => {
+  
+  return (
+    <>
+      <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
+        <a style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}>
+          <BsGrid3X3/>
+        </a>
+      </div>
+    </>
+  )
 }

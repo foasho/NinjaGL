@@ -1,0 +1,234 @@
+// 地形メーカー
+.terrainui {
+  color: #fff;
+  text-align: left;
+  padding: 5px;
+  position: relative;
+  .mode {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px;
+    }
+
+    .select {
+      margin: 5px 3px;
+
+      .active {
+        padding: 5px 10px;
+        background-color: #000000;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+
+      .disable {
+        padding: 5px 10px;
+        background-color: #333;
+        border-radius: 5px;
+      }
+    }
+  }
+
+  .type {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px;
+    }
+  }
+
+  .wire {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 5px 3px;
+    }
+    .input {
+        display: inline-block;
+        padding-left: 10px;
+        .checkbox {
+            cursor: pointer;
+            accent-color: #43D9D9;
+            transform: scale(1.2);
+            vertical-align: middle;
+        }
+    }
+  }
+
+  .strength {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px;
+    }
+  }
+
+  .range {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px;
+    }
+    .customRange {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 5px;
+      background: #ccc;
+      outline: none;
+
+      &::-webkit-slider-thumb,
+      &::-moz-range-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #0077CC;
+          cursor: pointer;
+          transition-property: background;
+          transition-duration: 0.3s;
+          transition-timing-function: ease-in-out;
+      }
+
+      &:focus {
+          &::-webkit-slider-thumb,
+          &::-moz-range-thumb {
+              background: #0099FF;
+          }
+      }
+    }
+  }
+
+  .inputArea {
+    padding-top: 10px;
+    .title {
+      font-size: 12px;
+      font-weight: bolder;
+    }
+    .name {
+      width: 100%;
+      display: flex;
+      text-align: left;
+      justify-content: center;
+      font-size: 10px;
+      div {
+        color: #fff;
+        width: calc(25.33% - 5px);
+      }
+    }
+    .inputContainer {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      input[type="text"] {
+          background-color: #3a3939;
+          color: #f2f2f2;
+          border: none;
+          padding: 5px 10px;
+          border-radius: 5px;
+          box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+          outline: none;
+          width: calc(30.33% - 20px); /* 幅を計算して指定する */
+          text-align: right;
+          margin-right: 10px; /* 右側に10pxのマージンを追加 */
+      }
+      input[type="text"]:focus {
+          box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+      input[type="text"]:last-child {
+          margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
+      }
+      input[type="color"] {
+        cursor: pointer;
+        background-color: transparent;
+        width: 30px; /* 幅を指定する */
+        height: 30px; /* 高さを指定する */
+        padding: 0; /* パディングを0にする */
+        border: none; /* ボーダーを消す */
+        border-radius: 50%; /* 角丸にする */
+        outline: none; /* アウトラインを消す */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* 影をつける */
+      }
+    }
+  }
+
+  .mapSize {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px;
+    }
+  }
+
+  .resolution {
+    margin: 10px 0px;
+    display: block;
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px;
+    }
+  }
+
+  .change {
+    padding-top: 20px;
+    font-size: 12px;
+    .btn {
+        border-radius: 2px;
+        padding: 7px 14px;
+        background-color: #cac0c0;
+        color: #000000;
+        transition: background-color 0.5s;
+        .icon {
+            padding-right: 5px;
+            svg {
+                vertical-align: middle;
+            }
+        }
+        &:hover {
+            color: #43D9D9;
+            background-color: #201f1f;
+            cursor: pointer;
+        }
+    }
+  }
+
+  .save {
+    padding-top: 30px;
+    .btn {
+        padding: 7px 14px;
+        background-color: #43D9D9;
+        color: #000000;
+        border-radius: 2px;
+        font-size: 12px;
+        user-select: none;
+        font-weight: bold;
+        .icon {
+            padding-right: 5px;
+            svg {
+                vertical-align: middle;
+            }
+        }
+        &:hover {
+            color: #ffffff;
+            background-color: #096775;
+            cursor: pointer;
+        }
+        transition: background-color 1s;
+    }
+}
+}

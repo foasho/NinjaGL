@@ -14,13 +14,13 @@
         ]
     },
     "avatar": {
+        "id": "avatar",
         "filePath": "assets/defaults/default-man.glb",
         "args": {
             "initPosition": [30, 10, -30],
             "initRotateDegY": -50,
             "height": 1.7,
             "isCenter": true,
-            "isVRM": false,
             "animMapper": {
                 "idle": "Idle",
                 "run" : "Run",
@@ -49,12 +49,19 @@
         }
     },
     "terrain": {
-        "filePath": "assets/defaults/myterrain.glb",
-        "args": {
-            "mapSize": 128
-        }
+        "id": "terrain",
+        "filePath": "assets/defaults/myterrain.ter",
+        "visibleType": "force",
+        "physics": "along"
     },
-    "objects": [],
+    "staticObjects": [
+        {
+            "id": "so1",
+            "visiableType": "auto",
+            "filePath": "assets/free/space/Pickup_Bullets.gltf",
+            "physics": "none"
+        }
+    ],
     "ui": {
             "touchController": {
                 "template": "default",
@@ -77,39 +84,50 @@
             ]
     },
     "sky": {
-        "distance": 450000,
-        "inclination": 0,
-        "subPosition": [0, 1, 0],
-        "azimuth": 0.25
+        "id": "sky1",
+        "args": {
+            "distance": 450000,
+            "inclination": 0,
+            "subPosition": [0, 1, 0],
+            "azimuth": 0.25
+        },
+        "physics": "none",
+        "visiableType": "force"
     },
     "lights": [
         {
-            "key": "light1",
-            "name": "光源1",
-            "type": "ambient",
-            "color": "#ffffff",
-            "castShadow": true
+            "id": "l1",
+            "args": {
+                "name": "光源1",
+                "type": "ambient",
+                "color": "#ffffff",
+                "castShadow": true
+            }
         },
         {
-            "key": "light2",
+            "id": "l2",
             "name": "光源2",
-            "type": "point",
-            "color": "#ffffff",
-            "distance": 100,
-            "intensity": 0.8,
-            "position": [0, 50, 0],
-            "castShadow": true
+            "args": {
+                "type": "point",
+                "color": "#ffffff",
+                "distance": 100,
+                "intensity": 0.8,
+                "position": [0, 50, 0],
+                "castShadow": true
+            }
         },
         {
-            "key": "light3",
+            "id": "l3",
             "name": "光源3",
-            "type": "spot",
-            "color": "#ffffff",
-            "angle": 45,
-            "distance": 100,
-            "intensity": 0.8,
-            "position": [64, 32, 64],
-            "castShadow": true
+            "args": {
+                "type": "spot",
+                "color": "#ffffff",
+                "angle": 45,
+                "distance": 100,
+                "intensity": 0.8,
+                "position": [64, 32, 64],
+                "castShadow": true
+            }
         }
     ],
     "scripts": [],

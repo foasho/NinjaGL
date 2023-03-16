@@ -3,32 +3,31 @@ import { LoadProcessing } from "./UIItems/LoadProcessing";
 // Icons
 import { BsHandbagFill } from "react-icons/bs";
 import { TouchMove } from "./UIItems/TouchMove";
-import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
+import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
 import { NaniwaIcons } from "./uis/NaniwaIcons";
 
 export const NaniwaUI = () => {
-    const [ready, setReady] = useState<boolean>(false);
-    const engine = useContext(NaniwaEngineContext);
+  const [ready, setReady] = useState<boolean>(false);
+  const engine = useContext(NaniwaEngineContext);
 
-    const ui = engine.ui;
-    console.log(ui.icons);
+  const ui = engine.ui;
 
-    return (
-        <>
-            <div style={{ position: "fixed", zIndex: 99999 }}>
-                {engine.deviceType == "mobile" || engine.deviceType == "tablet" &&
-                    <TouchMove/>
-                }
-                {ui.icons &&
-                    <>
-                        {ui.icons.length > 0 && 
-                            <NaniwaIcons icons={ui.icons} />
-                        }
-                    </>
-                }
-            </div>
-        </>
-    )
+  return (
+    <>
+      <div style={{ position: "fixed", zIndex: 99999 }}>
+        {engine.deviceType == "mobile" || engine.deviceType == "tablet" &&
+          <TouchMove />
+        }
+        {(ui && ui.icons) &&
+          <>
+            {ui.icons.length > 0 &&
+              <NaniwaIcons icons={ui.icons} />
+            }
+          </>
+        }
+      </div>
+    </>
+  )
 }
 
 `

@@ -1,8 +1,26 @@
 
 
 .main {
-    height: 100%;
+    height: 100vh;
     width: 100%;
 }
+// フォントをすべてMPlusRegularにする
+@font-face {
+    font-family: "MPLUSRegular";
+    src: url("/fonts/MPLUS1-Regular.ttf") format("truetype");
+}
+@font-face {
+    font-family: "MPLUSLighter";
+    src: url("/fonts/MPLUS1-Light.ttf") format("truetype");
+}
 
-@import "./pages/editor";
+@import "./components/NaniwaEditor/NaniwaEditor";
+@import "./components/NaniwaEditor/ViewPort/ScriptEditor";
+@import "./components/NaniwaEditor/Inspector/TerrainInspector";
+@import "./components/NaniwaEditor/Inspector/PlayerInspector";
+@import "./components/NaniwaEditor/Inspector/MainViewInspector";
+@import "./components/NaniwaEditor/Hierarchy/ContentViewer";
+@import "./components/NaniwaEditor/Hierarchy/Hierarchy";
+@import "./components/NaniwaEditor/Hierarchy/UINavigation";
+@import "./components/NaniwaEditor/Common/AppBar";
+@import "./components/NaniwaEditor/Dialogs/SelectNewObjectDialog";

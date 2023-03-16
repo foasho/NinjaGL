@@ -1,0 +1,106 @@
+// PlayerInspector
+.playerInspector {
+    color: #fff;
+    text-align: left;
+    padding: 10px;
+    position: relative;
+    .selectAnim {
+        padding: 10px;
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .select {
+            margin-top: 3px;
+        }
+    }
+    .selectType {
+        padding: 10px;
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+    .select {
+            margin-top: 3px;
+        }
+    }
+    .motionMapper {
+        padding: 10px;
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .mappers {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px;
+            .idle {
+                margin-bottom: 7px;
+            }
+            .walk {
+                margin-bottom: 7px;
+            }
+            .run {
+                margin-bottom: 7px;
+            }
+            .jump {
+                margin-bottom: 7px;
+            }
+            .action1 {
+                margin-bottom: 7px;
+            }
+            .addAction {
+                padding-top: 20px;
+                font-size: 14px;
+                text-align: center;                   
+                .btn {
+                    border-radius: 2px;
+                    padding: 7px 14px;
+                    background-color: #cac0c0;
+                    color: #000000;
+                    transition: background-color 0.5s;
+                    .icon {
+                        padding-right: 5px;
+                        svg {
+                            vertical-align: middle;
+                        }
+                    }
+                    &:hover {
+                        color: #43D9D9;
+                        background-color: #201f1f;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+    .save {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translate(-50%, 0);
+        width: 140px;
+        text-align: center;
+        .btn {
+            padding: 7px 14px;
+            background-color: #43D9D9;
+            color: #000000;
+            border-radius: 2px;
+            font-size: 12px;
+            user-select: none;
+            .icon {
+                padding-right: 5px;
+                svg {
+                    vertical-align: middle;
+                }
+            }
+            &:hover {
+                color: #ffffff;
+                background-color: #096775;
+                cursor: pointer;
+            }
+            transition: background-color 1s;
+        }
+    }
+}

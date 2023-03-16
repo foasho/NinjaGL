@@ -1,0 +1,209 @@
+.mainInspector {
+    .position {
+        width: 100%;
+        padding-top: 15px;
+        .title {
+            font-size: 12px;
+            font-weight: bolder;
+        }
+        .name {
+            width: 100%;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            font-size: 10px;
+            div {
+                color: #fff;
+                width: calc(33.33% - 5px);
+            }
+        }
+        .inputContainer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            input[type="text"] {
+                background-color: #3a3939;
+                color: #f2f2f2;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+                outline: none;
+                width: calc(33.33% - 20px); /* 幅を計算して指定する */
+                text-align: right;
+                margin-right: 10px; /* 右側に10pxのマージンを追加 */
+            }
+            input[type="text"]:focus {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+              }
+            input[type="text"]:last-child {
+                margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
+            }
+        }
+    }
+    .rotation {
+        width: 100%;
+        padding-top: 15px;
+        .title {
+            font-size: 12px;
+            font-weight: bolder;
+        }
+        .name {
+            width: 100%;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            font-size: 10px;
+            div {
+                color: #fff;
+                width: calc(33.33% - 5px);
+            }
+        }
+        .inputContainer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            input[type="text"] {
+                background-color: #3a3939;
+                color: #f2f2f2;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+                outline: none;
+                width: calc(33.33% - 20px); /* 幅を計算して指定する */
+                text-align: right;
+                margin-right: 10px; /* 右側に10pxのマージンを追加 */
+            }
+            input[type="text"]:focus {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+              }
+            input[type="text"]:last-child {
+                margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
+            }
+        }
+    }
+    .scale {
+        width: 100%;
+        padding-top: 15px;
+        .title {
+            font-size: 12px;
+            font-weight: bolder;
+        }
+        .name {
+            width: 100%;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            font-size: 10px;
+            div {
+                color: #fff;
+                width: calc(33.33% - 5px);
+            }
+        }
+        .inputContainer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            input[type="text"] {
+                background-color: #3a3939;
+                color: #f2f2f2;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+                outline: none;
+                width: calc(33.33% - 20px); /* 幅を計算して指定する */
+                text-align: right;
+                margin-right: 10px; /* 右側に10pxのマージンを追加 */
+            }
+            input[type="text"]:focus {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+              }
+            input[type="text"]:last-child {
+                margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
+            }
+        }
+    }
+
+    .material {
+        margin: 15px 0px;
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px 3px;
+        }
+        .type {
+            .name {
+                font-size: 12px;
+                font-weight: bolder;
+            }
+        }
+        .color {
+            margin-top: 10px;
+            .name {
+                font-size: 12px;
+                font-weight: bolder;
+            }
+            .pallet {
+                padding-top: 2px;
+                line-height: 30px;
+                display: flex;
+                vertical-align: middle;
+                input[type="color"] {
+                    cursor: pointer;
+                    background-color: transparent;
+                    width: 30px; /* 幅を指定する */
+                    height: 30px; /* 高さを指定する */
+                    padding: 0; /* パディングを0にする */
+                    border: none; /* ボーダーを消す */
+                    border-radius: 50%; /* 角丸にする */
+                    outline: none; /* アウトラインを消す */
+                    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* 影をつける */
+                }
+                input[type="text"] {
+                    font-size: 12px;
+                    background-color: #3a3939;
+                    color: #f2f2f2;
+                    border: none;
+                    padding: 7px 10px;
+                    border-radius: 5px;
+                    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+                    outline: none;
+                    width: 70%; /* 幅を計算して指定する */
+                    text-align: right;
+                    margin: auto;
+                }
+                input[type="text"]:focus {
+                    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+                  }
+                input[type="text"]:last-child {
+                    margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
+                }
+            }
+        }
+    }
+
+    .physics {
+        margin: 15px 0px;
+        .title {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px 3px;
+        }
+        .input {
+            display: inline-block;
+            padding-left: 10px;
+            .checkbox {
+                cursor: pointer;
+                accent-color: #43D9D9;
+                transform: scale(1.2);
+                vertical-align: middle;
+            }
+        }
+        .customCheckbox {
+
+        }
+    }
+}

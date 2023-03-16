@@ -1,26 +1,26 @@
-import { NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager"
+import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager"
 import { useContext, useEffect, useState } from "react"
 import { Object3D } from "three";
 
-export interface ITerrainProps {}
+export interface ITerrainProps { }
 
 export const Terrain = () => {
-    const engine = useContext(NaniwaEngineContext)
-    const [terrainObject, setTerrainObject] = useState<Object3D>();
-    useEffect(() => {
-        if (true){
-            setTerrainObject(engine.getTerrain().object)
-        }
-    }, [])
-    return (
+  const engine = useContext(NaniwaEngineContext)
+  const [terrainObject, setTerrainObject] = useState<Object3D>();
+  useEffect(() => {
+    if (true) {
+      setTerrainObject(engine.getTerrain().object)
+    }
+  }, [])
+  return (
+    <>
+      {terrainObject &&
         <>
-            {terrainObject &&
-                <>
-                    <mesh>
-                        <primitive object={terrainObject} />
-                    </mesh>
-                </>
-            }
+          <mesh>
+            <primitive object={terrainObject} />
+          </mesh>
         </>
-    )
+      }
+    </>
+  )
 }

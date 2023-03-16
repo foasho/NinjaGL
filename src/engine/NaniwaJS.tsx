@@ -1,41 +1,45 @@
-import { NaniwaEngine, NaniwaEngineContext } from "@/engine/core/NaniwaEngineManager";
-import { InitNaniwa } from "@/engine/core/NaniwaInit";
-import { INaniwaProps } from "@/engine/core/NaniwaProps";
+import { NaniwaEngine, NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
+import { InitNaniwa } from "@/engine/Core/NaniwaInit";
+import { INaniwaProps } from "@/engine/Core/NaniwaProps";
 import { useEffect, useState } from "react";
 import { NaniwaCanvas } from "./NaniwaCanvas";
 import { NaniwaUI } from "./NaniwaUI";
 
 export interface INaniwaJSProps {
-    jsonPath?: string;
-    canvasHeight?: any;
-    canvasWidth?: any; 
+  jsonPath?: string;
+  canvasHeight?: any;
+  canvasWidth?: any;
 }
 
 export const NaniwaJS = (props: INaniwaJSProps) => {
-    const [engine, setEngine] = useState<NaniwaEngine>();
-    useEffect(() => {
-        const _engine = new NaniwaEngine();
-        if (props.jsonPath && props.jsonPath.length > 3){
-            _engine.setJson(props.jsonPath);
-        }
-        setEngine(_engine);
-        return () => {
-            // if (engine){
-            //     engine.allClear();
-            //     setEngine(null);
-            // }
-        }
-    }, []);
+  const [engine, setEngine] = useState<NaniwaEngine>();
+  useEffect(() => {
+    const fetchEngine = async () => {
+      const _engine = new NaniwaEngine();
+      if (props.jsonPath && props.jsonPath.length > 3) {
+        await _engine.setJson(props.jsonPath);
+      }
+      else {
+        await _engine.setJson(defaultProjectJsonPath);
+      }
+      setEngine(_engine);
+    }
+    fetchEngine();
+    return () => {
+    }
+  }, []);
 
-    return (
-        <>
-            <div style={{ height: "100vh" }}>
-                {engine &&
-                    <NaniwaEngineContext.Provider value={engine}>
-                        <NaniwaCanvas/>
-                    </NaniwaEngineContext.Provider>
-                }
-            </div>
-        </>
-    )
+  return (
+    <>
+      <div id="naniwaviewer" style={{ height: "100%" }}>
+        {engine &&
+          <NaniwaEngineContext.Provider value={engine}>
+            <NaniwaCanvas />
+          </NaniwaEngineContext.Provider>
+        }
+      </div>
+    </>
+  )
 }
+
+const defaultProjectJsonPath = "savedata/default.json";

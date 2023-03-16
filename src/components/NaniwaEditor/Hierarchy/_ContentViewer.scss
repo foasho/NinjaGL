@@ -1,0 +1,125 @@
+.contentsbrowser {
+    flex: 6;
+    color: #fff;
+    background-color: $editorColor;
+    padding: 15px;
+    max-height: 35vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin; /* スクロールバーを細くする */
+    scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+    &::-webkit-scrollbar {
+        width: 4px; /* スクロールバーの幅を変更 */
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.5); /* スクロールバーの色を変更 */
+        border-radius: 3px; /* スクロールバーの丸みを追加 */
+    }
+    .pathName {
+        user-select: none;
+        .title {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            padding-right: 10px;
+            .home {
+                padding-left: 3px;
+                cursor: pointer;
+                vertical-align: middle;
+            }
+        }
+        .route {
+            cursor: pointer;
+            padding: 2px 3px;
+            letter-spacing: 2px;
+            font-size: 12px;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+    .itemContainer {
+        margin: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        position: relative;
+        max-height: 35vh;
+        .tooltip {
+            position: fixed;
+            user-select: none;
+            padding: 7px;
+            color: #fff;
+            background: rgba($color: #000000, $alpha: 0.8);
+            z-index: 99999;
+            display: none;
+            font-size: 10px;
+            width: auto;
+            border-radius: 6px;
+            text-align: left;
+        } 
+        .tooltip:before {
+            content: attr(data-text);
+            top: 100%;
+            left: 50%;
+            transform: translate(-50%, 5px);
+            display: none;
+            padding: 5x;
+            background-color: #333;
+            color: #fff;
+            font-size: 12px;
+            border-radius: 3px;
+            white-space: nowrap;
+            
+        }  
+        .tooltip:hover:before {
+            display: block;
+        }    
+        .itemCard {
+            flex-basis: calc(33.333% - 5px);
+            box-sizing: border-box;
+            margin-bottom: 5px;
+            justify-content: center;
+            align-items: center;
+            max-width: 50px;
+            text-align: center;
+            display: "inline-block";
+            padding: 2px;
+            .icon {
+                border-radius: 5px;
+                background-color: #413f3f;
+                text-align: center;
+                height: 50px;
+                width: 100%;
+                margin: auto;
+                .iconImg {
+                    padding: 6px 3px 3px 3px;
+                    width: 80%;
+                    margin: auto;
+                    max-height: 40px;
+                    font-size: 32px;
+                }
+                svg {
+                    padding-top: 8px;
+                    user-select: none;
+                    cursor: pointer;
+                }
+                img {
+                    cursor: grab;
+                }
+            }
+            .itemName {
+                text-align: center;
+                font-size: 10px;
+                padding-top: 3px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                line-height: 1;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2; /* 表示する行数 */
+                white-space: pre;
+            }
+        }
+    }
+}
