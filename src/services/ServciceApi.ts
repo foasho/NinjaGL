@@ -16,11 +16,12 @@ export const sapi = axios.create({
 });
 
 export interface IApiProps {
-  route: "filesize" | "uploadgltf" | "assets";
+  route: "filesize" | "uploadgltf" | "assets" | "savescript" | "saveshader";
   queryObject?: { [key: string]: string | number };
   method?: "GET" | "POST";
   contentType?: "json" | "form";
   formData?: FormData;
+  data?: any;
 }
 
 /**
@@ -63,7 +64,8 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
       sapi.options(BASE_URL, { headers: { 'Content-Type': 'application/json;charset=utf-8' } });
     }
     return await sapi.post(
-      "/api/" + props.route + query
+      "/api/" + props.route + query,
+      props.data
     )
   }
 }

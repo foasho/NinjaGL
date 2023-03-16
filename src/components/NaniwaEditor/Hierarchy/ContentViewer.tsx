@@ -183,12 +183,15 @@ export const ContentViewer = (props: IFileProps) => {
     console.log("非表示にする");
   }
 
-  const onDoubleClick = () => {
+  const onDoubleClick = (type: string) => {
     if (props.isDirectory) {
       const newRoute = editor.assetRoute + "/" + props.name;
       if (props.onDoubleClick) {
         props.onDoubleClick("directory", newRoute);
       }
+    }
+    else if (props.isFile && type == "js"){
+      props.onChangeScriptPath(`${editor.assetRoute}/${props.name}`);
     }
   }
 
@@ -208,7 +211,7 @@ export const ContentViewer = (props: IFileProps) => {
   return (
     <>
       <div
-        onDoubleClick={(e) => onDoubleClick()}
+        onDoubleClick={(e) => onDoubleClick(contentsSelectType)}
         className={styles.itemCard}
         onDragStart={(e) => onDragStart()}
         onDragEnd={(e) => onDragEnd()}

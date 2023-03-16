@@ -29,6 +29,7 @@ export interface IFileProps {
   isFile: boolean;
   isDirectory: boolean;
   name: string;
+  onChangeScriptPath: (path: string) => void;
   onDoubleClick?: (type: string, value: string) => void;
 }
 
@@ -36,6 +37,7 @@ export const NaniwaEditor = () => {
   const editor = useContext(NaniwaEditorContext);
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
   const [files, setFiles] = useState<IFileProps[]>([]);
+  const [scriptPath, setScriptPath] = useState<string>();
 
   const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
@@ -136,14 +138,23 @@ export const NaniwaEditor = () => {
     }
   }
 
+  /**
+   * 言語選択
+   */
   const onClickSelectLang = () => {
     Swal.fire("注意", "現在は日本語のみ対応です。\nCurrently, we only support Japanese.");
   }
 
+  /**
+   * テンプレート選択
+   */
   const onClickSelectTemplate = () => {
     Swal.fire("注意", "現在ゲームテンプレートの準備中です。");
   }
 
+  /**
+   * プレイモードと編集モードの切り替え
+   */
   const onPlayStop = () => {
     if (viewSelect == "debugplay"){
       setViewSelect("mainview");
@@ -153,6 +164,17 @@ export const NaniwaEditor = () => {
     }
   }
 
+  /**
+   * JSScriptで特定のスクリプトを開く
+   */
+  const changeScriptEditor = (scriptPath: string) => {
+    setScriptPath(scriptPath);
+    setViewSelect("scripteditor");
+  }
+
+  /**
+   * プロジェクト全体を保存
+   */
   const onSave = () => {
     toast('保存しました!!', {
       position: "top-right",
@@ -235,7 +257,10 @@ export const NaniwaEditor = () => {
               <div className={styles.itemContainer}>
                 {files.map((file) => {
                   return (
-                    <ContentViewer {...file} onDoubleClick={onDoubleClick} />
+                    <ContentViewer 
+                      {...file} onDoubleClick={onDoubleClick}
+                      onChangeScriptPath={changeScriptEditor}
+                    />
                   )
                 })}
               </div>
@@ -313,7 +338,7 @@ export const NaniwaEditor = () => {
               }
               {viewSelect == "scripteditor" &&
                 <>
-                  <ScriptEditor />
+                  <ScriptEditor scriptPath={scriptPath} onChangeScriptPath={changeScriptEditor}/>
                 </>
               }
               {viewSelect == "shadereditor" &&

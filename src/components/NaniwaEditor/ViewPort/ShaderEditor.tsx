@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
 import MonacoEditor from "@monaco-editor/react";
 import type { languages } from 'monaco-editor'
+import { toast } from 'react-toastify';
 
 interface IShaderEditor {
   shaderPath?: number;
@@ -18,6 +19,27 @@ export const ShaderEditor = (props: IShaderEditor) => {
   const saveCode = async() => {
     if (!scriptPath){
       // 新規作成の場合は、ファイル名を名付ける
+    }
+  }
+
+  /**
+   * 保存
+   */
+  const onSave = () => {
+    if (scriptPath){
+      toast('保存しました', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+    else {
+
     }
   }
 
@@ -80,6 +102,12 @@ export const ShaderEditor = (props: IShaderEditor) => {
       controller.abort();
     };
   }, [scriptPath]);
+
+  let filename = "* 名称未設定スクリプト";
+  if (scriptPath){
+    const len = scriptPath.split("/").length;
+    filename = scriptPath.split("/")[len - 1];
+  }
 
   return (
     <>

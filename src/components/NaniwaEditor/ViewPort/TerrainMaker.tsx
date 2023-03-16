@@ -1,5 +1,5 @@
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { Environment, OrbitControls, SpotLight } from "@react-three/drei";
+import { Environment, GizmoHelper, GizmoViewport, OrbitControls, SpotLight } from "@react-three/drei";
 import { useContext, useEffect, useState, useRef } from "react";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 import {
@@ -197,7 +197,9 @@ const TerrainMakeComponent = () => {
         <planeGeometry args={[terrainManager.mapSize, terrainManager.mapSize, terrainManager.mapResolution, terrainManager.mapResolution]} />
         <meshStandardMaterial ref={matRef} wireframe={true} side={DoubleSide} />
       </mesh>
-
+      <GizmoHelper alignment="top-right" margin={[75, 75]}>
+          <GizmoViewport labelColor="white" axisHeadScale={1} />
+      </GizmoHelper>
       <SpotLight
         ref={lightRef}
         angle={MathUtils.degToRad(45)}

@@ -178,7 +178,7 @@ const SystemHelper = () => {
   return (
     <>
       <gridHelper args={[4096, 4096]} />
-      <GizmoHelper alignment="top-right" margin={[100, 100]}>
+      <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
     </>

@@ -58,14 +58,36 @@ export const TerrainInspector = () => {
   }
 
   const changeMapSize = (e) => {
-    if (e.target.value && Number(e.target.value) > 0) {
+    if (
+      e.target.value && Number(e.target.value) > 0 &&
+      e.target.value && Number(e.target.value) < 4096
+    ) {
       setMapSize(Number(e.target.value));
+    }
+    else if (e.target.value && Number(e.target.value) >= 4096){
+      Swal.fire(
+        {
+          icon: 'error',
+          title: '値が大きすぎます'
+        }
+      )
     }
   }
 
   const changeMapResolution = (e) => {
-    if (e.target.value && Number(e.target.value) > 0) {
+    if (
+      e.target.value && Number(e.target.value) > 0 &&
+      e.target.value && Number(e.target.value) < 4096
+    ) {
       setMapResolution(Number(e.target.value));
+    }
+    else if (e.target.value && Number(e.target.value) >= 4096){
+      Swal.fire(
+        {
+          icon: 'error',
+          title: '値が大きすぎます'
+        }
+      )
     }
   }
 
@@ -151,16 +173,22 @@ export const TerrainInspector = () => {
         <div className={styles.title}>
           ワイヤーフレーム
         </div>
-        <div className={styles.select}>
-          <span onClick={() => changeWF()}>
-            {wf ? "表示" : "非表示"}
-          </span>
+        <div className={styles.input}>
+          <input 
+            className={styles.checkbox} 
+            type="checkbox" 
+            onInput={() => changeWF()} 
+            checked={wf} 
+          />
         </div>
       </div>
-      <div className={styles.strength}>
-        <div>変形させる強さ</div>
+      <div className={styles.range}>
+        <div className={styles.title}>
+          変形させる強さ
+        </div>
         <div>
           <input
+            className={styles.customRange}
             type={"range"}
             value={power}
             onInput={(e) => changePower(e)}
@@ -171,9 +199,12 @@ export const TerrainInspector = () => {
         </div>
       </div>
       <div className={styles.range}>
-        <div>変形させる範囲</div>
+        <div className={styles.title}>
+          変形させる範囲
+        </div>
         <div>
           <input
+          className={styles.customRange}
             type={"range"}
             value={radius}
             onInput={(e) => changeRadius(e)}
@@ -183,34 +214,31 @@ export const TerrainInspector = () => {
           />
         </div>
       </div>
-      <div className={styles.material}>
-        <div>色</div>
-        <div>
+      <div className={styles.inputArea}>
+        <div className={styles.name}>
+          <div></div>
+          <div>サイズ</div>
+          <div></div>
+          <div>解像度</div>
+        </div>
+        <div className={styles.inputContainer}>
           <input
             type={"color"}
             value={color}
             onInput={(e) => changeColor(e)}
           />
+          <input type={"text"} min={1} max={4096} value={mapSize} onChange={(e) => changeMapSize(e)} />
+          <input type={"text"} min={4} max={4096} value={mapResolution} onChange={(e) => changeMapResolution(e)} />
         </div>
       </div>
-      <div className={styles.size}>
-        <div>サイズ</div>
-        <div>
-          <input type={"number"} min={1} value={mapSize} onChange={(e) => changeMapSize(e)} />
-        </div>
-      </div>
-      <div className={styles.resolution}>
-        <div>解像度</div>
-        <div>
-          <input type={"number"} min={4} value={mapResolution} onChange={(e) => changeMapResolution(e)} />
-        </div>
-      </div>
-      <div>
-        <button onClick={() => updateMap()}>変更を反映</button>
+      <div className={styles.change}>
+        <a className={styles.btn} onClick={() => updateMap()}>
+          変更を反映
+        </a>
       </div>
       <div className={styles.save}>
-        <a onClick={() => saveTerrain()} >
-          モデルを保存
+        <a className={styles.btn} onClick={() => saveTerrain()} >
+          地形モデルを保存
         </a>
       </div>
     </div>

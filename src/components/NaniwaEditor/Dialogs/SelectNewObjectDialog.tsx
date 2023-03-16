@@ -1,6 +1,9 @@
 import styles from "@/App.module.scss";
 import { useState } from "react";
 import ReactDOM from "react-dom";
+import { AiOutlineCodeSandbox } from "react-icons/ai";
+import { BiCapsule, BiCylinder, BiRectangle } from "react-icons/bi";
+import { ImSphere } from "react-icons/im";
 
 interface IResponse {
   response: (data: ISelectNewObjectDialog) => void;
@@ -17,6 +20,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   }
   const selectSky = (value: string) => {
     prop.response({ type: "sky", value: value });
+  }
+  const selectObj = (value: string) => {
+    prop.response({ type: "object", value: value });
   }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
@@ -56,6 +62,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
               <div className={styles.name}>
                 音源
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("object")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/object.png"/>
+              </div>
+              <div className={styles.name}>
+                3D<br/>
+                オブジェクト
               </div>
             </div>
           </>
@@ -118,6 +133,51 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
             </>
           }
+
+          {selectType == "object" &&
+          <>
+            <div className={styles.card} onClick={() => {selectObj("box")}} >
+              <div className={styles.objicon}>
+                <AiOutlineCodeSandbox/>
+              </div>
+              <div className={styles.name}>
+                立方体
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectObj("sphere")}} >
+              <div className={styles.objicon}>
+                <ImSphere/>
+              </div>
+              <div className={styles.name}>
+                球体
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectObj("plane")}} >
+              <div className={styles.objicon}>
+                <BiRectangle/>
+              </div>
+              <div className={styles.name}>
+                平面
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectObj("capsule")}} >
+              <div className={styles.objicon}>
+                <BiCylinder/>
+              </div>
+              <div className={styles.name}>
+                円柱
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectLight("point")}} >
+              <div className={styles.objicon}>
+                <BiCapsule/>
+              </div>
+              <div className={styles.name}>
+                カプセル型
+              </div>
+            </div>
+          </>
+          }
         </div>
       </div>
     </div>
@@ -127,7 +187,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound";
+  type: "light" | "sky" | "sound" | "object";
   value: string;
 }
 /**

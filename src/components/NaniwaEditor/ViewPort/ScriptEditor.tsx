@@ -1,22 +1,104 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
 import MonacoEditor from "@monaco-editor/react";
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import { reqApi } from '@/services/ServciceApi';
 
 interface IScriptEditor {
-  scriptPath?: number;
+  scriptPath: string;
+  onChangeScriptPath: (path: string) => void;
 }
 export const ScriptEditor = (props: IScriptEditor) => {
-  const code = useRef<string>(initCode);
-  const [scriptPath, setScriptPath] = useState<string>(null);
+  const [code, setCode] = useState<string>(initCode);
+  const [isPreview, setIsPreview] = useState<boolean>(false);
+  const { scriptPath } = props;
 
   const handleEditorChange = (value) => {
-    code.current = value;
+    setCode(value);
   };
 
-  const saveCode = async() => {
-    if (!scriptPath){
-      // 新規作成の場合は、ファイル名を名付ける
+  /**
+   * コードを保存する
+   * @param script 
+   * @param filename 
+   * @returns 
+   */
+  const saveCode = async(script: string, filename: string) => {
+    return reqApi({ 
+      route: "savescript",
+      data: { script: script, filename: filename } ,
+      method: "POST"
+    })
+  }
+
+  /**
+   * 保存
+   */
+  const onSave = async () => {
+    if (scriptPath){
+      const len = scriptPath.split("/").length;
+      const filename = scriptPath.split("/")[len - 1];
+      await saveCode(code, filename);
+      toast('保存しました', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
+    else {
+      Swal.fire({
+        title: 'ファイル名を決めてください',
+        input: 'text',
+        showCancelButton: true,
+        confirmButtonText: '保存',
+        showLoaderOnConfirm: true,
+        preConfirm: async (inputStr: string) => {
+          //バリデーションを入れたりしても良い
+          if (inputStr.length == 0) {
+            return Swal.showValidationMessage('1文字以上いれてね');
+          }
+          return inputStr.replace(".js", "");
+        },
+        allowOutsideClick: function () {
+          return !Swal.isLoading();
+        }
+      }).then( async (result) => {
+        if (result.value) {
+          const filename = result.value + ".js";
+          await saveCode(code, filename);
+          toast('保存しました', {
+            position: "top-right",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          props.onChangeScriptPath("scripts/"+filename);
+        }
+      });
+    }
+  }
+  const handlerSave = (event) => {
+    if (event.ctrlKey && event.key === 's') {
+      event.preventDefault();
+      onSave();
+    }
+  } 
+
+  /**
+   * プレビュー
+   */
+  const onPreview = () => {
+
   }
 
   /**
@@ -32,9 +114,8 @@ export const ScriptEditor = (props: IScriptEditor) => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
-          const jsonData = await response.json();
-          code.current = jsonData;
-          setScriptPath(scriptPath);
+          const data = await response.text();
+          setCode(data);
         } catch (error) {
           if (error.name === 'AbortError') {
             console.log('Fetch aborted');
@@ -45,22 +126,41 @@ export const ScriptEditor = (props: IScriptEditor) => {
       };
       fetchData();
     }
+    // 保存をオーバーライド
+    document.addEventListener('keydown', handlerSave);
     return () => {
+      document.removeEventListener('keydown', handlerSave);
       controller.abort();
     };
   }, [scriptPath]);
 
+  let filename = "* 名称未設定スクリプト";
+  if (scriptPath){
+    const len = scriptPath.split("/").length;
+    filename = scriptPath.split("/")[len - 1];
+  }
+
   return (
     <>
+    <div className={styles.scriptEditor}>
       <div className={styles.navigation}>
+        <div className={styles.filename}>
+          {filename}
+        </div>
+        <div className={styles.save} onClick={() => onSave()}>
+          Save
+        </div>
+        <div className={styles.preview} onClick={() => onPreview()}>
+          Preview
+        </div>
       </div>
-      <div style={{ height: "100%", width: "100%", background: "#838383" }}>
+      <div className={styles.editor}>
         <MonacoEditor
           height="100%"
           width="100%"
           language="javascript"
           theme="vs-dark"
-          value={code.current}
+          value={code}
           onChange={handleEditorChange}
           options={{
             selectOnLineNumbers: true,
@@ -71,6 +171,7 @@ export const ScriptEditor = (props: IScriptEditor) => {
           }}
         />
       </div>
+    </div>
     </>
   )
 }
