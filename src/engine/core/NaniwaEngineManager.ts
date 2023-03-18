@@ -272,20 +272,12 @@ export class NaniwaEngine {
               this.oms.push(obj);
             }
             else if (jsonData[key].object){
-              // const cloneObj: Object3D = jsonData[key].object.clone();
-              // console.log("parameter chack");
-              // console.log(cloneObj);
-              // cloneObj.animations = jsonData[key].animations;
               const obj: IObjectManagement = {
                 ...jsonData[key], 
-                // object: cloneObj,
-                // // animations: cloneObj.animations,
-                // mixer: new AnimationMixer(cloneObj)
               }
-              console.log(obj);
               // パラメータにisCenterがついていれば半径分ずらす
               if (obj.args.isCenter){
-                console.log("avatar -> isCenter");
+                console.log("Avatar -> isCenter");
                 AvatarDataSetter({
                   object: obj.object,
                   isCenter: true,

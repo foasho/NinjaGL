@@ -154,11 +154,7 @@ export const ContentViewer = (props: IFileProps) => {
   }
 
   const viewTooltip = () => {
-    console.log("表示するよん");
     tooltip.current.style.display = "block";
-    if (icon && props.isFile) {
-      console.log("実際に表示");
-    }
   }
 
   const onHover = (e) => {
@@ -180,7 +176,6 @@ export const ContentViewer = (props: IFileProps) => {
       clearTimeout(tooltipTimer)
     }
     tooltip.current.style.display = "none";
-    console.log("非表示にする");
   }
 
   const onDoubleClick = (type: string) => {
