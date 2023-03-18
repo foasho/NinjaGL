@@ -49,8 +49,9 @@ export const MainViewer = () => {
         type == "ter" ||
         type == "avt"
       ) {
+        const filePath = editor.contentsSelectPath;
         loader.load(
-          editor.contentsSelectPath,
+          filePath,
           async (gltf) => {
             const scene = gltf.scene || gltf.scenes[0] as Object3D;
             scene.traverse((node: Mesh) => {
@@ -65,7 +66,7 @@ export const MainViewer = () => {
               // Animationがあればセットする
               editor.setObjectManagement({
                 id: generateUUID(),
-                filePath: editor.contentsSelectPath,
+                filePath: filePath,
                 type: "object",
                 physics: "aabb",
                 visiableType: "auto",
@@ -81,7 +82,7 @@ export const MainViewer = () => {
             if (type == "ter") {
               editor.setObjectManagement({
                 id: generateUUID(),
-                filePath: editor.contentsSelectPath,
+                filePath: filePath,
                 type: "terrain",
                 physics: "along",
                 visiableType: "force",
@@ -92,7 +93,7 @@ export const MainViewer = () => {
             if (type == "avt") {
               editor.setObjectManagement({
                 id: generateUUID(),
-                filePath: editor.contentsSelectPath,
+                filePath: filePath,
                 type: "avatar",
                 physics: "aabb",
                 visiableType: "force",
@@ -135,7 +136,8 @@ export const MainViewer = () => {
           async (err) => {
             console.log("モデル読み込みエラ―");
             console.log(err);
-          }
+          },
+          
         )
       }
     }

@@ -3,6 +3,8 @@ import { IObjectManagement } from "@/engine/Core/NaniwaProps";
 import { useRef, useContext, useEffect, useState } from "react";
 import { NaniwaEditorContext } from "../NaniwaEditorManager";
 import Select from 'react-select';
+import { reqApi } from "@/services/ServciceApi";
+import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
 
 export const MainViewInspector = () => {
   const editor = useContext(NaniwaEditorContext);
@@ -16,6 +18,7 @@ export const MainViewInspector = () => {
   const refScaY = useRef<HTMLInputElement>();
   const refScaZ = useRef<HTMLInputElement>();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
+  const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [selectOM, setSelectOM] = useState<IObjectManagement>(null);
   const id = selectOM? selectOM.id: null;
@@ -60,8 +63,39 @@ export const MainViewInspector = () => {
     { value: "along", label: "形状に従う" }
   ]
 
+  /**
+   * 物理判定の有無
+   * @param selectPhysics 
+   */
   const onChangePhysics = (selectPhysics) => {
     setPhysics(selectPhysics);
+  }
+
+  /**
+   * LoD対応
+   */
+  const onCheckLoD = async () => {
+    if (!isLod && selectOM.filePath ){
+      const data = await reqApi({route: "createlod", queryObject: { 
+        filePath: selectOM.filePath 
+      }});
+      if (data.status == 200){
+        setIsLod(!isLod);
+      }
+    }
+    else {
+      setIsLod(!isLod);
+    }
+  }
+
+  /**
+   * Lodを確認する
+   */
+  const onLoDView = async () => {
+    console.log(selectOM.filePath);
+    if (selectOM.filePath && selectOM.filePath.length > 3){
+      const data = await showLoDViewDialog(selectOM.filePath);
+    }
   }
 
   return (
@@ -164,6 +198,27 @@ export const MainViewInspector = () => {
               </>
             }
           </div>
+          {selectOM.type == "object" && 
+          <div className={styles.lod}>
+            <div className={styles.title}>
+              LoD対応の有無
+            </div>
+            <div className={styles.input}>
+              <input 
+                type="checkbox" 
+                className={styles.checkbox} 
+                checked={isLod} 
+                onInput={() => onCheckLoD()}
+              />
+              <span className={styles.customCheckbox}></span>
+            </div>
+            {isLod &&
+              <a className={styles.lodbtn} onClick={() => onLoDView()}>
+                LoDモデルを確認
+              </a>
+            }
+          </div>
+          }
         </div>
       }
       {(selectOM && selectOM.type == "light") &&

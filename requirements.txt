@@ -1,0 +1,2 @@
+fastapi==0.92.0
+pymesh==1.0.2
