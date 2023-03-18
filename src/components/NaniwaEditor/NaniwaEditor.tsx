@@ -24,6 +24,7 @@ import { PlayerInspector } from "./Inspector/PlayerInspector";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
+import { useSpeechRecognition } from "@/engine/Addons/SpeechRecognitionHelper";
 
 export interface IFileProps {
   size: number;

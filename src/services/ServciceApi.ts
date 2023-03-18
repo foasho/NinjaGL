@@ -7,7 +7,7 @@ const BASE_URL = (process.env.REACT_APP_ENV == "prod") ? process.env.REACT_APP_E
 // API 基本設定
 export const sapi = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000,
+  timeout: 500000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
     // 'Access-Control-Allow-Origin': '*'
@@ -16,7 +16,7 @@ export const sapi = axios.create({
 });
 
 export interface IApiProps {
-  route: "filesize" | "uploadgltf" | "assets" | "savescript" | "saveshader";
+  route: "filesize" | "uploadgltf" | "assets" | "savescript" | "saveshader" | "createlod";
   queryObject?: { [key: string]: string | number };
   method?: "GET" | "POST";
   contentType?: "json" | "form";
