@@ -15,3 +15,10 @@ export const rtdp = (number: number, decimalPlaces: number): number => {
   const factor = Math.pow(10, decimalPlaces);
   return Math.round(number * factor) / factor;
 }
+
+/**
+ * 数値化できるかどうか
+ */
+export const isNumber = (value):boolean => {
+  return typeof value === 'string' && !isNaN(Number(value));
+}

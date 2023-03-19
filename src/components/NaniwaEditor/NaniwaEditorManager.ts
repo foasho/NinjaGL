@@ -128,11 +128,7 @@ export class NaniwaEditorManager {
   setPosition(id: string, position: Vector3) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.args.position = new Vector3().set(
-        rtdp(position.x, this.transformDecimal),
-        rtdp(position.y, this.transformDecimal),
-        rtdp(position.z, this.transformDecimal)
-      );
+      target.args.position = new Vector3().copy(position);
     }
   }
 
@@ -144,11 +140,7 @@ export class NaniwaEditorManager {
   setScale(id: string, scale: Vector3) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.args.scale = new Vector3().set(
-        rtdp(scale.x, this.transformDecimal),
-        rtdp(scale.y, this.transformDecimal),
-        rtdp(scale.z, this.transformDecimal)
-      );
+      target.args.scale = new Vector3().copy(scale);
     }
   }
 
@@ -160,11 +152,7 @@ export class NaniwaEditorManager {
   setRotation(id: string, rotation: Euler) {
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.args.rotation = new Euler().set(
-        rtdp(rotation.x, this.transformDecimal),
-        rtdp(rotation.y, this.transformDecimal),
-        rtdp(rotation.z, this.transformDecimal)
-      );
+      target.args.rotation = new Euler().copy(rotation);
     }
   }
 
@@ -180,6 +168,25 @@ export class NaniwaEditorManager {
     }
     return target.args.position;
   }
+
+    /**
+   * Editor InspectorからFocusされてるか
+   * @param id 
+   * @param focusFlag
+   */
+    setFocus(id: string, focusFlag: boolean) {
+      const target = this.oms.find(om => om.id == id);
+      if (id && target) {
+        target.args.focus = focusFlag;
+      }
+    }
+    getFocus(id: string): boolean{
+      const target = this.oms.find(om => om.id == id);
+      if (target) {
+        return target.args.focus;
+      }
+      return false;
+    }
 
   /**
    * 特定のオブジェクトの回転率を取得

@@ -60,6 +60,7 @@ const StaticObject = (props: IStaticObject) => {
   const editor = useContext(NaniwaEditorContext);
   const [visible, setVisible] = useState<boolean>(false);
   const handleDrag = useRef<boolean>(false);
+  const editorData = useRef<{ focus: boolean; position: Vector3, rotation: Euler }>({ focus: false, position: new Vector3(), rotation: new Euler() });
   const id = props.om.id;
 
   // Get Size
@@ -103,9 +104,13 @@ const StaticObject = (props: IStaticObject) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
+    const isFocus = editor.getFocus(id);
+    if (!isFocus){
+      console.log(position);
+      editor.setPosition(id, position);
+      editor.setScale(id, scale);
+      editor.setRotation(id, rotation);
+    }
     handleDrag.current = true;
   }
 
@@ -127,12 +132,19 @@ const StaticObject = (props: IStaticObject) => {
   }
   else if (props.om.physics == "aabb" && visible){
   }
-  useHelper(visible && ref, BoxHelper);
+  useHelper((visible && props.om.physics != "none") && ref, BoxHelper);
 
   useFrame((_, delta) => {
     const isNowSelect = (editor.getSelectOM() == props.om)?true: false;
     if (visible != isNowSelect){
       setVisible(isNowSelect);
+    }
+    editorData.current.focus = editor.getFocus(id);
+    if (editorData.current.focus){
+      const pos = editor.getPosition(id);
+      editorData.current.position = new Vector3().copy(pos);
+      const rot = editor.getRotation(id);
+      editorData.current.rotation = new Euler().copy(rot);
     }
   });
 
@@ -147,6 +159,7 @@ const StaticObject = (props: IStaticObject) => {
         onDrag={(e) => onDrag(e)}
         onDragStart={() => onDragStart()}
         onDragEnd={() => onDragEnd()}
+        userData={editorData.current}
       />
       <primitive
         object={object}

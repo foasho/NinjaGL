@@ -77,19 +77,10 @@ export const MyLight = (prop: ILightProps) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    if (editor.mode == "position") {
-      editor.setPosition(id, position);
-    }
-    else if (editor.mode == "scale") {
-      editor.setScale(id, scale);
-    }
+    editor.setPosition(id, position);
+    editor.setScale(id, scale);
     editor.setRotation(id, rotation);
     handleDrag.current = true;
-    itemsRef.current.map(item => {
-      item.position.copy(position);
-      item.rotation.copy(rotation);
-      item.scale.copy(scale);
-    })
   }
 
   useFrame((_, delta) => {

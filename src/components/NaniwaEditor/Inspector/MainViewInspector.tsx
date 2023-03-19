@@ -5,6 +5,9 @@ import { NaniwaEditorContext } from "../NaniwaEditorManager";
 import Select from 'react-select';
 import { reqApi } from "@/services/ServciceApi";
 import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
+import { Euler, Vector3 } from "three";
+import { isNumber } from "@/commons/functional";
+import { degToRad, radToDeg } from "three/src/math/MathUtils";
 
 export const MainViewInspector = () => {
   const editor = useContext(NaniwaEditorContext);
@@ -17,38 +20,63 @@ export const MainViewInspector = () => {
   const refScaX = useRef<HTMLInputElement>();
   const refScaY = useRef<HTMLInputElement>();
   const refScaZ = useRef<HTMLInputElement>();
+  const [isFocus, setIsFocus] = useState<boolean>();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [selectOM, setSelectOM] = useState<IObjectManagement>(null);
   const id = selectOM? selectOM.id: null;
 
+  editor.setFocus(id, isFocus);
+
   useEffect(() => {
     const interval = setInterval(() => {
       myFrame();
     }, 1000 / 10);
     return () => clearInterval(interval);
-  }, [selectOM])
+  }, [selectOM, isFocus])
 
   const myFrame = () => {
     if (id){
       const position = editor.getPosition(id);
-      if (position && selectOM.type == "object") {
-        refPosX.current.value = position.x.toString();
-        refPosY.current.value = position.y.toString();
-        refPosZ.current.value = position.z.toString();
+      if (
+        position && 
+        (
+          selectOM.type == "object" || 
+          selectOM.type == "light"
+        )
+      ) {
+        if (!isFocus){
+          refPosX.current.value = position.x.toFixed(2).toString();
+          refPosY.current.value = position.y.toFixed(2).toString();
+          refPosZ.current.value = position.z.toFixed(2).toString();
+        }
+        else {
+
+        }
       }
       const rotation = editor.getRotation(id);
-      if (rotation && selectOM.type == "object") {
-        refRotX.current.value = rotation.x.toString();
-        refRotY.current.value = rotation.y.toString();
-        refRotZ.current.value = rotation.z.toString();
+      if (
+        rotation && (
+          selectOM.type == "object" || 
+          selectOM.type == "light"
+        )
+      ) {
+        if (!isFocus){
+          refRotX.current.value = radToDeg(rotation.x).toFixed(0).toString();
+          refRotY.current.value = radToDeg(rotation.y).toFixed(0).toString();
+          refRotZ.current.value = radToDeg(rotation.z).toFixed(0).toString();
+        }
       }
       const scale = editor.getScale(id);
-      if (scale && selectOM.type == "object") {
-        refScaX.current.value = scale.x.toString();
-        refScaY.current.value = scale.y.toString();
-        refScaZ.current.value = scale.z.toString();
+      if (scale && (
+        selectOM.type == "object"
+      )) {
+        if (!isFocus){
+          refScaX.current.value = scale.x.toFixed(2).toString();
+          refScaY.current.value = scale.y.toFixed(2).toString();
+          refScaZ.current.value = scale.z.toFixed(2).toString();
+        }
       }
     }
     if (selectOM != editor.getSelectOM()){
@@ -56,7 +84,67 @@ export const MainViewInspector = () => {
     }
   }
 
-  const changePosition = (e, xyz) => { }
+  /**
+   * 位置変更　Inspector -> Object
+   * @param e 
+   * @param xyz 
+   */
+  const changePosition = (e, xyz: "x" | "y" | "z") => { 
+    const targetValue = e.target.value;
+    const newPosition: Vector3 = selectOM.args.position.clone();
+    if (xyz == "x") {
+      if (isNumber(targetValue)){
+        newPosition.setX(Number(targetValue));
+      }
+      refPosX.current.value = targetValue;
+    }
+    else if (xyz == "y") {
+      if (isNumber(targetValue)){
+        newPosition.setY(Number(targetValue));
+      }
+      refPosX.current.value = targetValue;
+    }
+    else if (xyz == "z") {
+      if (isNumber(targetValue)){
+        newPosition.setZ(Number(targetValue));
+      }
+      refPosX.current.value = targetValue;
+    }
+    editor.setPosition(id, newPosition);
+    // 変更後1秒
+  }
+
+  /**
+   * 回転変更　Inspector -> Object
+   * @param e 
+   * @param xyz 
+   */
+  const changeRotation = (e, xyz: "x" | "y" | "z") => { 
+    const targetValue = e.target.value;
+    const newRotation: Euler = selectOM.args.rotation.clone();
+    if (xyz == "x") {
+      if (isNumber(targetValue)){
+        const targetRad = degToRad(targetValue);
+        newRotation.set(Number(targetRad), newRotation.y, newRotation.z);
+      }
+      refRotX.current.value = targetValue;
+    }
+    else if (xyz == "y") {
+      if (isNumber(targetValue)){
+        const targetRad = degToRad(targetValue);
+        newRotation.set(newRotation.x, Number(targetRad), newRotation.z);
+      }
+      refRotY.current.value = targetValue;
+    }
+    else if (xyz == "z") {
+      if (isNumber(targetValue)){
+        const targetRad = degToRad(targetValue);
+        newRotation.set(newRotation.x, newRotation.y, Number(targetRad));
+      }
+      refRotZ.current.value = targetValue;
+    }
+    editor.setRotation(id, newRotation);
+  }
 
   const physicsOptions = [
     { value: "aabb", label: "無回転BOX(AABB)" },
@@ -98,16 +186,24 @@ export const MainViewInspector = () => {
     }
   }
 
+  const focusChange = (flag: boolean) => {
+    editor.setFocus(id, flag);
+    setIsFocus(flag);
+  }
+
   return (
     <>
+    <div className={styles.mainInspector}>
       {(
         selectOM &&
         (
           selectOM.type == "object" ||
-          selectOM.type == "avatar"
+          selectOM.type == "avatar" ||
+          selectOM.type == "light"
         )
       ) &&
-        <div className={styles.mainInspector}>
+        
+        <>
           <div className={styles.position}>
             <div className={styles.title}>
               位置
@@ -118,9 +214,30 @@ export const MainViewInspector = () => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refPosX} type="text" placeholder="0" value={selectOM.object.position.x} onChange={(e) => changePosition(e, "x")} />
-              <input ref={refPosY} type="text" placeholder="0" value={selectOM.object.position.y} onChange={(e) => changePosition(e, "y")} />
-              <input ref={refPosZ} type="text" placeholder="0" value={selectOM.object.position.z} onChange={(e) => changePosition(e, "z")} />
+              <input 
+                ref={refPosX} 
+                type="text" 
+                placeholder="0" 
+                onInput={(e) => changePosition(e, "x")} 
+                onFocus={() => focusChange(true)}
+                onBlur={() => focusChange(false)}
+              />
+              <input 
+                ref={refPosY} 
+                type="text" 
+                placeholder="0" 
+                onChange={(e) => changePosition(e, "y")} 
+                onFocus={() => focusChange(true)}
+                onBlur={() => focusChange(false)}
+              />
+              <input 
+                ref={refPosZ} 
+                type="text" 
+                placeholder="0" 
+                onChange={(e) => changePosition(e, "z")} 
+                onFocus={() => focusChange(true)}
+                onBlur={() => focusChange(false)}
+              />
             </div>
           </div>
           <div className={styles.rotation}>
@@ -133,26 +250,52 @@ export const MainViewInspector = () => {
               <div>Z</div>
             </div>
             <div className={styles.inputContainer}>
-              <input ref={refRotX} type="text" placeholder="0" />
-              <input ref={refRotY} type="text" placeholder="0" />
-              <input ref={refRotZ} type="text" placeholder="0" />
+              <input 
+                ref={refRotX} 
+                type="text" 
+                placeholder="0" 
+                onInput={(e) => changeRotation(e, "x")} 
+                onFocus={() => focusChange(true)}
+                onBlur={() => focusChange(false)}
+              />
+              <input 
+                ref={refRotY} 
+                type="text" 
+                placeholder="0" 
+                onInput={(e) => changeRotation(e, "y")} 
+                onFocus={() => focusChange(true)}
+                onBlur={() => focusChange(false)}
+              />
+              <input 
+                ref={refRotZ} 
+                type="text" 
+                placeholder="0" 
+                onInput={(e) => changeRotation(e, "z")} 
+                onFocus={() => focusChange(true)}
+                onBlur={() => focusChange(false)}
+              />
             </div>
           </div>
-          <div className={styles.scale}>
-            <div className={styles.title}>
-              スケール
+          {(
+          selectOM.type == "object" ||
+          selectOM.type == "avatar" 
+          )&&
+            <div className={styles.scale}>
+              <div className={styles.title}>
+                スケール
+              </div>
+              <div className={styles.name}>
+                <div>X</div>
+                <div>Y</div>
+                <div>Z</div>
+              </div>
+              <div className={styles.inputContainer}>
+                <input ref={refScaX} type="text" placeholder="0" value={selectOM.object.scale.x} />
+                <input ref={refScaY} type="text" placeholder="0" value={selectOM.object.scale.y} />
+                <input ref={refScaZ} type="text" placeholder="0" value={selectOM.object.scale.z} />
+              </div>
             </div>
-            <div className={styles.name}>
-              <div>X</div>
-              <div>Y</div>
-              <div>Z</div>
-            </div>
-            <div className={styles.inputContainer}>
-              <input ref={refScaX} type="text" placeholder="0" value={selectOM.object.scale.x} />
-              <input ref={refScaY} type="text" placeholder="0" value={selectOM.object.scale.y} />
-              <input ref={refScaZ} type="text" placeholder="0" value={selectOM.object.scale.z} />
-            </div>
-          </div>
+          }
           <div className={styles.material}>
             <div className={styles.title}>
               マテリアル設定
@@ -219,13 +362,10 @@ export const MainViewInspector = () => {
             }
           </div>
           }
-        </div>
+          </>
       }
-      {(selectOM && selectOM.type == "light") &&
-        <>
 
-        </>
-      }
+      </div>
     </>
   )
 }

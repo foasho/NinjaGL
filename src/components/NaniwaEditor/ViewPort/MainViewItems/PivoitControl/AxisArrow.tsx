@@ -63,6 +63,7 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
 
   const onPointerDown = React.useCallback(
     (e: ThreeEvent<PointerEvent>) => {
+      if (userData && userData.focus) return;
       if (displayValues) {
         divRef.current.innerText = `${translation.current[axis].toFixed(2)}`
         divRef.current.style.display = 'block'
