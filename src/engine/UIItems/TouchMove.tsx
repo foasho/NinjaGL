@@ -1,5 +1,5 @@
 import { initInput, manualKeyState, setManualInput } from "@/engine/Core/InputControls";
-import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
+import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
 import { useContext, useEffect, useState } from "react";
 import { MdOutlineGames } from "react-icons/md";
 import { Vector2 } from "three";
@@ -8,7 +8,7 @@ export const TouchMove = () => {
   const [isOrientation, setOrientation] = useState<boolean>((window.innerHeight < window.innerWidth) ? true : false);
   let currentTouch: Vector2 = new Vector2(0, 0);
   let currentTouchCamera: Vector2 = new Vector2(0, 0);
-  const engine = useContext(NaniwaEngineContext)
+  const engine = useContext(NinjaEngineContext)
 
   const touchStart = (e) => {
     initInput(engine.deviceType);

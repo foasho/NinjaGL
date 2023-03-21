@@ -1,8 +1,9 @@
 
-
 .main {
     height: 100vh;
     width: 100%;
+    margin: 0;
+    padding: 0;
 }
 // フォントをすべてMPlusRegularにする
 @font-face {
@@ -14,14 +15,14 @@
     src: url("/fonts/MPLUS1-Light.ttf") format("truetype");
 }
 
-@import "./components/NaniwaEditor/NaniwaEditor";
-@import "./components/NaniwaEditor/ViewPort/ScriptEditor";
-@import "./components/NaniwaEditor/Inspector/TerrainInspector";
-@import "./components/NaniwaEditor/Inspector/PlayerInspector";
-@import "./components/NaniwaEditor/Inspector/MainViewInspector";
-@import "./components/NaniwaEditor/Hierarchy/ContentViewer";
-@import "./components/NaniwaEditor/Hierarchy/Hierarchy";
-@import "./components/NaniwaEditor/Hierarchy/UINavigation";
-@import "./components/NaniwaEditor/Common/AppBar";
-@import "./components/NaniwaEditor/Dialogs/SelectNewObjectDialog";
-@import "./components/NaniwaEditor/Dialogs/LoDViewDialog";
+@import "./components/NinjaEditor/NinjaEditor";
+@import "./components/NinjaEditor/ViewPort/ScriptEditor";
+@import "./components/NinjaEditor/Inspector/TerrainInspector";
+@import "./components/NinjaEditor/Inspector/PlayerInspector";
+@import "./components/NinjaEditor/Inspector/MainViewInspector";
+@import "./components/NinjaEditor/Hierarchy/ContentViewer";
+@import "./components/NinjaEditor/Hierarchy/Hierarchy";
+@import "./components/NinjaEditor/Hierarchy/UINavigation";
+@import "./components/NinjaEditor/Common/AppBar";
+@import "./components/NinjaEditor/Dialogs/SelectNewObjectDialog";
+@import "./components/NinjaEditor/Dialogs/LoDViewDialog";

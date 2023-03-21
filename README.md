@@ -1,14 +1,14 @@
-# NaniwaJS
+# NinjaGL
 
 ※まだ作成中のライブラリ
 
 ## Web上で高速なゲームを作るためのゲームエンジン
 日本語で直感的なゲームエンジン(をめざしている)
-![バナー画像](https://i.pinimg.com/originals/e6/02/29/e602297a6663c1114971364e15772650.png)
+![バナー画像](https://i.pinimg.com/originals/5c/14/67/5c1467dfa20d49a540151e8cad805761.png)
 
 ## 構成
-- NaniwaEditor: 汎用ゲームエンジンライクなUIの制作用エディタ
-- NaniwaEngine: エンジンで作成した3DコンテンツをReact上のコンポネント組み込める実行ライブラリ
+- NinjaEditor: 汎用ゲームエンジンライクなUIの制作用エディタ
+- NinjaEngine: エンジンで作成した3DコンテンツをReact上のコンポネント組み込める実行ライブラリ
 
 ## デモ準備中
 調整中

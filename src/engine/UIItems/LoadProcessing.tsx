@@ -1,11 +1,11 @@
-import { loadingText, loadPer, NaniwaEngineContext, totalFileSize } from "@/engine/Core/NaniwaEngineManager"
+import { loadingText, loadPer, NinjaEngineContext, totalFileSize } from "@/engine/Core/NinjaEngineManager"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Vector2 } from "three";
 
 export const LoadProcessing = () => {
   const ref = useRef<HTMLDivElement>();
   const [per, setPer] = useState<number>(0);
-  const engine = useContext(NaniwaEngineContext);
+  const engine = useContext(NinjaEngineContext);
   const [timer, setTimer] = useState<NodeJS.Timer>()
 
   const setPercentage = () => {

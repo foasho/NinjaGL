@@ -1,6 +1,6 @@
 import { Vector2 } from "three";
 import { useEffect, useRef } from "react";
-import { IInputMovement } from "./NaniwaProps";
+import { IInputMovement } from "./NinjaProps";
 
 /**
  * ActionキーのリストEnum
@@ -112,7 +112,7 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
     const handleClickUp = () => {
       movement.current.action = false;
     }
-    const canvas = document.getElementById("naniwajs");
+    const canvas = document.getElementById("Ninjajs");
     if (deviceType == "desktop") {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);

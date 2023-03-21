@@ -1,9 +1,9 @@
 import { AnimationClip, AnimationMixer, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Quaternion, Raycaster, Vector2, Vector3 } from "three";
-import { IInputMovement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from "./NaniwaProps";
+import { IInputMovement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from "./NinjaProps";
 import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./Intersects";
 import { Face } from "./Octree";
 import { World } from "./World";
-import { NaniwaEngine } from "./NaniwaEngineManager";
+import { NinjaEngine } from "./NinjaEngineManager";
 
 /**
  * ベース: https://github.com/yomotsu/meshwalk
@@ -36,7 +36,7 @@ export class AvatarController {
   /**
    * 初期値
    */
-  parent: NaniwaEngine;
+  parent: NinjaEngine;
   isCharacterController: boolean = true;
   object: Object3D;
   objectUUIDs: string[] = [];
@@ -102,7 +102,7 @@ export class AvatarController {
   _events: () => void;
 
   constructor(
-    parent: NaniwaEngine,
+    parent: NinjaEngine,
     object3d: Object3D,
     radius: number,
     animations?: AnimationClip[],

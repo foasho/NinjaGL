@@ -1,5 +1,5 @@
-import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
-import { IObjectManagement } from "@/engine/Core/NaniwaProps";
+import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
+import { IObjectManagement } from "@/engine/Core/NinjaProps";
 import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
 import { useContext } from "react"
 import { MathUtils } from "three";
@@ -65,7 +65,7 @@ const Light = (props: IObjectManagement) => {
 }
 
 export const NEnvironment = () => {
-  const engine = useContext(NaniwaEngineContext);
+  const engine = useContext(NinjaEngineContext);
   const sky = engine ? engine.getSky() : null;
   const lights = engine ? engine.getLights() : [];
   return (

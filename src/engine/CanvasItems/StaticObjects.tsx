@@ -1,12 +1,12 @@
 import { useContext } from "react";
 import { Euler, Vector3 } from "three";
-import { NaniwaEngineContext } from "../Core/NaniwaEngineManager";
-import { IObjectManagement } from "../Core/NaniwaProps";
+import { NinjaEngineContext } from "../Core/NinjaEngineManager";
+import { IObjectManagement } from "../Core/NinjaProps";
 
 export interface IStaticObjectsProps { }
 
 export const StaticObjects = () => {
-  const engine = useContext(NaniwaEngineContext);
+  const engine = useContext(NinjaEngineContext);
   const staticObjects = engine ? engine.getStaticObjects() : null;
 
   return (

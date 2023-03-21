@@ -1,5 +1,5 @@
 import { Sphere } from "three";
-import { IInputMovement } from "./NaniwaProps";
+import { IInputMovement } from "./NinjaProps";
 import { Octree, uniqTrianglesFromNodes } from "./Octree";
 import { AvatarController } from "./AvatarController";
 
