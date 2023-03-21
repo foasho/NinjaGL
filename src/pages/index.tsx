@@ -1,27 +1,42 @@
 import Head from 'next/head';
 import { Inter } from '@next/font/google';
 import styles from '../App.module.scss';
-import { NaniwaJS } from '@/engine/NaniwaJS';
-import { NextPageContext } from 'next';
-import { useRouter } from "next/router";
-
+import { NinjaEditorContext, NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
+import { useState, useEffect } from "react";
+import { NinjaEditor } from "@/components/NinjaEditor/NinjaEditor";
+import { ToastContainer } from "react-toastify";
 
 const inter = Inter({ subsets: ['latin'] })
 
 function Home() {
-  const router = useRouter();
-  const { json } = router.query;
+  const [editor, setEditor] = useState<NinjaEditorManager>(null);
+
+  useEffect(() => {
+    setEditor(new NinjaEditorManager());
+    return () => {
+      setEditor(null);
+    }
+  }, [false]);
 
   return (
     <>
       <Head>
         <title></title>
-        <meta name="ReactGameEngine" content="NaniwaJS" />
+        <meta name="ReactGameEngine" content="NinjaJS" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <NaniwaJS jsonPath={json ? json.toString() : null} />
+        <NinjaEditorContext.Provider value={editor}>
+          {editor &&
+            <NinjaEditor />
+          }
+        </NinjaEditorContext.Provider>
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            style={{zIndex:99999}}
+          />
       </main>
     </>
   )

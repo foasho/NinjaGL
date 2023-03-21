@@ -1,5 +1,5 @@
 import { useInputControl } from "@/engine/Core/InputControls";
-import { NaniwaEngineContext } from "@/engine/Core/NaniwaEngineManager";
+import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -10,7 +10,7 @@ export interface IAvatarProps { }
 
 export const Avatar = () => {
   const ref = useRef<Mesh>();
-  const engine = useContext(NaniwaEngineContext);
+  const engine = useContext(NinjaEngineContext);
   const { camera } = useThree();
 
   // 初回ロード時にAvatarObjectをセットする 
