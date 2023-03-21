@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { NinjaCanvas } from "./NinjaCanvas";
 import { NinjaUI } from "./NinjaUI";
 
-export interface INinjaJSProps {
+export interface INinjaGLProps {
   jsonPath?: string;
   canvasHeight?: any;
   canvasWidth?: any;
 }
 
-export const NinjaJS = (props: INinjaJSProps) => {
+export const NinjaGL = (props: INinjaGLProps) => {
   const [engine, setEngine] = useState<NinjaEngine>();
   useEffect(() => {
     const fetchEngine = async () => {

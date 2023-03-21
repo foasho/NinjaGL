@@ -112,7 +112,6 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
     const handleClickUp = () => {
       movement.current.action = false;
     }
-    const canvas = document.getElementById("Ninjajs");
     if (deviceType == "desktop") {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);

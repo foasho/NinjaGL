@@ -153,7 +153,7 @@ export const NinjaEditor = () => {
               <a onClick={() => onClickSelectLang()}>{t("lang")}</a>
             </li>
             <li className={`${styles.navItem} ${styles.left}`}>
-              <a onClick={() => window.open("https://github.com/foasho/Ninjajs", "_blank")}>
+              <a onClick={() => window.open("https://github.com/foasho/NinjaGL", "_blank")}>
                 Github
               </a>
             </li>
@@ -162,7 +162,7 @@ export const NinjaEditor = () => {
             </li>
             <li className={`${styles.navCenter}`}>
               <a className={styles.item}>
-                NinjaJS
+                NinjaGL
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>

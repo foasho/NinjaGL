@@ -22,7 +22,7 @@ function Home() {
     <>
       <Head>
         <title></title>
-        <meta name="ReactGameEngine" content="NinjaJS" />
+        <meta name="ReactGameEngine" content="NinjaGL" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
