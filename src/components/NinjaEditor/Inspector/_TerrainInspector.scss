@@ -34,26 +34,42 @@
   .type {
     margin: 10px 0px;
     display: block;
+    width: 100%;
     .title {
       font-size: 12px;
       font-weight: bold;
       padding: 4px;
     }
     .select {
-      margin: 5px 3px;
-
+      margin: 2px 3px;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
       .active {
-        padding: 5px 10px;
         background-color: #000000;
-        border-radius: 5px;
         font-weight: bold;
       }
 
-      .disable {
-        padding: 5px 10px;
+      .disable {  
         background-color: #333;
-        border-radius: 5px;
       }
+
+      .brush {
+        padding: 5px 10px;
+        border-radius: 5px;
+        flex: 1;
+        text-align: center;
+        margin: 2px;
+        cursor: pointer;
+        flex-basis: calc(33.333% - 5px);
+        .name {
+          font-size: 12px;
+        }
+        .icon {
+          font-size: 24px;
+        }
+      }
+
     }
   }
 
