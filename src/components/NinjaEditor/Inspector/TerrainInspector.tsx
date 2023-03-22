@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { reqApi } from "@/services/ServciceApi";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { GiFlatPlatform, GiMountainCave, GiMountaintop, GiPaintBrush } from "react-icons/gi";
 
 /**
  * 入力イベント / 入力の型
@@ -157,7 +158,7 @@ export const TerrainInspector = () => {
   return (
     <div className={styles.terrainui}>
       <div className={styles.mode}>
-        <div className={styles.title}>モード</div>
+        <div className={styles.title}>{t("mode")}</div>
         <div className={styles.select}>
           <span className={mode == "view" ? styles.active : styles.disable}>
             {t("view")}
@@ -171,22 +172,37 @@ export const TerrainInspector = () => {
         <div className={styles.title}>{t("brushType")}</div>
         <div className={styles.select}>
           <div
-            className={brush == "normal" ? styles.active : styles.disable}
+            className={(brush == "normal" ? styles.active : styles.disable) + ` ${styles.brush}`}
             onClick={() => changeBrush("normal")}
           >
-            {t("brushNormal")}
+            <div className={styles.icon}>
+              <GiMountaintop/>
+            </div>
+            <div className={styles.name}>
+              {t("brushNormal")}
+            </div>
           </div>
           <div 
-            className={brush == "flat" ? styles.active : styles.disable}
+            className={(brush == "flat" ? styles.active : styles.disable) + ` ${styles.brush}`}
             onClick={() => changeBrush("flat")}
           >
-            {t("brushFlat")}
+            <div className={styles.icon}>
+              <GiFlatPlatform/>
+            </div>
+            <div className={styles.name}>
+              {t("brushFlat")}
+            </div>
           </div>
           <div 
-            className={brush == "paint" ? styles.active : styles.disable}
+            className={(brush == "paint" ? styles.active : styles.disable) + ` ${styles.brush}`}
             onClick={() => changeBrush("paint")}
           >
-            {t("brushPaint")}
+            <div className={styles.icon}>
+              <GiPaintBrush/>
+            </div>
+            <div className={styles.name}>
+              {t("brushPaint")}
+            </div>
           </div>
         </div>
       </div>

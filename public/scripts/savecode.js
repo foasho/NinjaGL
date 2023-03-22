@@ -1,6 +1,6 @@
 
   /**
-  * NinjaJS
+  * NinjaGL
   * -公式ドキュメント: https://www.example.com/
   * -公式サンプル    : https://www.example.com/
   **/

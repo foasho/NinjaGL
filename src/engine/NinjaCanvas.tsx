@@ -31,7 +31,7 @@ export const NinjaCanvas = () => {
   }, []);
 
   const onResize = () => {
-    const cv = document.getElementById("Ninjajs") as HTMLCanvasElement;
+    const cv = document.getElementById("ninjagl") as HTMLCanvasElement;
     const width = cv.width;
     const height = cv.height;
     if (canvasRef.current){
@@ -50,7 +50,7 @@ export const NinjaCanvas = () => {
 
   return (
     <>
-      <Canvas id="Ninjajs" ref={canvasRef} shadows dpr={window.devicePixelRatio}>
+      <Canvas id="ninjagl" ref={canvasRef} shadows dpr={window.devicePixelRatio}>
         {(ready && engine) &&
           <>
             <System />

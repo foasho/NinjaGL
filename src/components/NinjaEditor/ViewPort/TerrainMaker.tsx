@@ -190,33 +190,33 @@ const TerrainMakeComponent = () => {
 
   useFrame((_, delta) => {
     if (isReverse.current) {
-      // const st = 1;
-      // var cameraDirection = new Vector3();
-      // camera.getWorldDirection(cameraDirection);
-      // var cameraPosition = camera.position.clone();
-      // if (input.forward) {
-      //   cameraPosition.add(cameraDirection.multiplyScalar(st));
-      //   camera.position.copy(cameraPosition);
-      // }
-      // if (input.backward) {
-      //   cameraPosition.sub(cameraDirection.multiplyScalar(st));
-      //   camera.position.copy(cameraPosition);
-      // }
-      // if (input.right) {
-      //   var cameraRight = new Vector3();
-      //   cameraRight.crossVectors(cameraDirection, camera.up).normalize();
-      //   cameraPosition.add(cameraRight.multiplyScalar(st));
-      //   camera.position.copy(cameraPosition);
-      //   var cameraTarget = cameraPosition.clone().add(cameraDirection);
-      //   camera.lookAt(cameraTarget); // カメラの注視点を更新
-      // }
-      // if (input.left) {
-      //   var cameraLeft = new Vector3();
-      //   cameraLeft.crossVectors(cameraDirection, camera.up).normalize();
-      //   cameraPosition.sub(cameraLeft.multiplyScalar(st));
-      //   camera.position.copy(cameraPosition);
-      //   camera.lookAt(cameraPosition.clone().add(cameraDirection));
-      // }
+      const st = 1;
+      var cameraDirection = new Vector3();
+      camera.getWorldDirection(cameraDirection);
+      var cameraPosition = camera.position.clone();
+      if (input.forward) {
+        cameraPosition.add(cameraDirection.multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+      }
+      if (input.backward) {
+        cameraPosition.sub(cameraDirection.multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+      }
+      if (input.right) {
+        var cameraRight = new Vector3();
+        cameraRight.crossVectors(cameraDirection, camera.up).normalize();
+        cameraPosition.add(cameraRight.multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+        var cameraTarget = cameraPosition.clone().add(cameraDirection);
+        camera.lookAt(cameraTarget); // カメラの注視点を更新
+      }
+      if (input.left) {
+        var cameraLeft = new Vector3();
+        cameraLeft.crossVectors(cameraDirection, camera.up).normalize();
+        cameraPosition.sub(cameraLeft.multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+        camera.lookAt(cameraPosition.clone().add(cameraDirection));
+      }
     }
     if (terrainManager.mode == "edit") {
       camRef.current.enabled = false;
