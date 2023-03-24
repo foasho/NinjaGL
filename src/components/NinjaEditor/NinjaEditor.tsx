@@ -87,6 +87,21 @@ export const NinjaEditor = () => {
         }
       )
     }
+    else if (data.type == "three"){
+      console.log("three", data.type);
+      editor.setObjectManagement(
+        {
+          id: generateUUID(),
+          name: `*${data.value}`,
+          type: "three",
+          args: {
+            type: data.value
+          },
+          physics: "none",
+          visiableType: "auto",
+        }
+      )
+    }
   }
 
   /**

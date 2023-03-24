@@ -18,7 +18,6 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { SimplifyModifier } from "three/examples/jsm/modifiers/SimplifyModifier";
 import { generateUUID } from "three/src/math/MathUtils";
-import { VRMLoaderPlugin } from '@pixiv/three-vrm';
 
 /**
  * 基本的な3Dオブジェクトのロード
@@ -341,11 +340,6 @@ export interface IAvatarData {
 export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarData> => {
   const key = generateUUID();
   const loader = new GLTFLoader();
-  if (props.isVRM) {
-    loader.register((parser) => {
-      return new VRMLoaderPlugin(parser);
-    });
-  }
   return new Promise((resolve) => {
     loader.load(
       props.filePath,
@@ -468,7 +462,7 @@ export const AvatarDataSetter = (props: IAvatarDataSetterProps) => {
  */
 export interface IGLTFLoadProps {
   filePath: string;
-  posType: "center";
+  // posType: "center";
   onLoadCallback?: (key: string, size: number) => void;
 }
 
@@ -486,7 +480,6 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{ gltf: GLTF
     loader.load(
       props.filePath,
       async (gltf) => {
-        console.log("地形ファイルの読み込み");
         const scene = gltf.scene || gltf.scenes[0];
         // scene.updateMatrixWorld();// 回転情報なども同期
         scene.traverse((node: Mesh) => {

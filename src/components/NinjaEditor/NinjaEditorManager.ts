@@ -156,6 +156,34 @@ export class NinjaEditorManager {
     }
   }
 
+    /**
+   * Editor InspectorからFocusされてるか
+   * @param id 
+   * @param focusFlag
+  */
+  setFocus(id: string, focusFlag: boolean) {
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.focus = focusFlag;
+    }
+  }
+
+  /**
+   * マテリアルを設定する
+   * @param id 
+   * @param type 
+   * @param value 
+   */
+  setMaterial(id: string, type: "color"|"texture", value: any){
+    const target = this.oms.find(om => om.id == id);
+    if (target && type == "color"){
+      target.args.material = {
+        type: type,
+        value: value
+      }
+    }
+  }
+
   /**
    * 特定のオブジェクトのPositionを取得
    * @param id 
@@ -168,25 +196,6 @@ export class NinjaEditorManager {
     }
     return target.args.position;
   }
-
-    /**
-   * Editor InspectorからFocusされてるか
-   * @param id 
-   * @param focusFlag
-   */
-    setFocus(id: string, focusFlag: boolean) {
-      const target = this.oms.find(om => om.id == id);
-      if (id && target) {
-        target.args.focus = focusFlag;
-      }
-    }
-    getFocus(id: string): boolean{
-      const target = this.oms.find(om => om.id == id);
-      if (target) {
-        return target.args.focus;
-      }
-      return false;
-    }
 
   /**
    * 特定のオブジェクトの回転率を取得
@@ -212,6 +221,31 @@ export class NinjaEditorManager {
       return new Vector3(0, 0, 0);
     }
     return target.args.scale;
+  }
+
+  /**
+   * 特定の選択中フラグを取得
+   * @param id 
+   * @returns 
+   */
+  getFocus(id: string): boolean{
+    const target = this.oms.find(om => om.id == id);
+    if (target) {
+      return target.args.focus;
+    }
+    return false;
+  }
+
+  /**
+   * 特定のオブジェクトからマテリアルを取得
+   * @param id 
+   */
+  getMaterial(id: string){
+    const target = this.oms.find(om => om.id == id);
+    if (!target || !target.args.material) {
+      return null;
+    }
+    return target.args.material;
   }
 
   /**
@@ -298,6 +332,15 @@ export class NinjaEditorManager {
    */
   getSky = (): IObjectManagement => {
     const data = this.oms.find(om => om.type == "sky");
+    return data;
+  }
+
+  /**
+   * 
+   * @param trig 
+   */
+  getThreeObjects = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "three");
     return data;
   }
 

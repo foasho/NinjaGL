@@ -288,13 +288,11 @@ export class NinjaEngine {
             }
           }
           else if (key == "terrain") {
-            console.log(jsonData[key]);
             if (!jsonData[key]) continue;
             if (jsonData[key].filePath  && jsonData[key].filePath.length > 3){
               const { gltf } = await TerrainLoader(
                 {
                   filePath: `${jsonData[key].filePath}`,
-                  posType: "center",
                   onLoadCallback: this.loadingFileState
                 }
               );
@@ -425,20 +423,18 @@ export class NinjaEngine {
   setAvatar(threeMesh: Mesh|Object3D) {
     const avatarObject = this.getAvatarObject();
     if (avatarObject) {
-      console.log("アバターチェック");
-      console.log(avatarObject)
-      if (avatarObject.args.initPosition) {
+      if (avatarObject.args.position) {
         threeMesh.position.set(
-          avatarObject.args.initPosition[0],
-          avatarObject.args.initPosition[1],
-          avatarObject.args.initPosition[2]
-        );
+          avatarObject.args.position.x,
+          avatarObject.args.position.y,
+          avatarObject.args.position.z
+        );   
       }
-      if (avatarObject.args.initRotateDegY) {
+      if (avatarObject.args.rotation) {
         threeMesh.quaternion.copy(
           new Quaternion().setFromEuler(new Euler(
             0,
-            MathUtils.degToRad(avatarObject.args.initRotateDegY),
+            MathUtils.degToRad(avatarObject.args.rotation.y),
             0
           ))
         );

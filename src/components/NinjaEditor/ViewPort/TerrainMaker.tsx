@@ -8,29 +8,18 @@ import {
   Intersection,
   Vector3,
   Raycaster,
-  Vector2,
   GridHelper,
   SpotLight as SL,
   Color,
   DoubleSide,
   MathUtils,
-  Euler,
-  SphereGeometry,
   CircleGeometry,
-  Face,
-  MeshBasicMaterial,
-  BufferGeometry,
-  ShaderMaterial,
-  Matrix4,
-  ShaderLib,
   WebGLRenderTarget,
-  OrthographicCamera,
-  DataTexture,
-  RGBFormat,
-  FloatType,
-  RGBAFormat
+  BufferAttribute,
+  GLBufferAttribute
 } from "three";
 import { useInputControl } from "@/engine/Core/InputControls";
+import { colors } from "react-select/dist/declarations/src/theme";
 
 const TerrainMakeComponent = () => {
   const editor = useContext(NinjaEditorContext);
@@ -79,6 +68,7 @@ const TerrainMakeComponent = () => {
       if (intersects.length > 0) {
         position = intersects[0].point;
         if (position) {
+          if (geometry.attributes.position instanceof GLBufferAttribute) return;
           const vertices = geometry.attributes.position.array;
           const maxDistance = radius * radius; // 2乗距離
           for (let i = 0; i < vertices.length; i += stride) {
@@ -118,6 +108,7 @@ const TerrainMakeComponent = () => {
             const value = values[i];
             if (terrainManager.brush == "normal"){
               let position = object.geometry.attributes.position;
+              if (position instanceof GLBufferAttribute) return;
               position.setZ(
                 index,
                 (position.getZ(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
@@ -126,6 +117,7 @@ const TerrainMakeComponent = () => {
             }
             else if (terrainManager.brush == "flat") {
               let position = object.geometry.attributes.position;
+              if (position instanceof GLBufferAttribute) return;
               position.setZ(
                 index,
                 intersectPosition.z
@@ -136,11 +128,35 @@ const TerrainMakeComponent = () => {
         }
       }
       else if (terrainManager.brush == "paint"){
-        console.log("check");
-        // getFaces(intersects, terrainManager.radius);
         if (intersects.length > 0 && intersects[0]) {
+          const radius = terrainManager.radius;
           const intersectPosition = intersects[0].point;
-          setBrushPosition(intersectPosition);
+          const cloneGeometry = ref.current.geometry.clone();
+          if (!cloneGeometry.attributes.color) {
+            const count = cloneGeometry.attributes.position.count;
+            const buffer = new BufferAttribute( new Float32Array( count * 3 ), 3 );
+            cloneGeometry.setAttribute("color", buffer);
+          }
+          if (
+            cloneGeometry.attributes.color instanceof GLBufferAttribute ||
+            cloneGeometry.attributes.position instanceof GLBufferAttribute
+          ) return;
+          const numVertices = cloneGeometry.attributes.color.array;
+          let colors = new Float32Array(numVertices);
+          const color = new Color(terrainManager.color);
+          const vertex = new Vector3();
+          const positionArray = Array.from(cloneGeometry.attributes.position.array);
+          for (let i = 0; i <= positionArray.length - 3; i += 3) {
+            vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
+            vertex.applyMatrix4(ref.current.matrixWorld); // Consider rotation
+            const distance = vertex.distanceTo(intersectPosition);
+            if (distance <= radius) {
+              colors.set(color.toArray(), i);
+            }
+          }
+          cloneGeometry.setAttribute("color", new BufferAttribute(colors, 3));
+          ref.current.geometry.copy(cloneGeometry);
+          
         }
       }
     }
@@ -208,7 +224,7 @@ const TerrainMakeComponent = () => {
         cameraPosition.add(cameraRight.multiplyScalar(st));
         camera.position.copy(cameraPosition);
         var cameraTarget = cameraPosition.clone().add(cameraDirection);
-        camera.lookAt(cameraTarget); // カメラの注視点を更新
+        camera.lookAt(cameraTarget); // LookAt Update
       }
       if (input.left) {
         var cameraLeft = new Vector3();
@@ -224,8 +240,6 @@ const TerrainMakeComponent = () => {
     else {
       camRef.current.enabled = true;
     }
-    // matRef.current.wireframe = terrainManager.wireFrame;
-    // matRef.current.color = new Color(terrainManager.color);
     lightRef.current.position.set(
       -terrainManager.mapSize / 1.6,
       terrainManager.mapSize / 1.6,
@@ -267,7 +281,7 @@ const TerrainMakeComponent = () => {
         castShadow
       >
         <planeGeometry args={[terrainManager.mapSize, terrainManager.mapSize, terrainManager.mapResolution, terrainManager.mapResolution]} />
-        <meshStandardMaterial ref={matRef} side={DoubleSide} />
+        <meshStandardMaterial ref={matRef} side={DoubleSide} vertexColors={true} color={0xffffff} />
       </mesh>
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
@@ -278,6 +292,7 @@ const TerrainMakeComponent = () => {
         color={'#fadcb9'}
         volumetric={false}
       />
+      {/* <directionalLight position={[0, -10, 0]} /> */}
       <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
         <circleBufferGeometry args={[terrainManager.radius]} />
         <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />

@@ -18,6 +18,8 @@ function Home() {
     }
   }, [false]);
 
+  const mode = process.env.MODE;
+
   return (
     <>
       <Head>

@@ -24,6 +24,7 @@ export const MainViewInspector = () => {
   const [isFocus, setIsFocus] = useState<boolean>();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
+  const [color, setColor] = useState<string>();
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [selectOM, setSelectOM] = useState<IObjectManagement>(null);
   const id = selectOM? selectOM.id: null;
@@ -36,7 +37,7 @@ export const MainViewInspector = () => {
       myFrame();
     }, 1000 / 10);
     return () => clearInterval(interval);
-  }, [selectOM, isFocus])
+  }, [selectOM, isFocus]);
 
   const myFrame = () => {
     if (id){
@@ -45,7 +46,8 @@ export const MainViewInspector = () => {
         position && 
         (
           selectOM.type == "object" || 
-          selectOM.type == "light"
+          selectOM.type == "light" ||
+          selectOM.type == "three"
         )
       ) {
         if (!isFocus){
@@ -53,15 +55,13 @@ export const MainViewInspector = () => {
           refPosY.current.value = position.y.toFixed(2).toString();
           refPosZ.current.value = position.z.toFixed(2).toString();
         }
-        else {
-
-        }
       }
       const rotation = editor.getRotation(id);
       if (
         rotation && (
           selectOM.type == "object" || 
-          selectOM.type == "light"
+          selectOM.type == "light" ||
+          selectOM.type == "three"
         )
       ) {
         if (!isFocus){
@@ -73,7 +73,8 @@ export const MainViewInspector = () => {
       const scale = editor.getScale(id);
       if (scale && (
         selectOM.type == "object"|| 
-        selectOM.type == "light"
+        selectOM.type == "light" ||
+        selectOM.type == "three"
       )) {
         if (!isFocus){
           refScaX.current.value = scale.x.toFixed(2).toString();
@@ -155,6 +156,16 @@ export const MainViewInspector = () => {
   ]
 
   /**
+   * 色の変更
+   */
+  const changeMaterial = (type: "color" | "texture", value: any) => {
+    if (type == "color" && value){
+      editor.setMaterial(id, type, value);
+      setColor(value);
+    }
+  }
+
+  /**
    * 物理判定の有無
    * @param selectPhysics 
    */
@@ -202,7 +213,8 @@ export const MainViewInspector = () => {
         (
           selectOM.type == "object" ||
           selectOM.type == "avatar" ||
-          selectOM.type == "light"
+          selectOM.type == "light" || 
+          selectOM.type == "three"
         )
       ) &&
         
@@ -325,8 +337,14 @@ export const MainViewInspector = () => {
                 {t("color")}
               </div>
               <div className={styles.pallet}>
-                <input type={"color"} value={"#43D9D9"}/>
-                <input type={"text"} value={"#43D9D9"} />
+                <input 
+                  type={"color"} 
+                  value={color} 
+                  onChange={(e) => changeMaterial("color", e.target.value)}
+                  onFocus={() => focusChange(true)}
+                  onBlur={() => focusChange(false)}
+                />
+                <input type={"text"} value={color} />
               </div>
             </div>
           </div>

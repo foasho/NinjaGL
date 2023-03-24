@@ -13,6 +13,7 @@ import { Avatar } from "./MainViewItems/Avatar";
 import { MySky } from "./MainViewItems/Sky";
 import { BsGrid3X3 } from "react-icons/bs";
 import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
+import { ThreeObjects } from "./MainViewItems/Three";
 
 export const MainViewer = () => {
   const camRef = useRef<OrbitControlsImpl>();
@@ -166,6 +167,7 @@ export const MainViewer = () => {
         <Terrain/>
         <Avatar/>
         <MySky/>
+        <ThreeObjects/>
         {isGrid &&
           <SystemHelper/>
         }

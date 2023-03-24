@@ -52,7 +52,6 @@ export const MyLight = (prop: ILightProps) => {
 
   const onClick = (e, value: boolean) => {
     e.stopPropagation();
-    console.log(e);
     if (value) {
       // 選択できるのは１つのみにする
       if (editor.selectedId != id) {
