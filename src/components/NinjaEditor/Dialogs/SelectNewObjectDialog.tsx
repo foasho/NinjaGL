@@ -23,8 +23,8 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectSky = (value: string) => {
     prop.response({ type: "sky", value: value });
   }
-  const selectObj = (value: string) => {
-    prop.response({ type: "object", value: value });
+  const selectThree = (value: string) => {
+    prop.response({ type: "three", value: value });
   }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
@@ -66,7 +66,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("audio")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {setSelectType("object")}} >
+            <div className={styles.card} onClick={() => {setSelectType("three")}} >
               <div className={styles.icon}>
                 <img className={styles.img} src="fileicons/object.png"/>
               </div>
@@ -132,9 +132,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </>
           }
 
-          {selectType == "object" &&
+          {selectType == "three" &&
           <>
-            <div className={styles.card} onClick={() => {selectObj("box")}} >
+            <div className={styles.card} onClick={() => {selectThree("box")}} >
               <div className={styles.objicon}>
                 <AiOutlineCodeSandbox/>
               </div>
@@ -142,7 +142,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("box")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {selectObj("sphere")}} >
+            <div className={styles.card} onClick={() => {selectThree("sphere")}} >
               <div className={styles.objicon}>
                 <ImSphere/>
               </div>
@@ -150,7 +150,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("sphere")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {selectObj("plane")}} >
+            <div className={styles.card} onClick={() => {selectThree("plane")}} >
               <div className={styles.objicon}>
                 <BiRectangle/>
               </div>
@@ -158,7 +158,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("plane")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {selectObj("capsule")}} >
+            <div className={styles.card} onClick={() => {selectThree("cylinder")}} >
               <div className={styles.objicon}>
                 <BiCylinder/>
               </div>
@@ -166,7 +166,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("cylinder")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {selectLight("point")}} >
+            <div className={styles.card} onClick={() => {selectThree("capsule")}} >
               <div className={styles.objicon}>
                 <BiCapsule/>
               </div>
@@ -185,7 +185,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound" | "object";
+  type: "light" | "sky" | "sound" | "object" | "three";
   value: string;
 }
 /**

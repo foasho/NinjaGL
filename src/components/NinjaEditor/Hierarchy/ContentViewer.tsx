@@ -24,7 +24,6 @@ export interface IFileProps {
 
 
 const getExtension = (filename: string) => {
-  console.log(filename);
   return filename.split('.').pop().toLowerCase();
 }
 
@@ -38,12 +37,6 @@ const object_icon = "fileicons/object.png";
 const isGLTF = (filename: string) => {
   const ext = getExtension(filename);
   return ['glb', 'gltf'].includes(ext);
-}
-
-const ava_icon = "fileicons/avatar.png";
-const isAvatar = (filename: string) => {
-  const ext = getExtension(filename);
-  return ['avt'].includes(ext);
 }
 
 const mp3_icon = "fileicons/mp3.png";
@@ -133,6 +126,10 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     }
   }
 
+  /**
+   * パスを押して移動
+   * @param value 
+   */
   const onMoveDic = (value: string) => {
     const routes = editor.assetRoute.split("/");
     let path = "";
@@ -149,10 +146,17 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     else {
       path = "/";
     }
-    reqApi({ route: "filesize", queryObject: { routePath: path } }).then((res) => {
+    reqApi({ route: "filesize", queryObject: { routePath: path } }).then(async (res) => {
       if (res.status == 200) {
+        loadRef.current.style.display = "block";
         editor.assetRoute = (path != "/") ? path : "";
-        setFiles(res.data.files);
+        const _files = res.data.files;
+        for (const file of _files){
+          const imageUrl = await getGLTFImage(file);
+          file.imageUrl = imageUrl;
+        }
+        setFiles(_files);
+        loadRef.current.style.display = "none";
       }
     })
   }
@@ -166,7 +170,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             <AiFillHome />
           </span>
         </div>
-        {editor.assetRoute.split("/").map((route) => {
+        {editor.assetRoute.split("/").map((route, idx) => {
           if (route.length == 0) {
             return <></>
           }
@@ -255,14 +259,6 @@ export const ContentViewer = (props: IFileProps) => {
         </>
       )
       contentsSelectType = "ter";
-    }
-    else if (isAvatar(props.name)) {
-      icon = (
-        <>
-          <img src={ava_icon} className={styles.iconImg} data-path={props.name} />
-        </>
-      )
-      contentsSelectType = "avt";
     }
     // どれにも該当しない場合は表示しない
     else {

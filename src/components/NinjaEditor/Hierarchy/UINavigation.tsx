@@ -49,7 +49,7 @@ const UIItem = (prop: IUIItem) => {
     let typeIcon = (<BsBox />); // デフォルトObject型
   
     let visibleIcon = (<AiFillEye />);
-    if (prop.ui.visiableType == "none") {
+    if (prop.ui.visibleType == "none") {
       visibleIcon = (<AiFillEyeInvisible />);
     }
     useEffect(() => {

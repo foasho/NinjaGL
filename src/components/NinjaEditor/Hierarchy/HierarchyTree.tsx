@@ -61,7 +61,11 @@ interface ITreeItem {
 const TreeItem = (prop: ITreeItem) => {
   const ref = useRef<HTMLDivElement>();
   const editor = useContext(NinjaEditorContext);
+  const [isSelect, setIsSelect] = useState<boolean>(true);
+  const [visible, setVisible] = useState<boolean>(true);
   const { t } = useTranslation();
+  const { om } = prop;
+  const id = om.id;
   let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
     lineStyle = styles.darkLine;
@@ -79,15 +83,19 @@ const TreeItem = (prop: ITreeItem) => {
   }
 
   let visibleIcon = (<AiFillEye />);
-  if (prop.om.visiableType == "none") {
+  if (!visible) {
     visibleIcon = (<AiFillEyeInvisible />);
   }
+
   useEffect(() => {
     if (prop.om.name) {
       setName(prop.om.name);
     }
   }, []);
 
+  /**
+   * 名前を変更
+   */
   const changeName = async () => {
     Swal.fire({
       title: '名前の変更',
@@ -107,12 +115,24 @@ const TreeItem = (prop: ITreeItem) => {
       }
     }).then((result) => {
       if (result.value) {
+        editor.setName(id, result.value);
         setName(result.value);
       }
     });
   }
 
-  const onClick = () => {
+  /**
+   * 表示非表示切り替え
+   */
+  const changeVisible = () => {
+    editor.setVisible(id, !visible);
+    setVisible(!visible);
+  }
+
+  /**
+   * 選択/非選択を切り替える
+   */
+  const onSelectObject = () => {
     if (ref.current.classList.contains(styles.select)){
       editor.unSelectObject(prop.om.id);
     }
@@ -132,10 +152,10 @@ const TreeItem = (prop: ITreeItem) => {
         <div className={styles.type}>
           {typeIcon}
         </div>
-        <div className={styles.name} onClick={onClick} onDoubleClick={changeName}>
+        <div className={styles.name} onClick={onSelectObject} onDoubleClick={changeName}>
           {name}
         </div>
-        <div className={styles.visible}>
+        <div className={styles.visible} onClick={() => changeVisible()}>
           {visibleIcon}
         </div>
       </div>

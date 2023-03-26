@@ -2,7 +2,8 @@
     width: 100%;
     height: 45px;
     display: flex;
-    background-color: $editorColor;
+    position: relative;
+    background-color: $bgColor;
     align-items: center;
     justify-content: space-between;
     font-size: 14px;
@@ -20,6 +21,7 @@
             float: none;
             padding: 10px 3px;
             a {
+                user-select: none;
                 padding: 5px 10px;
                 border-radius: 2px;
                 color: #fff;
@@ -85,6 +87,62 @@
                 cursor: pointer;
                 user-select: none;
                 font-family: 'MPLUSLighter', sans-serif;
+
+            }
+        }
+    }
+
+    .filemenu {
+        top: 45px;
+        left: 0;
+        position: absolute;
+        background-color: $black;
+        color: $textColor;
+        width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.514);
+        z-index: 1;
+        ul {
+            font-size: 10px;
+            font-weight: bold;
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            li {
+                position: relative;
+                a {
+                    display: block;
+                    padding: 10px;
+                    text-decoration: none;
+                    border-radius: 3px;
+                    cursor: pointer;
+                }
+                &:hover {
+                    background-color: $selectbgColor;
+                }
+            }
+            .subMenu {
+                position: absolute;
+                top: 0;
+                left: 160px;
+                min-width: 160px;
+                background-color: $black;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+                white-space: nowrap; /* テキストを折り返さないようにする */
+                overflow: hidden; /* 要素からはみ出た部分を非表示にする */
+                li {
+                    display: flex;
+                    a {
+                        display: inline-block;
+                        padding: 10px;
+                        text-decoration: none;
+                        display: block;
+                        cursor: pointer;
+                        &:hover {
+                            background-color: $selectbgColor;
+                        }
+                    }
+                }
             }
         }
     }

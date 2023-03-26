@@ -4,6 +4,11 @@ export interface INinjaProps {
   mode: "play" | "edit"
 }
 
+export interface IConfigParams {
+  physics: { octree: "auto" },
+  mapsize: number;
+}
+
 /**
  * 入力系のInputパラメータ
  */
@@ -28,7 +33,7 @@ export interface IObjectManagement {
   name?: string;
   type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light";
   filePath?: string;
-  visiableType: "auto" | "force" | "none";
+  visibleType: "auto" | "force" | "none";
   layerNum?: number;
   args: any;
   rules?: any;
@@ -47,7 +52,29 @@ export interface IUIManagement {
   name?: string;
   styles?: string;
   args?: string;
-  visiableType: "view" | "none";
+  visibleType: "view" | "none";
+}
+
+/**
+ * テクスチャマネジメント
+ */
+export interface ITextureManagement {
+  type: "image";
+  id: string;
+  name?: string;
+  filePath?: string;
+  binary: Blob;
+}
+
+/**
+ * スクリプトマネジメント
+ */
+export interface IScriptManagement {
+  type: string;// 未定
+  id: string;
+  name?: string;
+  filePath?: string;
+  script?: string;
 }
 
 export interface ISoundProps {
@@ -57,7 +84,6 @@ export interface ISoundProps {
   volume: number;
   filePath: string;
   position?: Vector3;
-  
   trigAnim?: string;
   stopAnim?: string;
 }

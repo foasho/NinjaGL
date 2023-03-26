@@ -24,10 +24,16 @@ export const MainViewInspector = () => {
   const [isFocus, setIsFocus] = useState<boolean>();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
+  const [color, setColor] = useState<string>();
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
+  const [castShadow, setCastShadow] = useState<boolean>(true);
+  const [receiveShadow, setreceiveShadow] = useState<boolean>(true);
+  const [helper, setHelper] = useState<boolean>(true);
+  const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
+
   const [selectOM, setSelectOM] = useState<IObjectManagement>(null);
   const id = selectOM? selectOM.id: null;
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   editor.setFocus(id, isFocus);
 
@@ -36,7 +42,7 @@ export const MainViewInspector = () => {
       myFrame();
     }, 1000 / 10);
     return () => clearInterval(interval);
-  }, [selectOM, isFocus])
+  }, [selectOM, isFocus]);
 
   const myFrame = () => {
     if (id){
@@ -45,7 +51,8 @@ export const MainViewInspector = () => {
         position && 
         (
           selectOM.type == "object" || 
-          selectOM.type == "light"
+          selectOM.type == "light" ||
+          selectOM.type == "three"
         )
       ) {
         if (!isFocus){
@@ -53,15 +60,13 @@ export const MainViewInspector = () => {
           refPosY.current.value = position.y.toFixed(2).toString();
           refPosZ.current.value = position.z.toFixed(2).toString();
         }
-        else {
-
-        }
       }
       const rotation = editor.getRotation(id);
       if (
         rotation && (
           selectOM.type == "object" || 
-          selectOM.type == "light"
+          selectOM.type == "light" ||
+          selectOM.type == "three"
         )
       ) {
         if (!isFocus){
@@ -73,7 +78,8 @@ export const MainViewInspector = () => {
       const scale = editor.getScale(id);
       if (scale && (
         selectOM.type == "object"|| 
-        selectOM.type == "light"
+        selectOM.type == "light" ||
+        selectOM.type == "three"
       )) {
         if (!isFocus){
           refScaX.current.value = scale.x.toFixed(2).toString();
@@ -86,6 +92,13 @@ export const MainViewInspector = () => {
       setSelectOM(editor.getSelectOM());
     }
   }
+
+  /**
+   * 初期設定
+   */
+  useEffect(() => {
+
+  }, []);
 
   /**
    * 位置変更　Inspector -> Object
@@ -149,10 +162,28 @@ export const MainViewInspector = () => {
     editor.setRotation(id, newRotation);
   }
 
+  // 物理判定選択肢
   const physicsOptions = [
     { value: "aabb", label: "無回転BOX(AABB)" },
     { value: "along", label: "形状に従う" }
-  ]
+  ];
+
+  // 描画種別の選択肢
+  const visibleTypeOptions: {value: "auto"|"force"|"none", label: string}[] = [
+    { value: "auto", label: t("autoScaling") },
+    { value: "force", label: t("visibleForce") },
+    { value: "none", label: t("visibleNone") }
+  ];
+
+  /**
+   * 色の変更
+   */
+  const changeMaterial = (type: "color" | "texture", value: any) => {
+    if (type == "color" && value){
+      editor.setMaterial(id, type, value);
+      setColor(value);
+    }
+  }
 
   /**
    * 物理判定の有無
@@ -189,6 +220,41 @@ export const MainViewInspector = () => {
     }
   }
 
+  /**
+   * CastShadowを変更
+   */
+  const onCheckCastShadow = () => {
+    editor.setCastShadow(id, !castShadow);
+    setCastShadow(!castShadow);
+  }
+
+  /**
+   * receiveShadowを変更
+   */
+  const onCheckreceiveShadow = () => {
+    editor.setreceiveShadow(id, !receiveShadow);
+    setreceiveShadow(!receiveShadow);
+  }
+
+  /**
+   * Helper表示切り替え
+   */
+  const onCheckHelper = () => {
+    editor.setHelper(id, !helper);
+    setHelper(!helper);
+  }
+
+  /**
+   * 描画種別の変更
+   */
+  const changeVisibleType = (selectVisibleType) => {
+    editor.setVisibleType(id, selectVisibleType.value);
+    setVisibleType(selectVisibleType);
+  }
+
+  /**
+   * Focusの切り替え
+   */
   const focusChange = (flag: boolean) => {
     editor.setFocus(id, flag);
     setIsFocus(flag);
@@ -202,7 +268,9 @@ export const MainViewInspector = () => {
         (
           selectOM.type == "object" ||
           selectOM.type == "avatar" ||
-          selectOM.type == "light"
+          selectOM.type == "light" || 
+          selectOM.type == "three" ||
+          selectOM.type == "terrain"
         )
       ) &&
         
@@ -325,8 +393,14 @@ export const MainViewInspector = () => {
                 {t("color")}
               </div>
               <div className={styles.pallet}>
-                <input type={"color"} value={"#43D9D9"}/>
-                <input type={"text"} value={"#43D9D9"} />
+                <input 
+                  type={"color"} 
+                  value={color} 
+                  onChange={(e) => changeMaterial("color", e.target.value)}
+                  onFocus={() => focusChange(true)}
+                  onBlur={() => focusChange(false)}
+                />
+                <input type={"text"} value={color} />
               </div>
             </div>
           </div>
@@ -354,28 +428,82 @@ export const MainViewInspector = () => {
               </>
             }
           </div>
-          {selectOM.type == "object" && 
-          <div className={styles.lod}>
-            <div className={styles.title}>
-            {t("isLoD")}
+          {
+            (
+              selectOM.type == "object"
+            ) && 
+            <div className={styles.lod}>
+              <div className={styles.title}>
+              {t("isLoD")}
+              </div>
+              <div className={styles.input}>
+                <input 
+                  type="checkbox" 
+                  className={styles.checkbox} 
+                  checked={isLod} 
+                  onInput={() => onCheckLoD()}
+                />
+                <span className={styles.customCheckbox}></span>
+              </div>
+              {isLod &&
+                <a className={styles.lodbtn} onClick={() => onLoDView()}>
+                  {t("chakeLoD")}
+                </a>
+              }
             </div>
-            <div className={styles.input}>
-              <input 
-                type="checkbox" 
-                className={styles.checkbox} 
-                checked={isLod} 
-                onInput={() => onCheckLoD()}
-              />
-              <span className={styles.customCheckbox}></span>
-            </div>
-            {isLod &&
-              <a className={styles.lodbtn} onClick={() => onLoDView()}>
-                {t("chakeLoD")}
-              </a>
-            }
-          </div>
           }
+
+          {
+            (selectOM.type == "light" || selectOM.type == "three" || selectOM.type == "object" || selectOM.type == "avatar") && 
+            <>
+              <div className={styles.castShadow}>
+                  <div className={styles.title}>
+                    {t("castshadow")}
+                  </div>
+                  <div className={styles.input}>
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={castShadow} 
+                      onInput={() => onCheckCastShadow()}
+                    />
+                    <span className={styles.customCheckbox}></span>
+                  </div>
+              </div>
+              <div className={styles.visibleType}>
+                <div className={styles.title}>
+                  {t("visibleType")}
+                </div>
+                <div className={styles.input}>
+                  <Select
+                    options={visibleTypeOptions}
+                    value={visibleType}
+                    onChange={(select) => changeVisibleType(select.value)}
+                    styles={normalStyles}
+                    />
+                </div>
+              </div>
+            </>
+          }
+
+          <>
+            <div className={styles.helper}>
+              <div className={styles.title}>
+                {t("helper")}
+              </div>
+              <div className={styles.input}>
+                <input 
+                  type="checkbox" 
+                  className={styles.checkbox} 
+                  checked={helper} 
+                  onInput={() => onCheckHelper()}
+                />
+                <span className={styles.customCheckbox}></span>
+              </div>
+            </div>
           </>
+
+        </>
       }
 
       </div>

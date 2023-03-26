@@ -3,10 +3,7 @@ import { PlayerEditor } from "@/components/NinjaEditor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/components/NinjaEditor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef } from "react";
-import { Object3D, Vector3 } from "three";
-import { reqApi } from "@/services/ServciceApi";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
-import { PivotControls } from "@react-three/drei";
 import { IObjectManagement } from "@/engine/Core/NinjaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
@@ -25,11 +22,16 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
+import { NJCFile, saveNJCFile } from "@/engine/Core/NinjaFileControl";
+import { loadNJCFile } from "@/engine/Core/NinjaFileControl";
+
 
 export const NinjaEditor = () => {
   const editor = useContext(NinjaEditorContext);
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
-  
+  const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
+  const [showSubMenu, setShowSubMenu] = useState(false);
+  const [projectFiles, setProjectFiles] = useState<{name: string; path: string}[]>([]);
   const [scriptPath, setScriptPath] = useState<string>();
   const { t, i18n } = useTranslation();
 
@@ -38,7 +40,6 @@ export const NinjaEditor = () => {
       setViewSelect(viewType);
     }
   }
-
 
   /**
    * 新しいオブジェクトを追加する
@@ -52,10 +53,12 @@ export const NinjaEditor = () => {
           name: `*${data.value}`,
           type: "light",
           args: {
-            type: data.value
+            type: data.value,
+            castShadow: true,
+            receiveShadow: false,
           },
           physics: "none",
-          visiableType: "auto",
+          visibleType: "auto",
         }
       )
     }
@@ -69,21 +72,36 @@ export const NinjaEditor = () => {
             type: data.value
           },
           physics: "none",
-          visiableType: "auto",
+          visibleType: "auto",
         }
       )
     }
     else if (data.type == "sound"){
+      // editor.setObjectManagement(
+      //   {
+      //     id: generateUUID(),
+      //     name: `*${data.value}`,
+      //     type: "sound",
+      //     args: {
+      //       type: data.value
+      //     },
+      //     physics: "none",
+      //     visibleType: "auto",
+      //   }
+      // )
+    }
+    else if (data.type == "three"){
+      console.log("three", data.type);
       editor.setObjectManagement(
         {
           id: generateUUID(),
           name: `*${data.value}`,
-          type: "sky",
+          type: "three",
           args: {
             type: data.value
           },
           physics: "none",
-          visiableType: "auto",
+          visibleType: "auto",
         }
       )
     }
@@ -105,7 +123,7 @@ export const NinjaEditor = () => {
    * テンプレート選択
    */
   const onClickSelectTemplate = () => {
-    Swal.fire("注意", "現在ゲームテンプレートの準備中です。");
+    Swal.fire(t("attention"), t("templatePrepare"));
   }
 
   /**
@@ -132,23 +150,59 @@ export const NinjaEditor = () => {
    * プロジェクト全体を保存
    */
   const onSave = () => {
-    toast(t("completeSave"), {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
+    const njcFile = new NJCFile();
+    editor.getOms().map((om) => {
+      njcFile.addOM({...om});
     });
+    editor.getUMs().map((um) => {
+      njcFile.addUM({...um});
+    });
+    saveNJCFile(njcFile, "savedata-sample.njc");
   }
+
+  /**
+   * ファイルメニューを開く
+   */
+  const openFileMenu = () => {
+    setShowFileMenu(!showFileMenu);
+  }
+  const handleFileMenuLeave = () => {
+    setShowFileMenu(false);
+  };
+  const handleRecentProjectsHover = () => {
+    setShowSubMenu(true);
+  };
+  const handleSubMenuMouseLeave = () => {
+    setShowSubMenu(false);
+  };
+
+  const openProject = async () => {
+    const input: HTMLInputElement = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.njc'; // NJCの拡張子を指定
+    input.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files.length > 0){
+        const file = (target.files as FileList)[0];
+        console.log("load file check");
+        console.log(file);
+        const data = await loadNJCFile(file);
+        console.log("ロードデータを確認");
+        console.log(data);
+      }
+    };
+    input.click();
+  }
+  
 
   return (
     <>
       <div className={styles.editor}>
         <div className={styles.appBar}>
           <ul className={styles.nav}>
+            <li className={`${styles.navItem} ${styles.left}`}>
+              <a onClick={() => openFileMenu()}>{t("file")}</a>
+            </li>
             <li className={`${styles.navItem} ${styles.left}`}>
               <a onClick={() => onClickSelectLang()}>{t("lang")}</a>
             </li>
@@ -183,6 +237,35 @@ export const NinjaEditor = () => {
               </a>
             </li>
           </ul>
+          {showFileMenu &&
+          <div className={styles.filemenu}>
+            <ul onMouseLeave={() => handleFileMenuLeave()}>
+              <li><a>{t("newProject")}</a></li>
+              <li><a onClick={() => openProject()}>{t("open")}</a></li>
+              <li onMouseEnter={() => handleRecentProjectsHover()} onMouseLeave={() => handleSubMenuMouseLeave()}>
+                <a>{t("recentProjects")}</a>
+                {showSubMenu &&
+                <ul className={styles.subMenu} onMouseLeave={() => handleSubMenuMouseLeave()}>
+                  {projectFiles.map((pf => {
+                    return (
+                      <li>
+                        <a>{pf.name}</a>
+                        <a>{pf.path}</a>
+                      </li>
+                    )
+                  }))}
+                  {projectFiles.length == 0 && 
+                    <li>
+                      <a>{t("noRecentData")}</a>
+                    </li>
+                  }
+                </ul>
+                }
+              </li>
+              <li><a>{t("help")}</a></li>
+            </ul>
+          </div>
+          }
         </div>
         <div className={styles.mainContents}>
           <div className={styles.hierarchy}>
@@ -199,12 +282,12 @@ export const NinjaEditor = () => {
             <div className={styles.contentsbrowser}>
               <ContentsBrowser changeScriptEditor={changeScriptEditor} />
             </div>
-            <div className={styles.createObj}>
+            <div className={styles.createObj} onClick={() => onClickNewObject()}>
               <div className={styles.title}>
                 <span className={styles.icon}>
                   <AiOutlinePlus />
                 </span>
-                <span className={styles.name} onClick={() => onClickNewObject()}>
+                <span className={styles.name}>
                   {t("newObject")}
                 </span>
               </div>
@@ -252,9 +335,14 @@ export const NinjaEditor = () => {
               </div>
             </div>
             <div className={styles.viewport}>
-              <div style={{ display: viewSelect == "mainview" ? "block": "none", height: "100%" }}>
+              {/* <div style={{ display: viewSelect == "mainview" ? "block": "none", height: "100%" }}>
                 <MainViewer />
-              </div>
+              </div> */}
+              {viewSelect == "mainview" &&
+               <>
+                <MainViewer />
+               </>
+              }
               {viewSelect == "debugplay" &&
                 <>
                   <DebugPlay />

@@ -18,7 +18,7 @@ export const NinjaCanvas = () => {
     const setup = async () => {
       if (engine && !engine.loadCompleted) {
         engine.allSetup();
-        await engine.importConfigJson();
+        await engine.loadJsonData();
         setReady(true);
       }
     }

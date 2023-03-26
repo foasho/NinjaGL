@@ -18,7 +18,7 @@ export const Terrain = () => {
   const [helper, setHelper] = useState<boolean>(true)
 
   const lineSegs = [];
-  if (object){
+  if (object && helper){
     object.traverse((node) => {
       if (node instanceof Mesh) {
         node.receiveShadow = true;
@@ -42,6 +42,10 @@ export const Terrain = () => {
   useFrame((_, delta) => {
     if (terrain != editor.getTerrain()){
       setTerrain(editor.getTerrain());
+    }
+    if (terrain && helper !== editor.getHelper(id)){
+      console.log("ちぇっくだよｐん");
+      setHelper(editor.getHelper(id));
     }
   });
 
