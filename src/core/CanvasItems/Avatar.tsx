@@ -1,5 +1,5 @@
-import { useInputControl } from "@/engine/Core/InputControls";
-import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
+import { useInputControl } from "@/core/Core/InputControls";
+import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";

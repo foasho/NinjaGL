@@ -1,5 +1,5 @@
-import { NinjaEngine, NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
-import { NinjaCanvas } from "@/engine/NinjaCanvas";
+import { NinjaEngine, NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
+import { NinjaCanvas } from "@/core/NinjaCanvas";
 import { useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
@@ -18,7 +18,6 @@ export const DebugPlay = () => {
     const oms = editor.oms;
     const ums = editor.ums;
     const config = editor.config;
-    // まずは直接いれてみる
     const _engine = new NinjaEngine();
     const avatar = editor.getAvatar();
     const terrain = editor.getTerrain();

@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/engine/Core/NinjaProps"
+import { IObjectManagement } from "@/core/Core/NinjaProps"
 import { Sky } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useState } from "react"

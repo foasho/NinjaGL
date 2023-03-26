@@ -4,7 +4,7 @@ import { MainViewer } from "@/components/NinjaEditor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef } from "react";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
-import { IObjectManagement } from "@/engine/Core/NinjaProps";
+import { IObjectManagement } from "@/core/Core/NinjaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMaker } from "./ViewPort/TerrainMaker";
@@ -22,12 +22,14 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { NJCFile, saveNJCFile } from "@/engine/Core/NinjaFileControl";
-import { loadNJCFile } from "@/engine/Core/NinjaFileControl";
+import { NJCFile, saveNJCFile } from "@/core/Core/NinjaFileControl";
+import { loadNJCFile } from "@/core/Core/NinjaFileControl";
+import { BiEditAlt } from "react-icons/bi";
 
 
 export const NinjaEditor = () => {
   const editor = useContext(NinjaEditorContext);
+  const [projectName, setProjectName] = useState<string>(null);
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
   const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
   const [showSubMenu, setShowSubMenu] = useState(false);
@@ -147,6 +149,33 @@ export const NinjaEditor = () => {
   }
 
   /**
+   * プロジェクト名を保存
+   */
+  const changeProjectName = () => {
+    Swal.fire({
+      title: t("changeProjectName"),
+      input: 'text',
+      showCancelButton: true,
+      confirmButtonText: t("change"),
+      showLoaderOnConfirm: true,
+      preConfirm: async (inputStr) => {
+        //バリデーションを入れたりしても良い
+        if (inputStr.length == 0) {
+          return Swal.showValidationMessage(t("leastInput"));
+        }
+        return inputStr
+      },
+      allowOutsideClick: function () {
+        return !Swal.isLoading();
+      }
+    }).then((result) => {
+      if (result.value) {
+        setProjectName(result.value);
+      }
+    });
+  }
+
+  /**
    * プロジェクト全体を保存
    */
   const onSave = () => {
@@ -217,6 +246,9 @@ export const NinjaEditor = () => {
             <li className={`${styles.navCenter}`}>
               <a className={styles.item}>
                 NinjaGL
+              </a>
+              <a className={styles.projectName} onClick={() => {changeProjectName()}}>
+                {projectName? projectName: <><BiEditAlt/>{t("nontitle")}</>}
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>

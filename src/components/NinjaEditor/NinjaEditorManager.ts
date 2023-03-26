@@ -1,7 +1,7 @@
 import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { IConfigParams, IObjectManagement, ITextureManagement, IUIManagement } from "@/engine/Core/NinjaProps";
+import { IConfigParams, IObjectManagement, ITextureManagement, IUIManagement } from "@/core/Core/NinjaProps";
 import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import { rtdp } from "@/commons/functional";

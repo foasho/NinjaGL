@@ -3,7 +3,8 @@ import {
   Mesh,
   BufferGeometry,
   Sphere,
-  Object3D
+  Object3D,
+  GLBufferAttribute
 } from "three";
 
 /**
@@ -98,6 +99,7 @@ export class Octree extends Box3 {
       var geometryId = geometry.uuid;
       if (geometry.index) {
         var indices = geometry.index.array;
+        if (geometry.attributes.position instanceof GLBufferAttribute) return;
         var positions = geometry.attributes.position.array;
         var groups = geometry.groups.length !== 0 ? geometry.groups : [
           {

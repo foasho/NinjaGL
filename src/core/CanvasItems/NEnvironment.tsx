@@ -1,5 +1,5 @@
-import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
-import { IObjectManagement } from "@/engine/Core/NinjaProps";
+import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
+import { IObjectManagement } from "@/core/Core/NinjaProps";
 import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
 import { useContext } from "react"
 import { MathUtils } from "three";
