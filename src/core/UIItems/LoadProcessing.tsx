@@ -1,4 +1,4 @@
-import { loadingText, loadPer, NinjaEngineContext, totalFileSize } from "@/engine/Core/NinjaEngineManager"
+import { loadingText, loadPer, NinjaEngineContext, totalFileSize } from "@/core/Core/NinjaEngineManager"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Vector2 } from "three";
 

@@ -3,7 +3,7 @@ import { LoadProcessing } from "./UIItems/LoadProcessing";
 // Icons
 import { BsHandbagFill } from "react-icons/bs";
 import { TouchMove } from "./UIItems/TouchMove";
-import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager";
+import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
 import { NinjaIcons } from "./uis/NinjaIcons";
 
 export const NinjaUI = () => {

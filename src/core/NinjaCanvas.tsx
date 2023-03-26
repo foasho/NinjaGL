@@ -1,4 +1,4 @@
-import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager"
+import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager"
 import { Canvas, useThree } from "@react-three/fiber"
 import { useContext, useEffect, useRef, useState } from "react"
 import { Avatar } from "./CanvasItems/Avatar"

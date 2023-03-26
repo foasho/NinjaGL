@@ -1,4 +1,4 @@
-import { IObjectManagement, IUIManagement } from "@/engine/Core/NinjaProps";
+import { IObjectManagement, IUIManagement } from "@/core/Core/NinjaProps";
 import { useState, useRef, useContext, useEffect } from "react"
 import styles from "@/App.module.scss";
 import { NinjaEditorContext } from "../NinjaEditorManager";

@@ -1,7 +1,14 @@
 {
   "name": "ninjagl",
   "version": "0.1.0",
-  "private": true,
+  "description": "R3F-WEBGL FastGameEditor",
+  "private": false,
+  "author": "ShoOsaka",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foasho/NinjaGL.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,6 +23,7 @@
     "@react-three/drei": "^9.56.18",
     "@react-three/fiber": "^8.11.0",
     "@react-three/postprocessing": "^2.7.0",
+    "@react-three/xr": "^5.4.1",
     "@tensorflow/tfjs": "^4.3.0",
     "@types/node": "18.13.0",
     "@types/react": "18.0.28",
@@ -39,6 +47,7 @@
     "react-dom": "18.2.0",
     "react-i18next": "^12.2.0",
     "react-icons": "^4.7.1",
+    "react-router-dom": "^6.9.0",
     "react-select": "^5.7.0",
     "react-toastify": "^9.1.1",
     "sass": "^1.58.1",
@@ -49,6 +58,7 @@
     "typescript": "4.9.5"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.20.2",
     "@types/file-saver": "^2.0.5",
     "glslify-loader": "^2.0.0",
     "raw-loader": "^4.0.2"

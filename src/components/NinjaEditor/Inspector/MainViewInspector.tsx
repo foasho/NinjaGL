@@ -1,5 +1,5 @@
 import styles from "@/App.module.scss";
-import { IObjectManagement } from "@/engine/Core/NinjaProps";
+import { IObjectManagement } from "@/core/Core/NinjaProps";
 import { useRef, useContext, useEffect, useState } from "react";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';

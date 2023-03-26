@@ -1,4 +1,4 @@
-import { NinjaEngineContext } from "@/engine/Core/NinjaEngineManager"
+import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager"
 import { useContext, useEffect, useState } from "react"
 import { Object3D } from "three";
 

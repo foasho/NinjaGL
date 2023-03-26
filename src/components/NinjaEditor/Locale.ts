@@ -97,6 +97,8 @@ const resources = {
       recentProjects: "Recent Projects",
       help: "Help",
       noRecentData: "None...",
+      nontitle: "NonTitle",
+      changeProjectName: "Change Project Name",
     }
   },
   ja: {
@@ -198,6 +200,8 @@ const resources = {
       recentProjects: "最近開いたプロジェクト",
       help: "ヘルプ",
       noRecentData: "No Data",
+      nontitle: "名称未設定",
+      changeProjectName: "プロジェクト名を変更",
     }
   }
 }

@@ -19,9 +19,9 @@ import {
   GLBufferAttribute,
   Material
 } from "three";
-import { useInputControl } from "@/engine/Core/InputControls";
+import { useInputControl } from "@/core/Core/InputControls";
 import { colors } from "react-select/dist/declarations/src/theme";
-import { IObjectManagement } from "@/engine/Core/NinjaProps";
+import { IObjectManagement } from "@/core/Core/NinjaProps";
 
 const TerrainMakeComponent = () => {
   const editor = useContext(NinjaEditorContext);
