@@ -14,6 +14,7 @@ import { MySky } from "./MainViewItems/Sky";
 import { BsGrid3X3 } from "react-icons/bs";
 import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 import { ThreeObjects } from "./MainViewItems/Three";
+import { Perf } from "r3f-perf";
 
 export const MainViewer = () => {
   const camRef = useRef<OrbitControlsImpl>();
@@ -36,7 +37,7 @@ export const MainViewer = () => {
       //   editor.setObjectManagement({
       //     id: generateUUID(),
       //     type: "object",
-      //     visiableType: "auto",
+      //     visibleType: "auto",
       //     args: null,
       //     physics: "aabb",
       //     object: gltf.scene
@@ -70,7 +71,7 @@ export const MainViewer = () => {
                 filePath: filePath,
                 type: "object",
                 physics: "aabb",
-                visiableType: "auto",
+                visibleType: "auto",
                 args: {
                   position: new Vector3(0, 0, 0),
                   rotation: new Euler(0, 0, 0)
@@ -86,7 +87,7 @@ export const MainViewer = () => {
                 filePath: filePath,
                 type: "terrain",
                 physics: "along",
-                visiableType: "force",
+                visibleType: "force",
                 args: {},
                 object: scene
               });
@@ -97,7 +98,7 @@ export const MainViewer = () => {
                 filePath: filePath,
                 type: "avatar",
                 physics: "aabb",
-                visiableType: "force",
+                visibleType: "force",
                 args: {
                   height: 1.7,
                   isCenter: true,
@@ -160,6 +161,7 @@ export const MainViewer = () => {
         camera={{ position: [-3, 3, -6] }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        shadows
       >
         <OrbitControls makeDefault={true} ref={camRef} />
         <MyLights/>
@@ -184,6 +186,9 @@ export const MainViewer = () => {
   )
 }
 
+/**
+ * 補助機能
+ */
 const SystemHelper = () => {
   return (
     <>
@@ -191,19 +196,7 @@ const SystemHelper = () => {
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
-    </>
-  )
-}
-
-const SystemUI = () => {
-  
-  return (
-    <>
-      <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
-        <a style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}>
-          <BsGrid3X3/>
-        </a>
-      </div>
+      <Perf position={"bottom-right"} style={{ position: "absolute" }}/>
     </>
   )
 }

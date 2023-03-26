@@ -262,7 +262,7 @@ export class NinjaEngine {
               const obj: IObjectManagement = {
                 id: jsonData[key].id,
                 type: key,
-                visiableType: "force",
+                visibleType: "force",
                 object: object,
                 args: jsonData[key].args,
                 physics: "along",
@@ -302,7 +302,7 @@ export class NinjaEngine {
               const obj: IObjectManagement = {
                 id: jsonData[key].id,
                 type: key,
-                visiableType: "force",
+                visibleType: "force",
                 object: object,
                 args: jsonData[key].args,
                 physics: "along"
@@ -328,7 +328,7 @@ export class NinjaEngine {
               const obj: IObjectManagement = {
                 id: jsonData[key].id,
                 type: key,
-                visiableType: "force",
+                visibleType: "force",
                 object: object,
                 args: jsonData[key].args,
                 physics: "along"
@@ -347,7 +347,7 @@ export class NinjaEngine {
                   id: targetObj.id,
                   type: "object",
                   args: targetObj.args,
-                  visiableType: "auto",
+                  visibleType: "auto",
                   physics: targetObj.physics
                 }
                 this.oms.push(obj);
@@ -369,7 +369,7 @@ export class NinjaEngine {
             name: jsonData[key].name,
             type: key,
             args: jsonData[key],
-            visiableType: "force",
+            visibleType: "force",
             physics: jsonData[key].physics
           }
           this.oms.push(obj);
@@ -625,11 +625,11 @@ export class NinjaEngine {
   /**
    * 可視上のオブジェクトを全て取得する
    */
-  getAllVisiableObjects(): Object3D[] {
+  getAllvisibleObjects(): Object3D[] {
     const objects = this.oms.filter(om => {
       let isVisible = false;
-      if (om.object && om.visiableType == "force") return true;
-      if (om.object && om.visiableType == "auto") {
+      if (om.object && om.visibleType == "force") return true;
+      if (om.object && om.visibleType == "auto") {
         if (om.layerNum !== undefined) {
 
           return true;

@@ -1,7 +1,8 @@
 import { IObjectManagement } from "@/engine/Core/NinjaProps";
+import { useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
-import { Euler, Group, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
+import { BoxHelper, Euler, Group, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager"
 import { PivotControls } from "./PivoitControl";
 
@@ -37,6 +38,7 @@ const ThreeObject = (props: IThreeObject) => {
   const ref = useRef<Mesh>();
   const editor = useContext(NinjaEditorContext);
   const [visible, setVisible] = useState<boolean>(false);
+  const [helper, setHelper] = useState<boolean>(true);
   const handleDrag = useRef<boolean>(false);
   const editorData = useRef<{ focus: boolean; position: Vector3, rotation: Euler }>({ focus: false, position: new Vector3(), rotation: new Euler() });
   const id = props.om.id;
@@ -118,7 +120,19 @@ const ThreeObject = (props: IThreeObject) => {
         }
       }
     }
+    if (ref.current){
+      const castShadow = editor.getCastShadow(id);
+      const receiveShadow = editor.getreceiveShadow(id);
+      ref.current.castShadow = castShadow;
+      ref.current.receiveShadow = receiveShadow;
+      ref.current.visible = editor.getVisible(id);
+    }
+    if (helper !== editor.getHelper(id)){
+      setHelper(editor.getHelper(id));
+    }
   });
+
+  useHelper((visible && helper) && ref, BoxHelper);
 
   return (
     <>
@@ -143,6 +157,8 @@ const ThreeObject = (props: IThreeObject) => {
             onPointerMissed={(e) => {
               onClick(e, false)
             }}
+            castShadow={true}
+            receiveShadow={true}
           >
             {geometry}
             <meshStandardMaterial ref={matRef} />

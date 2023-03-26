@@ -1,4 +1,14 @@
-$editorColor: #222121;
+// Common
+$bgColor: #222121;
+$black: #000;
+$white: #f2f2f2;
+$textColor: #f2f2f2;
+$textBgHover: #6e6b6b;
+$selectbgColor: #333;
+
+// Theme
+$mainColor: #BA68C8;
+
 
 .editor {
     width: auto;
@@ -13,16 +23,16 @@ $editorColor: #222121;
             flex: 1;
             height: calc(100% - 2px);
             padding-top: 2px;
-            background-color: $editorColor;
+            background-color: $bgColor;
             max-width: 200px;
             position: relative;
             .createObj {
-                border-top: 2px #000000 solid;
+                border-top: 2px $black solid;
                 position: absolute;
                 bottom: 0;
                 width: 100%;
                 .title {
-                    color: #fff;
+                    color: $textColor;
                     font-size: 14px;
                     font-weight: bold;
                     text-align: center;
@@ -34,10 +44,10 @@ $editorColor: #222121;
                         padding-right: 6px;
                         font-size: 18px;
                         vertical-align: middle;
+                        transition: background-color 1s ease;
                     }
                     &:hover{
-                        background-color: #6e6b6b;
-
+                        background-color: $textBgHover;
                     }
                 }
             }
@@ -45,22 +55,22 @@ $editorColor: #222121;
         .contents {
             flex: 2;
             height: 100%;
-            background-color: #000;
+            background-color: $black;
             display: block;
             // flex-direction: column;
             .viewselect {
                 margin: 0;
                 height: 25px;
                 padding: 0;
-                color: #fff;
-                background-color: #333;
+                color: $textColor;
+                background-color: $selectbgColor;
                 user-select: none;
                 .select {
                     display: inline-block;
                     a {
                         padding: 0 10px;
                         font-size: 10px;
-                        border-right: 2px solid #000;
+                        border-right: 2px solid $black;
                         cursor: pointer;
                     }
                 }
@@ -69,7 +79,7 @@ $editorColor: #222121;
                 margin: 0;
                 padding: 0;
                 height: calc(100% - 25px);
-                background-color: #fff;
+                background-color: $white;
             }
             
         }
@@ -78,8 +88,8 @@ $editorColor: #222121;
             width: 200px;
             max-width: 200px;
             padding: 10px;
-            background-color: $editorColor;
-            color: #fff;
+            background-color: $bgColor;
+            color: $white;
             text-align: left;
         }
     }

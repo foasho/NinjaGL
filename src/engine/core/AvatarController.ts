@@ -646,7 +646,7 @@ export class AvatarController {
       const objectPosition = this.object.position.clone();
       const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
       const distance = cameraPosition.distanceTo(objectPosition);
-      const objects = this.parent.getAllVisiableObjects();
+      const objects = this.parent.getAllvisibleObjects();
       if (objects.length > 0) {
         this.raycaster.set(newPosition, direction);
         this.raycaster.far = distance - this.radius;

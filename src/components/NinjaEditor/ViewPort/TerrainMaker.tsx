@@ -258,8 +258,6 @@ const TerrainMakeComponent = () => {
     else {
       lightRef.current.intensity = lightRef.current.distance / 32;
     }
-
-    
     if (texture){
       texture.needsUpdate = true;
       gl.setRenderTarget(null);

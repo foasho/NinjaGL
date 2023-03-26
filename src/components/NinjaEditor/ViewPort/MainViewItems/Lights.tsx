@@ -93,6 +93,16 @@ export const MyLight = (prop: ILightProps) => {
       catchRef.current.rotation.copy(ref.current.rotation.clone());
       catchRef.current.scale.copy(ref.current.scale.clone());
     }
+    if (ref.current){
+      const castShadow = editor.getCastShadow(id);
+      const receiveShadow = editor.getreceiveShadow(id);
+      ref.current.castShadow = castShadow;
+      ref.current.receiveShadow = receiveShadow;
+      const material = editor.getMaterial(id);
+      if (material && material.type == "color"){
+        ref.current.color.set(material.value);
+      }
+    }
   })
   
   return (
@@ -112,6 +122,7 @@ export const MyLight = (prop: ILightProps) => {
             />
             <spotLight 
               ref={ref}
+              castShadow
             />
             <mesh 
               onClick={(e) => onClick(e, true)}
@@ -138,6 +149,7 @@ export const MyLight = (prop: ILightProps) => {
             />
               <directionalLight 
                 ref={ref}
+                castShadow
               />
               <mesh 
                 onClick={(e) => onClick(e, true)}
@@ -166,6 +178,7 @@ export const MyLight = (prop: ILightProps) => {
             <pointLight
               ref={ref}
               position={[0, 5, 0]}
+              castShadow
             />
             <mesh 
               onClick={(e) => onClick(e, true)}

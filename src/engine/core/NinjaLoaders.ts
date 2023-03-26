@@ -12,12 +12,14 @@ import {
   AnimationClip,
   Quaternion,
   MeshPhongMaterial,
-  Group
+  Group,
+  GLBufferAttribute
 } from "three";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { SimplifyModifier } from "three/examples/jsm/modifiers/SimplifyModifier";
 import { generateUUID } from "three/src/math/MathUtils";
+import { IObjectManagement } from "./NinjaProps";
 
 /**
  * 基本的な3Dオブジェクトのロード
@@ -118,6 +120,12 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
     var offset = geometry1.attributes.position.count;
 
     // 頂点属性を結合する
+    if (geometry1.attributes.position instanceof GLBufferAttribute) return;
+    if (geometry2.attributes.position instanceof GLBufferAttribute) return;
+    if (geometry1.attributes.normal instanceof GLBufferAttribute) return;
+    if (geometry2.attributes.normal instanceof GLBufferAttribute) return;
+    if (geometry1.attributes.uv instanceof GLBufferAttribute) return;
+    if (geometry2.attributes.uv instanceof GLBufferAttribute) return;
     var positions1 = geometry1.attributes.position.array;
     var positions2 = geometry2.attributes.position.array;
     var mergedPositions = new Float32Array(positions1.length + positions2.length);

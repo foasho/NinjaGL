@@ -132,7 +132,7 @@ const jsonData = {
   "staticObjects": [
     {
       "id": "so1",
-      "visiableType": "auto",
+      "visibleType": "auto",
       "filePath": "assets/free/space/Pickup_Bullets.gltf",
       "physics": "none"
     }
@@ -146,7 +146,7 @@ const jsonData = {
       "azimuth": 0.25
     },
     "physics": "none",
-    "visiableType": "force"
+    "visibleType": "force"
   },
   "lights": [
     {

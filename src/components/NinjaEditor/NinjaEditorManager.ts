@@ -10,7 +10,7 @@ interface ISetObjectManagement {
   id?: string;
   name?: string;
   type: "three" | "object" | "avatar" | "terrain" | "others" | "sky" | "light";
-  visiableType: "auto" | "force" | "none";
+  visibleType: "auto" | "force" | "none";
   layerNum?: number;
   args?: any;
   rules?: any;
@@ -185,6 +185,74 @@ export class NinjaEditorManager {
   }
 
   /**
+   * CastShadowを変更
+   */
+  setCastShadow(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.castShadow = value;
+    }
+  }
+
+  /**
+   * CastShadowを変更
+   */
+  setreceiveShadow(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.receiveShadow = value;
+    }
+  }
+
+  /**
+   * Helper表示の切り替え
+   */
+  setHelper(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.helper = value;
+    }
+  }
+
+  /**
+   * 名前を変更
+   * @param id 
+   * @param value 
+   */
+  setName(id: string, value: string){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.name = value;
+    }
+  }
+
+  /**
+   * 表示種別を非表示にする
+   * @param id 
+   * @param value 
+   */
+  setVisibleType(id: string, visibleType: "none" | "force" | "auto"){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.visibleType = visibleType;
+    }
+  }
+
+  /**
+   * 表示を非表示にする
+   * @param id 
+   * @param value 
+   */
+  setVisible(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.visible = value;
+    }
+  }
+
+  // Get Function
+
+  /**
    * 特定のオブジェクトのPositionを取得
    * @param id 
    * @returns 
@@ -247,6 +315,54 @@ export class NinjaEditorManager {
     }
     return target.args.material;
   }
+
+  /**
+   * CastShadowを取得
+   */
+  getCastShadow(id: string){
+    const target = this.oms.find(om => om.id == id);
+    if (!target) {
+      return false;
+    }
+    return target.args.castShadow;
+  }
+
+  /**
+   * receiveShadowを取得
+   */
+  getreceiveShadow(id: string){
+    const target = this.oms.find(om => om.id == id);
+    if (!target) {
+      return false;
+    }
+    return target.args.receiveShadow;
+  }
+
+  /**
+   * Helperを取得
+   */
+  getHelper(id: string){
+    const target = this.oms.find(om => om.id == id);
+    if (!target) {
+      return false;
+    }
+    return target.args.helper;
+  }
+
+  /**
+   * 表示を非表示にする
+   * @param id 
+   */
+  getVisible(id: string){
+    const target = this.oms.find(om => om.id == id);
+    if (!target) {
+      return false;
+    }
+    return target.args.visible;
+  }
+
+
+  /** --- OM関係 --- */
 
   /**
    * 特定のOMにObejctをセットする
@@ -358,6 +474,12 @@ export class NinjaEditorManager {
     return this.camera.enabled;
   };
 
+  /**
+   * 
+   * @param id 
+   * @returns 
+   */
+
   getObjectById = (id: string): Object3D => {
     const data = this.oms.find(om => om.id == id);
     if (!data) return null;
@@ -368,6 +490,14 @@ export class NinjaEditorManager {
   }
   unSelectObject = (id: string) => {
     this.selectedId = null;
+  }
+
+  /**
+   * 
+   * @returns 
+   */
+  getOms = () => {
+    return this.oms;
   }
 
   /**
@@ -382,43 +512,6 @@ export class NinjaEditorManager {
    */
   setUI(){
   }
-
-  /**
-   * 特定のObjectをBlobに変換する
-   */
-  convertObjectToBlob = (scene): Promise<Blob> => {
-      return new Promise((resolve) => {
-        var exporter = new GLTFExporter();
-        const options: GLTFExporterOptions = {
-          binary: true,
-          maxTextureSize: 4096,
-          animations: scene.animations,
-          includeCustomExtensions: true
-        };
-        exporter.parse(
-          scene,
-          (result) => {
-            if (result instanceof ArrayBuffer) {
-              return resolve(this.saveArrayBuffer(result));
-            }
-            else {
-              const output = JSON.stringify(result, null, 2);
-              return resolve(this.saveString(output));
-            }
-          },
-          (error: ErrorEvent) => {
-            console.log(`出力中エラー: ${error.toString()}`);
-          }
-        , options);
-      });
-  }
-  saveString(text: string): Blob {
-    return new Blob([text], { type: 'text/plain' });
-  }
-  saveArrayBuffer(buffer: ArrayBuffer): Blob {
-    return new Blob([buffer], { type: "application/octet-stream" });
-  }
-
 
   /**
    * 設定ファイルを読み込む
