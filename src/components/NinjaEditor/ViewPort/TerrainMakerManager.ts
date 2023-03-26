@@ -3,6 +3,7 @@ import { Mesh, Object3D, PlaneGeometry, PerspectiveCamera, OrthographicCamera } 
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 
 export class TerrainMakerManager {
+  type: "create" | "edit" = "create";
   mode: "edit" | "view" = "view";
   brush: "normal" | "flat" | "paint" = "normal";
   cache: Object3D;
@@ -12,7 +13,7 @@ export class TerrainMakerManager {
   mapSize = 32;
   mapResolution = 64;
   power = 0.1;
-  wireFrame = false;
+  wireFrame = true;
   radius = 1.0;
   camera: PerspectiveCamera | OrthographicCamera;
 
@@ -29,6 +30,11 @@ export class TerrainMakerManager {
         -this.mapSize / 2
       );
     }
+  }
+
+  setTerrain(terrainMesh){
+    this.terrainMesh = terrainMesh;
+    this.type = "edit";
   }
 
   changeMode() {
@@ -68,6 +74,10 @@ export class TerrainMakerManager {
 
   changeBrush(brush: "normal" | "flat" | "paint"){
     this.brush = brush;
+  }
+
+  getWireFrame = () => {
+    return this.wireFrame;
   }
 
   /**

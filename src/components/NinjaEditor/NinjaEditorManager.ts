@@ -1,7 +1,7 @@
 import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { IObjectManagement, IUIManagement } from "@/engine/Core/NinjaProps";
+import { IConfigParams, IObjectManagement, ITextureManagement, IUIManagement } from "@/engine/Core/NinjaProps";
 import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import { rtdp } from "@/commons/functional";
@@ -32,8 +32,10 @@ interface IPlayerManager {
 }
 
 export class NinjaEditorManager {
+  config: IConfigParams;
   oms: IObjectManagement[] = []; //Canvas表示系
-  uis: IUIManagement[] = [];// 操作UI系
+  ums: IUIManagement[] = [];// 操作UI系
+  tms: ITextureManagement[] = []; // テクスチャ
   attr: {[key: string] : any} = {};//その他任意属性
   camera: OrbitControlsImpl;
   transformDecimal: number = 2; 
@@ -69,14 +71,31 @@ export class NinjaEditorManager {
 
   constructor() {
     this.terrainManager = new TerrainMakerManager();
+    this.config = {
+      physics: { octree: "auto" },
+      mapsize: 128
+    };
   }
-  
+
+  /**
+   * マップサイズを設定
+   * @param mapSize 
+   */
+  setConfigMapsize(mapSize: number){
+    this.config.mapsize = mapSize;
+  }
 
   /**
    * カメラをセット
    */
   setCamera = (camera: OrbitControlsImpl) => {
     this.camera = camera;
+  }
+  /**
+   * カメラを取得
+   */
+  getCamera = () => {
+    return this.camera;
   }
 
   /**
@@ -407,10 +426,10 @@ export class NinjaEditorManager {
   }
 
   /**
-   * 全てのStaticObjectを取得する
+   * 全てのObjectを取得する
    * @returns 
    */
-  getStaticObjects = (): IObjectManagement[] => {
+  getObjects = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "object");
     return data;
   }
@@ -437,9 +456,12 @@ export class NinjaEditorManager {
    * Avatarを取得する
    * @returns 
    */
-   getAvatar = (): IObjectManagement => {
+  getAvatar = (): IObjectManagement => {
     const data = this.oms.find(om => om.type == "avatar");
     return data;
+  }
+  removeAvatar = () => {
+    this.oms = this.oms.filter(om => om.type !== "avatar");
   }
 
   /**
@@ -503,8 +525,8 @@ export class NinjaEditorManager {
   /**
    * 全てのUIを取得する
    */
-  getAllUIs = () => {
-    return this.uis;
+  getUMs = () => {
+    return this.ums;
   }
 
   /**

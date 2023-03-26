@@ -22,8 +22,8 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { NJCFile, saveNJCFile } from "@/engine/Core/NinjaExporter";
-import { loadNJCFile } from "@/engine/Core/NinjaExporter";
+import { NJCFile, saveNJCFile } from "@/engine/Core/NinjaFileControl";
+import { loadNJCFile } from "@/engine/Core/NinjaFileControl";
 
 
 export const NinjaEditor = () => {
@@ -150,21 +150,12 @@ export const NinjaEditor = () => {
    * プロジェクト全体を保存
    */
   const onSave = () => {
-    // toast(t("completeSave"), {
-    //   position: "top-right",
-    //   autoClose: 3000,
-    //   hideProgressBar: false,
-    //   closeOnClick: true,
-    //   pauseOnHover: false,
-    //   draggable: true,
-    //   progress: undefined,
-    //   theme: "light",
-    // });
-    // NinjaExporter(editor.getOms());
     const njcFile = new NJCFile();
     editor.getOms().map((om) => {
-      // njcFile.addObject(om.object, {test: "test1"});
-      njcFile.addObject({...om});
+      njcFile.addOM({...om});
+    });
+    editor.getUMs().map((um) => {
+      njcFile.addUM({...um});
     });
     saveNJCFile(njcFile, "savedata-sample.njc");
   }
@@ -344,9 +335,14 @@ export const NinjaEditor = () => {
               </div>
             </div>
             <div className={styles.viewport}>
-              <div style={{ display: viewSelect == "mainview" ? "block": "none", height: "100%" }}>
+              {/* <div style={{ display: viewSelect == "mainview" ? "block": "none", height: "100%" }}>
                 <MainViewer />
-              </div>
+              </div> */}
+              {viewSelect == "mainview" &&
+               <>
+                <MainViewer />
+               </>
+              }
               {viewSelect == "debugplay" &&
                 <>
                   <DebugPlay />

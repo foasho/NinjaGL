@@ -235,7 +235,7 @@ export class NinjaEngine {
   /**
    * 設定JSONファイルをImportする
    */
-  importConfigJson = async():Promise<boolean> => {
+  loadJsonData = async():Promise<boolean> => {
     if (this.loadCompleted || this.nowLoading) return null;
     const jsonData = this.jsonData;
     this.nowLoading = true;
@@ -337,7 +337,7 @@ export class NinjaEngine {
             }
           }
         }
-        else if (key == "staticObjects") {
+        else if (key == "objects") {
           const objs = jsonData[key];
           await Promise.all(
             Object.keys(objs).map(async (key: string) => {

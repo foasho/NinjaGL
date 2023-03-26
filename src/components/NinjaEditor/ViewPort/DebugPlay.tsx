@@ -16,12 +16,13 @@ export const DebugPlay = () => {
   useEffect(() => {
     // EditorからOMを取得してJSON化する
     const oms = editor.oms;
-    const uis = editor.uis;
+    const ums = editor.ums;
+    const config = editor.config;
     // まずは直接いれてみる
     const _engine = new NinjaEngine();
     const avatar = editor.getAvatar();
     const terrain = editor.getTerrain();
-    const objects = editor.getStaticObjects();
+    const objects = editor.getObjects();
     const sky = editor.getSky();
     const lights = editor.getLights();
     if (!avatar || !terrain){
@@ -32,23 +33,10 @@ export const DebugPlay = () => {
     }
     else {
       const jsonData = {
-        "init": {
-          "physics": {
-            "octree": "auto"
-          },
-          "mapSize": 128,
-          "backmusics": [
-            {
-              "key": "backmusic",
-              "filePath": "mp3/background.mp3",
-              "volume": 0.02,
-              "loop": true
-            }
-          ]
-        },
+        config: config,
         avatar: avatar,
         terrain: terrain,
-        staticObjects: objects,
+        objects: objects,
         sky: sky,
         lights: lights
       }
@@ -70,118 +58,4 @@ export const DebugPlay = () => {
       </div>
     </>
   )
-}
-
-// temp
-const jsonData = {
-  "init": {
-    "physics": {
-      "octree": "auto"
-    },
-    "mapSize": 128,
-    "backmusics": [
-      {
-        "key": "backmusic",
-        "filePath": "mp3/background.mp3",
-        "volume": 0.02,
-        "loop": true
-      }
-    ]
-  },
-  "avatar": {
-    "id": "avatar",
-    "filePath": "assets/defaults/default-man.glb",
-    "args": {
-      "initPosition": [30, 10, -30],
-      "initRotateDegY": -50,
-      "height": 1.7,
-      "isCenter": true,
-      "animMapper": {
-        "idle": "Idle",
-        "run": "Run",
-        "walk": "Walk",
-        "jump": "Jump",
-        "action": "Kick"
-      },
-      "sounds": [
-        {
-          "key": "grassWalk",
-          "filePath": "mp3/grassWalk.mp3",
-          "volume": 0.5,
-          "loop": true,
-          "trigAnim": "walk",
-          "stopAnim": "walk"
-        },
-        {
-          "key": "grassRun",
-          "filePath": "mp3/grassRun.mp3",
-          "volume": 0.5,
-          "loop": true,
-          "trigAnim": "run",
-          "stopAnim": "run"
-        }
-      ]
-    }
-  },
-  "terrain": {
-    "id": "terrain",
-    "filePath": "assets/defaults/myterrain.ter",
-    "visibleType": "force",
-    "physics": "along"
-  },
-  "staticObjects": [
-    {
-      "id": "so1",
-      "visibleType": "auto",
-      "filePath": "assets/free/space/Pickup_Bullets.gltf",
-      "physics": "none"
-    }
-  ],
-  "sky": {
-    "id": "sky1",
-    "args": {
-      "distance": 450000,
-      "inclination": 0,
-      "subPosition": [0, 1, 0],
-      "azimuth": 0.25
-    },
-    "physics": "none",
-    "visibleType": "force"
-  },
-  "lights": [
-    {
-      "id": "l1",
-      "args": {
-        "name": "光源1",
-        "type": "ambient",
-        "color": "#ffffff",
-        "castShadow": true
-      }
-    },
-    {
-      "id": "l2",
-      "name": "光源2",
-      "args": {
-        "type": "point",
-        "color": "#ffffff",
-        "distance": 100,
-        "intensity": 0.8,
-        "position": [0, 50, 0],
-        "castShadow": true
-      }
-    },
-    {
-      "id": "l3",
-      "name": "光源3",
-      "args": {
-        "type": "spot",
-        "color": "#ffffff",
-        "angle": 45,
-        "distance": 100,
-        "intensity": 0.8,
-        "position": [64, 32, 64],
-        "castShadow": true
-      }
-    }
-  ]
 }

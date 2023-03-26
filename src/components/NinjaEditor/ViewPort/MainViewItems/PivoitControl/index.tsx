@@ -157,7 +157,7 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
         const target = resolveObject(object)
         if (target) {
           // An object has been attached
-          const pivot = ref.current
+          const pivot = ref.current;
           target.updateWorldMatrix(true, true)
           pivot.matrix = target.matrix.clone()
         }

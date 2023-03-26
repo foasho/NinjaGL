@@ -1,8 +1,9 @@
 import { NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
-import { IObjectManagement, IUIManagement } from "./NinjaProps";
+import { IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
 import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
+import { clone as SkeletonClone } from "three/examples/jsm/utils/SkeletonUtils";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import JSZip from 'jszip';
 
@@ -18,24 +19,31 @@ interface NJCObjectData {
   userData: NJCUserData;
 }
 
-// export class NJCFile {
-//   objects: NJCObjectData[];
-//   constructor() {
-//     this.objects = [];
-//   }
-//   addObject(object: Object3D | Mesh, userData: NJCUserData = {}): void {
-//     this.objects.push({ object, userData });
-//   }
-// }
+/**
+ * ファイル形式
+ */
 export class NJCFile {
   oms: IObjectManagement[];
-  uis: IUIManagement[];
+  ums: IUIManagement[];
+  tms: ITextureManagement[];
+  scs: IScriptManagement[];
   constructor() {
     this.oms = [];
-    this.uis = [];
+    this.ums = [];
+    this.tms = [];
+    this.scs = [];
   }
-  addObject(om: IObjectManagement): void {
+  addOM(om: IObjectManagement): void {
     this.oms.push(om);
+  }
+  addUM(um: IUIManagement):void {
+    this.ums.push(um)
+  }
+  addTM(tm: ITextureManagement):void {
+    this.tms.push(tm)
+  }
+  addSC(sc: IScriptManagement):void {
+    this.scs.push(sc)
   }
 }
 
@@ -49,14 +57,25 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
   const objectsDir = zip.folder('objects');
 
   // GLBモデルをobjectsディレクトリに追加
+  const exportOMs: IObjectManagement[] = [];
   for (const om of njcFile.oms) {
     if (om.object) {
       const exportScene = new Scene();
-      exportScene.add(om.object);
+      const clone = SkeletonClone(om.object);
+      clone.animations = om.object.animations?om.object.animations: [];
+      exportScene.add(clone);
       const glbData = await exportGLTF(exportScene);
       objectsDir.file(`${om.id}.glb`, glbData);
       om.filePath = `objects/${om.id}.glb`;
     }
+    delete om.object;
+    delete om.mixer;
+    if (om.args){
+      if (om.args.position){
+        // om.args.position = 
+      }
+    }
+    exportOMs.push(om);
   }
 
   // JSONファイルを追加
@@ -74,6 +93,11 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
   saveAs(zipData, fileName);
 }
 
+/**
+ * NJCファイルを読み込む
+ * @param file 
+ * @returns 
+ */
 export const loadNJCFile = async (file: File): Promise<NJCFile> => {
   const zip = new JSZip();
 
@@ -93,15 +117,16 @@ export const loadNJCFile = async (file: File): Promise<NJCFile> => {
   // GLBモデルを読み込み
   const objectsDir = loadedZip.folder('objects');
   for (const om of omsJson) {
+    console.log("check", om);
     const glbFile = objectsDir.file(`${om.id}.glb`);
     if (glbFile) {
+      console.log(glbFile);
       const glbData = await glbFile.async('arraybuffer');
       const object = await loadGLTFFromData(glbData);
       om.object = object;
     }
-    njcFile.addObject(om);
+    njcFile.addOM(om);
   }
-
   return njcFile;
 }
 
@@ -184,17 +209,24 @@ export const convertObjectToArrayBuffer = async (scene): Promise<ArrayBuffer> =>
 /**
  * 特定のObjectをBlobに変換する
  */
-export const convertObjectToBlob = async (scene): Promise<Blob> => {
+export const convertObjectToBlob = async (object: Object3D, userData?: any): Promise<Blob> => {
   return new Promise((resolve) => {
     var exporter = new GLTFExporter();
     const options: GLTFExporterOptions = {
       binary: true,
       maxTextureSize: 4096,
-      animations: scene.animations,
+      animations: object.animations,
       includeCustomExtensions: true
     };
+    console.log("UserData set");
+    console.log(userData);
+
+    if (userData){
+      object.userData = userData;
+    }
+    
     exporter.parse(
-      scene,
+      object,
       (result) => {
         if (result instanceof ArrayBuffer) {
           return resolve(saveArrayBuffer(result));

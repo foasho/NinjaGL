@@ -1,4 +1,4 @@
-import { Environment, OrbitControls, PivotControls, Sky, useHelper } from "@react-three/drei";
+import { Environment, OrbitControls, Sky, useHelper } from "@react-three/drei";
 import { Box3, BoxHelper, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
@@ -6,6 +6,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "@/engine/Core/NinjaProps";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
+import { PivotControls } from "./PivoitControl";
 
 /**
  * アバターデータ
@@ -14,9 +15,21 @@ export const Avatar = () => {
   const editor = useContext(NinjaEditorContext);
   const [avatar, setAvatar] = useState<IObjectManagement>(null);
   const id = avatar? avatar.id: null;
+  const ref = useRef<Object3D>();
   const [enabled, setEnabled] = useState<boolean>(true)
   const [helper, setHelper] = useState<boolean>(true)
   const handleDrag = useRef<boolean>(false);
+  const editorData = useRef<{ 
+    focus: boolean; 
+    position: Vector3, 
+    rotation: Euler, 
+    scale: Vector3 
+  }>({ 
+    focus: false, 
+    position: new Vector3(), 
+    rotation: new Euler(), 
+    scale: new Vector3() 
+  });
 
   const onClick = (e, value: boolean) => {
     if (value) {
@@ -27,37 +40,27 @@ export const Avatar = () => {
     }
   }
 
-  const lineSegs = [];
-  if (avatar && avatar.physics == "along"){
-    avatar.object.traverse((node) => {
-      if (node instanceof Mesh) {
-        // nodeの回転率を戻す
-        node.updateMatrix();
-        node.geometry.applyMatrix4(node.matrix);
-        node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
-        node.rotation.set(0, 0, 0);
-        const wire = new WireframeGeometry(node.geometry);
-        const colorMat = new LineBasicMaterial({ color: editor.wireFrameColor });
-        const lineSeg = new LineSegments(wire, colorMat);
-        lineSegs.push(lineSeg);
-      }
-    });
-  }
-  else if (avatar && avatar.physics == "aabb"){
-    // try{
-    //   useHelper(ref, BoxHelper)
-    // }
-    // catch(e){
-    //   console.error("Helperの表示でエラー");
-    // }
-  }
-
   useFrame((_, delta) => {
     if (avatar != editor.getAvatar()){
       setAvatar(editor.getAvatar());
     }
     if ( enabled != (editor.getSelectId() == id)){
       setEnabled(editor.getSelectId() == id);
+    }
+    if (ref.current){
+      ref.current.visible = editor.getVisible(id);
+    }
+    if (helper !== editor.getHelper(id)){
+      setHelper(editor.getHelper(id));
+    }
+    editorData.current.focus = editor.getFocus(id);
+    if (editorData.current.focus){
+      const pos = editor.getPosition(id);
+      editorData.current.position = new Vector3().copy(pos);
+      const rot = editor.getRotation(id);
+      editorData.current.rotation = new Euler().copy(rot);
+      const sca = editor.getScale(id);
+      editorData.current.scale = new Vector3().copy(sca);
     }
   });
 
@@ -79,35 +82,34 @@ export const Avatar = () => {
     handleDrag.current = true;
   }
 
+  useHelper((enabled && helper) && ref, BoxHelper);
+
   return (
     <>
       {avatar &&
+      <>
         <PivotControls
           visible={enabled}
-          disableAxes={false}
-          disableSliders={false}
-          disableRotations={false}
+          depthTest={false}
+          lineWidth={2}
+          anchor={[0, 0, 0]}
           onDrag={(e) => onDrag(e)}
           onDragStart={() => onDragStart()}
           onDragEnd={() => onDragEnd()}
+          userData={editorData.current}
         >
-            <primitive
-              object={avatar.object}
-              // onClick={(e) => {
-              //   onClick(e, true)
-              // }}
-              // onPointerMissed={(e) => {
-              //   onClick(e, false)
-              // }}
-            />
+          <primitive
+            ref={ref}
+            object={avatar.object}
+            onClick={(e) => {
+              onClick(e, true)
+            }}
+            onPointerMissed={(e) => {
+              onClick(e, false)
+            }}
+          />
         </PivotControls>
-      }
-      {helper &&
-        <>
-          {lineSegs.map((lineSeg) => {
-            return <primitive object={lineSeg} />
-          })}
-        </>
+      </>
       }
     </>
   )

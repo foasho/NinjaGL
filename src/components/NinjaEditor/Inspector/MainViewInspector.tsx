@@ -454,7 +454,7 @@ export const MainViewInspector = () => {
           }
 
           {
-            (selectOM.type == "light" || selectOM.type == "three" || selectOM.type == "object") && 
+            (selectOM.type == "light" || selectOM.type == "three" || selectOM.type == "object" || selectOM.type == "avatar") && 
             <>
               <div className={styles.castShadow}>
                   <div className={styles.title}>

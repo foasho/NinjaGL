@@ -6,7 +6,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { MyLight, MyLights } from "./MainViewItems/Lights";
-import { StaticObjects } from "./MainViewItems/StaticObjects";
+import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
 import { generateUUID } from "three/src/math/MathUtils";
 import { Avatar } from "./MainViewItems/Avatar";
@@ -15,6 +15,7 @@ import { BsGrid3X3 } from "react-icons/bs";
 import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
+import { useInputControl } from "@/engine/Core/InputControls";
 
 export const MainViewer = () => {
   const camRef = useRef<OrbitControlsImpl>();
@@ -56,7 +57,13 @@ export const MainViewer = () => {
           filePath,
           async (gltf) => {
             const scene = gltf.scene || gltf.scenes[0] as Object3D;
+            const userData: { [key: string]: any } = {};
             scene.traverse((node: Mesh) => {
+              if (node.userData){
+                Object.keys(node.userData).map((key) => {
+                  userData[key] = node.userData[key];
+                });
+              }
               if ((node as Mesh).isMesh) {
                 if (node.geometry) {
                   node.castShadow = true;
@@ -65,21 +72,62 @@ export const MainViewer = () => {
               }
             });
             if (type == "gltf") {
-              // Animationがあればセットする
-              editor.setObjectManagement({
-                id: generateUUID(),
-                filePath: filePath,
-                type: "object",
-                physics: "aabb",
-                visibleType: "auto",
-                args: {
-                  position: new Vector3(0, 0, 0),
-                  rotation: new Euler(0, 0, 0)
-                },
-                object: scene,
-                animations: gltf.animations,
-                mixer: gltf.animations.length > 0? new AnimationMixer(scene): null
-              });
+              if (userData.type && userData.type == "avatar"){
+                // すでにアバターがある場合には、削除する
+                if (editor.getAvatar()){
+                  editor.removeAvatar();
+                }
+                editor.setObjectManagement({
+                  id: generateUUID(),
+                  filePath: filePath,
+                  type: "avatar",
+                  physics: "aabb",
+                  visibleType: "force",
+                  args: {
+                    height: 1.7,
+                    isCenter: true,
+                    animMapper: userData.animMapper? userData.animMapper: null,
+                    sounds: [
+                      {
+                        key: "grassWalk",
+                        filePath: "mp3/grassWalk.mp3",
+                        volume: 0.5,
+                        loop: true,
+                        trigAnim: "walk",
+                        stopAnim: "walk"
+                      },
+                      {
+                        key: "grassRun",
+                        filePath: "mp3/grassRun.mp3",
+                        volume: 0.5,
+                        loop: true,
+                        trigAnim: "run",
+                        stopAnim: "run"
+                      }
+                    ]
+                  },
+                  object: scene,
+                  animations: gltf.animations,
+                  mixer: gltf.animations.length > 0? new AnimationMixer(scene): null
+                });
+              }
+              else {
+                // Animationがあればセットする
+                editor.setObjectManagement({
+                  id: generateUUID(),
+                  filePath: filePath,
+                  type: "object",
+                  physics: "aabb",
+                  visibleType: "auto",
+                  args: {
+                    position: new Vector3(0, 0, 0),
+                    rotation: new Euler(0, 0, 0)
+                  },
+                  object: scene,
+                  animations: gltf.animations,
+                  mixer: gltf.animations.length > 0? new AnimationMixer(scene): null
+                });
+              }
             }
             if (type == "ter") {
               editor.setObjectManagement({
@@ -90,47 +138,6 @@ export const MainViewer = () => {
                 visibleType: "force",
                 args: {},
                 object: scene
-              });
-            }
-            if (type == "avt") {
-              editor.setObjectManagement({
-                id: generateUUID(),
-                filePath: filePath,
-                type: "avatar",
-                physics: "aabb",
-                visibleType: "force",
-                args: {
-                  height: 1.7,
-                  isCenter: true,
-                  animMapper: {
-                    idle: "Idle",
-                    run : "Run",
-                    walk: "Walk",
-                    jump : "Jump",
-                    action : "Kick"
-                  },
-                  sounds: [
-                    {
-                      key: "grassWalk",
-                      filePath: "mp3/grassWalk.mp3",
-                      volume: 0.5,
-                      loop: true,
-                      trigAnim: "walk",
-                      stopAnim: "walk"
-                    },
-                    {
-                      key: "grassRun",
-                      filePath: "mp3/grassRun.mp3",
-                      volume: 0.5,
-                      loop: true,
-                      trigAnim: "run",
-                      stopAnim: "run"
-                    }
-                  ]
-                },
-                object: scene,
-                animations: gltf.animations,
-                mixer: gltf.animations.length > 0? new AnimationMixer(scene): null
               });
             }
           },
@@ -151,6 +158,9 @@ export const MainViewer = () => {
 
   useEffect(() => {
     editor.setCamera(camRef.current);
+    return () => {
+      editor.camera = null;
+    }
   }, [])
 
   return (
@@ -163,7 +173,7 @@ export const MainViewer = () => {
         onDragOver={handleDragOver}
         shadows
       >
-        <OrbitControls makeDefault={true} ref={camRef} />
+        <OrbitControls ref={camRef} makeDefault/>
         <MyLights/>
         <StaticObjects/>
         <Terrain/>
@@ -173,6 +183,7 @@ export const MainViewer = () => {
         {isGrid &&
           <SystemHelper/>
         }
+        <SystemControl />
       </Canvas>
       <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
         <a 
@@ -197,6 +208,55 @@ const SystemHelper = () => {
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
       <Perf position={"bottom-right"} style={{ position: "absolute" }}/>
+    </>
+  )
+}
+
+/**
+ * 補助操作
+ */
+const SystemControl = () => {
+  const { camera } = useThree();
+  const editor = useContext(NinjaEditorContext);
+  const input = useInputControl("desktop");
+  useFrame((_, delta) => {
+    if (input.dash && (input.forward || input.backward || input.right || input.left)){
+      if (editor.getCamera()){
+        editor.getCamera().enabled = false;
+      }
+      const st = .5;
+      var cameraDirection = new Vector3();
+      camera.getWorldDirection(cameraDirection);
+      var cameraPosition = camera.position.clone();
+      var cameraTarget: Vector3;
+      if (input.forward) {
+        cameraPosition.add(cameraDirection.clone().multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+      }
+      if (input.backward) {
+        cameraPosition.sub(cameraDirection.clone().multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+      }
+      if (input.right) {
+        var cameraRight = new Vector3();
+        cameraRight.crossVectors(cameraDirection, camera.up).normalize();
+        cameraPosition.add(cameraRight.multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+        cameraTarget = cameraPosition.clone().add(cameraDirection);
+        camera.lookAt(cameraTarget);
+      }
+      else if (input.left) {
+        var cameraLeft = new Vector3();
+        cameraLeft.crossVectors(cameraDirection, camera.up).normalize();
+        cameraPosition.sub(cameraLeft.multiplyScalar(st));
+        camera.position.copy(cameraPosition);
+        cameraTarget = cameraPosition.clone().add(cameraDirection);
+        camera.lookAt(cameraTarget);
+      }
+    }
+  });
+  return (
+    <>
     </>
   )
 }

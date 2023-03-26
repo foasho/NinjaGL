@@ -4,6 +4,11 @@ export interface INinjaProps {
   mode: "play" | "edit"
 }
 
+export interface IConfigParams {
+  physics: { octree: "auto" },
+  mapsize: number;
+}
+
 /**
  * 入力系のInputパラメータ
  */
@@ -59,6 +64,17 @@ export interface ITextureManagement {
   name?: string;
   filePath?: string;
   binary: Blob;
+}
+
+/**
+ * スクリプトマネジメント
+ */
+export interface IScriptManagement {
+  type: string;// 未定
+  id: string;
+  name?: string;
+  filePath?: string;
+  script?: string;
 }
 
 export interface ISoundProps {

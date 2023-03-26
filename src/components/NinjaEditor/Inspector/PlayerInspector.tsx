@@ -2,11 +2,11 @@ import { useContext, useEffect, useState } from "react"
 import { NinjaEditorContext } from "../NinjaEditorManager"
 import Select from 'react-select';
 import styles from "@/App.module.scss";
-import { GiPoolDive } from "react-icons/gi";
+import { clone as SkeletonClone } from "three/examples/jsm/utils/SkeletonUtils";
 import Swal from "sweetalert2";
 import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
-import { convertObjectToBlob } from "@/engine/Core/NinjaExporter";
+import { convertObjectToBlob } from "@/engine/Core/NinjaFileControl";
 
 export const PlayerInspector = () => {
   const [selectedOption, setSelectedOption] = useState<{ value: string, label: string }>(null);
@@ -18,6 +18,7 @@ export const PlayerInspector = () => {
   const [runOption, setRunOption] = useState<{ value: string, label: string }>(null);
   const [jumpOption, setJumpOption] = useState<{ value: string, label: string }>(null);
   const [actionOption, setActionOption] = useState<{ value: string, label: string }>(null);
+  const [customActions, setCustomActions] = useState<{ value: string, label: string, keyInputValue: string }[]>([]);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -79,9 +80,34 @@ export const PlayerInspector = () => {
     // 最低限typeが選択されていればOK
     if (playerType) {
       //ファイル名の確認
-      const target = playerManager.object;
+      const target = SkeletonClone(playerManager.object);
       target.animations = playerManager.animations;
-      const file = await convertObjectToBlob(target);
+      const animMapper: {[key: string]: string} = {};
+      if (idleOption){
+        animMapper.idle = idleOption.label;
+      }
+      if (walkOption){
+        animMapper.walk = walkOption.label;
+      }
+      if (runOption){
+        animMapper.run = runOption.label;
+      }
+      if (jumpOption){
+        animMapper.jump = jumpOption.label;
+      }
+      if (actionOption){
+        animMapper.action = actionOption.label;
+      }
+      customActions.map((option) => {
+        animMapper[option.keyInputValue] = option.label;
+      });
+      const file = await convertObjectToBlob(
+        target, 
+        { 
+          animMapper: animMapper,
+          type: playerType.value
+        }
+      );
       Swal.fire({
         title: t("inputFileName"),
         input: 'text',
@@ -95,7 +121,7 @@ export const PlayerInspector = () => {
           }
 
           const formData = new FormData();
-          formData.append('file', file, `${inputStr}.avt`);
+          formData.append('file', file, `${inputStr.replace(".", "")}.glb`);
           return await reqApi({
             route: "uploadgltf",
             method: "POST",

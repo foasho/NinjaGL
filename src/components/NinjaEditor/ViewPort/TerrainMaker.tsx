@@ -16,10 +16,12 @@ import {
   CircleGeometry,
   WebGLRenderTarget,
   BufferAttribute,
-  GLBufferAttribute
+  GLBufferAttribute,
+  Material
 } from "three";
 import { useInputControl } from "@/engine/Core/InputControls";
 import { colors } from "react-select/dist/declarations/src/theme";
+import { IObjectManagement } from "@/engine/Core/NinjaProps";
 
 const TerrainMakeComponent = () => {
   const editor = useContext(NinjaEditorContext);
@@ -96,6 +98,7 @@ const TerrainMakeComponent = () => {
    */
   const onMouseMove = (event) => {
     raycaster.setFromCamera(mouse, camera);
+    if (!ref.current) return;
     const intersects = raycaster.intersectObject(ref.current);
     if (terrainManager.isMouseDown && terrainManager.mode == "edit") {
       if (terrainManager.brush == "normal" || terrainManager.brush == "flat"){
@@ -109,19 +112,35 @@ const TerrainMakeComponent = () => {
             if (terrainManager.brush == "normal"){
               let position = object.geometry.attributes.position;
               if (position instanceof GLBufferAttribute) return;
-              position.setZ(
-                index,
-                (position.getZ(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
-              );
+              if (terrainManager.type == "create"){
+                position.setZ(
+                  index,
+                  (position.getZ(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
+                );
+              }
+              else {
+                position.setY(
+                  index,
+                  (position.getY(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
+                );
+              }
               position.needsUpdate = true;
             }
             else if (terrainManager.brush == "flat") {
               let position = object.geometry.attributes.position;
               if (position instanceof GLBufferAttribute) return;
-              position.setZ(
-                index,
-                intersectPosition.z
-              );
+              if (terrainManager.type == "create"){
+                position.setZ(
+                  index,
+                  intersectPosition.z
+                );
+              }
+              else {
+                position.setY(
+                  index,
+                  intersectPosition.y
+                );
+              }
               position.needsUpdate = true;
             }
           });
@@ -131,7 +150,9 @@ const TerrainMakeComponent = () => {
         if (intersects.length > 0 && intersects[0]) {
           const radius = terrainManager.radius;
           const intersectPosition = intersects[0].point;
-          const cloneGeometry = ref.current.geometry.clone();
+          const object: Mesh = intersects[0].object as Mesh;
+          if (!object) return;
+          const cloneGeometry = object.geometry.clone();
           if (!cloneGeometry.attributes.color) {
             const count = cloneGeometry.attributes.position.count;
             const buffer = new BufferAttribute( new Float32Array( count * 3 ), 3 );
@@ -155,8 +176,7 @@ const TerrainMakeComponent = () => {
             }
           }
           cloneGeometry.setAttribute("color", new BufferAttribute(colors, 3));
-          ref.current.geometry.copy(cloneGeometry);
-          
+          object.geometry.copy(cloneGeometry);
         }
       }
     }
@@ -262,7 +282,16 @@ const TerrainMakeComponent = () => {
       texture.needsUpdate = true;
       gl.setRenderTarget(null);
     }
+    if (matRef.current && matRef.current instanceof MeshStandardMaterial){
+      matRef.current.wireframe = terrainManager.getWireFrame();
+    }
   });
+
+  if (terrainManager.type == "edit"){
+    if (terrainManager.terrainMesh.material){
+      matRef.current = terrainManager.terrainMesh.material as MeshStandardMaterial;
+    }
+  }
 
   return (
     <>
@@ -272,15 +301,23 @@ const TerrainMakeComponent = () => {
       />
       <axesHelper />
       <gridHelper visible={isGrid} ref={gridRef} args={[terrainManager.mapSize * 2, Number(terrainManager.mapResolution / 2)]} />
-      <mesh 
-        ref={ref} 
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow 
-        castShadow
-      >
-        <planeGeometry args={[terrainManager.mapSize, terrainManager.mapSize, terrainManager.mapResolution, terrainManager.mapResolution]} />
-        <meshStandardMaterial ref={matRef} side={DoubleSide} vertexColors={true} color={0xffffff} />
-      </mesh>
+      
+      {terrainManager.type == "create"?
+        <mesh 
+          ref={ref} 
+          rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow 
+          castShadow
+        >
+          <planeGeometry args={[terrainManager.mapSize, terrainManager.mapSize, terrainManager.mapResolution, terrainManager.mapResolution]} />
+          <meshStandardMaterial ref={matRef} wireframe={terrainManager.wireFrame} side={DoubleSide} vertexColors={true} color={0xffffff} />
+        </mesh>
+        :
+        <>
+          <primitive object={terrainManager.terrainMesh} ref={ref} />
+        </>
+      }
+
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
@@ -290,11 +327,12 @@ const TerrainMakeComponent = () => {
         color={'#fadcb9'}
         volumetric={false}
       />
-      {/* <directionalLight position={[0, -10, 0]} /> */}
-      <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleBufferGeometry args={[terrainManager.radius]} />
-        <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
-      </mesh>
+      
+        <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleBufferGeometry args={[terrainManager.radius]} />
+          <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
+        </mesh>
+      
     </>
   )
 }
@@ -311,6 +349,10 @@ const TerrainMakerCanvas = () => {
 
 export const TerrainMaker = () => {
   const editor = useContext(NinjaEditorContext);
+  const terrain = editor.getTerrain();
+  if (terrain){
+    editor.terrainManager.setTerrain(terrain.object);
+  }
   const terrainManager = editor.terrainManager;
   return (
     <>

@@ -18,11 +18,11 @@ export const StaticObjects = () => {
     editor.setEnabledCamera(trig);
   }
   useEffect(() => {
-    setStaticOMs(editor.getStaticObjects())
+    setStaticOMs(editor.getObjects())
   }, [])
   useFrame(() => {
-    if (staticOMs.length !== editor.getStaticObjects().length){
-      setStaticOMs(editor.getStaticObjects())
+    if (staticOMs.length !== editor.getObjects().length){
+      setStaticOMs(editor.getObjects())
     }
   });
   return (
@@ -60,7 +60,17 @@ const StaticObject = (props: IStaticObject) => {
   const editor = useContext(NinjaEditorContext);
   const [visible, setVisible] = useState<boolean>(false);
   const handleDrag = useRef<boolean>(false);
-  const editorData = useRef<{ focus: boolean; position: Vector3, rotation: Euler }>({ focus: false, position: new Vector3(), rotation: new Euler() });
+  const editorData = useRef<{ 
+    focus: boolean; 
+    position: Vector3, 
+    rotation: Euler, 
+    scale: Vector3 
+  }>({ 
+    focus: false, 
+    position: new Vector3(), 
+    rotation: new Euler(), 
+    scale: new Vector3() 
+  });
   const id = props.om.id;
 
   // Get Size
@@ -145,6 +155,8 @@ const StaticObject = (props: IStaticObject) => {
       editorData.current.position = new Vector3().copy(pos);
       const rot = editor.getRotation(id);
       editorData.current.rotation = new Euler().copy(rot);
+      const sca = editor.getScale(id);
+      editorData.current.scale = new Vector3().copy(sca);
     }
   });
 
