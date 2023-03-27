@@ -211,8 +211,8 @@ let QB: Vector3 = new Vector3();
 let negatedNormal: Vector3 = new Vector3();
 
 /**
-     * BoxとSphereとの検出
-     */
+ * BoxとSphereとの検出
+ */
 export const isInstersectSphereBox = (sphere: Sphere, box: Box3): boolean => {
   var sqDist: number = 0;
   if (sphere.center.x < box.min.x) sqDist += (box.min.x - sphere.center.x) * (box.min.x - sphere.center.x);

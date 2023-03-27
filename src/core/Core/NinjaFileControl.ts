@@ -1,6 +1,6 @@
 import { NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
-import { IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
+import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
 import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
 import { clone as SkeletonClone } from "three/examples/jsm/utils/SkeletonUtils";
@@ -23,6 +23,7 @@ interface NJCObjectData {
  * ファイル形式
  */
 export class NJCFile {
+  config: IConfigParams;
   oms: IObjectManagement[];
   ums: IUIManagement[];
   tms: ITextureManagement[];
@@ -32,6 +33,7 @@ export class NJCFile {
     this.ums = [];
     this.tms = [];
     this.scs = [];
+    this.config = { physics: { octree: "auto" }, mapsize: 64 }
   }
   addOM(om: IObjectManagement): void {
     this.oms.push(om);

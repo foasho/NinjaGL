@@ -7,6 +7,7 @@ import { NinjaUI } from "./NinjaUI";
 
 export interface INinjaGLProps {
   jsonPath?: string;
+  njcPath?: string;
   canvasHeight?: any;
   canvasWidth?: any;
 }
@@ -19,6 +20,9 @@ export const NinjaGL = (props: INinjaGLProps) => {
       if (props.jsonPath && props.jsonPath.length > 3) {
         await _engine.setJson(props.jsonPath);
       }
+      else if (props.njcPath && props.njcPath.length > 3){
+        await _engine.setNJCPath(props.njcPath);
+      }
       else {
         await _engine.setJson(defaultProjectJsonPath);
       }
@@ -29,9 +33,12 @@ export const NinjaGL = (props: INinjaGLProps) => {
     }
   }, []);
 
+  const height = props.canvasHeight? props.canvasHeight: "100%";
+  const width = props.canvasWidth? props.canvasWidth: "100%";
+
   return (
     <>
-      <div id="Ninjaviewer" style={{ height: "100%" }}>
+      <div id="Ninjaviewer" style={{ height: height, width: width }}>
         {engine &&
           <NinjaEngineContext.Provider value={engine}>
             <NinjaCanvas />
