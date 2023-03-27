@@ -99,6 +99,8 @@ const resources = {
       noRecentData: "None...",
       nontitle: "NonTitle",
       changeProjectName: "Change Project Name",
+      inputProjectName: "Input Project Name",
+      touchController: "Touch Controller",
     }
   },
   ja: {
@@ -202,6 +204,8 @@ const resources = {
       noRecentData: "No Data",
       nontitle: "名称未設定",
       changeProjectName: "プロジェクト名を変更",
+      inputProjectName: "プロジェクト名を入力",
+      touchController: "タッチコントローラ",
     }
   }
 }

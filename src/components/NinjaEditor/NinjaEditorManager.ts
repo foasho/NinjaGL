@@ -5,6 +5,7 @@ import { IConfigParams, IObjectManagement, ITextureManagement, IUIManagement } f
 import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import { rtdp } from "@/commons/functional";
+import { NJCFile } from "@/core/Core/NinjaFileControl";
 
 interface ISetObjectManagement {
   id?: string;
@@ -70,11 +71,23 @@ export class NinjaEditorManager {
   }
 
   constructor() {
+    this.initialize();
+  }
+
+  /**
+   * 初期化
+   */
+  initialize = () => {
+    this.config = null;
     this.terrainManager = new TerrainMakerManager();
     this.config = {
       physics: { octree: "auto" },
       mapsize: 128
     };
+    this.oms = [];
+    this.ums = [];
+    this.camera = null;
+    this.tms = [];
   }
 
   /**
@@ -536,14 +549,15 @@ export class NinjaEditorManager {
   }
 
   /**
-   * 設定ファイルを読み込む
+   * NJCファイルのロード
+   * @param njcFile 
    */
-  importSettingJson() { }
-
-  /**
-   * 設定ファイルを吐き出す
-   */
-  exportSettingJson() { }
+  setNJCFile(njcFile: NJCFile){
+    this.initialize();
+    this.oms = njcFile.oms;
+    this.ums = njcFile.ums;
+    console.log("<< Complete NJC File >>");
+  }
 }
 
 export const NinjaEditorContext = createContext<NinjaEditorManager>(null);
