@@ -11,16 +11,20 @@ import { Terrain } from "./MainViewItems/Terrain";
 import { generateUUID } from "three/src/math/MathUtils";
 import { Avatar } from "./MainViewItems/Avatar";
 import { MySky } from "./MainViewItems/Sky";
-import { BsGrid3X3 } from "react-icons/bs";
+import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
 import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
 import { useInputControl } from "@/core/Core/InputControls";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { UICanvas } from "./MainViewUIs/UICanvas";
 
 export const MainViewer = () => {
   const camRef = useRef<OrbitControlsImpl>();
   const editor = useContext(NinjaEditorContext);
   const [isGrid, setIsGrid] = useState<boolean>(true);
+  const [showCanvas, setShowCanvas] = useState<boolean>(true);
+  const [showUI, setShowUI] = useState<boolean>(false);
 
   /**
    * シーンへの直接ドラッグ＆ドロップ時
@@ -164,9 +168,9 @@ export const MainViewer = () => {
   }, [])
 
   return (
-    <div style={{ height: "100%", position: "relative" }}>
+    <div style={{ height: "100%", position: "relative", background: "#333" }}>
       <Canvas
-        style={{ background: "black" }}
+        style={{ background: "black", display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
         camera={{ position: [-3, 3, -6] }}
         onDrop={handleDrop}
@@ -185,12 +189,27 @@ export const MainViewer = () => {
         }
         <SystemControl />
       </Canvas>
-      <div style={{ position: "absolute", zIndex: "999", top: "10px", left: "10px" }}>
+      <div style={{ display: showUI? "block": "none", background: "rgba(255, 255, 255, 0.5)", position: "absolute", zIndex: 99, width: "100%", height: "100%", top: 0 }}>
+        <UICanvas/>
+      </div>
+      <div style={{ position: "absolute", zIndex: 999, top: "10px", left: "10px" }}>
         <a 
           onClick={() => setIsGrid(!isGrid)}
-          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}
+          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", marginRight: "5px", background: "#222", borderRadius: "3px" }}
         >
           {isGrid? <MdOutlineGridOn/>: <MdOutlineGridOff/>}
+        </a>
+        <a 
+          onClick={() => setShowCanvas(!showCanvas)}
+          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", marginRight: "5px", background: "#222", borderRadius: "3px" }}
+        >
+          {showCanvas? <AiFillEye/>: <AiFillEyeInvisible/>}
+        </a>
+        <a 
+          onClick={() => setShowUI(!showUI)}
+          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}
+        >
+          {showUI? <MdVideogameAsset/>: <MdVideogameAssetOff/>}
         </a>
       </div>
     </div>
@@ -207,7 +226,7 @@ const SystemHelper = () => {
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
-      <Perf position={"bottom-right"} style={{ position: "absolute" }}/>
+      <Perf position={"bottom-right"} style={{ position: "absolute" }} minimal={true}/>
     </>
   )
 }

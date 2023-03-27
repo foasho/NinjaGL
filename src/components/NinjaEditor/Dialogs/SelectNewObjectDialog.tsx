@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { AiOutlineCodeSandbox } from "react-icons/ai";
 import { BiCapsule, BiCylinder, BiRectangle } from "react-icons/bi";
 import { ImSphere } from "react-icons/im";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 interface IResponse {
   response: (data: ISelectNewObjectDialog) => void;
@@ -17,6 +18,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
       prop.response({ type: null, value: null });
     }
   };
+  const selectUI = (value: string) => {
+    prop.response({ type: "ui", value: value });
+  }
   const selectLight = (value: string) => {
     prop.response({ type: "light", value: value });
   }
@@ -74,6 +78,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("object3d")}
               </div>
             </div>
+            <div className={styles.card} onClick={() => {setSelectType("ui")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/ui.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("ui")}
+              </div>
+            </div>
+            
           </>
           }
 
@@ -176,6 +189,19 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </div>
           </>
           }
+
+          {selectType == "ui" &&
+          <>
+            <div className={styles.card} onClick={() => {selectUI("touchController")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/touchController.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("touchController")}
+              </div>
+            </div>
+          </>
+          }
         </div>
       </div>
     </div>
@@ -185,7 +211,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound" | "object" | "three";
+  type: "light" | "sky" | "sound" | "object" | "three" | "ui";
   value: string;
 }
 /**

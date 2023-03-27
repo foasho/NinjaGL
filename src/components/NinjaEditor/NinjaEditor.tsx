@@ -186,7 +186,33 @@ export const NinjaEditor = () => {
     editor.getUMs().map((um) => {
       njcFile.addUM({...um});
     });
-    saveNJCFile(njcFile, "savedata-sample.njc");
+    if (!projectName){
+      Swal.fire({
+        title: t("inputProjectName"),
+        input: 'text',
+        showCancelButton: true,
+        confirmButtonText: t("change"),
+        showLoaderOnConfirm: true,
+        preConfirm: async (inputStr) => {
+          //バリデーションを入れたりしても良い
+          if (inputStr.length == 0) {
+            return Swal.showValidationMessage(t("leastInput"));
+          }
+          return inputStr;
+        },
+        allowOutsideClick: function () {
+          return !Swal.isLoading();
+        }
+      }).then((result) => {
+        if (result.value) {
+          setProjectName(result.value);
+          saveNJCFile(njcFile, `${result.value}.njc`);
+        }
+      });
+    }
+    else {
+      saveNJCFile(njcFile, `${projectName}.njc`);
+    }
   }
 
   /**
@@ -215,9 +241,10 @@ export const NinjaEditor = () => {
         const file = (target.files as FileList)[0];
         console.log("load file check");
         console.log(file);
-        const data = await loadNJCFile(file);
-        console.log("ロードデータを確認");
-        console.log(data);
+        const njcFile = await loadNJCFile(file);
+        console.log("ロードしたnjcFileを確認");
+        console.log(njcFile);
+        editor.setNJCFile(njcFile);
       }
     };
     input.click();
