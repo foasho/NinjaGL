@@ -43,6 +43,7 @@ export class Octree extends Box3 {
    * 拡張変数 Extend THREE.Box3
    * ---------------------------------------
    */
+  name: string = "OctreeInit";
 
   constructor(props: IOctree) {
     super(); // Box3として拡張

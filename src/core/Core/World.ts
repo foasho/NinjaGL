@@ -2,12 +2,15 @@ import { Sphere } from "three";
 import { IInputMovement } from "./NinjaProps";
 import { Octree, uniqTrianglesFromNodes } from "./Octree";
 import { AvatarController } from "./AvatarController";
+import { Box3 } from "three/src/Three";
 
 export class World {
 
+  mode: "neighborhood"| "overall" = "neighborhood"; // 周辺のみの判定が全体かどうか
   octreePool: Octree[] = [];           // 8本木Box3
   avatarPool: AvatarController[] = []; // アバター
-  sphere = new Sphere();
+  sphere = new Sphere();               // 自身の物理判定
+  aabbPool: Box3[] = [];               // AABB物理判定
 
   constructor() { }
 
@@ -23,9 +26,30 @@ export class World {
   /**
    * 8本木(Box3)を追加
    */
-  addOctree(object: Octree) {
-    this.octreePool.push(object);
+  addOctree(octree: Octree) {
+    this.octreePool.push(octree);
   }
+
+  /**
+   * 特定の8本木を削除
+   * ※指定がなければデフォルトのOctreeInitを削除
+   */
+  removeOctreeByName(name: string="OctreeInit"){
+    this.octreePool =this.octreePool.filter(octree => {
+      if (octree.name !== name) return octree;
+    })
+  }
+
+  /**
+   * 特定のAABBを追加
+   */
+  addAABB(aabb: Box3){
+    this.aabbPool.push(aabb);
+  }
+
+  /**
+   * 特定の
+   */
 
   /**
    * 物理世界の時間をすすめる

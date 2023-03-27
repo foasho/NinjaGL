@@ -1,7 +1,7 @@
 import { World } from "./World";
 import { Octree } from "./Octree";
 import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
-import { IInputMovement, IObjectManagement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from "./NinjaProps";
+import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
 import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { convertToGB } from "@/commons/functional";
@@ -9,6 +9,7 @@ import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, Pers
 import { reqApi } from "@/services/ServciceApi";
 import { useInputControl } from "./InputControls";
 import { NinjaShader } from "./NinjaShader";
+import { NJCFile } from "./NinjaFileControl";
 
 export interface INinjaEngineProps {
   worldSize?: [number, number, number];
@@ -38,6 +39,9 @@ export class NinjaEngine {
     availableHeap: 0
   }
   oms: IObjectManagement[] = [];
+  ums: IUIManagement[] = [];
+  tms: ITextureManagement[] = [];
+  scs: IScriptManagement[] = [];
   world: World;
   octree: Octree;
   avatar: AvatarController;
@@ -97,6 +101,17 @@ export class NinjaEngine {
   }
 
   /**
+   * 設定を反映する
+   * @param x 
+   * @param y 
+   */
+  setConfig = (config: IConfigParams) => {
+    if (config.mapsize){
+      
+    }
+  }
+
+  /**
    * Canvasのサイズをセットする
    */
   setCanvasSize = (x: number, y: number) => {
@@ -127,6 +142,19 @@ export class NinjaEngine {
    */
   setJsonData = (data: any) => {
     this.jsonData = data;
+  }
+  /**
+   * NJCFileをセットする
+   */
+  setNJCPath = async(njcPath: string) => {
+    
+  }
+  setNJC = (njcFile: NJCFile) => {
+    this.oms = njcFile.oms;
+    this.ums = njcFile.ums;
+    this.tms = njcFile.tms;
+    this.scs = njcFile.scs;
+    if (njcFile.config){}
   }
 
   /**
