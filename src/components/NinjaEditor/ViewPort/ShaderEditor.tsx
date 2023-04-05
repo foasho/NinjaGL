@@ -1,25 +1,45 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
-import MonacoEditor from "@monaco-editor/react";
+import MonacoEditor, { Monaco } from "@monaco-editor/react";
 import type { languages } from 'monaco-editor'
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { Mesh, ShaderMaterial, Uniform, Vector3 } from 'three';
+import { Canvas, useFrame, extend, useLoader } from '@react-three/fiber';
+import { Environment, OrbitControls, Sky, shaderMaterial } from '@react-three/drei';
+import path from 'path';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import Select from 'react-select';
 
 interface IShaderEditor {
-  shaderPath?: number;
+  shaderPath?: string;
 }
 export const ShaderEditor = (props: IShaderEditor) => {
-
-  const code = useRef<string>(initCode);
-  const [scriptPath, setScriptPath] = useState<string>(null);
+  const fragmentRef = useRef(null);
+  const vertexRef = useRef(null);
+  const [objectType, setObjectType] = useState<"box"|"plane"|"sphere"|"gltf">("box");
+  const [fragmentCode, setFragmentCode] = useState<string>(initCodeFragment);
+  const [vertexCode, setVertexCode] = useState<string>(initCodeVertex);
+  const [fileName, setFileName] = useState<string>(null);
   const { t } = useTranslation();
+  const [mode, setMode] = useState<"Fragment"|"Vertex">("Fragment");
+  const [showPreview, setShowPreview] = useState<boolean>(true);
+  const [separate, setSeparate] = useState<{editorWidth: string, previewWidth: string}>({editorWidth: "50%", previewWidth: "50%"});
 
-  const handleEditorChange = (value) => {
-    code.current = value;
-  };
+  const handleEditorWillMount = (monaco: Monaco) => {
+    monaco?.languages.register({ id: "glsl" });
+    monaco?.languages.setMonarchTokensProvider("glsl", glslLanguage);
+  }
 
-  const saveCode = async() => {
-    if (!scriptPath){
+  const handleEditorDidMount = (editor, ref) => {
+    ref.current = editor;
+  }
+ 
+  /**
+   * ファイルを保存する
+   */
+  const saveCodeFile = async() => {
+    if (!fileName){
       // 新規作成の場合は、ファイル名を名付ける
     }
   }
@@ -28,68 +48,113 @@ export const ShaderEditor = (props: IShaderEditor) => {
    * 保存
    */
   const onSave = () => {
-    if (scriptPath){
-      toast(t("save"), {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+    toast(t("completeSave"), {
+      position: "top-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    if (fileName){
     }
     else {
-
+      
+    }
+    const currentCode = mode === "Fragment" ? fragmentRef.current.getValue() : vertexRef.current.getValue();
+    if (mode == "Fragment"){
+      setFragmentCode(currentCode);
+    }
+    else {
+      setVertexCode(currentCode);
     }
   }
+
+  const onPreview = () => {
+    setShowPreview(!showPreview);
+  }
+
+  /**
+   * モードチェンジ
+   */
+  const changeMode = () => {
+    if (mode == "Fragment"){
+      setMode("Vertex");
+      if (fragmentRef.current) setFragmentCode(fragmentRef.current.getValue())
+    }
+    else {
+      setMode("Fragment");
+      if (vertexRef.current) setVertexCode(vertexRef.current.getValue())
+    }
+  }
+
+  /**
+   * リサイザーをつかむ
+   */
+  const onMouseDown = (e) => {
+    e.preventDefault();
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }
+
+  const onMouseMove = (event) => {
+    const separation = event.clientX;
+    const totalWidth = window.innerWidth;
+    const newEditorWidth = `${(separation / totalWidth) * 100}%`;
+    const newPreviewWidth = `${100 - (separation / totalWidth) * 100}%`;
+    setSeparate({
+        editorWidth: newEditorWidth,
+        previewWidth: newPreviewWidth
+    });
+  };
+
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  };
+
+  /**
+   * キーボードショートカット
+   * @param event 
+   */
+  const handleKeyDown = (event) => {
+    if (event.ctrlKey && event.key === 's') {
+      event.preventDefault();
+      onSave();
+    }
+  };
+
 
   /**
    * ファイル指定して起動する場合は、初期Codeはそのファイルを読み込む
    */
   useEffect(() => {
-    // Register a new language called "glsl"
-    // monaco.languages.register({ id: 'glsl' });
-
-    // // Configure the language
-    // monaco.languages.setLanguageConfiguration('glsl', {
-    //   comments: {
-    //     lineComment: '//',
-    //     blockComment: ['/*', '*/'],
-    //   },
-    //   brackets: [
-    //     ['{', '}'],
-    //     ['[', ']'],
-    //     ['(', ')'],
-    //   ],
-    //   autoClosingPairs: [
-    //     { open: '{', close: '}' },
-    //     { open: '[', close: ']' },
-    //     { open: '(', close: ')' },
-    //     { open: '/*', close: '*/' },
-    //   ],
-    //   surroundingPairs: [
-    //     { open: '{', close: '}' },
-    //     { open: '[', close: ']' },
-    //     { open: '(', close: ')' },
-    //   ],
-    // });
-    // Configure the GLSL language highlighting
-    // monaco.languages.setMonarchTokensProvider('glsl', {});
-
     const controller = new AbortController();
     const signal = controller.signal;
     if (props.shaderPath){
+      const fileName = path.basename(props.shaderPath);
+      let _mode: "Vertex"|"Fragment" = "Vertex";
+      if (fileName.includes(".frag")){
+        _mode = "Fragment";
+      }
       const fetchData = async () => {
         try {
-          const response = await fetch(scriptPath, { signal });
+          const scriptPath = `${props.shaderPath}`;
+          const response = await fetch(props.shaderPath, { signal });
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
           const jsonData = await response.json();
-          code.current = jsonData;
-          setScriptPath(scriptPath);
+          if (_mode == "Fragment"){
+            setMode(_mode);
+            setFragmentCode(jsonData);
+          }
+          else{
+            setMode(_mode);
+            setVertexCode(jsonData);
+          }
         } catch (error) {
           if (error.name === 'AbortError') {
             console.log('Fetch aborted');
@@ -100,36 +165,218 @@ export const ShaderEditor = (props: IShaderEditor) => {
       };
       fetchData();
     }
+
     return () => {
       controller.abort();
     };
-  }, [scriptPath]);
+  }, [props.shaderPath]);
 
   let filename = t("nonNameShader");
-  if (scriptPath){
-    const len = scriptPath.split("/").length;
-    filename = scriptPath.split("/")[len - 1];
+  if (props.shaderPath){
+    filename = path.basename(props.shaderPath);
+  }
+
+  const options: { value: string, label: string }[] = [
+    { value: "box", label: "立方体" },
+    { value: "sphere", label: "球体" },
+    { value: "plane", label: "平面" }
+  ];
+
+  const onChangeObjectType = (option) => {
+    setObjectType(option.value);
   }
 
   return (
+    <div className={styles.shaderEditor}>
+      <div className={styles.navigation}>
+        <div className={styles.mode} onClick={() => changeMode()}>
+          {mode}
+        </div>
+        <div className={styles.filename}>
+          {filename}
+          {mode == "Fragment"? ".frag": ".vertex"}
+        </div>
+        <div className={styles.save} onClick={() => onSave()}>
+          Save
+        </div>
+        <div className={styles.preview} onClick={() => onPreview()}>
+          Preview
+        </div>
+        <div className={styles.preview}>
+          <Select
+            options={options}
+            value={options.find(op => op.label == objectType)}
+            onChange={onChangeObjectType}
+            styles={darkThemeStyles}
+          />
+        </div>
+      </div>
+      <div className={styles.editor}>
+        <div 
+        className={styles.monaco} 
+        style={{width: showPreview?separate.editorWidth: "100%"}}
+        onKeyDown={handleKeyDown}
+        >
+          {mode == "Fragment" ?
+            <MonacoEditor
+              language="glsl"
+              theme="vs-dark"
+              value={fragmentCode}
+              beforeMount={(monaco) => handleEditorWillMount(monaco)}
+              onMount={(editor) => handleEditorDidMount(editor, fragmentRef)}
+              options={{
+                selectOnLineNumbers: true,
+                roundedSelection: false,
+                readOnly: false,
+                cursorStyle: 'line',
+                automaticLayout: true,
+              }}
+              
+            />:
+            <MonacoEditor
+              language="glsl"
+              theme="vs-dark"
+              value={vertexCode}
+              beforeMount={(monaco) => handleEditorWillMount(monaco)}
+              onMount={(editor) => handleEditorDidMount(editor, vertexRef)}
+              options={{
+                selectOnLineNumbers: true,
+                roundedSelection: false,
+                readOnly: false,
+                cursorStyle: 'line',
+                automaticLayout: true,
+              }}
+            />
+          }
+        </div>
+        {showPreview &&
+          <>
+            <div 
+              className={styles.resizer} 
+              style={{ left: separate.editorWidth }}
+              onMouseDown={onMouseDown}
+            ></div>
+            <div className={styles.preview} style={{ width: separate.previewWidth }}>
+              <Canvas shadows>
+                <ShaderViewer vertexCode={vertexCode} fragmentCode={fragmentCode} objectType={objectType}/>
+                <Environment preset='city' blur={0.7} />
+                <OrbitControls/>
+                <Sky/>
+              </Canvas>
+            </div>
+          </>
+        }
+      </div>
+    </div>
+  )
+}
+
+/**
+ * モデル読み込み
+ * @param param0 
+ * @returns 
+ */
+const Model = ({ url }): JSX.Element => {
+  const gltf: any = useLoader(GLTFLoader, url);
+  return <primitive object={gltf.scene} />;
+}
+
+
+interface IShaderViewer {
+  objectType: "box" | "plane" | "sphere" | "gltf";
+  vertexCode: string;
+  fragmentCode: string;
+  url?: string;
+}
+/**
+ * シェーダビューア
+ * @returns 
+ */
+const ShaderViewer = (props: IShaderViewer) => {
+  const ref = useRef<Mesh>();
+  const CustomShaderMaterial = createShaderMaterial(props.vertexCode, props.fragmentCode);
+  const shaderRef = useRef<ShaderMaterial>(CustomShaderMaterial);
+  
+  let geometry;
+
+  switch (props.objectType) {
+    case 'box':
+      geometry = <boxGeometry args={[1, 1, 1]} />;
+      break;
+    case 'plane':
+      geometry = <planeGeometry args={[1, 1]} />;
+      break;
+    case 'sphere':
+      geometry = <sphereGeometry args={[1, 32, 32]} />;
+      break;
+    case 'gltf':
+      const gltf: any = useLoader(GLTFLoader, props.url);
+      return (
+        <mesh>
+          <primitive object={gltf.scene}/>
+          <primitive object={CustomShaderMaterial}/>
+        </mesh>
+      )
+    default:
+      geometry = <boxGeometry args={[1, 1, 1]} />;
+  }
+
+  useFrame((state, delta) => {
+    // if (shaderRef.current){
+    //   shaderRef.current.uniforms.speed.value = 2.0;
+    //   shaderRef.current.uniforms.amplitude.value = 0.5;
+    //   shaderRef.current.uniforms.time.value = state.clock.getElapsedTime();
+    //   shaderRef.current.uniforms.direction.value = new Vector3(0, 1, 1); // 波の進行方向を横向きに変更する
+    //   shaderRef.current.needsUpdate = true;
+    // }
+  })
+
+  
+  return (
     <>
-      <MonacoEditor
-        language="glsl"
-        theme="vs-dark"
-        value={code.current}
-        onChange={handleEditorChange}
-        // editorDidMount={handleEditorDidMount}
-        options={{
-          selectOnLineNumbers: true,
-          roundedSelection: false,
-          readOnly: false,
-          cursorStyle: 'line',
-          automaticLayout: true,
-        }}
-      />
+      <mesh>
+        {geometry}
+        <primitive object={CustomShaderMaterial} />
+      </mesh>
     </>
   )
 }
+
+
+
+/**
+ * シェーダコードからuniformを取得する
+ * @param shaderCode 
+ * @returns 
+ */
+const extractUniforms = (shaderCode) => {
+  const regex = /uniform\s+(\w+)\s+(\w+);/g;
+  let uniforms = {};
+  let match;
+  while ((match = regex.exec(shaderCode)) !== null) {
+    uniforms[match[2]] = { type: match[1], value: null };
+  }
+  return uniforms;
+}
+
+/**
+ *  任意のシェーダマテリアル
+ * @param vertexShader 
+ * @param fragmentShader 
+ * @returns 
+ */
+const createShaderMaterial = (vertexShader: string, fragmentShader: string): ShaderMaterial => {
+  const vertexUniforms = extractUniforms(vertexShader);
+  const fragmentUniforms = extractUniforms(fragmentShader);
+
+  const material = new ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms: { ...vertexUniforms, ...fragmentUniforms },
+  });
+  return material;
+}
+
 
 // 頂点シェーダーのサンプル
 const initCodeVertex = `
@@ -142,7 +389,7 @@ void main() {
 `
 
 // フラグメントシェーダーのサンプル
-const initCode = `
+const initCodeFragment = `
 varying vec2 vUv;
 uniform float time;
 
@@ -165,166 +412,148 @@ void main() {
 
 
 /**
- * GLSLの定義
+ * 選択肢のダークテーマスタイル
  */
+const darkThemeStyles = {
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#43D9D9',
+    fontSize: '16px',
+    lineHeight: '1', // これを追加
+  }),
+  control: (styles) => ({
+    ...styles,
+    backgroundColor: '#111',
+    borderColor: '#555',
+    height: 'auto',
+    minHeight: '40px',
+    width: '180px',
+    lineHeight: '1', // これを追加
+  }),
+  menu: (styles) => ({
+    ...styles,
+    backgroundColor: '#333',
+    width: '180px',
+    lineHeight: '1', // これを追加
+  }),
+  option: (styles, { isFocused, isSelected }) => {
+    return {
+      ...styles,
+      backgroundColor:
+        isSelected
+          ? '#555'
+          : isFocused
+            ? '#444'
+            : 'transparent',
+      color: isSelected ? '#fff' : '#fff',
+      height: 'auto',
+      minHeight: '40px',
+      fontSize: '16px',
+      lineHeight: '1', // これを追加
+    };
+  },
+};
 
+/**
+ * GLSL言語エディタの設定
+ */
+const glslLanguage: languages.IMonarchLanguage = {
+  // Set defaultToken to invalid to see what you do not tokenize yet
+  defaultToken: 'invalid',
+  tokenPostfix: '.glsl',
 
-// export const conf: languages.LanguageConfiguration = {
-//   comments: {
-//     lineComment: '//',
-//     blockComment: ['/*', '*/']
-//   },
-//   brackets: [
-//     ['{', '}'],
-//     ['[', ']'],
-//     ['(', ')']
-//   ],
-//   autoClosingPairs: [
-//     { open: '[', close: ']' },
-//     { open: '{', close: '}' },
-//     { open: '(', close: ')' },
-//     { open: "'", close: "'", notIn: ['string', 'comment'] },
-//     { open: '"', close: '"', notIn: ['string'] }
-//   ],
-//   surroundingPairs: [
-//     { open: '{', close: '}' },
-//     { open: '[', close: ']' },
-//     { open: '(', close: ')' },
-//     { open: '"', close: '"' },
-//     { open: "'", close: "'" }
-//   ]
-// }
+  keywords: [
+    'void', 'bool', 'int', 'float', 'uint', 'double', 'vec2', 'vec3', 'vec4', 'bvec2', 'bvec3', 'bvec4', 'ivec2', 'ivec3', 'ivec4', 'uvec2', 'uvec3', 'uvec4', 'dvec2', 'dvec3', 'dvec4',
+    'mat2', 'mat3', 'mat4', 'mat2x2', 'mat2x3', 'mat2x4', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4x2', 'mat4x3', 'mat4x4', 'sampler1D', 'sampler2D', 'sampler3D', 'samplerCube', 'sampler1DShadow',
+    'sampler2DShadow', 'samplerCubeShadow', 'sampler1DArray', 'sampler2DArray', 'sampler1DArrayShadow', 'sampler2DArrayShadow', 'isampler1D', 'isampler2D', 'isampler3D', 'isamplerCube', 'isampler1DArray',
+    'isampler2DArray', 'usampler1D', 'usampler2D', 'usampler3D', 'usamplerCube', 'usampler1DArray', 'usampler2DArray', 'sampler2DRect', 'sampler2DRectShadow', 'isampler2DRect', 'usampler2DRect', 'samplerBuffer',
+    'isamplerBuffer', 'usamplerBuffer', 'sampler2DMS', 'isampler2DMS', 'usampler2DMS', 'sampler2DMSArray', 'isampler2DMSArray', 'usampler2DMSArray', 'struct', 'uniform', 'layout', 'in', 'out', 'inout',
+    'attribute', 'varying', 'const', 'if', 'else', 'switch', 'case', 'default', 'while', 'do', 'for', 'continue', 'break', 'return', 'discards', 'beginInvocationInterlock', 'endInvocationInterlock',
+    'subroutine', 'lowp', 'mediump', 'highp', 'precision', 'invariant', 'discard', 'mat2x2', 'mat3', 'mat3x3', 'mat4', 'mat4x4', 'dmat2', 'dmat2x2', 'dmat2x3', 'dmat2x4', 'dmat3', 'dmat3x2', 'dmat3x3', 
+    'dmat3x4', 'dmat4', 'dmat4x2', 'dmat4x3', 'dmat4x4', 'vec2', 'vec3', 'vec4', 'ivec2', 'ivec3', 'ivec4', 'uvec2', 'uvec3', 'uvec4', 'dvec2', 'dvec3', 'dvec4', 'bvec2', 'bvec3', 'bvec4', 'float', 'double',
+    'bool', 'int', 'uint', 'true', 'false', 'mix', 'step', 'smoothstep', 'length', 'distance', 'dot', 'cross', 'normalize', 'faceforward', 'reflect', 'refract', 'matrixCompMult', 'outerProduct', 'transpose',
+  ],
 
-// export const keywords = [
-//   'const', 'uniform', 'break', 'continue',
-//   'do', 'for', 'while', 'if', 'else', 'switch', 'case', 'in', 'out', 'inout', 'true', 'false',
-//   'invariant', 'discard', 'return', 'sampler2D', 'samplerCube', 'sampler3D', 'struct',
-//   'radians', 'degrees', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'pow', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-//   'exp', 'log', 'exp2', 'log2', 'sqrt', 'inversesqrt', 'abs', 'sign', 'floor', 'ceil', 'round', 'roundEven', 'trunc', 'fract', 'mod', 'modf',
-//   'min', 'max', 'clamp', 'mix', 'step', 'smoothstep', 'length', 'distance', 'dot', 'cross ',
-//   'determinant', 'inverse', 'normalize', 'faceforward', 'reflect', 'refract', 'matrixCompMult', 'outerProduct', 'transpose', 'lessThan ',
-//   'lessThanEqual', 'greaterThan', 'greaterThanEqual', 'equal', 'notEqual', 'any', 'all', 'not', 'packUnorm2x16', 'unpackUnorm2x16', 'packSnorm2x16', 'unpackSnorm2x16', 'packHalf2x16', 'unpackHalf2x16',
-//   'dFdx', 'dFdy', 'fwidth', 'textureSize', 'texture', 'textureProj', 'textureLod', 'textureGrad', 'texelFetch', 'texelFetchOffset',
-//   'textureProjLod', 'textureLodOffset', 'textureGradOffset', 'textureProjLodOffset', 'textureProjGrad', 'intBitsToFloat', 'uintBitsToFloat', 'floatBitsToInt', 'floatBitsToUint', 'isnan', 'isinf',
-//   'vec2', 'vec3', 'vec4', 'ivec2', 'ivec3', 'ivec4', 'uvec2', 'uvec3', 'uvec4', 'bvec2', 'bvec3', 'bvec4',
-//   'mat2', 'mat3', 'mat2x2', 'mat2x3', 'mat2x4', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4x2', 'mat4x3', 'mat4x4', 'mat4',
-//   'float', 'int', 'uint', 'void', 'bool',
-// ]
+  operators: [
+    '=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '++', '--',
+    '+', '-', '*', '/', '%', '<', '>', '<=', '>=', '==', '!=', '&&', '||',
+    '!', '~', '&', '|', '^', '<<', '>>', '>>>',
+  ],
 
-// export const language = <languages.IMonarchLanguage>{
-//   tokenPostfix: '.glsl',
-//   // Set defaultToken to invalid to see what you do not tokenize yet
-//   defaultToken: 'invalid',
-//   keywords,
-//   operators: [
-//     '=',
-//     '>',
-//     '<',
-//     '!',
-//     '~',
-//     '?',
-//     ':',
-//     '==',
-//     '<=',
-//     '>=',
-//     '!=',
-//     '&&',
-//     '||',
-//     '++',
-//     '--',
-//     '+',
-//     '-',
-//     '*',
-//     '/',
-//     '&',
-//     '|',
-//     '^',
-//     '%',
-//     '<<',
-//     '>>',
-//     '>>>',
-//     '+=',
-//     '-=',
-//     '*=',
-//     '/=',
-//     '&=',
-//     '|=',
-//     '^=',
-//     '%=',
-//     '<<=',
-//     '>>=',
-//     '>>>='
-//   ],
-//   symbols: /[=><!~?:&|+\-*\/\^%]+/,
-//   escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
-//   integersuffix: /([uU](ll|LL|l|L)|(ll|LL|l|L)?[uU]?)/,
-//   floatsuffix: /[fFlL]?/,
-//   encoding: /u|u8|U|L/,
+  brackets: [
+    { open: '(', close: ')',token: 'delimiter.parenthesis' },
+    { open: '{', close: '}',token: 'delimiter.curly' },
+    { open: '[', close: ']',token: 'delimiter.square' },
+  ],
 
-//   tokenizer: {
-//     root: [
-//       // identifiers and keywords
-//       [
-//         /[a-zA-Z_]\w*/,
-//         {
-//           cases: {
-//             '@keywords': { token: 'keyword.$0' },
-//             '@default': 'identifier'
-//           }
-//         }
-//       ],
+  // we include these common regular expressions
+  symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
-//       // Preprocessor directive (#define)
-//       [/^\s*#\s*\w+/, 'keyword.directive'],
+  // C style block comments are supported
+  comments: [
+    ['\\/\\*', '\\*\\/', 'comment'],
+    ['\\/\\/', '$', 'comment']
+  ],
 
-//       // whitespace
-//       { include: '@whitespace' },
+  // The main tokenizer for our languages
+  tokenizer: {
+    root: [
+      // identifiers and keywords
+      [/[a-z_$][\w$]*/, {
+        cases: {
+          '@keywords': { token: 'keyword.$0' },
+          '@default': 'identifier',
+        }
+      }],
+      [/[A-Z][\w\$]*/, 'type.identifier'],  // to show class names nicely
 
-//       // delimiters and operators
-//       [/[{}()\[\]]/, '@brackets'],
-//       [/@symbols/, {
-//         cases: {
-//           '@operators': 'operator',
-//           '@default': ''
-//         }
-//       }],
+      // whitespace
+      { include: '@whitespace' },
 
-//       // numbers
-//       [/\d*\d+[eE]([\-+]?\d+)?(@floatsuffix)/, 'number.float'],
-//       [/\d*\.\d+([eE][\-+]?\d+)?(@floatsuffix)/, 'number.float'],
-//       [/0[xX][0-9a-fA-F']*[0-9a-fA-F](@integersuffix)/, 'number.hex'],
-//       [/0[0-7']*[0-7](@integersuffix)/, 'number.octal'],
-//       [/0[bB][0-1']*[0-1](@integersuffix)/, 'number.binary'],
-//       [/\d[\d']*\d(@integersuffix)/, 'number'],
-//       [/\d(@integersuffix)/, 'number'],
+      // delimiters and operators
+      [/[{}()\[\]]/, '@brackets'],
+      [/@symbols/, {
+        cases: {
+          '@operators': 'delimiter.operator',
+          '@default': ''
+        }
+      }],
 
-//       // delimiter: after number because of .\d floats
-//       [/[;,.]/, 'delimiter']
-//     ],
+      // numbers
+      [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
+      [/0[xX][0-9a-fA-F]+/, 'number.hex'],
+      [/\d+/, 'number'],
 
-//     comment: [
-//       [/[^\/*]+/, 'comment'],
-//       [/\/\*/, 'comment', '@push'],
-//       ['\\*/', 'comment', '@pop'],
-//       [/[\/*]/, 'comment']
-//     ],
+      // delimiter: after number because of .\d floats
+      [/[;,.]/, 'delimiter'],
 
-//     // Does it have strings?
-//     string: [
-//       [/[^\\"]+/, 'string'],
-//       [/@escapes/, 'string.escape'],
-//       [/\\./, 'string.escape.invalid'],
-//       [/"/, {
-//         token: 'string.quote',
-//         bracket: '@close',
-//         next: '@pop'
-//       }]
-//     ],
+      // strings
+      [/"([^"\\]|\\.)*$/, 'string.invalid'],  // non-teminated string
+      [/"/, 'string', '@string'],
 
-//     whitespace: [
-//       [/[ \t\r\n]+/, 'white'],
-//       [/\/\*/, 'comment', '@comment'],
-//       [/\/\/.*$/, 'comment']
-//     ]
-//   }
-// }
+      // characters
+      [/'[^\\']'/, 'string'],
+      // [/(')(@escapes)(')/, ['string','string.escape','string']],
+      [/'/, 'string.invalid']
+    ],
+
+    whitespace: [
+      [/[ \t\r\n]+/, ''],
+      [/\/\*/, 'comment', '@comment'],
+      [/\/\/.*$/, 'comment'],
+    ],
+
+    comment: [
+      [/[^\/*]+/, 'comment'],
+      [/\*\//, 'comment', '@pop'],
+      [/[\/*]/, 'comment']
+    ],
+
+    string: [
+      [/[^\\"]+/,  'string'],
+      // [/@escapes/, 'string.escape'],
+      // [/\\./,      'string.escape.invalid'],
+      [/"/,        'string', '@pop']
+    ],
+  },
+};
