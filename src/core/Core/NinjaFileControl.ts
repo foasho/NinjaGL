@@ -119,13 +119,34 @@ export const loadNJCFile = async (file: File): Promise<NJCFile> => {
   // GLBモデルを読み込み
   const objectsDir = loadedZip.folder('objects');
   for (const om of omsJson) {
-    console.log("check", om);
     const glbFile = objectsDir.file(`${om.id}.glb`);
     if (glbFile) {
-      console.log(glbFile);
       const glbData = await glbFile.async('arraybuffer');
       const object = await loadGLTFFromData(glbData);
       om.object = object;
+    }
+    // Position,Rotation,Scale同期
+    if (om.args && om.args.rotation) {
+      om.args.rotation = new Euler(
+        om.args.rotation._x, 
+        om.args.rotation._y, 
+        om.args.rotation._z, 
+        om.args.rotation._order
+      );
+    }
+    if (om.args && om.args.position){
+      om.args.position = new Vector3(
+        om.args.position.x, 
+        om.args.position.y, 
+        om.args.position.z
+      );
+    }
+    if (om.args && om.args.scale){
+      om.args.scale = new Vector3(
+        om.args.scale.x, 
+        om.args.scale.y, 
+        om.args.scale.z
+      );
     }
     njcFile.addOM(om);
   }
@@ -220,8 +241,6 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
       animations: object.animations,
       includeCustomExtensions: true
     };
-    console.log("UserData set");
-    console.log(userData);
 
     if (userData){
       object.userData = userData;

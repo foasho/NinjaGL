@@ -84,6 +84,18 @@ export const MyLight = (prop: ILightProps) => {
     // ref.current.loolAt(1, 1, 1);
   }
 
+  useEffect(() => {
+    if (om.args.position){
+      ref.current.position.copy(om.args.position.clone());
+    }
+    if (om.args.rotation){
+      ref.current.rotation.copy(om.args.rotation.clone());
+    }
+    if (om.args.scale){
+      ref.current.scale.copy(om.args.scale.clone());
+    }
+  }, []);
+
   useFrame((_, delta) => {
     if ( visible != (editor.getSelectId() == id)){
       setVisible(editor.getSelectId() == id);
@@ -94,13 +106,24 @@ export const MyLight = (prop: ILightProps) => {
       catchRef.current.scale.copy(ref.current.scale.clone());
     }
     if (ref.current){
-      const castShadow = editor.getCastShadow(id);
-      const receiveShadow = editor.getreceiveShadow(id);
-      ref.current.castShadow = castShadow;
-      ref.current.receiveShadow = receiveShadow;
-      const material = editor.getMaterial(id);
-      if (material && material.type == "color"){
-        ref.current.color.set(material.value);
+      const isFocus = editor.getFocus(id);
+      if (isFocus){
+        // const pos = editor.getPosition(id);
+        // editorData.current.position = new Vector3().copy(pos);
+        // const rot = editor.getRotation(id);
+        // editorData.current.rotation = new Euler().copy(rot);
+        // const sca = editor.getScale(id);
+        // editorData.current.scale = new Vector3().copy(sca);
+      }
+      else {
+        const castShadow = editor.getCastShadow(id);
+        const receiveShadow = editor.getreceiveShadow(id);
+        ref.current.castShadow = castShadow;
+        ref.current.receiveShadow = receiveShadow;
+        const material = editor.getMaterial(id);
+        if (material && material.type == "color"){
+          ref.current.color.set(material.value);
+        }
       }
     }
   })
