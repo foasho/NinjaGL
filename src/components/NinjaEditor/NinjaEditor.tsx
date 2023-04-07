@@ -4,7 +4,7 @@ import { MainViewer } from "@/components/NinjaEditor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef } from "react";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
-import { IObjectManagement } from "@/core/Core/NinjaProps";
+import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMaker } from "./ViewPort/TerrainMaker";
@@ -22,8 +22,8 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { NJCFile, saveNJCFile } from "@/core/Core/NinjaFileControl";
-import { loadNJCFile } from "@/core/Core/NinjaFileControl";
+import { NJCFile, saveNJCFile } from "@/core/utils/NinjaFileControl";
+import { loadNJCFile } from "@/core/utils/NinjaFileControl";
 import { BiEditAlt } from "react-icons/bi";
 
 

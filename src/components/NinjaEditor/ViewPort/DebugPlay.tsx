@@ -1,4 +1,4 @@
-import { NinjaEngine, NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
+import { NinjaEngine, NinjaEngineContext } from "@/core/utils/NinjaEngineManager";
 import { NinjaCanvas } from "@/core/NinjaCanvas";
 import { useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";

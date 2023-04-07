@@ -6,7 +6,7 @@ import { clone as SkeletonClone } from "three/examples/jsm/utils/SkeletonUtils";
 import Swal from "sweetalert2";
 import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
-import { convertObjectToBlob } from "@/core/Core/NinjaFileControl";
+import { convertObjectToBlob } from "@/core/utils/NinjaFileControl";
 
 export const PlayerInspector = () => {
   const [selectedOption, setSelectedOption] = useState<{ value: string, label: string }>(null);

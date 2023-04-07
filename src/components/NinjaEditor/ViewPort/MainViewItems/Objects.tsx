@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/core/Core/NinjaProps";
+import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
 import { Box3, BoxHelper, Euler, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Vector3, WireframeGeometry } from "three";

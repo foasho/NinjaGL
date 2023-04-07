@@ -1,6 +1,6 @@
-import { NinjaEngine, NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
-import { InitNinja } from "@/core/Core/NinjaInit";
-import { INinjaProps } from "@/core/Core/NinjaProps";
+import { NinjaEngine, NinjaEngineContext } from "@/core/utils/NinjaEngineManager";
+import { InitNinja } from "@/core/utils/NinjaInit";
+import { INinjaProps } from "@/core/utils/NinjaProps";
 import { useEffect, useState } from "react";
 import { NinjaCanvas } from "./NinjaCanvas";
 import { NinjaUI } from "./NinjaUI";

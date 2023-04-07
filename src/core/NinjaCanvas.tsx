@@ -1,13 +1,13 @@
-import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager"
+import { NinjaEngineContext } from "@/core/utils/NinjaEngineManager"
 import { Canvas, useThree } from "@react-three/fiber"
 import { useContext, useEffect, useRef, useState } from "react"
-import { Avatar } from "./CanvasItems/Avatar"
-import { NEnvironment } from "./CanvasItems/NEnvironment"
-import { StaticObjects } from "./CanvasItems/StaticObjects"
-import { System } from "./CanvasItems/System"
-import { Terrain } from "./CanvasItems/Terrain"
+import { Avatar } from "./canvas-items/Avatar"
+import { NEnvironment } from "./canvas-items/NEnvironment"
+import { StaticObjects } from "./canvas-items/StaticObjects"
+import { System } from "./canvas-items/System"
+import { Terrain } from "./canvas-items/Terrain"
 import { NinjaUI } from "./NinjaUI"
-import { LoadProcessing } from "./UIItems/LoadProcessing"
+import { LoadProcessing } from "./ui-items/LoadProcessing"
 
 export const NinjaCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>();

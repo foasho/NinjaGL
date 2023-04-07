@@ -15,7 +15,7 @@ import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
 import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
-import { useInputControl } from "@/core/Core/InputControls";
+import { useInputControl } from "@/core/utils/InputControls";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 

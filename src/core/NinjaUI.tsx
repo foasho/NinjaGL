@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { LoadProcessing } from "./UIItems/LoadProcessing";
+import { LoadProcessing } from "./ui-items/LoadProcessing";
 // Icons
 import { BsHandbagFill } from "react-icons/bs";
-import { TouchMove } from "./UIItems/TouchMove";
-import { NinjaEngineContext } from "@/core/Core/NinjaEngineManager";
+import { TouchMove } from "./ui-items/TouchMove";
+import { NinjaEngineContext } from "@/core/utils/NinjaEngineManager";
 import { NinjaIcons } from "./uis/NinjaIcons";
 
 export const NinjaUI = () => {

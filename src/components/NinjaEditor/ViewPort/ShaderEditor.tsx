@@ -424,12 +424,13 @@ const createShaderMaterial = (vertexShader: string, fragmentShader: string): Sha
   const vertexVariables = extractVariables(vertexShader);
   const fragmentVariables = extractVariables(fragmentShader);
 
+  let uniforms = { ...vertexVariables.uniforms, ...fragmentVariables.uniforms };
   const material = new ShaderMaterial({
     vertexShader,
     fragmentShader,
-    uniforms: { ...vertexVariables.uniforms, ...fragmentVariables.uniforms },
+    transparent: true, // 透明化するために必要
+    uniforms: uniforms,
   });
-  material.uniforms.u_color = { value: new Vector3(1, 1, 1) };
   return material;
 }
 
