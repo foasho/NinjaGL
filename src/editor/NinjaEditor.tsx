@@ -1,7 +1,7 @@
 import styles from "@/App.module.scss";
-import { PlayerEditor } from "@/components/NinjaEditor/ViewPort/PlayerEditor";
-import { MainViewer } from "@/components/NinjaEditor/ViewPort/MainViewer";
-import { NinjaEditorContext, NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
+import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
+import { MainViewer } from "@/editor/ViewPort/MainViewer";
+import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef } from "react";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { IObjectManagement } from "@/core/utils/NinjaProps";

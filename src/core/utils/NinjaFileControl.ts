@@ -1,4 +1,4 @@
-import { NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
+import { NinjaEditorManager } from "@/editor/NinjaEditorManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";

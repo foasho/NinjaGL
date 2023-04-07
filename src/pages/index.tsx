@@ -1,9 +1,9 @@
 import Head from 'next/head';
 import { Inter } from '@next/font/google';
 import styles from '../App.module.scss';
-import { NinjaEditorContext, NinjaEditorManager } from "@/components/NinjaEditor/NinjaEditorManager";
+import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
 import { useState, useEffect } from "react";
-import { NinjaEditor } from "@/components/NinjaEditor/NinjaEditor";
+import { NinjaEditor } from "@/editor/NinjaEditor";
 import { ToastContainer } from "react-toastify";
 
 const inter = Inter({ subsets: ['latin'] })
