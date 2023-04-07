@@ -15,8 +15,9 @@ export const DebugPlay = () => {
   const { t } = useTranslation();
   useEffect(() => {
     // EditorからOMを取得してJSON化する
-    const oms = editor.oms;
-    const ums = editor.ums;
+    const ums = editor.getUMs();
+    const tms = editor.getTMs();
+    const scs = editor.getSCs();
     const config = editor.config;
     const _engine = new NinjaEngine();
     const avatar = editor.getAvatar();

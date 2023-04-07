@@ -1,7 +1,7 @@
 import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { IConfigParams, IObjectManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
+import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
 import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import { rtdp } from "@/commons/functional";
@@ -37,6 +37,7 @@ export class NinjaEditorManager {
   oms: IObjectManagement[] = []; //Canvas表示系
   ums: IUIManagement[] = [];// 操作UI系
   tms: ITextureManagement[] = []; // テクスチャ
+  scs: IScriptManagement[] = []; // スクリプト
   attr: {[key: string] : any} = {};//その他任意属性
   camera: OrbitControlsImpl;
   transformDecimal: number = 2; 
@@ -548,6 +549,20 @@ export class NinjaEditorManager {
    */
   getUMs = () => {
     return this.ums;
+  }
+
+  /**
+   * すべてのTMを取得する
+   */
+  getTMs= () => {
+    return this.tms;
+  }
+
+  /**
+   * すべてのScriptを取得する
+   */
+  getSCs= () => {
+    return this.scs;
   }
 
   /**
