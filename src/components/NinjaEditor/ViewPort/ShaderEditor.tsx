@@ -4,9 +4,9 @@ import MonacoEditor, { Monaco } from "@monaco-editor/react";
 import type { languages } from 'monaco-editor'
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
-import { Mesh, ShaderMaterial, Uniform, Vector3 } from 'three';
+import { DoubleSide, Mesh, ShaderMaterial, Matrix3, Matrix4, ShaderMaterialParameters, Uniform, Vector2, Vector3, Vector4 } from 'three';
 import { Canvas, useFrame, extend, useLoader } from '@react-three/fiber';
-import { Environment, OrbitControls, Sky, shaderMaterial } from '@react-three/drei';
+import { Environment, OrbitControls, Sky, SoftShadows, shaderMaterial } from '@react-three/drei';
 import path from 'path';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import Select from 'react-select';
@@ -18,6 +18,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
   const fragmentRef = useRef(null);
   const vertexRef = useRef(null);
   const [objectType, setObjectType] = useState<"box"|"plane"|"sphere"|"gltf">("box");
+  const [uploadModel, setUploadModel] = useState<string>("");
   const [fragmentCode, setFragmentCode] = useState<string>(initCodeFragment);
   const [vertexCode, setVertexCode] = useState<string>(initCodeVertex);
   const [fileName, setFileName] = useState<string>(null);
@@ -63,13 +64,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
     else {
       
     }
-    const currentCode = mode === "Fragment" ? fragmentRef.current.getValue() : vertexRef.current.getValue();
-    if (mode == "Fragment"){
-      setFragmentCode(currentCode);
-    }
-    else {
-      setVertexCode(currentCode);
-    }
+    setFragmentCode(fragmentRef.current.getValue());
+    setVertexCode(vertexRef.current.getValue());
   }
 
   const onPreview = () => {
@@ -80,15 +76,25 @@ export const ShaderEditor = (props: IShaderEditor) => {
    * モードチェンジ
    */
   const changeMode = () => {
-    if (mode == "Fragment"){
-      setMode("Vertex");
-      if (fragmentRef.current) setFragmentCode(fragmentRef.current.getValue())
+  let currentCode;
+  if (mode === "Fragment") {
+    if (fragmentRef.current) {
+      currentCode = fragmentRef.current.getValue();
+    } else {
+      currentCode = initCodeFragment;
     }
-    else {
-      setMode("Fragment");
-      if (vertexRef.current) setVertexCode(vertexRef.current.getValue())
+    setFragmentCode(currentCode);
+    setMode("Vertex");
+  } else {
+    if (vertexRef.current) {
+      currentCode = vertexRef.current.getValue();
+    } else {
+      currentCode = initCodeVertex;
     }
+    setVertexCode(currentCode);
+    setMode("Fragment");
   }
+};
 
   /**
    * リサイザーをつかむ
@@ -179,7 +185,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
   const options: { value: string, label: string }[] = [
     { value: "box", label: "立方体" },
     { value: "sphere", label: "球体" },
-    { value: "plane", label: "平面" }
+    { value: "plane", label: "平面" },
+    { value: "gltf", label: "" }
   ];
 
   const onChangeObjectType = (option) => {
@@ -189,35 +196,35 @@ export const ShaderEditor = (props: IShaderEditor) => {
   return (
     <div className={styles.shaderEditor}>
       <div className={styles.navigation}>
-        <div className={styles.mode} onClick={() => changeMode()}>
+        <div className={`${styles.mode} ${styles.navItem}`} onClick={() => changeMode()}>
           {mode}
         </div>
-        <div className={styles.filename}>
+        <div className={`${styles.filename} ${styles.navItem}`}>
           {filename}
           {mode == "Fragment"? ".frag": ".vertex"}
         </div>
-        <div className={styles.save} onClick={() => onSave()}>
+        <div className={`${styles.mode} ${styles.save}`} onClick={() => onSave()}>
           Save
         </div>
-        <div className={styles.preview} onClick={() => onPreview()}>
+        <div className={`${styles.preview} ${styles.navItem}`} onClick={() => onPreview()}>
           Preview
         </div>
-        <div className={styles.preview}>
+        <div className={`${styles.type} ${styles.navItem}`}>
           <Select
-            options={options}
-            value={options.find(op => op.label == objectType)}
-            onChange={onChangeObjectType}
-            styles={darkThemeStyles}
-          />
+              options={options}
+              value={options.find(op => op.value == objectType)}
+              onChange={onChangeObjectType}
+              styles={darkThemeStyles}
+            />
         </div>
       </div>
       <div className={styles.editor}>
         <div 
-        className={styles.monaco} 
-        style={{width: showPreview?separate.editorWidth: "100%"}}
-        onKeyDown={handleKeyDown}
+          className={styles.monaco} 
+          style={{width: showPreview?separate.editorWidth: "100%"}}
+          onKeyDown={handleKeyDown}
         >
-          {mode == "Fragment" ?
+          <div style={{ display: mode=="Fragment"?"block": "none", height: "100%" }}>
             <MonacoEditor
               language="glsl"
               theme="vs-dark"
@@ -231,8 +238,9 @@ export const ShaderEditor = (props: IShaderEditor) => {
                 cursorStyle: 'line',
                 automaticLayout: true,
               }}
-              
-            />:
+            />
+          </div>
+          <div style={{ display: mode=="Vertex"?"block": "none", height: "100%" }}>
             <MonacoEditor
               language="glsl"
               theme="vs-dark"
@@ -247,7 +255,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
                 automaticLayout: true,
               }}
             />
-          }
+          </div>
         </div>
         {showPreview &&
           <>
@@ -258,6 +266,11 @@ export const ShaderEditor = (props: IShaderEditor) => {
             ></div>
             <div className={styles.preview} style={{ width: separate.previewWidth }}>
               <Canvas shadows>
+                <SoftShadows/>
+                <mesh castShadow receiveShadow scale={[10, 10, 10]} rotation={[-Math.PI/2, 0, 0]} position={[0, -1, 0]}>
+                  <planeBufferGeometry/>
+                  <meshStandardMaterial side={DoubleSide} color={0xf2f2f2} />
+                </mesh>
                 <ShaderViewer vertexCode={vertexCode} fragmentCode={fragmentCode} objectType={objectType}/>
                 <Environment preset='city' blur={0.7} />
                 <OrbitControls/>
@@ -270,17 +283,6 @@ export const ShaderEditor = (props: IShaderEditor) => {
     </div>
   )
 }
-
-/**
- * モデル読み込み
- * @param param0 
- * @returns 
- */
-const Model = ({ url }): JSX.Element => {
-  const gltf: any = useLoader(GLTFLoader, url);
-  return <primitive object={gltf.scene} />;
-}
-
 
 interface IShaderViewer {
   objectType: "box" | "plane" | "sphere" | "gltf";
@@ -298,7 +300,7 @@ const ShaderViewer = (props: IShaderViewer) => {
   const shaderRef = useRef<ShaderMaterial>(CustomShaderMaterial);
   
   let geometry;
-
+  let obj;
   switch (props.objectType) {
     case 'box':
       geometry = <boxGeometry args={[1, 1, 1]} />;
@@ -310,13 +312,18 @@ const ShaderViewer = (props: IShaderViewer) => {
       geometry = <sphereGeometry args={[1, 32, 32]} />;
       break;
     case 'gltf':
-      const gltf: any = useLoader(GLTFLoader, props.url);
-      return (
-        <mesh>
-          <primitive object={gltf.scene}/>
-          <primitive object={CustomShaderMaterial}/>
-        </mesh>
-      )
+      if (!props.url) {
+        obj = <mesh></mesh>;
+      }
+      else {
+        const gltf: any = useLoader(GLTFLoader, props.url);
+        obj = (
+          <>
+            <primitive object={gltf.scene}/>
+            <primitive object={CustomShaderMaterial}/>
+          </>
+        )
+      }
     default:
       geometry = <boxGeometry args={[1, 1, 1]} />;
   }
@@ -334,14 +341,48 @@ const ShaderViewer = (props: IShaderViewer) => {
   
   return (
     <>
-      <mesh>
-        {geometry}
-        <primitive object={CustomShaderMaterial} />
+        <mesh castShadow>
+          {(!obj)?
+            <>
+                {geometry}
+                <primitive object={CustomShaderMaterial} />
+            </>
+            :
+            <>
+              {obj}
+            </>
+          }
       </mesh>
     </>
   )
 }
 
+/**
+ * 変数名から型を推定
+ */
+const getDefaultInitialValue = (type: string) => {
+  switch (type) {
+    case 'float':
+      return 0.0;
+    case 'int':
+    case 'bool':
+      return 0;
+    case 'vec2':
+      return new Vector2();
+    case 'vec3':
+      return new Vector3();
+    case 'vec4':
+      return new Vector4();
+    case 'mat3':
+      return new Matrix3();
+    case 'mat4':
+      return new Matrix4();
+    case 'sampler2D':
+      return null; // テクスチャが未指定の場合、Three.jsはデフォルトの白いテクスチャを使用します。
+    default:
+      return undefined;
+  }
+}
 
 
 /**
@@ -349,14 +390,28 @@ const ShaderViewer = (props: IShaderViewer) => {
  * @param shaderCode 
  * @returns 
  */
-const extractUniforms = (shaderCode) => {
-  const regex = /uniform\s+(\w+)\s+(\w+);/g;
-  let uniforms = {};
+const extractVariables = (shaderCode, initialValues = {}) => {
+  const regex = /(\w+)\s+(\w+)\s+(\w+);/g;
+  let variables = { attributes: {}, varyings: {}, uniforms: {} };
   let match;
+
   while ((match = regex.exec(shaderCode)) !== null) {
-    uniforms[match[2]] = { type: match[1], value: null };
+    if (match[1] === 'attribute') {
+      variables.attributes[match[3]] = { type: match[2] };
+    } else if (match[1] === 'varying') {
+      variables.varyings[match[3]] = { type: match[2] };
+    } else if (match[1] === 'uniform') {
+      variables.uniforms[match[3]] = {
+        type: match[2],
+        value:
+          initialValues.hasOwnProperty(match[3])
+            ? initialValues[match[3]]
+            : getDefaultInitialValue(match[2]),
+      };
+    }
   }
-  return uniforms;
+
+  return variables;
 }
 
 /**
@@ -366,14 +421,15 @@ const extractUniforms = (shaderCode) => {
  * @returns 
  */
 const createShaderMaterial = (vertexShader: string, fragmentShader: string): ShaderMaterial => {
-  const vertexUniforms = extractUniforms(vertexShader);
-  const fragmentUniforms = extractUniforms(fragmentShader);
+  const vertexVariables = extractVariables(vertexShader);
+  const fragmentVariables = extractVariables(fragmentShader);
 
   const material = new ShaderMaterial({
     vertexShader,
     fragmentShader,
-    uniforms: { ...vertexUniforms, ...fragmentUniforms },
+    uniforms: { ...vertexVariables.uniforms, ...fragmentVariables.uniforms },
   });
+  material.uniforms.u_color = { value: new Vector3(1, 1, 1) };
   return material;
 }
 
@@ -418,23 +474,30 @@ const darkThemeStyles = {
   singleValue: (provided) => ({
     ...provided,
     color: '#43D9D9',
-    fontSize: '16px',
-    lineHeight: '1', // これを追加
+    fontSize: '10px',
+    paddingLeft: "15px"
+  }),
+  input: (styles) => ({
+    ...styles,
   }),
   control: (styles) => ({
     ...styles,
     backgroundColor: '#111',
     borderColor: '#555',
     height: 'auto',
-    minHeight: '40px',
-    width: '180px',
-    lineHeight: '1', // これを追加
+    minHeight: '30px',
+    width: '120px',
+    lineHeight: '1',
+    alignItems: 'center',
+  }),
+  valueContainer: (provided) => ({
+    ...provided,
+    padding: '0', // これを追加
   }),
   menu: (styles) => ({
     ...styles,
     backgroundColor: '#333',
     width: '180px',
-    lineHeight: '1', // これを追加
   }),
   option: (styles, { isFocused, isSelected }) => {
     return {
@@ -447,11 +510,22 @@ const darkThemeStyles = {
             : 'transparent',
       color: isSelected ? '#fff' : '#fff',
       height: 'auto',
-      minHeight: '40px',
-      fontSize: '16px',
-      lineHeight: '1', // これを追加
+      minHeight: '30px',
+      fontSize: '10px',
     };
   },
+  indicatorsContainer: (provided) => ({
+    ...provided,
+    padding: '0',
+  }),
+  indicatorSeparator: (provided) => ({
+    ...provided,
+    display: 'none',
+  }),
+  dropdownIndicator: (provided) => ({
+    ...provided,
+    padding: '0', // これを追加
+  }),
 };
 
 /**

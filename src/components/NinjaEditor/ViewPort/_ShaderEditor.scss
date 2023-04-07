@@ -4,7 +4,7 @@
     .navigation {
         font-size: 12px;
         line-height: 30px;
-        div {
+        .navItem {
             display: inline-block;
             cursor: pointer;
             user-select: none;
@@ -24,12 +24,18 @@
             padding: 0 10px;
             font-weight: bold;
             float: right;
+            color: $textColor;
         }
         .preview {
             background-color: #494949;
             padding: 0 10px;
             float: right;
             color: #fff;
+        }
+        .type {
+            float: right;
+            color: #fff;
+            margin-right: 5px;
         }
     }
     .editor {
