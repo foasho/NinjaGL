@@ -5,7 +5,7 @@ import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, IS
 import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { convertToGB } from "@/commons/functional";
-import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2 } from "three";
+import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2, SkinnedMesh, Box3 } from "three";
 import { reqApi } from "@/services/ServciceApi";
 import { useInputControl } from "./InputControls";
 import { NinjaShader } from "./NinjaShader";
@@ -55,7 +55,14 @@ export class NinjaEngine {
   // Canvasのサイズ
   canvasSize: Vector2 = new Vector2(0, 0);
   canvasPos: Vector2 = new Vector2(0, 0);
-  constructor() { }
+  // ScriptWorker[ユーザースクリプト]
+  worker: Worker; // Web Worker
+  constructor() { 
+    this.worker = new Worker("worker.js");
+    this.worker.onmessage = (e: MessageEvent) => {
+      this.handleWorkerMessage(e);
+    }
+  }
 
   /**
    * セットアップ
@@ -144,11 +151,8 @@ export class NinjaEngine {
     this.jsonData = data;
   }
   /**
-   * NJCFileをセットする
+   * NJCをセットする
    */
-  setNJCPath = async(njcPath: string) => {
-    
-  }
   setNJC = (njcFile: NJCFile) => {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
@@ -370,25 +374,74 @@ export class NinjaEngine {
           await Promise.all(
             Object.keys(objs).map(async (key: string) => {
               const targetObj = objs[key];
-              if (targetObj.filePath && targetObj.filePath.length > 3){
-                const obj: IObjectManagement = {
-                  id: targetObj.id,
-                  type: "object",
-                  args: targetObj.args,
-                  visibleType: "auto",
-                  physics: targetObj.physics
-                }
-                this.oms.push(obj);
-              }
-              else if (targetObj.object){
-                this.oms.push(targetObj);
-              }
+              this.oms.push(targetObj);
               // PhysicsTypeがnoneでなければ、物理世界に入れる(今後)
-              if (targetObj.physics !== "none"){
-                console.log("StaticObjectの物理対応はあとで実装");
+              const om = this.oms.find((om: IObjectManagement) => om.id == targetObj.id);
+              if (om.physics !== "none"){
+                if (om.physics == "aabb" && om.object instanceof Object3D){
+                  const aabb = new Box3();
+                  aabb.setFromObject(om.object);
+                  this.octree.importAABB(om.id, aabb);
+                }
+                else if (om.physics == "along" && om.object instanceof Object3D){
+                  this.octree.importThreeObj3D(om.id, om.object);
+                }
+                // args.positionがあれば追加したFaceを移動させる
+                if (om.args.position){
+                  const pos = om.args.position;
+                  const posVec = new Vector3(pos.x, pos.y, pos.z);
+                  om.object.position.copy(posVec.clone());
+                  this.octree.translateFaceByName(om.id, posVec.clone());
+                  om.layerNum = this.getLayerNumber(pos);
+                }
+                if (om.args.rotation){
+                  const rot = om.args.rotation;
+                  om.object.rotation.copy(rot.clone());
+                }
               }
             })
           )
+        }
+        else if (key == "threes"){
+          Object.keys(jsonData[key]).map((key: string) => {
+            const targetObj = jsonData[key][key];
+            const obj: IObjectManagement = targetObj;
+            this.oms.push(obj);
+            const om = this.oms.find((om: IObjectManagement) => om.id == targetObj.id);
+            if (om.args.type){
+              if (om.args.type == "box"){}
+              else if (om.args.type == "sphere"){}
+              else if (om.args.type == "cylinder"){}
+              else if (om.args.type == "plane"){}
+              else if (om.args.type == "text"){}
+              if (om.physics !== "none"){
+                if (om.physics == "aabb" && om.object instanceof Object3D){
+                  const aabb = new Box3();
+                  aabb.setFromObject(om.object);
+                  this.octree.importAABB(om.id, aabb);
+                }
+                else if (om.physics == "along" && om.object instanceof Object3D){
+                  this.octree.importThreeObj3D(om.id, om.object);
+                }
+                // args.positionがあれば追加したFaceを移動させる
+                if (om.args.position){
+                  const pos = om.args.position;
+                  const posVec = new Vector3(pos.x, pos.y, pos.z);
+                  this.octree.translateFaceByName(om.id, posVec.clone());
+                  om.layerNum = this.getLayerNumber(pos);
+                }
+              }
+            }
+            if (om.layerNum === undefined){
+              om.layerNum = this.getLayerNumber(new Vector3(0, 0, 0));
+            }
+            if (om.visibleType == "force"){
+              om.layerNum = 0;
+            }
+            else if (om.visibleType == "none"){
+              om.layerNum = -1;
+            }
+          });
         }
         else if (key == "sky") {
           if (!jsonData[key]) continue;
@@ -437,6 +490,270 @@ export class NinjaEngine {
       loadPer = 100 * Number((totalSize / totalFileSize).toFixed(2));
     }
   }
+
+  /**
+   * WebWorkerのメッセージを処理する
+   */
+  handleWorkerMessage = (e: MessageEvent) => {
+    const { type, data } = e.data;
+    if (type == "getOM") {
+      // OMを取得する
+      const { id } = data;
+      this.worker.postMessage({ type: "getOM", data: this.getOMById(id) })
+    }
+    else if (type == "setPosition"){
+      // 特定のIDのOMの位置を変更する
+      const { id, position } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        om.object.position.set(position.x, position.y, position.z);
+      }
+    }
+    else if (type == "getPosition") {
+      // 特定のIDのOMの位置を取得する
+      const { id } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        this.worker.postMessage({ type: "getPosition", data: om.object.position })
+      }
+    }
+    else if (type == "setRotation"){
+      // 特定のIDのOMの回転を変更する
+      const { id, rotation } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        om.object.rotation.set(rotation.x, rotation.y, rotation.z);
+      }
+    }
+    else if (type == "getRotation") {
+      // 特定のIDのOMの回転を取得する
+      const { id } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        this.worker.postMessage({ type: "getRotation", data: om.object.rotation })
+      }
+    }
+    else if (type == "setScale"){
+      // 特定のIDのOMのスケールを変更する
+      const { id, scale } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        om.object.scale.set(scale.x, scale.y, scale.z);
+      }
+    }
+    else if (type == "getScale") {
+      // 特定のIDのOMのスケールを取得する
+      const { id } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        this.worker.postMessage({ type: "getScale", data: om.object.scale })
+      }
+    }
+    else if (type == "setQuaternion"){
+      // 特定のIDのOMの回転を変更する
+      const { id, quaternion } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        om.object.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+      }
+    }
+    else if (type == "setAvatar"){
+      // アバターをセットする
+      const { threeMesh } = data;
+      this.setAvatar(threeMesh);
+    }
+    else if (type == "setAvatarPosition"){
+      // アバターの位置をセットする
+      const { position } = data;
+      const avatarObject = this.getAvatarObject();
+      if (avatarObject) {
+        avatarObject.object.position.set(position.x, position.y, position.z);
+        // 物理世界の位置も更新する
+        this.world.sphere.center.set(position.x, position.y, position.z);
+      }
+    }
+    else if (type == "changeAvatarOffset"){
+      // アバターのカメラオフセットを変更する
+      const { offset } = data;
+      this.avatar.cameraOffset = offset.clone();
+    }
+    else if (type == "changeUniforms"){
+      // 特定のIDのOMのuniformsを変更する
+      const { id, uniforms } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        if (om.object instanceof Mesh && om.object.material) {
+          Object.keys(uniforms).map((key) => {
+            if (om.object instanceof Mesh){
+              om.object.material.uniforms[key].value = uniforms[key];
+            }
+          });
+          om.object.material.needsUpdate = true;
+        }
+      }
+    }
+    else if (type == "changeVisible"){
+      // 特定のIDのOMのvisibleを変更する
+      const { id, visible } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        om.object.visible = visible;
+      }
+    }
+    else if (type == "changeVisibleType"){
+      // 特定のIDのOMのvisibleTypeを変更する
+      const { id, visibleType } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        om.visibleType = visibleType;
+      }
+    }
+    else if (type == "changeAnimation"){
+      // 特定のIDのOMのanimationを変更する
+      const { id, animation } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        if (om.object instanceof SkinnedMesh) {
+          om.mixer.stopAllAction();
+          om.mixer.clipAction(animation).play();
+        }
+      }
+    }
+    else if (type == "startAnimationByName"){
+      // 特定のIDのOMのanimationを開始する
+      const { id, animationName } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        if (om.object instanceof SkinnedMesh) {
+          const animation = om.animations.find(animation => animation.name == animationName);
+          if (animation) {
+            om.mixer.stopAllAction();
+            om.mixer.clipAction(animation).play();
+          }
+        }
+      }
+    }
+    else if (type == "stopAnimationByName"){
+      // 特定のIDのOMのanimationを停止する
+      const { id, animationName } = data;
+      const om = this.getOMById(id);
+      if (om) {
+        if (om.object instanceof SkinnedMesh) {
+          const animation = om.animations.find(animation => animation.name == animationName);
+          if (animation) {
+            om.mixer.stopAllAction();
+          }
+        }
+      }
+    }
+    else if (type == "startSound"){
+      // 特定のIDのサウンドを開始する
+      const { id } = data;
+      const sound = this.getSoundById(id);
+      if (sound) {
+        sound.sound.play();
+      }
+    }
+    else if (type == "loopSound"){
+      // 特定のIDのサウンドをループする
+      const { id } = data;
+      const sound = this.getSoundById(id);
+      if (sound) {
+        sound.sound.setLoop(true);
+        sound.sound.play();
+      }
+    }
+    else if (type == "stopSound"){
+      // 特定のIDのサウンドを停止する
+      const { id } = data;
+      const sound = this.getSoundById(id);
+      if (sound) {
+        sound.sound.stop();
+      }
+    }
+    else if (type == "setSoundVolume"){
+      // 特定のIDのサウンドの音量を変更する
+      const { id, volume } = data;
+      const sound = this.getSoundById(id);
+      if (sound) {
+        sound.sound.setVolume(volume);
+      }
+    }
+  }
+
+  /**
+   * 特定のIDのOMを取得する
+   * @param id 
+   * @returns 
+   */
+  getOMById(id: string): IObjectManagement {
+    return this.oms.find(om => om.id == id);
+  }
+
+  /**
+   * 特定のIDのサウンドを取得する
+   */
+  getSoundById(id: string): ISoundProps {
+    return this.sounds.find(sound => sound.id == id);
+  }
+
+  /**
+   * 新しいサウンドをセットする
+   */
+  setSoundById(params: ISetSoundOption) {
+    const sound = new Audio(this.listener);
+    const audioLoader = new AudioLoader();
+    audioLoader.load(
+      params.filePath,
+      (buffer) => {
+        sound.setBuffer(buffer);
+        sound.setLoop(params.loop);
+        sound.setVolume(params.volume);
+        sound.pause();
+      }
+    )
+    this.sounds.push({
+      id: params.id,
+      key: params.key,
+      sound: sound,
+      loop: params.loop,
+      filePath: params.filePath,
+      volume: params.volume,
+      trigAnim: params.trigAnim,
+      stopAnim: params.stopAnim
+    });
+  }
+
+  /**
+   * 特定のIDのサウンドを再生する
+   */
+  playSoundById(id: string) {
+    const sound = this.getSoundById(id);
+    if (sound && !sound.sound.isPlaying) {
+      sound.sound.play();
+    }
+  }
+
+  /**
+   * 特定のIDのサウンドを停止する
+   */
+  stopSoundById(id: string) {
+    const sound = this.getSoundById(id);
+    if (sound) {
+      sound.sound.stop();
+    }
+  }
+
+  /**
+   * 特定のIDのサウンドを一時停止する
+   */
+  pauseSoundById(id: string) {
+    const sound = this.getSoundById(id);
+    if (sound) {
+      sound.sound.pause();
+    }
+  }
+  
 
   /**
    * アバターのオブジェクトマネジメントを取得
@@ -643,6 +960,29 @@ export class NinjaEngine {
   }
 
   /**
+   * 特定のIDと新しいPositionからOMのレイヤー番号を更新する
+   */
+  updateLayerNumber(id: string, pos: Vector3) {
+    const layer = this.getLayerNumber(pos);
+    if (layer) {
+      const om = this.oms.find(om => om.id == id);
+      if (om) {
+        om.layerNum = layer;
+      }
+    }
+  }
+
+  /**
+   * アバターのレイヤー番号を更新する
+   */
+  updateAvatarLayerNumber() {
+    const avatar = this.getAvatarObject();
+    if (avatar) {
+      this.updateLayerNumber(avatar.id, avatar.object.position);
+    }
+  }
+
+  /**
    * 全てのオブジェクトを取得する
    */
   getAllObjects(): Object3D[] {
@@ -659,7 +999,6 @@ export class NinjaEngine {
       if (om.object && om.visibleType == "force") return true;
       if (om.object && om.visibleType == "auto") {
         if (om.layerNum !== undefined) {
-
           return true;
         }
       }
@@ -676,19 +1015,16 @@ export class NinjaEngine {
       const nowLayerNum = this.getLayerNumber(this.camera.position);
       const visibleLayers = this.getActiveLayers(nowLayerNum);
       visibleLayers.map((layerNum) => {
-        // this.camera.layers.enable(layerNum);
+        // 見える範囲を表示する
+        this.camera.layers.enable(layerNum);
       });
       const disableLayers = this.possibleLayers;
       disableLayers.map((layerNum) => {
-        // this.camera.layers.disable(layerNum);
+        // みえない範囲を非表示にする
+        this.camera.layers.disable(layerNum);
       });
     }
   }
-
-  /**
-   * 動作オブジェクトの更新
-   */
-
 
   /**
    * フレームによる更新
@@ -697,7 +1033,11 @@ export class NinjaEngine {
    */
   frameUpdate(timeDelta: number, input: IInputMovement) {
     if (this.loadCompleted) {
+      // アバターのレイヤー番号を更新する
+      this.updateAvatarLayerNumber();
+      // 可視上のオブジェクトを更新する
       this.updateViewableObject();
+      // 物理ワールドを更新する
       if (this.world) this.world.step(timeDelta, input);
       // 動態管理をリフレッシュする
       this.moveOrderKeys = [];

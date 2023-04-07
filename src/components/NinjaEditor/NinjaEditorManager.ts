@@ -487,11 +487,19 @@ export class NinjaEditorManager {
   }
 
   /**
-   * 
+   * Three.js標準のObjectを取得
    * @param trig 
    */
   getThreeObjects = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "three");
+    return data;
+  }
+
+  /**
+   * 霧を取得
+   */
+  getFog = (): IObjectManagement => {
+    const data = this.oms.find(om => om.type == "fog");
     return data;
   }
 

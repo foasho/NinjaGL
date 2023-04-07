@@ -149,6 +149,7 @@ export class AvatarController {
     if (sounds && sounds.length > 0) {
       sounds.map((sd) => {
         this.setSound({
+          id: sd.id,
           key: sd.key,
           filePath: sd.filePath,
           volume: sd.volume,
@@ -943,7 +944,6 @@ export class AvatarController {
   async setSound(params: ISetSoundOption) {
     if (!this.sounds.find(s => s.key == params.key)) {
       const listener = new AudioListener();
-      // this.camera.add(listener);
       const sound = new Audio(listener);
       const audioLoader = new AudioLoader();
       audioLoader.load(
@@ -956,6 +956,7 @@ export class AvatarController {
         }
       )
       this.sounds.push({
+        id: params.id,
         key: params.key,
         sound: sound,
         loop: params.loop,

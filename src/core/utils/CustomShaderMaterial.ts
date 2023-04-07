@@ -1,0 +1,6 @@
+
+/**
+ * CustomShaderMaterial
+ */
+export const CustomShaderMaterial = () => {
+}

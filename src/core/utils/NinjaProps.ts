@@ -31,7 +31,7 @@ export interface IInputMovement {
 export interface IObjectManagement {
   id: string;
   name?: string;
-  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light";
+  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light" | "fog";
   filePath?: string;
   visibleType: "auto" | "force" | "none";
   layerNum?: number;
@@ -78,6 +78,7 @@ export interface IScriptManagement {
 }
 
 export interface ISoundProps {
+  id: string;
   key: string;
   sound: Audio;
   loop: boolean;
@@ -89,6 +90,7 @@ export interface ISoundProps {
 }
 
 export interface ISetSoundOption {
+  id: string;
   key: string;
   filePath: string;
   loop: boolean;

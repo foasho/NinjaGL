@@ -24,6 +24,7 @@ export const DebugPlay = () => {
     const objects = editor.getObjects();
     const sky = editor.getSky();
     const lights = editor.getLights();
+    const threes = editor.getThreeObjects();
     if (!avatar || !terrain){
       Swal.fire({
         icon: "error",
@@ -36,6 +37,7 @@ export const DebugPlay = () => {
         avatar: avatar,
         terrain: terrain,
         objects: objects,
+        threes: threes,
         sky: sky,
         lights: lights
       }

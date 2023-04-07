@@ -180,14 +180,67 @@ export class Octree extends Box3 {
         }
       }
     });
-    console.log(geometries);
     this.importGeometories(name, geometries);
     return geometries;
   }
 
+  /**
+   * AABBを物理世界に取り入れる
+   */
+  importAABB(name: string, aabb: Box3) {
+    const corners = [
+      new Vector3(aabb.min.x, aabb.min.y, aabb.min.z),
+      new Vector3(aabb.max.x, aabb.min.y, aabb.min.z),
+      new Vector3(aabb.max.x, aabb.max.y, aabb.min.z),
+      new Vector3(aabb.min.x, aabb.max.y, aabb.min.z),
+      new Vector3(aabb.min.x, aabb.min.y, aabb.max.z),
+      new Vector3(aabb.max.x, aabb.min.y, aabb.max.z),
+      new Vector3(aabb.max.x, aabb.max.y, aabb.max.z),
+      new Vector3(aabb.min.x, aabb.max.y, aabb.max.z),
+    ];
+
+    const indices = [
+      [0, 1, 2, 3, 0, 0, -1],
+      [1, 5, 6, 2, 1, 0, 0],
+      [5, 4, 7, 6, 0, 0, 1],
+      [4, 0, 3, 7, -1, 0, 0],
+      [3, 2, 6, 7, 0, 1, 0],
+      [4, 5, 1, 0, 0, -1, 0],
+    ];
+
+    const createFace = (a, b, c, normal, name) => new Face({ a, b, c, normal: new Vector3(...normal), meshID: name, name });
+
+    for (const [i1, i2, i3, i4, nx, ny, nz] of indices) {
+      const f1 = createFace(corners[i1], corners[i2], corners[i3], [nx, ny, nz], name);
+      const f2 = createFace(corners[i1], corners[i3], corners[i4], [nx, ny, nz], name);
+      this.addFace(f1);
+      this.addFace(f2);
+    }
+  }
+
 
   /**
-   * 3角形を追加する
+   * ---------------------------------------
+   */
+
+  /**
+   * 特定の名前を持つFaceを取得する
+   */
+  getFacesByName(name: string): Face[] {
+    const faces = [];
+    for (const node of this.nodes[0]) {
+      for (const face of node.trianglePool) {
+        if (face.meshID === name) {
+          faces.push(face);
+        }
+      }
+    }
+    return faces;
+  }
+
+
+  /**
+   * Faceを追加する
    * @param face 
    */
   addFace(face: Face) {
@@ -203,6 +256,10 @@ export class Octree extends Box3 {
             tmp = tmp.concat(node.getChildNodes());
           }
         }
+        // ノードにFaceを追加
+        node.trianglePool.push(face);
+        // Faceにノードを設定
+        face.node = node;
       }
       if (tmp.length === 0) {
         break;
@@ -212,6 +269,38 @@ export class Octree extends Box3 {
     }
   }
 
+  /**
+   * Faceを削除する
+   */
+  removeFace(face: Face) {
+    this.nodes.forEach((nodeDepth) => {
+      nodeDepth.forEach((node) => {
+        var newTrianglePool = [];
+        node.trianglePool.forEach((f) => {
+          if (f !== face) {
+            newTrianglePool.push(f);
+          }
+        });
+        node.trianglePool = newTrianglePool;
+      });
+    });
+  }
+
+  /**
+   * Faceの位置を移動します。
+   * @param name Face名
+   * @param translation 移動するベクトル
+   */
+  translateFaceByName(name: string, translation: Vector3) {
+    const faces = this.getFacesByName(name);
+      faces.forEach((face) => {
+        face.a.add(translation);
+        face.b.add(translation);
+        face.c.add(translation);
+    });
+  }
+
+  
 
 
   /**
@@ -251,16 +340,9 @@ export class Octree extends Box3 {
   }
 
   /**
-   * 名前からメッシュの位置を更新する
-   */
-  updateThreeMeshByName(name: string) {
-    // 追って記述する
-  }
-
-  /**
    * 衝突していたNodeを取得
-   * @param sphere 
-   * @param depth 
+   * @param sphere AvatarSphere
+   * @param depth Octreeの深さ
    * @returns 
    */
   getIntersectedNodes(sphere: Sphere, depth: number) {
@@ -290,6 +372,12 @@ export class Octree extends Box3 {
     return intersectedNodes;
   }
 
+
+
+  /**
+   * Faceの存在確認
+   * @param name 
+   */
   existFaces(name: string) {
     let isFind = false;
     this.nodes.forEach((nodeDepth: OctreeNode[]) => {
@@ -304,7 +392,6 @@ export class Octree extends Box3 {
       });
     });
   }
-
 }
 
 /**
@@ -432,6 +519,7 @@ export class Face {
   c: Vector3;
   normal: Vector3;
   meshID: string;
+  node: OctreeNode | null = null;
   constructor(props: IFaceProps) {
     this.name = props.name;
     this.a = props.a.clone();

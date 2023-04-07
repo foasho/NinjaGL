@@ -2,7 +2,6 @@ import { Sphere } from "three";
 import { IInputMovement } from "./NinjaProps";
 import { Octree, uniqTrianglesFromNodes } from "./Octree";
 import { AvatarController } from "./AvatarController";
-import { Box3 } from "three/src/Three";
 
 export class World {
 
@@ -10,7 +9,6 @@ export class World {
   octreePool: Octree[] = [];           // 8本木Box3
   avatarPool: AvatarController[] = []; // アバター
   sphere = new Sphere();               // 自身の物理判定
-  aabbPool: Box3[] = [];               // AABB物理判定
 
   constructor() { }
 
@@ -31,27 +29,6 @@ export class World {
   }
 
   /**
-   * 特定の8本木を削除
-   * ※指定がなければデフォルトのOctreeInitを削除
-   */
-  removeOctreeByName(name: string="OctreeInit"){
-    this.octreePool =this.octreePool.filter(octree => {
-      if (octree.name !== name) return octree;
-    })
-  }
-
-  /**
-   * 特定のAABBを追加
-   */
-  addAABB(aabb: Box3){
-    this.aabbPool.push(aabb);
-  }
-
-  /**
-   * 特定の
-   */
-
-  /**
    * 物理世界の時間をすすめる
    * ※ 物理
    * @param timeDelta 
@@ -68,11 +45,14 @@ export class World {
           chara.center,
           chara.radius + chara.groundPadding
         );
+        // 8本木の中に入っているものを取得する
         var intersectedNodes = octree.getIntersectedNodes(this.sphere, octree.maxDepth);
+        // 重複を削除する
         faces = uniqTrianglesFromNodes(intersectedNodes);
       }
-      // Avatarの更新をする
+      // 重複を削除したものを渡す
       chara.collisionCandidate = faces;
+      // キャラクターの更新
       chara.update(timeDelta, input);
     }
   }
