@@ -5,9 +5,8 @@ import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';
 import { reqApi } from "@/services/ServciceApi";
 import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
-import { Euler, Vector3 } from "three";
+import { Euler, Vector3, MathUtils } from "three";
 import { isNumber } from "@/commons/functional";
-import { degToRad, radToDeg } from "three/src/math/MathUtils";
 import { useTranslation } from "react-i18next";
 
 export const MainViewInspector = () => {
@@ -70,9 +69,9 @@ export const MainViewInspector = () => {
         )
       ) {
         if (!isFocus){
-          refRotX.current.value = radToDeg(rotation.x).toFixed(0).toString();
-          refRotY.current.value = radToDeg(rotation.y).toFixed(0).toString();
-          refRotZ.current.value = radToDeg(rotation.z).toFixed(0).toString();
+          refRotX.current.value = MathUtils.radToDeg(rotation.x).toFixed(0).toString();
+          refRotY.current.value = MathUtils.radToDeg(rotation.y).toFixed(0).toString();
+          refRotZ.current.value = MathUtils.radToDeg(rotation.z).toFixed(0).toString();
         }
       }
       const scale = editor.getScale(id);
@@ -140,21 +139,21 @@ export const MainViewInspector = () => {
     const newRotation: Euler = selectOM.args.rotation.clone();
     if (xyz == "x") {
       if (isNumber(targetValue)){
-        const targetRad = degToRad(targetValue);
+        const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(Number(targetRad), newRotation.y, newRotation.z);
       }
       refRotX.current.value = targetValue;
     }
     else if (xyz == "y") {
       if (isNumber(targetValue)){
-        const targetRad = degToRad(targetValue);
+        const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(newRotation.x, Number(targetRad), newRotation.z);
       }
       refRotY.current.value = targetValue;
     }
     else if (xyz == "z") {
       if (isNumber(targetValue)){
-        const targetRad = degToRad(targetValue);
+        const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(newRotation.x, newRotation.y, Number(targetRad));
       }
       refRotZ.current.value = targetValue;

@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { NinjaEditorContext } from "../NinjaEditorManager"
 import Select from 'react-select';
 import styles from "@/App.module.scss";
-import { clone as SkeletonClone } from "three/examples/jsm/utils/SkeletonUtils";
+import { SkeletonUtils } from "three-stdlib/utils/SkeletonUtils";
 import Swal from "sweetalert2";
 import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
@@ -80,7 +80,7 @@ export const PlayerInspector = () => {
     // 最低限typeが選択されていればOK
     if (playerType) {
       //ファイル名の確認
-      const target = SkeletonClone(playerManager.object);
+      const target = SkeletonUtils.clone(playerManager.object);
       target.animations = playerManager.animations;
       const animMapper: {[key: string]: string} = {};
       if (idleOption){

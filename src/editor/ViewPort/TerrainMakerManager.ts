@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import { Mesh, Object3D, PlaneGeometry, PerspectiveCamera, OrthographicCamera } from "three";
-import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
+import { GLTFExporter, GLTFExporterOptions } from "three-stdlib/exporters/GLTFExporter";
 
 export class TerrainMakerManager {
   type: "create" | "edit" = "create";

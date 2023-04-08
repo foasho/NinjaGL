@@ -2,7 +2,7 @@ import { Environment, OrbitControls, Sky, useHelper } from "@react-three/drei";
 import { Box3, BoxHelper, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";

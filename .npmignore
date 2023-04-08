@@ -2,4 +2,4 @@
 *.glb
 *.gltf
 /pages/*
-/components/*
+/editor/*

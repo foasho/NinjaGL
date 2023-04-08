@@ -15,15 +15,16 @@
     src: url("/fonts/MPLUS1-Light.ttf") format("truetype");
 }
 
-@import "./components/NinjaEditor/NinjaEditor";
-@import "./components/NinjaEditor/ViewPort/ScriptEditor";
-@import "./components/NinjaEditor/ViewPort/ShaderEditor";
-@import "./components/NinjaEditor/Inspector/TerrainInspector";
-@import "./components/NinjaEditor/Inspector/PlayerInspector";
-@import "./components/NinjaEditor/Inspector/MainViewInspector";
-@import "./components/NinjaEditor/Hierarchy/ContentViewer";
-@import "./components/NinjaEditor/Hierarchy/Hierarchy";
-@import "./components/NinjaEditor/Hierarchy/UINavigation";
-@import "./components/NinjaEditor/Common/AppBar";
-@import "./components/NinjaEditor/Dialogs/SelectNewObjectDialog";
-@import "./components/NinjaEditor/Dialogs/LoDViewDialog";
+@import "./editor/NinjaEditor";
+@import "./editor/ViewPort/ScriptEditor";
+@import "./editor/ViewPort/ShaderEditor";
+@import "./editor/Inspector/TerrainInspector";
+@import "./editor/Inspector/PlayerInspector";
+@import "./editor/Inspector/MainViewInspector";
+@import "./editor/Hierarchy/ContentViewer";
+@import "./editor/Hierarchy/Hierarchy";
+@import "./editor/Hierarchy/UINavigation";
+@import "./editor/ViewPort/MainViewUIs/UICanvas";
+@import "./editor/Common/AppBar";
+@import "./editor/Dialogs/SelectNewObjectDialog";
+@import "./editor/Dialogs/LoDViewDialog";

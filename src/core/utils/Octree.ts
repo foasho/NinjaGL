@@ -11,7 +11,7 @@ import {
  * ベース: https://github.com/yomotsu/meshwalk
  */
 import { Vector3 } from "three";
-import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF } from "three-stdlib/loaders/GLTFLoader";
 import { isInstersectSphereBox, isIntersectTriAABB } from "./Intersects";
 
 /**

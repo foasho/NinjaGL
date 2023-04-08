@@ -1,14 +1,13 @@
 import { Environment, GizmoHelper, GizmoViewport, Html, OrbitControls, PivotControls, Sky } from "@react-three/drei";
-import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
+import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { MyLight, MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
-import { generateUUID } from "three/src/math/MathUtils";
 import { Avatar } from "./MainViewItems/Avatar";
 import { MySky } from "./MainViewItems/Sky";
 import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
@@ -82,7 +81,7 @@ export const MainViewer = () => {
                   editor.removeAvatar();
                 }
                 editor.setObjectManagement({
-                  id: generateUUID(),
+                  id: MathUtils.generateUUID(),
                   filePath: filePath,
                   type: "avatar",
                   physics: "aabb",
@@ -118,7 +117,7 @@ export const MainViewer = () => {
               else {
                 // Animationがあればセットする
                 editor.setObjectManagement({
-                  id: generateUUID(),
+                  id: MathUtils.generateUUID(),
                   filePath: filePath,
                   type: "object",
                   physics: "aabb",
@@ -135,7 +134,7 @@ export const MainViewer = () => {
             }
             if (type == "ter") {
               editor.setObjectManagement({
-                id: generateUUID(),
+                id: MathUtils.generateUUID(),
                 filePath: filePath,
                 type: "terrain",
                 physics: "along",
@@ -232,6 +231,7 @@ const SystemHelper = () => {
 }
 
 /**
+ * WASDカメラ視点移動
  * 補助操作
  */
 const SystemControl = () => {

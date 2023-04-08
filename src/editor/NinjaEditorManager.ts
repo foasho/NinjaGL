@@ -3,8 +3,6 @@ import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
 import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
-import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
-import { rtdp } from "@/commons/functional";
 import { NJCFile } from "@/core/utils/NinjaFileControl";
 
 interface ISetObjectManagement {

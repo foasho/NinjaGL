@@ -2,12 +2,9 @@ import { reqApi } from "@/services/ServciceApi";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
+import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils } from "three";
+import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { generateUUID } from "three/src/math/MathUtils";
-import { MdOutlineSystemUpdate } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 
 export const PlayerEditor = () => {
