@@ -13,12 +13,12 @@ import {
   Quaternion,
   MeshPhongMaterial,
   Group,
-  GLBufferAttribute
+  GLBufferAttribute,
+  MathUtils
 } from "three";
-import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
-import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
-import { SimplifyModifier } from "three/examples/jsm/modifiers/SimplifyModifier";
-import { generateUUID } from "three/src/math/MathUtils";
+import { MeshoptDecoder } from "three-stdlib/libs/MeshoptDecoder";
+import { GLTFLoader, GLTF } from "three-stdlib/loaders/GLTFLoader";
+import { SimplifyModifier } from "three-stdlib/modifiers/SimplifyModifier";
 import { IObjectManagement } from "./NinjaProps";
 
 /**
@@ -201,11 +201,11 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
             };
             if (!geometry) {
               geometry = mesh.geometry.clone();
-              geometry.uuid = generateUUID(); //別のUUIDとして生成
+              geometry.uuid = MathUtils.generateUUID(); //別のUUIDとして生成
             }
             else {
               const _geo = mesh.geometry.clone();
-              _geo.uuid = generateUUID();
+              _geo.uuid = MathUtils.generateUUID();
               geometry = mergeBufferGeometry(geometry, _geo);
             }
             node.castShadow = props.shadows ? true : false;
@@ -346,7 +346,7 @@ export interface IAvatarData {
 }
 
 export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarData> => {
-  const key = generateUUID();
+  const key = MathUtils.generateUUID();
   const loader = new GLTFLoader();
   return new Promise((resolve) => {
     loader.load(
@@ -480,7 +480,7 @@ export interface IGLTFLoadProps {
  * @returns 
  */
 export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{ gltf: GLTF }> => {
-  const key = generateUUID();
+  const key = MathUtils.generateUUID();
   return new Promise((resolve) => {
     const loader = new GLTFLoader()
       .setCrossOrigin('anonymous')

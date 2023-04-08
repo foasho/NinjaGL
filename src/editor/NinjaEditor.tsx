@@ -1,10 +1,11 @@
+import "./Locale";
 import styles from "@/App.module.scss";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef } from "react";
+import { MathUtils } from "three";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMaker } from "./ViewPort/TerrainMaker";
@@ -14,8 +15,6 @@ import { HierarchyTree } from "./Hierarchy/HierarchyTree";
 import { BsPlay, BsStop } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
-import { generateUUID } from "three/src/math/MathUtils";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
@@ -51,7 +50,7 @@ export const NinjaEditor = () => {
     if (data.type == "light"){
       editor.setObjectManagement(
         {
-          id: generateUUID(),
+          id: MathUtils.generateUUID(),
           name: `*${data.value}`,
           type: "light",
           args: {
@@ -67,7 +66,7 @@ export const NinjaEditor = () => {
     else if (data.type == "sky"){
       editor.setObjectManagement(
         {
-          id: generateUUID(),
+          id: MathUtils.generateUUID(),
           name: `*${data.value}`,
           type: "sky",
           args: {
@@ -96,7 +95,7 @@ export const NinjaEditor = () => {
       console.log("three", data.type);
       editor.setObjectManagement(
         {
-          id: generateUUID(),
+          id: MathUtils.generateUUID(),
           name: `*${data.value}`,
           type: "three",
           args: {

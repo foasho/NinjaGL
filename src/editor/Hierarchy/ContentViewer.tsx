@@ -8,7 +8,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three-stdlib";
 import { useTranslation } from "react-i18next";
 import { AiFillHome } from "react-icons/ai";
 
@@ -405,6 +405,7 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   // GLTFファイルを読み込む
   return new Promise((resolve) => {
     gltfLoader.load(gltfUrl, (gltf) => {
+      console.log(gltfUrl);
       const model = gltf.scene;
       scene.add(model);
       renderer.render(scene, camera);

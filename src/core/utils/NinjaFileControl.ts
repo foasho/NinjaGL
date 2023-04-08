@@ -1,10 +1,9 @@
-import { NinjaEditorManager } from "@/editor/NinjaEditorManager";
-import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
+import { GLTFExporter, GLTFExporterOptions } from "three-stdlib/exporters/GLTFExporter";
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
 import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
-import { clone as SkeletonClone } from "three/examples/jsm/utils/SkeletonUtils";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { SkeletonUtils } from "three-stdlib/utils/SkeletonUtils";
+import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
 import JSZip from 'jszip';
 
 /**
@@ -63,7 +62,7 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
   for (const om of njcFile.oms) {
     if (om.object) {
       const exportScene = new Scene();
-      const clone = SkeletonClone(om.object);
+      const clone = SkeletonUtils.clone(om.object);
       clone.animations = om.object.animations?om.object.animations: [];
       exportScene.add(clone);
       const glbData = await exportGLTF(exportScene);
@@ -180,7 +179,6 @@ async function exportGLTF(scene: Scene): Promise<ArrayBuffer> {
 
     const options: GLTFExporterOptions = {
       binary: true,
-      maxTextureSize: 4096,
       animations: scene.animations,
       includeCustomExtensions: true,
     };
@@ -194,7 +192,6 @@ async function exportGLTF(scene: Scene): Promise<ArrayBuffer> {
           reject(new Error('GLTFExporter returned a non-binary result.'));
         }
       },
-      (err) => {},
       options
     );
   });
@@ -211,7 +208,6 @@ export const convertObjectToArrayBuffer = async (scene): Promise<ArrayBuffer> =>
     var exporter = new GLTFExporter();
     const options: GLTFExporterOptions = {
       binary: true,
-      maxTextureSize: 4096,
       animations: scene.animations,
       includeCustomExtensions: true
     };
@@ -222,10 +218,7 @@ export const convertObjectToArrayBuffer = async (scene): Promise<ArrayBuffer> =>
           return result;
         }
       },
-      (error: ErrorEvent) => {
-        console.log(`出力中エラー: ${error.toString()}`);
-      }
-      , options);
+      options);
   });
 }
 
@@ -237,7 +230,6 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
     var exporter = new GLTFExporter();
     const options: GLTFExporterOptions = {
       binary: true,
-      maxTextureSize: 4096,
       animations: object.animations,
       includeCustomExtensions: true
     };
@@ -257,10 +249,7 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
           return resolve(saveString(output));
         }
       },
-      (error: ErrorEvent) => {
-        console.log(`出力中エラー: ${error.toString()}`);
-      }
-      , options);
+      options);
   });
 }
 
