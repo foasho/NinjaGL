@@ -25,7 +25,8 @@ export let loadingText: string = "ファイルサイズを取得中...";
 
 export class NinjaEngine {
   jsonData: any = null;
-  layerGrid: number = 8;
+  cameraLayer: number = 1;
+  layerGrid: number = 6;
   layerLength: number = 3;
   possibleLayers: number[] = [];
   nowLoading: boolean = false;
@@ -276,97 +277,57 @@ export class NinjaEngine {
     const keys = Object.keys(jsonData);
     await (async () => {
       for await (const key of keys) {
-        if (key == "avatar" || key == "terrain") {
-          let object: Object3D;
-          if (key == "avatar") {
-            if (jsonData[key].filePath  && jsonData[key].filePath.length > 3){
-              const { gltf } = await AvatarLoader(
-                {
-                  filePath: `${jsonData[key].filePath}`,
-                  height: jsonData[key].args.height,
-                  isCenter: jsonData.avatar.args.isCenter ? jsonData.avatar.args.isCenter : false,
-                  onLoadCallback: this.loadingFileState
-                }
-              );
-              object = gltf.scene;
-              const animations = gltf.animations;
-              const mixer = new AnimationMixer(gltf.scene);
-              const obj: IObjectManagement = {
-                id: jsonData[key].id,
-                type: key,
-                visibleType: "force",
-                object: object,
-                args: jsonData[key].args,
-                physics: "along",
-                animations: animations,
-                mixer: mixer
-              }
-              this.oms.push(obj);
+        if (key == "avatar") {
+          if (jsonData[key].object){
+            const obj: IObjectManagement = {
+              ...jsonData[key], 
             }
-            else if (jsonData[key].object){
-              const obj: IObjectManagement = {
-                ...jsonData[key], 
-              }
-              // パラメータにisCenterがついていれば半径分ずらす
-              if (obj.args.isCenter){
-                console.log("Avatar -> isCenter");
-                AvatarDataSetter({
-                  object: obj.object,
-                  isCenter: true,
-                  height: obj.args.height
-                });
-              }
-              this.oms.push(obj);     
+            // パラメータにisCenterがついていれば半径分ずらす
+            if (obj.args.isCenter){
+              console.log("Avatar -> isCenter");
+              AvatarDataSetter({
+                object: obj.object,
+                isCenter: true,
+                height: obj.args.height
+              });
             }
+            obj.animations = obj.object.animations;
+            const mixer = new AnimationMixer(obj.object);
+            obj.mixer = mixer;
+            obj.layerNum = 0;
+            obj.visibleType = "force";
+            this.oms.push(obj);     
           }
-          else if (key == "terrain") {
-            if (!jsonData[key]) continue;
-            if (jsonData[key].filePath  && jsonData[key].filePath.length > 3){
-              const { gltf } = await TerrainLoader(
-                {
-                  filePath: `${jsonData[key].filePath}`,
-                  onLoadCallback: this.loadingFileState
-                }
-              );
-              object = gltf.scene;
-              // 物理世界に適応させる
-              this.octree.importThreeGLTF(key, gltf);
-              const obj: IObjectManagement = {
-                id: jsonData[key].id,
-                type: key,
-                visibleType: "force",
-                object: object,
-                args: jsonData[key].args,
-                physics: "along"
+        }
+        else if (key == "terrain") {
+          if (!jsonData[key]) continue;
+          let object: Object3D;
+          if (jsonData[key].object){
+            object = jsonData[key].object.clone();
+            object.traverse((node: any) => {
+              if (node.isMesh && node instanceof Mesh){
+                node.updateMatrix();
+                node.geometry.applyMatrix4(node.matrix);
+                // --- 見た目上の回転を正として、回転率を0に戻す
+                node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
+                node.rotation.set(0, 0, 0);
+                // ----
+                node.castShadow = true;
+                node.receiveShadow = true;
               }
-              this.oms.push(obj);
-            }
-            else if (jsonData[key].object){
-              object = jsonData[key].object.clone();
-              object.traverse((node: any) => {
-                if (node.isMesh && node instanceof Mesh){
-                  node.updateMatrix();
-                  node.geometry.applyMatrix4(node.matrix);
-                  // --- 見た目上の回転を正として、回転率を0に戻す
-                  node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
-                  node.rotation.set(0, 0, 0);
-                  // ----
-                  node.castShadow = true;
-                  node.receiveShadow = true;
-                }
-              })
-              // 物理世界に適応させる
-              this.octree.importThreeObj3D(key, object);
-              const obj: IObjectManagement = {
-                id: jsonData[key].id,
-                type: key,
-                visibleType: "force",
-                object: object,
-                args: jsonData[key].args,
-                physics: "along"
-              };
-              this.oms.push(obj);
-            }
+            })
+            // 物理世界に適応させる
+            this.octree.importThreeObj3D(key, object);
+            const obj: IObjectManagement = {
+              id: jsonData[key].id,
+              type: key,
+              visibleType: "force",
+              object: object,
+              args: jsonData[key].args,
+              physics: "along",
+              layerNum: 0
+            };
+            this.oms.push(obj);
           }
         }
         else if (key == "objects") {
@@ -469,7 +430,7 @@ export class NinjaEngine {
         }
       }
 
-    })()
+    })();
     console.log("--- 全設定ファイルの読み込み完了 ---");
     this.nowLoading = false;
     this.loadCompleted = true;
@@ -784,8 +745,6 @@ export class NinjaEngine {
           ))
         );
       }
-      console.log("コントールするあばた");
-      console.log(threeMesh);
       this.avatar = new AvatarController(
         this,
         threeMesh,
@@ -964,7 +923,7 @@ export class NinjaEngine {
    */
   updateLayerNumber(id: string, pos: Vector3) {
     const layer = this.getLayerNumber(pos);
-    if (layer) {
+    if (layer !== undefined) {
       const om = this.oms.find(om => om.id == id);
       if (om) {
         om.layerNum = layer;
@@ -977,8 +936,10 @@ export class NinjaEngine {
    */
   updateAvatarLayerNumber() {
     const avatar = this.getAvatarObject();
-    if (avatar) {
-      this.updateLayerNumber(avatar.id, avatar.object.position);
+    if (avatar && this.avatar) {
+      const id = avatar.id;
+      const nowposition = this.avatar.object.position.clone();
+      this.updateLayerNumber(id, nowposition);
     }
   }
 
@@ -1012,17 +973,28 @@ export class NinjaEngine {
    */
   updateViewableObject() {
     if (this.camera) {
-      const nowLayerNum = this.getLayerNumber(this.camera.position);
-      const visibleLayers = this.getActiveLayers(nowLayerNum);
-      visibleLayers.map((layerNum) => {
-        // 見える範囲を表示する
-        this.camera.layers.enable(layerNum);
-      });
-      const disableLayers = this.possibleLayers;
-      disableLayers.map((layerNum) => {
+      const nowCameraLayer = this.getLayerNumber(this.camera.position);
+      if (nowCameraLayer !== this.cameraLayer){
+        const visibleLayers = this.getActiveLayers(nowCameraLayer);
+        visibleLayers.push(0);
+        if (this.avatar){
+          const nowAvatarLayer = this.getLayerNumber(this.avatar.object.position.clone());
+          visibleLayers.push(nowAvatarLayer);
+        }
+        visibleLayers.map((layerNum) => {
+          // 見える範囲を表示する
+          this.camera.layers.enable(layerNum);
+        });
+        const disableLayers = this.possibleLayers.filter(layerNum => !visibleLayers.includes(layerNum));
+  
         // みえない範囲を非表示にする
-        this.camera.layers.disable(layerNum);
-      });
+        disableLayers.map((layerNum) => {
+            this.camera.layers.disable(layerNum);
+        });
+        this.cameraLayer = nowCameraLayer;
+        console.log("OFFにしました; ", disableLayers);
+      }
+      console.log("現在のカメラレイヤー", nowCameraLayer);
     }
   }
 

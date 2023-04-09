@@ -27,7 +27,7 @@ export const Avatar = () => {
   return (
     <>
       {engine.getAvatarObject() &&
-        <mesh ref={ref}>
+        <mesh ref={ref} layers={engine.getAvatarObject().layerNum}>
           <primitive object={engine.getAvatarObject().object} />
         </mesh>
       }

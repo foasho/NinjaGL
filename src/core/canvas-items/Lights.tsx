@@ -5,8 +5,6 @@ import { useContext } from "react"
 import { MathUtils } from "three";
 import { ShaderMaterial } from "three";
 
-export interface INEnvironmentProps { }
-
 const Light = (props: IObjectManagement) => {
   let light = undefined;
   if (props.args.type == "spot") {
@@ -20,6 +18,7 @@ const Light = (props: IObjectManagement) => {
           castShadow
           color={'#fadcb9'}
           volumetric={false}
+          layers={props.layerNum}
         />
       </>
     )
@@ -32,6 +31,7 @@ const Light = (props: IObjectManagement) => {
           intensity={props.args.intensity ? props.args.intensity : 0.5}
           distance={props.args.distance ? props.args.distance : 25}
           castShadow
+          layers={props.layerNum}
         />
       </>
     )
@@ -42,6 +42,7 @@ const Light = (props: IObjectManagement) => {
         <ambientLight
           color={props.args.color ? props.args.color : '#fadcb9'}
           intensity={props.args.intensity ? props.args.intensity : 0.5}
+          layers={props.layerNum}
         />
       </>
     )
@@ -52,6 +53,7 @@ const Light = (props: IObjectManagement) => {
         <directionalLight
           castShadow
           position={props.args.position? props.args.position: [5, 5, 5]}
+          layers={props.layerNum}
         />
       </>
     )
@@ -64,26 +66,14 @@ const Light = (props: IObjectManagement) => {
   )
 }
 
-export const NEnvironment = () => {
+export const Lights = () => {
   const engine = useContext(NinjaEngineContext);
-  const sky = engine ? engine.getSky() : null;
   const lights = engine ? engine.getLights() : [];
   return (
     <>
       {lights.map((light) => {
         return <Light {...light} />
       })}
-
-      {sky &&
-        <>
-          <Sky
-            distance={sky.args.distance ? sky.args.distance : 450000}
-            sunPosition={sky.args.sunPosition ? sky.args.sunPosition : [0, 1, 0]}
-            inclination={sky.args.inclination ? sky.args.inclination : 0}
-            azimuth={sky.args.azimuth ? sky.args.azimuth : 0}
-          />
-        </>
-      }
     </>
   )
 }

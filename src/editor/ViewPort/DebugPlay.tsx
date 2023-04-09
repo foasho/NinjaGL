@@ -3,7 +3,9 @@ import { NinjaCanvas } from "@/core/NinjaCanvas";
 import { useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
-import { NinjaEditorContext } from "../NinjaEditorManager"
+import { NinjaEditorContext } from "../NinjaEditorManager";
+import { SkeletonUtils } from "three-stdlib";
+import { clone as SkeletonUtilsClone } from "three/examples/jsm/utils/SkeletonUtils";
 
 /**
 * OMとUIから一時的なJSONデータを生成し、
@@ -33,9 +35,16 @@ export const DebugPlay = () => {
       });
     }
     else {
+      // AvatarとTerrainは複製する
+      const _avatar = { ...avatar };
+      const target = SkeletonUtils.clone(_avatar.object);
+      console.log("target: ", target);
+      target.animations = avatar.animations;
+      _avatar.object = target;
+      // _avatar.object = SkeletonUtilsClone(_avatar.object);
       const jsonData = {
         config: config,
-        avatar: avatar,
+        avatar: _avatar,
         terrain: terrain,
         objects: objects,
         threes: threes,

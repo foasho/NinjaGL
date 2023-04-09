@@ -31,7 +31,7 @@ const StaticObject = (props: IStaticObject) => {
     position.copy(props.om.args.rotation);
   }
   return (
-    <mesh position={position} rotation={rotation}>
+    <mesh position={position} rotation={rotation} layers={props.om.layerNum}>
       {props.om.object && <primitive object={props.om.object} />}
     </mesh>
   )

@@ -14,7 +14,7 @@ $mainColor: #BA68C8;
 .editor {
     width: auto;
     font-family: 'MPLUSRegular', sans-serif;
-    
+    overflow: hidden;
     .mainContents {
         display: flex;
         flex-direction: row;
