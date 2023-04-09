@@ -2,9 +2,11 @@ import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
-import { BoxHelper, Euler, Group, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
+import { BoxHelper, Euler, Group, Material, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager"
 import { PivotControls } from "./PivoitControl";
+import { useSnapshot } from "valtio";
+import { globalStore } from "@/editor/Store";
 
 
 export const ThreeObjects = () => {
@@ -35,14 +37,12 @@ interface IThreeObject {
 }
 const ThreeObject = (props: IThreeObject) => {
   const { om } = props;
+  const state = useSnapshot(globalStore);
   const ref = useRef<Mesh>();
   const editor = useContext(NinjaEditorContext);
-  const [visible, setVisible] = useState<boolean>(false);
-  const [helper, setHelper] = useState<boolean>(true);
-  const handleDrag = useRef<boolean>(false);
-  const editorData = useRef<{ focus: boolean; position: Vector3, rotation: Euler }>({ focus: false, position: new Vector3(), rotation: new Euler() });
+  const [helper, setHelper] = useState<boolean>(false);
   const id = props.om.id;
-  const matRef = useRef<MeshStandardMaterial>();
+  const matRef = useRef<Material>();
   let geometry;
   if (om.args.type == "plane") {
     geometry = (<planeBufferGeometry />);
@@ -60,28 +60,12 @@ const ThreeObject = (props: IThreeObject) => {
     geometry = (<capsuleGeometry />);
   }
 
-  const onClick = (e, value: boolean) => {
-    if (value) {
-      // 選択できるのは１つのみにする
-      if (editor.selectedId != id) {
-        editor.selectObject(id);
-        setVisible(true);
-      }
-    }
-    else {
-      if (e.type == "click" && !handleDrag.current) {
-        editor.unSelectObject(id);
-        setVisible(false);
-      }
-    }
-  }
-
   // 操作系
   const onDragStart = () => {
-    handleDrag.current = true;
+    globalStore.pivotControl = true;
   }
   const onDragEnd = () => {
-    handleDrag.current = false;
+    // globalStore.pivotControl = false;
   }
 
   const onDrag = (e: Matrix4) => {
@@ -89,35 +73,30 @@ const ThreeObject = (props: IThreeObject) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    const isFocus = editor.getFocus(id);
-    if (!isFocus) {
-      console.log(position);
+    if (state.pivotControl) {
       editor.setPosition(id, position);
       editor.setScale(id, scale);
       editor.setRotation(id, rotation);
     }
-    handleDrag.current = true;
+    globalStore.pivotControl = true;
   }
 
   useFrame((_, delta) => {
-    const isNowSelect = (editor.getSelectOM() == props.om)?true: false;
-    if (visible != isNowSelect){
-      setVisible(isNowSelect);
-    }
-    editorData.current.focus = editor.getFocus(id);
-    if (editorData.current.focus){
+    if (state.currentId == id && state.editorFocus && ref.current) {
       const pos = editor.getPosition(id);
-      editorData.current.position = new Vector3().copy(pos);
+      ref.current.position.copy(pos);
       const rot = editor.getRotation(id);
-      editorData.current.rotation = new Euler().copy(rot);
+      ref.current.rotation.copy(rot);
       const scale = editor.getScale(id);
-      // editorData.current.scale = new Vector3().copy(rot);
+      // ref.current.scale.copy(scale);
       const material = editor.getMaterial(id);
-      if (material && matRef.current){
-        if (material.type == "color"){
-          matRef.current.color.set(material.value);
-          matRef.current.needsUpdate = true;
-        }
+      console.log("check m");
+      console.log(material);
+      if (material && matRef.current !== material){
+        console.log("set material");
+        console.log(material);
+        matRef.current = new MeshStandardMaterial({ color: 0x00ff00 });
+        matRef.current.needsUpdate = true;
       }
     }
     if (ref.current){
@@ -132,36 +111,33 @@ const ThreeObject = (props: IThreeObject) => {
     }
   });
 
-  useHelper((visible && helper) && ref, BoxHelper);
+  useHelper(((globalStore.currentId == id) && helper) && ref, BoxHelper);
 
   return (
     <>
       {geometry &&
         <>
-          <PivotControls
-            object={visible ? ref : undefined}
-            visible={visible}
-            depthTest={false}
-            lineWidth={2}
-            anchor={[0, 0, 0]}
-            onDrag={(e) => onDrag(e)}
-            onDragStart={() => onDragStart()}
-            onDragEnd={() => onDragEnd()}
-            userData={editorData.current}
-          />
+          {!state.editorFocus &&
+            <PivotControls
+              object={(globalStore.currentId == id) ? ref : undefined}
+              visible={(globalStore.currentId == id)}
+              depthTest={false}
+              lineWidth={2}
+              anchor={[0, 0, 0]}
+              onDrag={(e) => onDrag(e)}
+              onDragStart={() => onDragStart()}
+              onDragEnd={() => onDragEnd()}
+            />
+          }
           <mesh 
             ref={ref}
-            onClick={(e) => {
-              onClick(e, true)
-            }}
-            onPointerMissed={(e) => {
-              onClick(e, false)
-            }}
+            onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+            onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
             castShadow={true}
             receiveShadow={true}
           >
             {geometry}
-            <meshStandardMaterial ref={matRef} />
+            {matRef.current}
           </mesh>
         </>
       }

@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, Vector3, WebGLRenderer } from "three";
+import { AnimationClip, AnimationMixer, Euler, Group, Material, Matrix4, Object3D, Vector3, WebGLRenderer } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
@@ -44,7 +44,6 @@ export class NinjaEditorManager {
    * コンテンツブラウザ
    */
   mode: "position" | "scale" | "rotation" = "position";
-  selectedId: string = null;
   gltfViewerObj: Object3D;
   wireFrameColor = "#43D9D9";
   fileSelect: string = "";
@@ -188,31 +187,15 @@ export class NinjaEditorManager {
     }
   }
 
-    /**
-   * Editor InspectorからFocusされてるか
-   * @param id 
-   * @param focusFlag
-  */
-  setFocus(id: string, focusFlag: boolean) {
-    const target = this.oms.find(om => om.id == id);
-    if (id && target) {
-      target.args.focus = focusFlag;
-    }
-  }
-
   /**
    * マテリアルを設定する
    * @param id 
-   * @param type 
-   * @param value 
+   * @param material Material
    */
-  setMaterial(id: string, type: "color"|"texture", value: any){
+  setMaterial(id: string, material: Material){
     const target = this.oms.find(om => om.id == id);
-    if (target && type == "color"){
-      target.args.material = {
-        type: type,
-        value: value
-      }
+    if (target){
+      target.args.material = material;
     }
   }
 
@@ -318,29 +301,16 @@ export class NinjaEditorManager {
   getScale(id: string) {
     const target = this.oms.find(om => om.id == id);
     if (!target || !target.args.scale) {
-      return new Vector3(0, 0, 0);
+      return new Vector3(1, 1, 1);
     }
     return target.args.scale;
-  }
-
-  /**
-   * 特定の選択中フラグを取得
-   * @param id 
-   * @returns 
-   */
-  getFocus(id: string): boolean{
-    const target = this.oms.find(om => om.id == id);
-    if (target) {
-      return target.args.focus;
-    }
-    return false;
   }
 
   /**
    * 特定のオブジェクトからマテリアルを取得
    * @param id 
    */
-  getMaterial(id: string){
+  getMaterial(id: string): Material{
     const target = this.oms.find(om => om.id == id);
     if (!target || !target.args.material) {
       return null;
@@ -425,17 +395,17 @@ export class NinjaEditorManager {
    * 選択中のOMを取得する
    * @returns 
    */
-  getSelectOM = (): IObjectManagement => {
-    const data = this.oms.find(om => this.selectedId == om.id)
-    return data;
-  }
+  // getSelectOM = (): IObjectManagement => {
+  //   const data = this.oms.find(om => this.selectedId == om.id)
+  //   return data;
+  // }
 
   /**
    * 現在選択中のIDを取得
    * @returns 
    */
-  getSelectId = ():string => {
-    return this.selectedId;
+  getOMById = (id: string):IObjectManagement => {
+    return this.oms.find(om => om.id == id);
   }
 
   /**
@@ -516,24 +486,6 @@ export class NinjaEditorManager {
   getEnabledCamera = (): boolean => {
     return this.camera.enabled;
   };
-
-  /**
-   * 
-   * @param id 
-   * @returns 
-   */
-
-  getObjectById = (id: string): Object3D => {
-    const data = this.oms.find(om => om.id == id);
-    if (!data) return null;
-    return data.object;
-  }
-  selectObject = (id: string) => {
-    this.selectedId = id;
-  }
-  unSelectObject = (id: string) => {
-    this.selectedId = null;
-  }
 
   /**
    * 

@@ -5,6 +5,8 @@ import { Box3, BoxHelper, Euler, Group, LineBasicMaterial, LineSegments, Matrix4
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
+import { useSnapshot } from "valtio";
+import { globalStore } from "@/editor/Store";
 
 
 /**
@@ -48,6 +50,7 @@ interface IStaticObject {
  * @returns 
  */
 const StaticObject = (props: IStaticObject) => {
+  const state = useSnapshot(globalStore);
   const itemsRef = useRef([]);
   const object: Object3D = props.om.object;
   object.traverse((node: any) => {
@@ -58,7 +61,6 @@ const StaticObject = (props: IStaticObject) => {
   })
   const ref = useRef<Group|Object3D>();
   const editor = useContext(NinjaEditorContext);
-  const [visible, setVisible] = useState<boolean>(false);
   const handleDrag = useRef<boolean>(false);
   const editorData = useRef<{ 
     focus: boolean; 
@@ -86,27 +88,10 @@ const StaticObject = (props: IStaticObject) => {
     len = (size.max.z - size.min.z);
   }
 
-  const onClick = (e, value: boolean) => {
-    if (value) {
-      // 選択できるのは１つのみにする
-      if (editor.selectedId != id) {
-        editor.selectObject(id);
-        setVisible(true);
-      }
-    }
-    else {
-      if (e.type == "click" && !handleDrag.current) {
-        editor.unSelectObject(id);
-        setVisible(false);
-      }
-    }
-  }
-
   const onDragStart = () => {
-    handleDrag.current = true;
+    globalStore.editorFocus = true;
   }
   const onDragEnd = () => {
-    handleDrag.current = false;
   }
 
   const onDrag = (e: Matrix4) => {
@@ -114,14 +99,13 @@ const StaticObject = (props: IStaticObject) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    const isFocus = editor.getFocus(id);
-    if (!isFocus){
+    if (state.pivotControl){
       console.log(position);
       editor.setPosition(id, position);
       editor.setScale(id, scale);
       editor.setRotation(id, rotation);
     }
-    handleDrag.current = true;
+    globalStore.editorFocus = true;
   }
 
   const lineSegs = [];
@@ -140,48 +124,40 @@ const StaticObject = (props: IStaticObject) => {
       }
     });
   }
-  else if (props.om.physics == "aabb" && visible){
+  else if (props.om.physics == "aabb" && (globalStore.currentId == id)){
   }
-  useHelper((visible && props.om.physics != "none") && ref, BoxHelper);
+  useHelper(((globalStore.currentId == id) && props.om.physics != "none") && ref, BoxHelper);
 
   useFrame((_, delta) => {
-    const isNowSelect = (editor.getSelectOM() == props.om)?true: false;
-    if (visible != isNowSelect){
-      setVisible(isNowSelect);
-    }
-    editorData.current.focus = editor.getFocus(id);
-    if (editorData.current.focus){
+    if (state.editorFocus && ref.current){
       const pos = editor.getPosition(id);
-      editorData.current.position = new Vector3().copy(pos);
+      ref.current.position.copy(pos);
       const rot = editor.getRotation(id);
-      editorData.current.rotation = new Euler().copy(rot);
+      ref.current.rotation.copy(rot);
       const sca = editor.getScale(id);
-      editorData.current.scale = new Vector3().copy(sca);
+      ref.current.scale.copy(sca);
     }
   });
 
   return (
     <>
-      <PivotControls 
-        object={visible ? ref : undefined}
-        visible={visible}
-        depthTest={false}
-        lineWidth={2}
-        anchor={[0, 0, 0]}
-        onDrag={(e) => onDrag(e)}
-        onDragStart={() => onDragStart()}
-        onDragEnd={() => onDragEnd()}
-        userData={editorData.current}
-      />
+      {!state.editorFocus &&
+        <PivotControls 
+          object={(globalStore.currentId == id) ? ref : undefined}
+          visible={(globalStore.currentId == id)}
+          depthTest={false}
+          lineWidth={2}
+          anchor={[0, 0, 0]}
+          onDrag={(e) => onDrag(e)}
+          onDragStart={() => onDragStart()}
+          onDragEnd={() => onDragEnd()}
+        />
+      }
       <primitive
         object={object}
         ref={ref}
-        onClick={(e) => {
-          onClick(e, true)
-        }}
-        onPointerMissed={(e) => {
-          onClick(e, false)
-        }}
+        onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+        onPointerMissed={(e) => (e.type === 'click' && !handleDrag.current) && (globalStore.init())}
       />
       {props.om.physics == "along" &&
         <>

@@ -4,10 +4,11 @@ import {
   useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useState, useRef } from "react";
-import { BoxHelper, DirectionalLight, DirectionalLightHelper, DoubleSide, Euler, Mesh, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
+import { BoxHelper, DirectionalLight, DirectionalLightHelper, DoubleSide, Euler, Material, Mesh, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { PivotControls } from "./PivoitControl";
-
+import { useSnapshot } from "valtio";
+import { globalStore } from "@/editor/Store";
 
 export const MyLights = () => {
   const editor = useContext(NinjaEditorContext);
@@ -33,8 +34,8 @@ interface ILightProps {
   om       : IObjectManagement;
 }
 export const MyLight = (prop: ILightProps) => {
+  const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const [visible, setVisible] = useState<boolean>(false);
   const handleDrag = useRef<boolean>(false);
   const ref = useRef<any>();
   const catchRef = useRef<Mesh>();
@@ -50,26 +51,10 @@ export const MyLight = (prop: ILightProps) => {
     useHelper(ref, PointLightHelper);
   }
 
-  const onClick = (e, value: boolean) => {
-    e.stopPropagation();
-    if (value) {
-      // 選択できるのは１つのみにする
-      if (editor.selectedId != id) {
-        editor.selectObject(id);
-      }
-    }
-    else {
-      if (e.type == "click" && !handleDrag.current) {
-        editor.unSelectObject(id);
-      }
-    }
-  }
-
   const onDragStart = () => {
-    handleDrag.current = true;
+    globalStore.pivotControl = true;
   }
   const onDragEnd = () => {
-    handleDrag.current = false;
   }
 
   const onDrag = (e) => {
@@ -80,8 +65,7 @@ export const MyLight = (prop: ILightProps) => {
     editor.setPosition(id, position);
     editor.setScale(id, scale);
     editor.setRotation(id, rotation);
-    handleDrag.current = true;
-    // ref.current.loolAt(1, 1, 1);
+    globalStore.pivotControl = true;
   }
 
   useEffect(() => {
@@ -97,33 +81,30 @@ export const MyLight = (prop: ILightProps) => {
   }, []);
 
   useFrame((_, delta) => {
-    if ( visible != (editor.getSelectId() == id)){
-      setVisible(editor.getSelectId() == id);
-    }
+    // キャッチ用Boxを同期させる
     if (catchRef.current && ref.current){
       catchRef.current.position.copy(ref.current.position.clone());
       catchRef.current.rotation.copy(ref.current.rotation.clone());
       catchRef.current.scale.copy(ref.current.scale.clone());
     }
+
     if (ref.current){
-      const isFocus = editor.getFocus(id);
-      if (isFocus){
-        // const pos = editor.getPosition(id);
-        // editorData.current.position = new Vector3().copy(pos);
-        // const rot = editor.getRotation(id);
-        // editorData.current.rotation = new Euler().copy(rot);
-        // const sca = editor.getScale(id);
-        // editorData.current.scale = new Vector3().copy(sca);
-      }
-      else {
-        const castShadow = editor.getCastShadow(id);
-        const receiveShadow = editor.getreceiveShadow(id);
-        ref.current.castShadow = castShadow;
-        ref.current.receiveShadow = receiveShadow;
-        const material = editor.getMaterial(id);
-        if (material && material.type == "color"){
-          ref.current.color.set(material.value);
+      if (state.editorFocus){
+        const color = ref.current?.color;
+        if (color && color.isColor){
+          const meshStandardMaterial = ref.current? ref.current.material: new Material();
+          meshStandardMaterial.color.set(color);
+          editor.setMaterial(id, meshStandardMaterial);
         }
+      }
+      const castShadow = editor.getCastShadow(id);
+      const receiveShadow = editor.getreceiveShadow(id);
+      ref.current.castShadow = castShadow;
+      ref.current.receiveShadow = receiveShadow;
+      const material = editor.getMaterial(id);
+      if (material instanceof Material){
+        ref.current.material = material;
+        ref.current.needsUpdate = true;
       }
     }
   })
@@ -132,24 +113,26 @@ export const MyLight = (prop: ILightProps) => {
       <>
         {om.args.type == "spot" &&
           <>
-            <PivotControls
-                scale={5}
-                visible={visible}
-                disableAxes={!visible}
-                disableSliders={!visible}
-                disableRotations={!visible}
-                onDrag={(e) => onDrag(e)}
-                onDragStart={() => onDragStart()}
-                onDragEnd={() => onDragEnd()}
-                object={visible ? ref : undefined}
-            />
+            {!state.editorFocus &&
+              <PivotControls
+                  scale={5}
+                  visible={(id==state.currentId)}
+                  disableAxes={!(id==state.currentId)}
+                  disableSliders={!(id==state.currentId)}
+                  disableRotations={!(id==state.currentId)}
+                  onDrag={(e) => onDrag(e)}
+                  onDragStart={() => onDragStart()}
+                  onDragEnd={() => onDragEnd()}
+                  object={(id==state.currentId) ? ref : undefined}
+              />
+            }
             <spotLight 
               ref={ref}
               castShadow
             />
             <mesh 
-              onClick={(e) => onClick(e, true)}
-              onPointerMissed={(e) => onClick(e, false)}
+              onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+              onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
               ref={catchRef}
             >
               <boxBufferGeometry />
@@ -161,22 +144,22 @@ export const MyLight = (prop: ILightProps) => {
           <>
               <PivotControls
                 scale={5}
-                visible={visible}
-                disableAxes={!visible}
-                disableSliders={!visible}
-                disableRotations={!visible}
+                visible={(id==state.currentId)}
+                disableAxes={!(id==state.currentId)}
+                disableSliders={!(id==state.currentId)}
+                disableRotations={!(id==state.currentId)}
                 onDrag={(e) => onDrag(e)}
                 onDragStart={() => onDragStart()}
                 onDragEnd={() => onDragEnd()}
-                object={visible ? ref : undefined}
+                object={(id==state.currentId) ? ref : undefined}
             />
               <directionalLight 
                 ref={ref}
                 castShadow
               />
               <mesh 
-                onClick={(e) => onClick(e, true)}
-                onPointerMissed={(e) => onClick(e, false)}
+                onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+                onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
                 ref={catchRef}
                 onContextMenu={(e) => {e.stopPropagation()}}
               >
@@ -189,14 +172,14 @@ export const MyLight = (prop: ILightProps) => {
           <>
             <PivotControls
                 scale={5}
-                visible={visible}
-                disableAxes={!visible}
-                disableSliders={!visible}
-                disableRotations={!visible}
+                visible={(id==state.currentId)}
+                disableAxes={!(id==state.currentId)}
+                disableSliders={!(id==state.currentId)}
+                disableRotations={!(id==state.currentId)}
                 onDrag={(e) => onDrag(e)}
                 onDragStart={() => onDragStart()}
                 onDragEnd={() => onDragEnd()}
-                object={visible ? ref : undefined}
+                object={(id==state.currentId) ? ref : undefined}
             />
             <pointLight
               ref={ref}
@@ -204,8 +187,8 @@ export const MyLight = (prop: ILightProps) => {
               castShadow
             />
             <mesh 
-              onClick={(e) => onClick(e, true)}
-              onPointerMissed={(e) => onClick(e, false)}
+              onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+              onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
               ref={catchRef}
             >
               <octahedronGeometry args={[1]} />

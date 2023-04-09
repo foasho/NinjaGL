@@ -152,22 +152,6 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
     const translation = React.useRef<[number, number, number]>([0, 0, 0])
     const [focusHandler, setFocusHandler] = React.useState<boolean>(false);
 
-    const didMountSetup = () => {
-      if (object) {
-        const target = resolveObject(object)
-        if (target) {
-          // An object has been attached
-          const pivot = ref.current;
-          target.updateWorldMatrix(true, true)
-          pivot.matrix = target.matrix.clone()
-        }
-      }
-    }
-
-    const targetUpdate = () => {
-      
-    }
-
     React.useEffect(() => {
       if (object) {
         const target = resolveObject(object)
@@ -188,34 +172,6 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
         }
       }
     }, [object])
-
-    const anchorSetup = () => {
-      if (anchor) {
-        const target = resolveObject(object, childrenRef.current)
-        if (target) {
-          target.updateWorldMatrix(true, true)
-          mPInv.copy(target.matrixWorld).invert()
-          bb.makeEmpty()
-          target.traverse((obj: any) => {
-            if (!obj.geometry) return
-            if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox()
-            mL.copy(obj.matrixWorld).premultiply(mPInv)
-            bbObj.copy(obj.geometry.boundingBox)
-            bbObj.applyMatrix4(mL)
-            bb.union(bbObj)
-          })
-          vCenter.copy(bb.max).add(bb.min).multiplyScalar(0.5)
-          vSize.copy(bb.max).sub(bb.min).multiplyScalar(0.5)
-          vAnchorOffset
-            .copy(vSize)
-            .multiply(new THREE.Vector3(...anchor))
-            .add(vCenter)
-          vPosition.set(...offset).add(vAnchorOffset)
-          gizmoRef.current.position.copy(vPosition)
-          invalidate()
-        }
-      }
-    }
 
     React.useLayoutEffect(() => {
       if (anchor) {
@@ -314,65 +270,15 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
     const vec = new THREE.Vector3()
     useFrame((state) => {
       if (fixed) {
-        if (userData && userData.focus){}
-        else {
-          const sf = calculateScaleFactor(gizmoRef.current.getWorldPosition(vec), scale, state.camera, state.size)
-          if (gizmoRef.current) {
-            if (gizmoRef.current?.scale.x !== sf || gizmoRef.current?.scale.y !== sf || gizmoRef.current?.scale.z !== sf) {
-              gizmoRef.current.scale.setScalar(sf)
-              state.invalidate()
-            }
+        const sf = calculateScaleFactor(gizmoRef.current.getWorldPosition(vec), scale, state.camera, state.size)
+        if (gizmoRef.current) {
+          if (gizmoRef.current?.scale.x !== sf || gizmoRef.current?.scale.y !== sf || gizmoRef.current?.scale.z !== sf) {
+            gizmoRef.current.scale.setScalar(sf)
+            state.invalidate()
           }
         }
       }
-      // userDataがあれば、positionを変更させる
-      if (userData && focusHandler){
-        if (userData.position){
-          const target = resolveObject(object);
-          if (target){
-            const newMatrix = target.matrix.clone();
-            newMatrix.setPosition(userData.position.clone());
-            target.matrix.copy(newMatrix);
-            const changedPos = new Vector3().setFromMatrixPosition(newMatrix).sub(target.position);
-            // gizmoの位置もaddする(GizmoはOFFにする)
-            if (gizmoRef.current) {
-              const currentWorldPosition = new Vector3();
-              gizmoRef.current.getWorldPosition(currentWorldPosition);
-              const targetWorldPosition = userData.position.clone();
-              const newLocalPosition = targetWorldPosition.clone();
-              gizmoRef.current.parent.worldToLocal(newLocalPosition);
-              gizmoRef.current.position.copy(newLocalPosition);
-              gizmoRef.current.updateMatrix();
-              gizmoRef.current.updateMatrixWorld(true);
-              // state.invalidate()
-            }
-              
-          }
-        }
-        if (userData.rotation){
-          const target = resolveObject(object);
-          if (target){
-            const newMatrix: Matrix4 = target.matrix.clone();
-            const rotMatrix = newMatrix.makeRotationFromEuler(userData.rotation);
-            rotMatrix.setPosition(target.position);
-            target.matrix.copy(rotMatrix);
-            // gizmoの位置もaddする
-            if (gizmoRef.current){
-              gizmoRef.current.rotation.copy(userData.rotation);
-            }
-          }
-        }
-      }
-      if (userData && focusHandler != userData.focus){
-        if (focusHandler){
-          // 操作してた座標を反映させる
-        }
-        setFocusHandler(userData.focus);
-        // 
-        console.log("切り替わったよん");
-        // didMountSetup();
-        // anchorSetup();
-      }
+
     })
 
 

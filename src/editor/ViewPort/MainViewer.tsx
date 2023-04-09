@@ -178,7 +178,7 @@ export const MainViewer = () => {
   return (
     <div className={styles.mainView}>
       <Canvas
-        style={{ background: "black", display: showCanvas? "block": "none" }}
+        style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
         camera={{ position: [-3, 3, -6] }}
         onDrop={handleDrop}

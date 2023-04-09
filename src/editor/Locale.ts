@@ -101,6 +101,8 @@ const resources = {
       changeProjectName: "Change Project Name",
       inputProjectName: "Input Project Name",
       touchController: "Touch Controller",
+      aabb: "AABB",
+      along: "Along Shape",
     }
   },
   ja: {
@@ -206,6 +208,8 @@ const resources = {
       changeProjectName: "プロジェクト名を変更",
       inputProjectName: "プロジェクト名を入力",
       touchController: "タッチコントローラ",
+      aabb: "AABB",
+      along: "形状に沿う",
     }
   }
 }

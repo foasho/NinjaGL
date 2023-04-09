@@ -7,11 +7,15 @@ import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
 import { MdTerrain } from "react-icons/md";
 import Swal from "sweetalert2";
 import { NinjaEditorContext } from "../NinjaEditorManager";
+import { useSnapshot } from "valtio";
+import { globalStore } from "@/editor/Store";
 
 export const HierarchyTree = () => {
   const editor = useContext(NinjaEditorContext);
   const [oms, setOMs] = useState<IObjectManagement[]>([]);
-  const [selectOM, setSelectOM] = useState<IObjectManagement>();
+  const state = useSnapshot(globalStore);
+  const id = state.currentId;
+  const selectOM = editor.getOMById(id);
   const { t } = useTranslation();
   
   useEffect(() => {
@@ -24,10 +28,6 @@ export const HierarchyTree = () => {
   const myFrame = () => {
     if (oms.length !== editor.getObjectManagements().length) {
       setOMs([...editor.getObjectManagements()]);
-    }
-    // selectOMが変わったら再レンダ
-    if (selectOM !== editor.getSelectOM()){
-      setSelectOM(editor.getSelectOM());
     }
   }
 
@@ -59,6 +59,7 @@ interface ITreeItem {
   isSelect: boolean;
 }
 const TreeItem = (prop: ITreeItem) => {
+  const state = useSnapshot(globalStore);
   const ref = useRef<HTMLDivElement>();
   const editor = useContext(NinjaEditorContext);
   const [isSelect, setIsSelect] = useState<boolean>(true);
@@ -134,10 +135,10 @@ const TreeItem = (prop: ITreeItem) => {
    */
   const onSelectObject = () => {
     if (ref.current.classList.contains(styles.select)){
-      editor.unSelectObject(prop.om.id);
+      state.init();
     }
     else {
-      editor.selectObject(prop.om.id);
+      globalStore.currentId = prop.om.id;
     }
   }
 

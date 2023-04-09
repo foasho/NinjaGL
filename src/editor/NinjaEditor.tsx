@@ -3,7 +3,7 @@ import styles from "@/App.module.scss";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, createContext } from "react";
 import { MathUtils } from "three";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
@@ -23,9 +23,14 @@ import { useTranslation } from "react-i18next";
 import { NJCFile, saveNJCFile } from "@/core/utils/NinjaFileControl";
 import { loadNJCFile } from "@/core/utils/NinjaFileControl";
 import { BiEditAlt } from "react-icons/bi";
+import { useSnapshot } from "valtio";
+import { globalStore } from "./Store";
 
-
+/**
+ * NinjaEngineメインコンポネント
+ */
 export const NinjaEditor = () => {
+  const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
   const [projectName, setProjectName] = useState<string>(null);
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
@@ -392,9 +397,6 @@ export const NinjaEditor = () => {
               </div>
             </div>
             <div className={styles.viewport}>
-              {/* <div style={{ display: viewSelect == "mainview" ? "block": "none", height: "100%" }}>
-                <MainViewer />
-              </div> */}
               {viewSelect == "mainview" &&
                <>
                 <MainViewer />
@@ -428,8 +430,13 @@ export const NinjaEditor = () => {
             </div>
 
           </div>
-          <div className={styles.inspector}>
-            {viewSelect == "mainview" &&
+          <div 
+            className={styles.inspector}
+            style={{
+              display: ((viewSelect == "mainview" && !state.currentId))?"none": "block",
+            }}
+          >
+            {(viewSelect == "mainview") &&
               <>
                 <MainViewInspector />
               </>

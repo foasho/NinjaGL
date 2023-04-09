@@ -5,100 +5,67 @@ import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';
 import { reqApi } from "@/services/ServciceApi";
 import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
-import { Euler, Vector3, MathUtils } from "three";
+import { Euler, Vector3, MathUtils, MeshStandardMaterial } from "three";
 import { isNumber } from "@/commons/functional";
 import { useTranslation } from "react-i18next";
+import { useSnapshot } from "valtio";
+import { globalStore } from "@/editor/Store";
 
 export const MainViewInspector = () => {
+  const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const refPosX = useRef<HTMLInputElement>();
-  const refPosY = useRef<HTMLInputElement>();
-  const refPosZ = useRef<HTMLInputElement>();
-  const refRotX = useRef<HTMLInputElement>();
-  const refRotY = useRef<HTMLInputElement>();
-  const refRotZ = useRef<HTMLInputElement>();
-  const refScaX = useRef<HTMLInputElement>();
-  const refScaY = useRef<HTMLInputElement>();
-  const refScaZ = useRef<HTMLInputElement>();
-  const [isFocus, setIsFocus] = useState<boolean>();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
   const [color, setColor] = useState<string>();
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [castShadow, setCastShadow] = useState<boolean>(true);
   const [receiveShadow, setreceiveShadow] = useState<boolean>(true);
-  const [helper, setHelper] = useState<boolean>(true);
+  const [helper, setHelper] = useState<boolean>(false);
   const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
-
-  const [selectOM, setSelectOM] = useState<IObjectManagement>(null);
-  const id = selectOM? selectOM.id: null;
+  const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"tone"|"shader"; label: string;}>();
+  const id = state.currentId;
+  const selectOM = editor.getOMById(id);
+  const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
+  const [rotation, setRotation] = useState<Euler>(selectOM?.object?.rotation);
+  const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
   const { t } = useTranslation();
-
-  editor.setFocus(id, isFocus);
 
   useEffect(() => {
     const interval = setInterval(() => {
       myFrame();
     }, 1000 / 10);
     return () => clearInterval(interval);
-  }, [selectOM, isFocus]);
+  }, [id, globalStore.editorFocus, globalStore.pivotControl, position, rotation, scale, color]);
 
   const myFrame = () => {
-    if (id){
-      const position = editor.getPosition(id);
-      if (
-        position && 
-        (
-          selectOM.type == "object" || 
-          selectOM.type == "light" ||
-          selectOM.type == "three"
-        )
-      ) {
-        if (!isFocus){
-          refPosX.current.value = position.x.toFixed(2).toString();
-          refPosY.current.value = position.y.toFixed(2).toString();
-          refPosZ.current.value = position.z.toFixed(2).toString();
-        }
+    if (id && !globalStore.editorFocus){
+      if (state.pivotControl){
+        const position = editor.getPosition(id);
+        position.x = parseFloat(position.x.toFixed(2));
+        position.y = parseFloat(position.y.toFixed(2));
+        position.z = parseFloat(position.z.toFixed(2));
+        setPosition(position);
+    
+        const rotation = editor.getRotation(id);
+        rotation.x = parseFloat(rotation.x.toFixed(2));
+        rotation.y = parseFloat(rotation.y.toFixed(2));
+        rotation.z = parseFloat(rotation.z.toFixed(2));
+        setRotation(rotation);
+    
+        const scale = editor.getScale(id);
+        scale.x = parseFloat(scale.x.toFixed(2));
+        scale.y = parseFloat(scale.y.toFixed(2));
+        scale.z = parseFloat(scale.z.toFixed(2));
+        setScale(scale);
       }
-      const rotation = editor.getRotation(id);
-      if (
-        rotation && (
-          selectOM.type == "object" || 
-          selectOM.type == "light" ||
-          selectOM.type == "three"
-        )
-      ) {
-        if (!isFocus){
-          refRotX.current.value = MathUtils.radToDeg(rotation.x).toFixed(0).toString();
-          refRotY.current.value = MathUtils.radToDeg(rotation.y).toFixed(0).toString();
-          refRotZ.current.value = MathUtils.radToDeg(rotation.z).toFixed(0).toString();
-        }
+
+      const material = editor.getMaterial(id);
+      if (material && material instanceof MeshStandardMaterial){
+        console.log("マテリアルかえんで");
+        setColor(material.color.getHexString());
       }
-      const scale = editor.getScale(id);
-      if (scale && (
-        selectOM.type == "object"|| 
-        selectOM.type == "light" ||
-        selectOM.type == "three"
-      )) {
-        if (!isFocus){
-          refScaX.current.value = scale.x.toFixed(2).toString();
-          refScaY.current.value = scale.y.toFixed(2).toString();
-          refScaZ.current.value = scale.z.toFixed(2).toString();
-        }
-      }
-    }
-    if (selectOM != editor.getSelectOM()){
-      setSelectOM(editor.getSelectOM());
     }
   }
-
-  /**
-   * 初期設定
-   */
-  useEffect(() => {
-
-  }, []);
-
   /**
    * 位置変更　Inspector -> Object
    * @param e 
@@ -106,27 +73,23 @@ export const MainViewInspector = () => {
    */
   const changePosition = (e, xyz: "x" | "y" | "z") => { 
     const targetValue = e.target.value;
-    const newPosition: Vector3 = selectOM.args.position.clone();
+    const newPosition: Vector3 = selectOM.args.position? selectOM.args.position.clone(): new Vector3();
     if (xyz == "x") {
       if (isNumber(targetValue)){
         newPosition.setX(Number(targetValue));
       }
-      refPosX.current.value = targetValue;
     }
     else if (xyz == "y") {
       if (isNumber(targetValue)){
         newPosition.setY(Number(targetValue));
       }
-      refPosX.current.value = targetValue;
     }
     else if (xyz == "z") {
       if (isNumber(targetValue)){
         newPosition.setZ(Number(targetValue));
       }
-      refPosX.current.value = targetValue;
     }
     editor.setPosition(id, newPosition);
-    // 変更後1秒
   }
 
   /**
@@ -136,35 +99,57 @@ export const MainViewInspector = () => {
    */
   const changeRotation = (e, xyz: "x" | "y" | "z") => { 
     const targetValue = e.target.value;
-    const newRotation: Euler = selectOM.args.rotation.clone();
+    const newRotation: Euler = selectOM.args.rotation? selectOM.args.ratation.clone(): new Euler();
     if (xyz == "x") {
       if (isNumber(targetValue)){
         const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(Number(targetRad), newRotation.y, newRotation.z);
       }
-      refRotX.current.value = targetValue;
     }
     else if (xyz == "y") {
       if (isNumber(targetValue)){
         const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(newRotation.x, Number(targetRad), newRotation.z);
       }
-      refRotY.current.value = targetValue;
     }
     else if (xyz == "z") {
       if (isNumber(targetValue)){
         const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(newRotation.x, newRotation.y, Number(targetRad));
       }
-      refRotZ.current.value = targetValue;
     }
     editor.setRotation(id, newRotation);
   }
 
+  /**
+   * 拡大縮小変更　Inspector -> Object
+   */
+  const changeScale = (e, xyz: "x" | "y" | "z") => {
+    const targetValue = e.target.value;
+    const newScale: Vector3 = selectOM.args.scale? selectOM.args.scale.clone(): new Vector3();
+    if (xyz == "x") {
+      if (isNumber(targetValue)){
+        newScale.setX(Number(targetValue));
+      }
+    }
+    else if (xyz == "y") {
+      if (isNumber(targetValue)){
+        newScale.setY(Number(targetValue));
+      }
+    }
+    else if (xyz == "z") {
+      if (isNumber(targetValue)){
+        newScale.setZ(Number(targetValue));
+      }
+    }
+    editor.setScale(id, newScale);
+  }
+
+
   // 物理判定選択肢
   const physicsOptions = [
-    { value: "aabb", label: "無回転BOX(AABB)" },
-    { value: "along", label: "形状に従う" }
+    { value: "aabb", label: t("aabb") },
+    { value: "along", label: t("along") }
   ];
 
   // 描画種別の選択肢
@@ -174,12 +159,23 @@ export const MainViewInspector = () => {
     { value: "none", label: t("visibleNone") }
   ];
 
+  // マテリアル種別の選択肢
+  const materialOptions: {value: "standard"|"phong"|"tone"|"shader", label: string}[] = [
+    { value: "standard", label: t("StandardMaterial") },
+    { value: "phong", label: t("PhongMaterial") },
+    { value: "tone", label: t("ToneMaterial") },
+    { value: "shader", label: t("ShaderMaterial") }
+  ];
+
   /**
    * 色の変更
    */
   const changeMaterial = (type: "color" | "texture", value: any) => {
     if (type == "color" && value){
-      editor.setMaterial(id, type, value);
+      const meshStandardMaterial = new MeshStandardMaterial();
+      meshStandardMaterial.color.set(value);
+      editor.setMaterial(id, meshStandardMaterial);
+      console.log("check color");
       setColor(value);
     }
   }
@@ -213,7 +209,6 @@ export const MainViewInspector = () => {
    * Lodを確認する
    */
   const onLoDView = async () => {
-    console.log(selectOM.filePath);
     if (selectOM.filePath && selectOM.filePath.length > 3){
       const data = await showLoDViewDialog(selectOM.filePath);
     }
@@ -251,14 +246,6 @@ export const MainViewInspector = () => {
     setVisibleType(selectVisibleType);
   }
 
-  /**
-   * Focusの切り替え
-   */
-  const focusChange = (flag: boolean) => {
-    editor.setFocus(id, flag);
-    setIsFocus(flag);
-  }
-
   return (
     <>
     <div className={styles.mainInspector}>
@@ -285,28 +272,64 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                ref={refPosX} 
+                value={position?.x}
                 type="text" 
                 placeholder="0" 
-                onInput={(e) => changePosition(e, "x")} 
-                onFocus={() => focusChange(true)}
-                onBlur={() => focusChange(false)}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    changePosition({ target: { value: inputValue } }, "x");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newPosition = position.clone();
+                    newPosition.setX(Number(e.target.value));
+                    setPosition(newPosition);
+                  }
+                }} 
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                ref={refPosY} 
+                value={position?.y}
                 type="text" 
                 placeholder="0" 
-                onChange={(e) => changePosition(e, "y")} 
-                onFocus={() => focusChange(true)}
-                onBlur={() => focusChange(false)}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    changePosition({ target: { value: inputValue } }, "y");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newPosition = position.clone();
+                    newPosition.setY(Number(e.target.value));
+                    setPosition(newPosition);
+                  }
+                }} 
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                ref={refPosZ} 
+                value={position?.z}
                 type="text" 
                 placeholder="0" 
-                onChange={(e) => changePosition(e, "z")} 
-                onFocus={() => focusChange(true)}
-                onBlur={() => focusChange(false)}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    changePosition({ target: { value: inputValue } }, "z");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newPosition = position.clone();
+                    newPosition.setZ(Number(e.target.value));
+                    setPosition(newPosition);
+                  }
+                }} 
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
             </div>
           </div>
@@ -321,28 +344,60 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                ref={refRotX} 
+                value={rotation?.x}
                 type="text" 
                 placeholder="0" 
-                onInput={(e) => changeRotation(e, "x")} 
-                onFocus={() => focusChange(true)}
-                onBlur={() => focusChange(false)}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(1);
+                    changeRotation({ target: { value: inputValue } }, "x");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newRotation = rotation.clone();
+                    newRotation.set(e.target.value, rotation.y, rotation.z);
+                    setRotation(newRotation);
+                  }
+                }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                ref={refRotY} 
+                value={rotation?.y}
                 type="text" 
                 placeholder="0" 
-                onInput={(e) => changeRotation(e, "y")} 
-                onFocus={() => focusChange(true)}
-                onBlur={() => focusChange(false)}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(1);
+                    changeRotation({ target: { value: inputValue } }, "y");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newRotation = rotation.clone();
+                    newRotation.set(rotation.x, e.target.value, rotation.z);
+                    setRotation(newRotation);
+                  }
+                }}
               />
               <input 
-                ref={refRotZ} 
+                value={rotation?.z}
                 type="text" 
                 placeholder="0" 
-                onInput={(e) => changeRotation(e, "z")} 
-                onFocus={() => focusChange(true)}
-                onBlur={() => focusChange(false)}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(1);
+                    changeRotation({ target: { value: inputValue } }, "z");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newRotation = rotation.clone();
+                    newRotation.set(rotation.x, rotation.y, e.target.value);
+                    setRotation(newRotation);
+                  }
+                }}
               />
             </div>
           </div>
@@ -357,22 +412,58 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                ref={refScaX} 
+                value={scale?.x}
                 type="text" 
-                placeholder="0" 
-                value={selectOM.args.scale?.x}
+                placeholder="1" 
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    changeScale({ target: { value: inputValue } }, "x");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newScale = scale.clone();
+                    newScale.set(e.target.value, scale.y, scale.z);
+                    setScale(newScale);
+                  }
+                }}
                />
               <input 
-                ref={refScaY} 
+                value={scale?.y}
                 type="text" 
-                placeholder="0" 
-                value={selectOM.args.scale?.y}
+                placeholder="1" 
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    changeScale({ target: { value: inputValue } }, "y");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newScale = scale.clone();
+                    newScale.set(scale.x, e.target.value, scale.z);
+                    setScale(newScale);
+                  } 
+                }}
               />
               <input 
-                ref={refScaZ} 
+                value={scale?.z}
                 type="text" 
-                placeholder="0" 
-                value={selectOM.args.scale?.z} 
+                placeholder="1" 
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    changeScale({ target: { value: inputValue } }, "z");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newScale = scale.clone();
+                    newScale.set(scale.x, scale.y, e.target.value);
+                    setScale(newScale);
+                  }
+                }}
               />
             </div>
           </div>
@@ -381,27 +472,42 @@ export const MainViewInspector = () => {
               {t("materialConfig")}
             </div>
             <div className={styles.type}>
-              <div className={styles.name}>
-              {t("type")}
+              <div className={styles.title}>
+                {t("type")}
               </div>
-              <div>
-              </div>
-            </div>
-            <div className={styles.color}>
-              <div className={styles.name}>
-                {t("color")}
-              </div>
-              <div className={styles.pallet}>
-                <input 
-                  type={"color"} 
-                  value={color} 
-                  onChange={(e) => changeMaterial("color", e.target.value)}
-                  onFocus={() => focusChange(true)}
-                  onBlur={() => focusChange(false)}
-                />
-                <input type={"text"} value={color} />
+              <div className={styles.input}>
+                <Select
+                  options={materialOptions}
+                  // value={materialType}
+                  onChange={(select) => setMaterialType(select)}
+                  styles={normalStyles}
+                  />
               </div>
             </div>
+            {(materialType && materialType.value !== "shader") &&
+              <div className={styles.color}>
+                <div className={styles.name}>
+                  {t("color")}
+                </div>
+                <div className={styles.pallet}>
+                  <input 
+                    type={"color"} 
+                    value={color} 
+                    onChange={(e) => changeMaterial("color", e.target.value)}
+                    onFocus={() => globalStore.editorFocus = true}
+                    onBlur={() => globalStore.editorFocus = false}
+                  />
+                  <input type={"text"} value={color} />
+                </div>
+              </div>
+            }
+            {(materialType && materialType.value === "shader") &&
+              <div className={styles.shader}>
+                <div className={styles.attachBox}>
+                  Here Attach Script
+                </div>
+              </div>
+            }
           </div>
           <div className={styles.physics}>
             <div className={styles.title}>
@@ -477,7 +583,7 @@ export const MainViewInspector = () => {
                   <Select
                     options={visibleTypeOptions}
                     value={visibleType}
-                    onChange={(select) => changeVisibleType(select.value)}
+                    onChange={(select) => changeVisibleType(select)}
                     styles={normalStyles}
                     />
                 </div>

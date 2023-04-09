@@ -7,18 +7,19 @@ import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 import { PivotControls } from "./PivoitControl";
+import { globalStore } from "@/editor/Store";
+import { useSnapshot } from "valtio";
 
 /**
  * アバターデータ
  */
 export const Avatar = () => {
+  const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
   const [avatar, setAvatar] = useState<IObjectManagement>(null);
   const id = avatar? avatar.id: null;
   const ref = useRef<Object3D>();
-  const [enabled, setEnabled] = useState<boolean>(true)
   const [helper, setHelper] = useState<boolean>(true)
-  const handleDrag = useRef<boolean>(false);
   const editorData = useRef<{ 
     focus: boolean; 
     position: Vector3, 
@@ -31,21 +32,9 @@ export const Avatar = () => {
     scale: new Vector3() 
   });
 
-  const onClick = (e, value: boolean) => {
-    if (value) {
-      editor.selectObject(id);
-    }
-    else {
-      editor.unSelectObject(id);
-    }
-  }
-
   useFrame((_, delta) => {
     if (avatar != editor.getAvatar()){
       setAvatar(editor.getAvatar());
-    }
-    if ( enabled != (editor.getSelectId() == id)){
-      setEnabled(editor.getSelectId() == id);
     }
     if (ref.current){
       ref.current.visible = editor.getVisible(id);
@@ -53,8 +42,7 @@ export const Avatar = () => {
     if (helper !== editor.getHelper(id)){
       setHelper(editor.getHelper(id));
     }
-    editorData.current.focus = editor.getFocus(id);
-    if (editorData.current.focus){
+    if (state.editorFocus){
       const pos = editor.getPosition(id);
       editorData.current.position = new Vector3().copy(pos);
       const rot = editor.getRotation(id);
@@ -65,10 +53,10 @@ export const Avatar = () => {
   });
 
   const onDragStart = () => {
-    handleDrag.current = true;
+    globalStore.pivotControl = true;
   }
   const onDragEnd = () => {
-    handleDrag.current = false;
+    // globalStore.pivotControl = false;
   }
 
   const onDrag = (e: Matrix4) => {
@@ -79,36 +67,37 @@ export const Avatar = () => {
     editor.setPosition(id, position);
     editor.setScale(id, scale);
     editor.setRotation(id, rotation);
-    handleDrag.current = true;
+    globalStore.pivotControl = true;
   }
 
-  useHelper((enabled && helper) && ref, BoxHelper);
+  useHelper(((globalStore.currentId == id) && helper) && ref, BoxHelper);
 
   return (
     <>
       {avatar &&
       <>
-        <PivotControls
-          visible={enabled}
-          depthTest={false}
-          lineWidth={2}
-          anchor={[0, 0, 0]}
-          onDrag={(e) => onDrag(e)}
-          onDragStart={() => onDragStart()}
-          onDragEnd={() => onDragEnd()}
-          userData={editorData.current}
-        >
+          {!state.editorFocus &&
+            <PivotControls
+              object={(globalStore.currentId == id) ? ref : undefined}
+              visible={(id==state.currentId)}
+              disableAxes={!(id==state.currentId)}
+              disableSliders={!(id==state.currentId)}
+              disableRotations={!(id==state.currentId)}
+              depthTest={false}
+              lineWidth={2}
+              anchor={[0, 0, 0]}
+              onDrag={(e) => onDrag(e)}
+              onDragStart={() => onDragStart()}
+              onDragEnd={() => onDragEnd()}
+              userData={editorData.current}
+            />
+          }
           <primitive
             ref={ref}
             object={avatar.object}
-            onClick={(e) => {
-              onClick(e, true)
-            }}
-            onPointerMissed={(e) => {
-              onClick(e, false)
-            }}
+            onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+            onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
           />
-        </PivotControls>
       </>
       }
     </>
