@@ -1,10 +1,10 @@
-import { Environment, GizmoHelper, GizmoViewport, Html, OrbitControls, PivotControls, Sky } from "@react-three/drei";
-import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils } from "three";
+import { GizmoHelper, GizmoViewport, OrbitControls, PerspectiveCamera as DPerspectiveCamera } from "@react-three/drei";
+import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils, PerspectiveCamera } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useLayoutEffect } from "react";
+import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { MyLight, MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
@@ -22,7 +22,6 @@ import { MeshoptDecoder } from "meshoptimizer";
 
 export const MainViewer = () => {
   const [gridNum, setGridNum] = useState<8|16|24|32>(8);
-  const camRef = useRef<OrbitControlsImpl>();
   const editor = useContext(NinjaEditorContext);
   const [isGrid, setIsGrid] = useState<boolean>(true);
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
@@ -168,13 +167,6 @@ export const MainViewer = () => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
 
-  useEffect(() => {
-    editor.setCamera(camRef.current);
-    return () => {
-      editor.camera = null;
-    }
-  }, [])
-
   return (
     <div className={styles.mainView}>
       <Canvas
@@ -185,7 +177,6 @@ export const MainViewer = () => {
         onDragOver={handleDragOver}
         shadows
       >
-        <OrbitControls ref={camRef} makeDefault/>
         <MyLights/>
         <StaticObjects/>
         <Terrain/>
@@ -267,48 +258,75 @@ const SystemHelper = () => {
  * 補助操作
  */
 const SystemControl = () => {
-  const { camera, gl } = useThree();
+  const ref = useRef<OrbitControlsImpl>(null);
+  const cameraRef = useRef<PerspectiveCamera>(null);
+  const { gl, camera } = useThree();
   const editor = useContext(NinjaEditorContext);
   editor.render = gl;
   const input = useInputControl("desktop");
+
+  useLayoutEffect(() => {
+    if (cameraRef && cameraRef.current) {
+      cameraRef.current.position.set(-5, 3, 5);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cameraRef && cameraRef.current) {
+      cameraRef.current.far = camera.far;
+    }
+  }, [camera]);
+
   useFrame((_, delta) => {
-    if (input.dash && (input.forward || input.backward || input.right || input.left)){
-      if (editor.getCamera()){
-        editor.getCamera().enabled = false;
-      }
-      const st = .5;
-      var cameraDirection = new Vector3();
-      camera.getWorldDirection(cameraDirection);
-      var cameraPosition = camera.position.clone();
-      var cameraTarget: Vector3;
+    if (input.dash && (input.forward || input.backward || input.right || input.left)) {
+      const st = 0.5;
+      const cameraDirection = new Vector3();
+      cameraRef.current.getWorldDirection(cameraDirection);
+      const cameraPosition = cameraRef.current.position.clone();
+
       if (input.forward) {
         cameraPosition.add(cameraDirection.clone().multiplyScalar(st));
-        camera.position.copy(cameraPosition);
       }
       if (input.backward) {
         cameraPosition.sub(cameraDirection.clone().multiplyScalar(st));
-        camera.position.copy(cameraPosition);
       }
       if (input.right) {
-        var cameraRight = new Vector3();
-        cameraRight.crossVectors(cameraDirection, camera.up).normalize();
+        const cameraRight = new Vector3();
+        cameraRight.crossVectors(cameraDirection, cameraRef.current.up).normalize();
         cameraPosition.add(cameraRight.multiplyScalar(st));
-        camera.position.copy(cameraPosition);
-        cameraTarget = cameraPosition.clone().add(cameraDirection);
-        camera.lookAt(cameraTarget);
       }
-      else if (input.left) {
-        var cameraLeft = new Vector3();
-        cameraLeft.crossVectors(cameraDirection, camera.up).normalize();
+      if (input.left) {
+        const cameraLeft = new Vector3();
+        cameraLeft.crossVectors(cameraDirection, cameraRef.current.up).normalize();
         cameraPosition.sub(cameraLeft.multiplyScalar(st));
-        camera.position.copy(cameraPosition);
-        cameraTarget = cameraPosition.clone().add(cameraDirection);
-        camera.lookAt(cameraTarget);
+      }
+
+      cameraRef.current.position.copy(cameraPosition);
+      ref.current.target.copy(cameraPosition.add(cameraDirection));
+
+    } else {
+      if (ref.current && cameraRef.current) {
+        cameraRef.current.position.copy(ref.current.object.position);
+        cameraRef.current.rotation.copy(ref.current.object.rotation);
+        cameraRef.current.lookAt(ref.current.target);
       }
     }
   });
+
   return (
     <>
+      <DPerspectiveCamera makeDefault ref={cameraRef} />
+      <OrbitControls
+        ref={ref}
+        args={[cameraRef.current, gl.domElement]}
+        camera={cameraRef.current}
+        makeDefault={true}
+      />
     </>
-  )
-}
+  );
+};
+
+
+
+
+

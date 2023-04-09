@@ -31,7 +31,9 @@ export const Avatar = () => {
           <primitive object={engine.getAvatarObject().object} />
         </mesh>
       }
-      <OrbitControls makeDefault={true} />
+      <OrbitControls 
+        makeDefault={true} 
+      />
     </>
   )
 }

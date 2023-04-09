@@ -42,6 +42,7 @@ export const NinjaEditor = () => {
 
   const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
+      globalStore.init();
       setViewSelect(viewType);
     }
   }

@@ -156,18 +156,22 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
       if (object) {
         const target = resolveObject(object)
         if (target) {
-          // An object has been attached
-          const pivot = ref.current
-          const doesUpdate = target.matrixAutoUpdate
-          target.updateWorldMatrix(true, true)
-          target.matrixAutoUpdate = false
-          pivot.matrix = target.matrix.clone()
-          pivot.children[0].visible = true
-          return () => {
-            if (doesUpdate) {
-              target.matrixAutoUpdate = true
-              target.matrix.decompose(target.position, target.quaternion, target.scale)
+          try {
+            const pivot = ref.current
+            const doesUpdate = target.matrixAutoUpdate
+            target.updateWorldMatrix(true, true)
+            target.matrixAutoUpdate = false
+            pivot.matrix = target.matrix.clone()
+            pivot.children[0].visible = true
+            return () => {
+              if (doesUpdate) {
+                target.matrixAutoUpdate = true
+                target.matrix.decompose(target.position, target.quaternion, target.scale)
+              }
             }
+          }
+          catch (e) {
+            console.warn('PivotControls: object is not a THREE.Object3D')
           }
         }
       }
@@ -177,26 +181,31 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
       if (anchor) {
         const target = resolveObject(object, childrenRef.current)
         if (target) {
-          target.updateWorldMatrix(true, true)
-          mPInv.copy(target.matrixWorld).invert()
-          bb.makeEmpty()
-          target.traverse((obj: any) => {
-            if (!obj.geometry) return
-            if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox()
-            mL.copy(obj.matrixWorld).premultiply(mPInv)
-            bbObj.copy(obj.geometry.boundingBox)
-            bbObj.applyMatrix4(mL)
-            bb.union(bbObj)
-          })
-          vCenter.copy(bb.max).add(bb.min).multiplyScalar(0.5)
-          vSize.copy(bb.max).sub(bb.min).multiplyScalar(0.5)
-          vAnchorOffset
-            .copy(vSize)
-            .multiply(new THREE.Vector3(...anchor))
-            .add(vCenter)
-          vPosition.set(...offset).add(vAnchorOffset)
-          gizmoRef.current.position.copy(vPosition)
-          invalidate()
+          try{
+            target.updateWorldMatrix(true, true)
+            mPInv.copy(target.matrixWorld).invert()
+            bb.makeEmpty()
+            target.traverse((obj: any) => {
+              if (!obj.geometry) return
+              if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox()
+              mL.copy(obj.matrixWorld).premultiply(mPInv)
+              bbObj.copy(obj.geometry.boundingBox)
+              bbObj.applyMatrix4(mL)
+              bb.union(bbObj)
+            })
+            vCenter.copy(bb.max).add(bb.min).multiplyScalar(0.5)
+            vSize.copy(bb.max).sub(bb.min).multiplyScalar(0.5)
+            vAnchorOffset
+              .copy(vSize)
+              .multiply(new THREE.Vector3(...anchor))
+              .add(vCenter)
+            vPosition.set(...offset).add(vAnchorOffset)
+            gizmoRef.current.position.copy(vPosition)
+            invalidate()
+          }
+          catch (e) {
+            console.warn('PivotControls: object is not a THREE.Object3D')
+          }
         }
       }
     })

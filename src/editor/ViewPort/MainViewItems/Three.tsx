@@ -68,16 +68,22 @@ const ThreeObject = (props: IThreeObject) => {
     // globalStore.pivotControl = false;
   }
 
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.position.copy(editor.getPosition(id));
+      ref.current.rotation.copy(editor.getRotation(id));
+      ref.current.scale.copy(editor.getScale(id));
+    }
+  }, []);
+
   const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    if (state.pivotControl) {
-      editor.setPosition(id, position);
-      editor.setScale(id, scale);
-      editor.setRotation(id, rotation);
-    }
+    editor.setPosition(id, position);
+    editor.setScale(id, scale);
+    editor.setRotation(id, rotation);
     globalStore.pivotControl = true;
   }
 
