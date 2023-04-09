@@ -1,6 +1,7 @@
+import { convertObjectToBlob } from "@/core/utils/NinjaFileControl";
 import { createContext } from "react";
 import { Mesh, Object3D, PlaneGeometry, PerspectiveCamera, OrthographicCamera } from "three";
-import { GLTFExporter, GLTFExporterOptions } from "three-stdlib/exporters/GLTFExporter";
+import { GLTFExporter, GLTFExporterOptions } from "three-stdlib";
 
 export class TerrainMakerManager {
   type: "create" | "edit" = "create";
@@ -84,36 +85,13 @@ export class TerrainMakerManager {
    * GLB出力 -> Glob
    * @param filename 
    */
-  async exportTerrainMesh(filename?: string): Promise<Blob> {
+  async exportTerrainMesh(): Promise<Blob> {
     if (this.terrainMesh) {
       const obj3d = new Object3D();
       obj3d.add(this.terrainMesh.clone());
 
-      return new Promise((resolve) => {
-        var exporter = new GLTFExporter();
-        const options: GLTFExporterOptions = {
-          trs: false,
-          onlyVisible: true,
-          binary: true,
-          maxTextureSize: 4096
-        };
-        exporter.parse(
-          obj3d,
-          (result) => {
-            if (result instanceof ArrayBuffer) {
-              return resolve(this.saveArrayBuffer(result, filename));
-            }
-            else {
-              const output = JSON.stringify(result, null, 2);
-              return resolve(this.saveString(output, filename));
-            }
-          },
-          (error: ErrorEvent) => {
-            console.log(`出力中エラー: ${error.toString()}`);
-          }
-        );
-      });
-
+      const data = await convertObjectToBlob(obj3d);
+      return data;
     }
     else console.log("地形データが存在していません");
   }
@@ -124,16 +102,6 @@ export class TerrainMakerManager {
     link.download = filename;
     link.click();
     link.remove();
-  }
-
-  saveString(text: string, filename?: string): Blob {
-    // this.save( new Blob( [ text ], { type: 'text/plain' } ), filename );
-    return new Blob([text], { type: 'text/plain' });
-  }
-
-  saveArrayBuffer(buffer: ArrayBuffer, filename?: string): Blob {
-    // this.save(new Blob([buffer], { type: "application/octet-stream" }), filename);
-    return new Blob([buffer], { type: "application/octet-stream" });
   }
 }
 

@@ -1,0 +1,32 @@
+.uiItems {
+  .hideTouchInputController {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    background-color: #0000005d;
+    .outerCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50%;
+      height: 50%;
+      background-color: #0000005d;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .innerCircle {
+        width: 80%;
+        height: 80%;
+        background-color: #0000005d;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+    }
+  }
+}

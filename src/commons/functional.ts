@@ -22,3 +22,17 @@ export const rtdp = (number: number, decimalPlaces: number): number => {
 export const isNumber = (value):boolean => {
   return typeof value === 'string' && !isNaN(Number(value));
 }
+
+// https://stackoverflow.com/a/9039885/1314762
+export const isIOS = () => {
+  return [
+    'iPad Simulator',
+    'iPhone Simulator',
+    'iPod Simulator',
+    'iPad',
+    'iPhone',
+    'iPod'
+  ].includes(navigator.platform)
+  // iPad on iOS 13 detection
+  || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+}

@@ -7,10 +7,12 @@ import {
 import { useContext, useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
-import { GLTFLoader } from "three-stdlib";
+import { AmbientLight, DirectionalLight, LoadingManager, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
+import { DRACOLoader, GLTFLoader, KTX2Loader } from "three-stdlib";
+import { MeshoptDecoder } from "meshoptimizer";
 import { useTranslation } from "react-i18next";
 import { AiFillHome } from "react-icons/ai";
+import Swal from "sweetalert2";
 
 export interface IFileProps {
   size: number;
@@ -98,11 +100,20 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
       if (res.status == 200) {
         loadRef.current.style.display = "block";
         const _files = res.data.files;
+        const newFiles = [];
         for (const file of _files){
           const imageUrl = await getGLTFImage(file);
-          file.imageUrl = imageUrl;
+          if (imageUrl){
+            file.imageUrl = imageUrl;
+          }
+          else {
+            if (isGLTF(file.name)){
+              continue;
+            }
+          }
+          newFiles.push(file);
         }
-        setFiles(_files);
+        setFiles(newFiles);
         loadRef.current.style.display = "none";
       }
     })
@@ -115,11 +126,20 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           loadRef.current.style.display = "block";
           editor.assetRoute = (path != "/") ? path : "";
           const _files = res.data.files;
+          const newFiles = [];
           for (const file of _files){
             const imageUrl = await getGLTFImage(file);
-            file.imageUrl = imageUrl;
+            if (imageUrl){
+              file.imageUrl = imageUrl;
+            }
+            else {
+              if (isGLTF(file.name)){
+                continue;
+              }
+            }
+            newFiles.push(file);
           }
-          setFiles(_files);
+          setFiles(newFiles);
           loadRef.current.style.display = "none";
         }
       })
@@ -151,11 +171,20 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
         loadRef.current.style.display = "block";
         editor.assetRoute = (path != "/") ? path : "";
         const _files = res.data.files;
+        const newFiles = [];
         for (const file of _files){
           const imageUrl = await getGLTFImage(file);
-          file.imageUrl = imageUrl;
+          if (imageUrl){
+            file.imageUrl = imageUrl;
+          }
+          else {
+            if (isGLTF(file.name)){
+              continue;
+            }
+          }
+          newFiles.push(file);
         }
-        setFiles(_files);
+        setFiles(newFiles);
         loadRef.current.style.display = "none";
       }
     })
@@ -359,10 +388,10 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   canvas.width = 100;
   canvas.height = 100;
 
-  // シーンを作成
+  // Making Scene
   const scene = new Scene();
 
-  // カメラを作成
+  // Making Camera
   const camera = new PerspectiveCamera(
     45,
     1,
@@ -371,7 +400,7 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   );
   camera.position.set(0, 0, 2);
 
-  // レンダラーを作成
+  // Making Renderer
   const cleanup = () => {
     if (renderer) {
       renderer.dispose();
@@ -391,7 +420,7 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   renderer.setClearColor(0x888888, 1);
   renderer.setSize(35, 35);
 
-  // ライトを作成
+  // Making Light
   const directionalLight = new DirectionalLight(0xffffff, 0.5);
   directionalLight.position.set(10, 10, 10);
   const spotLight = new SpotLight(0xffffff);
@@ -399,19 +428,40 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   scene.add(spotLight);
   scene.add(directionalLight);
 
-  // GLTFローダーを作成
-  const gltfLoader = new GLTFLoader();
+  // Create GLTF Loader
+  const DRACO_LOADER = new DRACOLoader();
+  const KTX2_LOADER = new KTX2Loader();
+  const gltfLoader = new GLTFLoader()
+        .setCrossOrigin('anonymous')
+        .setDRACOLoader( DRACO_LOADER )
+        .setKTX2Loader( KTX2_LOADER.detectSupport( renderer ) )
+        .setMeshoptDecoder( MeshoptDecoder );
 
-  // GLTFファイルを読み込む
+  // Load GLTF and Making Image
   return new Promise((resolve) => {
-    gltfLoader.load(gltfUrl, (gltf) => {
-      console.log(gltfUrl);
-      const model = gltf.scene;
-      scene.add(model);
-      renderer.render(scene, camera);
-      const dataUrl = canvas.toDataURL();
-      cleanup();
-      return resolve(dataUrl);
-    });
+    gltfLoader.load(
+      gltfUrl, 
+      (gltf) => {
+        const model = gltf.scene || gltf.scenes[0];
+        scene.add(model);
+        renderer.render(scene, camera);
+        const dataUrl = canvas.toDataURL();
+        cleanup();
+        return resolve(dataUrl);
+      },
+      (progress) => {},
+      (error) => {
+        console.error(error);
+        cleanup();
+        Swal.fire({
+          title: "Error",
+          text: `Loading GLTF Error。\nFileName: ${gltfUrl}\n\n${error}`,
+          icon: "error",
+          confirmButtonText: "OK"
+        }).then((result) => {
+            return resolve(null);
+        });
+      }
+    );
   });
 };

@@ -2,9 +2,9 @@ import { Environment, GizmoHelper, GizmoViewport, Html, OrbitControls, PivotCont
 import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
-import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
+
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { MyLight, MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
@@ -17,8 +17,11 @@ import { Perf } from "r3f-perf";
 import { useInputControl } from "@/core/utils/InputControls";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
+import styles from "@/App.module.scss";
+import { MeshoptDecoder } from "meshoptimizer";
 
 export const MainViewer = () => {
+  const [gridNum, setGridNum] = useState<8|16|24|32>(8);
   const camRef = useRef<OrbitControlsImpl>();
   const editor = useContext(NinjaEditorContext);
   const [isGrid, setIsGrid] = useState<boolean>(true);
@@ -31,7 +34,13 @@ export const MainViewer = () => {
    */
   const handleDrop = (e) => {
     e.preventDefault();
-    const loader = new GLTFLoader();
+    const DRACO_LOADER = new DRACOLoader();
+    const KTX2_LOADER = new KTX2Loader();
+    const loader = new GLTFLoader()
+          .setCrossOrigin('anonymous')
+          .setDRACOLoader( DRACO_LOADER )
+          .setKTX2Loader( KTX2_LOADER.detectSupport( editor.render ) )
+          .setMeshoptDecoder( MeshoptDecoder );
     if (!editor.contentsSelect) {
       /**
        * ここは、一度アセットに落として、表示する必要がある
@@ -167,7 +176,7 @@ export const MainViewer = () => {
   }, [])
 
   return (
-    <div style={{ height: "100%", position: "relative", background: "#333" }}>
+    <div className={styles.mainView}>
       <Canvas
         style={{ background: "black", display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
@@ -188,28 +197,51 @@ export const MainViewer = () => {
         }
         <SystemControl />
       </Canvas>
-      <div style={{ display: showUI? "block": "none", background: "rgba(255, 255, 255, 0.5)", position: "absolute", zIndex: 99, width: "100%", height: "100%", top: 0 }}>
-        <UICanvas/>
+      <div className={styles.uiCanvas} style={{ display: showUI? "block": "none" }}>
+        <UICanvas gridNum={gridNum}/>
       </div>
-      <div style={{ position: "absolute", zIndex: 999, top: "10px", left: "10px" }}>
+      <div className={styles.control}>
         <a 
           onClick={() => setIsGrid(!isGrid)}
-          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", marginRight: "5px", background: "#222", borderRadius: "3px" }}
+          className={styles.helperBtn}
         >
           {isGrid? <MdOutlineGridOn/>: <MdOutlineGridOff/>}
         </a>
         <a 
           onClick={() => setShowCanvas(!showCanvas)}
-          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", marginRight: "5px", background: "#222", borderRadius: "3px" }}
+          className={styles.showCanvas}
         >
           {showCanvas? <AiFillEye/>: <AiFillEyeInvisible/>}
         </a>
         <a 
           onClick={() => setShowUI(!showUI)}
-          style={{ color: "#fff", cursor: "pointer", padding: "4px 6px", background: "#222", borderRadius: "3px" }}
+          className={styles.showUI}
         >
           {showUI? <MdVideogameAsset/>: <MdVideogameAssetOff/>}
         </a>
+        {showUI &&
+          <>
+            <a 
+            onClick={() => {
+              if (gridNum == 8) {
+                setGridNum(16);
+              }
+              else if (gridNum == 16) {
+                setGridNum(24);
+              }
+              else if (gridNum == 24) {
+                setGridNum(32);
+              }
+              else if (gridNum == 32) {
+                setGridNum(8);
+              }
+            }}
+            className={styles.gridNum}
+          >
+            {gridNum}
+          </a>
+          </>
+        }
       </div>
     </div>
   )
@@ -235,8 +267,9 @@ const SystemHelper = () => {
  * 補助操作
  */
 const SystemControl = () => {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const editor = useContext(NinjaEditorContext);
+  editor.render = gl;
   const input = useInputControl("desktop");
   useFrame((_, delta) => {
     if (input.dash && (input.forward || input.backward || input.right || input.left)){

@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Euler, Group, Matrix4, Object3D, Vector3, WebGLRenderer } from "three";
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
@@ -31,6 +31,7 @@ interface IPlayerManager {
 }
 
 export class NinjaEditorManager {
+  render: WebGLRenderer;
   config: IConfigParams;
   oms: IObjectManagement[] = []; //Canvas表示系
   ums: IUIManagement[] = [];// 操作UI系

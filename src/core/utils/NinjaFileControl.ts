@@ -1,9 +1,8 @@
-import { GLTFExporter, GLTFExporterOptions } from "three-stdlib/exporters/GLTFExporter";
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
 import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
-import { SkeletonUtils } from "three-stdlib/utils/SkeletonUtils";
-import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
+import { GLTFLoader, SkeletonUtils } from "three-stdlib";
+import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import JSZip from 'jszip';
 
 /**
@@ -173,7 +172,7 @@ async function loadGLTFFromData(data: ArrayBuffer): Promise<Object3D> {
   });
 }
 
-async function exportGLTF(scene: Scene): Promise<ArrayBuffer> {
+const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
   return new Promise<ArrayBuffer>((resolve, reject) => {
     const exporter = new GLTFExporter();
 
@@ -181,6 +180,7 @@ async function exportGLTF(scene: Scene): Promise<ArrayBuffer> {
       binary: true,
       animations: scene.animations,
       includeCustomExtensions: true,
+      maxTextureSize: 4096
     };
 
     exporter.parse(
@@ -192,6 +192,7 @@ async function exportGLTF(scene: Scene): Promise<ArrayBuffer> {
           reject(new Error('GLTFExporter returned a non-binary result.'));
         }
       },
+      undefined,
       options
     );
   });
@@ -209,7 +210,8 @@ export const convertObjectToArrayBuffer = async (scene): Promise<ArrayBuffer> =>
     const options: GLTFExporterOptions = {
       binary: true,
       animations: scene.animations,
-      includeCustomExtensions: true
+      includeCustomExtensions: true,
+      maxTextureSize: 4096
     };
     exporter.parse(
       scene,
@@ -218,7 +220,9 @@ export const convertObjectToArrayBuffer = async (scene): Promise<ArrayBuffer> =>
           return result;
         }
       },
-      options);
+      (error) => {},
+      options,
+      );
   });
 }
 
@@ -231,7 +235,8 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
     const options: GLTFExporterOptions = {
       binary: true,
       animations: object.animations,
-      includeCustomExtensions: true
+      includeCustomExtensions: true,
+      maxTextureSize: 4096
     };
 
     if (userData){
@@ -249,6 +254,7 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
           return resolve(saveString(output));
         }
       },
+      (error) => {},
       options);
   });
 }

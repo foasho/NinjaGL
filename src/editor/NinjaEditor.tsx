@@ -15,7 +15,6 @@ import { HierarchyTree } from "./Hierarchy/HierarchyTree";
 import { BsPlay, BsStop } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
-import "react-toastify/dist/ReactToastify.css";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
