@@ -68,7 +68,7 @@
     top: 10px;
     left: 10px;
   }
-
+  
   .helperBtn{
     color: #fff;
     cursor: pointer;
@@ -76,6 +76,44 @@
     margin-right: 5px;
     background: #222;
     border-radius: 3px;
+    position: relative;
+    .tooltipContent {
+      display: block;
+      position: absolute;
+      z-index: 1;
+      top: 100%;
+      left: 0;
+      background-color: $bgColor;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      min-width: 200px;
+      .checkboxes,
+      .numberInputs {
+        margin-bottom: 8px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        input[type="text"] {
+          width: 60px;
+          max-width: 60px;
+        }
+        input[type="number"] {
+          width: 60px;
+          max-width: 60px;
+        }
+      }
+
+      .numberInputs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 4px;
+        
+      }
+    }
   }
 
   .showCanvas{

@@ -12,7 +12,7 @@ import { NinjaShader } from "./NinjaShader";
 import { NJCFile } from "./NinjaFileControl";
 
 export interface INinjaEngineProps {
-  worldSize?: [number, number, number];
+  worldSize?: number;
   jsonPath?: string;
   layerGrid?: number;
 
@@ -33,7 +33,7 @@ export class NinjaEngine {
   loadCompleted: boolean = false;
   deviceType: "mobile" | "tablet" | "desktop" = "desktop";
   useGPU: boolean = false;
-  worldSize: [number, number, number] = [128, 128, 128];
+  worldSize: number = 64;
   memory: { totalHeap: number, usedHeap: number, availableHeap: number } = {
     totalHeap: 0,
     usedHeap: 0,
@@ -77,14 +77,14 @@ export class NinjaEngine {
     const L = this.getOctreeL();
     this.octree = new Octree({
       min: new Vector3(
-        -this.worldSize[0] / 2,
-        -this.worldSize[1] / 2,
-        -this.worldSize[2] / 2
+        -this.worldSize / 2,
+        -this.worldSize / 2,
+        -this.worldSize / 2
       ),
       max: new Vector3(
-        this.worldSize[0] / 2,
-        this.worldSize[1] / 2,
-        this.worldSize[2] / 2
+        this.worldSize / 2,
+        this.worldSize / 2,
+        this.worldSize / 2
       ),
       maxDepth: L
     });
@@ -212,7 +212,7 @@ export class NinjaEngine {
   getOctreeL = (): number => {
     const maxL = 7;
     let n = 0;
-    let l = this.worldSize[0];
+    let l = this.worldSize;
     for (l; l > 1; l = l / 2) {
       n++;
     }
@@ -904,18 +904,35 @@ export class NinjaEngine {
    * 特定のPositionからレイヤー番号を取得する
    */
   getLayerNumber(pos: Vector3) {
-    const layerXLen = this.worldSize[0] / this.layerGrid;
-    const layerZLen = this.worldSize[1] / this.layerGrid;
-    const cx = this.worldSize[0] / 2;
-    const cz = this.worldSize[1] / 2;
+    const layerXLen = this.worldSize / this.layerGrid;
+    const layerZLen = this.worldSize / this.layerGrid;
+    const cx = this.worldSize / 2;
+    const cz = this.worldSize / 2;
     if (cx < Math.abs(pos.x)) return null; // ワールド範囲外X方向
     if (cz < Math.abs(pos.z)) return null; // ワールド範囲外Z方向
     const px = pos.x + cx;
     const pz = pos.z + cz;
     const r = Math.ceil(px / layerXLen);
-    const c = Math.ceil((this.worldSize[1] - pz) / layerZLen);
+    const c = Math.ceil((this.worldSize - pz) / layerZLen);
     const layer = (c - 1) * this.layerGrid + r;
     return layer;
+  }
+
+  /**
+     * 特定のレイヤーの中心座標を取得する
+     */
+  getCenterPosFromLayer(layer: number, yPos: number = 0.5, worldSize: number=this.worldSize, layerGrid:number = this.layerGrid): Vector3 {
+    const layerXLen = worldSize / this.layerGrid;
+    const layerZLen = worldSize / this.layerGrid;
+    const cx = worldSize / 2;
+    const cz = worldSize / 2;
+    const c = Math.ceil(layer/layerGrid);
+    let r = ((layer) % (layerGrid));
+    if (r == 0) r = layerGrid;
+    const absPosX = r * layerXLen;
+    const absPosZ = (c-1) * layerZLen;
+    const worldXZ = [absPosX - cx - layerXLen/2, - absPosZ + cz - layerZLen/2];
+    return new Vector3(worldXZ[0], yPos, worldXZ[1]);
   }
 
   /**

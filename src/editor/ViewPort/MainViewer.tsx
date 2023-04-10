@@ -1,5 +1,5 @@
-import { GizmoHelper, GizmoViewport, OrbitControls, PerspectiveCamera as DPerspectiveCamera } from "@react-three/drei";
-import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils, PerspectiveCamera } from "three";
+import { GizmoHelper, GizmoViewport, OrbitControls, PerspectiveCamera as DPerspectiveCamera, Text } from "@react-three/drei";
+import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils, PerspectiveCamera, Color } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef, useLayoutEffect } from "react";
 import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -15,15 +15,28 @@ import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
 import { useInputControl } from "@/core/utils/InputControls";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";
 import { MeshoptDecoder } from "meshoptimizer";
+import { isNumber } from "@/commons/functional";
+import Swal from "sweetalert2";
 
 export const MainViewer = () => {
-  const [gridNum, setGridNum] = useState<8|16|24|32>(8);
+  const [isHovered, setIsHovered] = useState(false);
+  const cameraSpeedRef = useRef<HTMLInputElement>();
+  const [cameraSpeed, setCameraSpeed] = useState<number>(10);
+  const cameraFarRef = useRef<HTMLInputElement>();
+  const [cameraFar, setCameraFar] = useState<number>(1000);
+  const worldSizeRef = useRef<HTMLInputElement>();
+  const [worldSize, setWorldSize] = useState<number>(64);
+  const worldGridSizeRef = useRef<HTMLInputElement>();
+  const [worldGridSize, setWorldGridSize] = useState<number>(8);
+  const [uiGridNum, setUIGridNum] = useState<8|16|24|32>(8);
   const editor = useContext(NinjaEditorContext);
   const [isGrid, setIsGrid] = useState<boolean>(true);
+  const [isWorldHelper, setIsWorldHelper] = useState<boolean>(true);
+  const [isGizmo, setIsGizmo] = useState<boolean>(true);
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
   const [showUI, setShowUI] = useState<boolean>(false);
 
@@ -183,20 +196,122 @@ export const MainViewer = () => {
         <Avatar/>
         <MySky/>
         <ThreeObjects/>
-        {isGrid &&
-          <SystemHelper/>
-        }
-        <SystemControl />
+        <SystemHelper isGizmo={isGizmo} cameraFar={cameraFar} cameraSpeed={cameraSpeed} worldSize={worldSize} isGrid={isGrid} isWorldHelper={isWorldHelper} worldGridSize={worldGridSize} />
       </Canvas>
       <div className={styles.uiCanvas} style={{ display: showUI? "block": "none" }}>
-        <UICanvas gridNum={gridNum}/>
+        <UICanvas gridNum={uiGridNum}/>
       </div>
       <div className={styles.control}>
         <a 
-          onClick={() => setIsGrid(!isGrid)}
           className={styles.helperBtn}
-        >
-          {isGrid? <MdOutlineGridOn/>: <MdOutlineGridOff/>}
+          >
+          <AiFillSetting
+            onClick={() => setIsHovered(!isHovered)}
+          />
+          {isHovered && (
+              <div 
+                className={styles.tooltipContent}
+              >
+                <div className={styles.chechboxes}>
+                  <label>
+                    <input type="checkbox" checked={isGrid} onChange={() => setIsGrid(!isGrid)} />
+                    水平グリッド線
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={isWorldHelper} onChange={() => setIsWorldHelper(!isWorldHelper)} />
+                    ワールド補助線
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={isGizmo} onChange={() => setIsGizmo(!isGizmo)} />
+                    Gizmo
+                  </label>
+                </div>
+                <div className={styles.numberInputs}>
+                  <label>
+                    カメラスピード
+                    <input 
+                      type="text"
+                      ref={cameraSpeedRef}
+                      placeholder={cameraSpeed.toString()}
+                      onKeyDown={(e: any) => {
+                        if (e.key == "Enter" && cameraSpeedRef.current) {
+                          if (isNumber(cameraSpeedRef.current.value)) {
+                            const val = Number(cameraSpeedRef.current.value);
+                            setCameraSpeed(val);
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                  <label>
+                    視野(far)
+                    <input 
+                      type="text"
+                      ref={cameraFarRef}
+                      placeholder={cameraFar.toString()}
+                      onKeyDown={(e: any) => {
+                        if (e.key == "Enter" && cameraFarRef.current) {
+                          if (isNumber(cameraFarRef.current.value)) {
+                            const val = Number(cameraFarRef.current.value);
+                            if (val <= 4096){
+                              setCameraFar(val);
+                            }
+                            else {
+                              Swal.fire({
+                                title: "エラー",
+                                text: "4096以下の値を入力してください",
+                                icon: "error"
+                              });
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                  <label>
+                    ワールドの広さ
+                    <input 
+                      type="text"
+                      ref={worldSizeRef}
+                      placeholder={worldSize.toString()}
+                      onKeyDown={(e: any) => {
+                        if (e.key == "Enter" && worldSizeRef.current) {
+                          if (isNumber(worldSizeRef.current.value)) {
+                            const val = Number(worldSizeRef.current.value);
+                            if (val <= 4096){
+                              setWorldSize(val);
+                            }
+                            else {
+                              Swal.fire({
+                                title: "エラー",
+                                text: "4096以下の値を入力してください",
+                                icon: "error"
+                              });
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                  <label>
+                    グリッド数
+                    <input 
+                      type="text"
+                      ref={worldGridSizeRef}
+                      placeholder={worldGridSize.toString()}
+                      onKeyDown={(e: any) => {
+                        if (e.key == "Enter" && worldGridSizeRef.current) {
+                          if (isNumber(worldGridSizeRef.current.value)) {
+                            const val = Number(worldGridSizeRef.current.value);
+                            setWorldGridSize(val);
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+          )}
         </a>
         <a 
           onClick={() => setShowCanvas(!showCanvas)}
@@ -214,26 +329,26 @@ export const MainViewer = () => {
           <>
             <a 
             onClick={() => {
-              if (gridNum == 8) {
-                setGridNum(16);
+              if (uiGridNum == 8) {
+                setUIGridNum(16);
               }
-              else if (gridNum == 16) {
-                setGridNum(24);
+              else if (uiGridNum == 16) {
+                setUIGridNum(24);
               }
-              else if (gridNum == 24) {
-                setGridNum(32);
+              else if (uiGridNum == 24) {
+                setUIGridNum(32);
               }
-              else if (gridNum == 32) {
-                setGridNum(8);
+              else if (uiGridNum == 32) {
+                setUIGridNum(8);
               }
             }}
             className={styles.gridNum}
           >
-            {gridNum}
+            {uiGridNum}
           </a>
           </>
         }
-      </div>
+        </div>
     </div>
   )
 }
@@ -241,14 +356,89 @@ export const MainViewer = () => {
 /**
  * 補助機能
  */
-const SystemHelper = () => {
+interface ISysytemHelper {
+  worldGridSize: number;
+  cameraFar : number;
+  cameraSpeed: number;
+  isGrid: boolean;
+  isWorldHelper: boolean;
+  worldSize: number;
+  isGizmo: boolean;
+}
+const SystemHelper = (props: ISysytemHelper) => {
+  const gridHelperSize = 4096;
+  const divisions = props.worldGridSize;
+  const cellSize = props.worldSize / divisions;
+  const numberElements = [];
+  const numberPlanes = [];
+
+  const getCenterPosFromLayer = (
+    layer: number, 
+    yPos: number, 
+    worldSize: number, 
+    layerGrid:number
+  ): Vector3  => {
+    const layerXLen = worldSize / layerGrid;
+    const layerZLen = worldSize / layerGrid;
+    const cx = worldSize / 2;
+    const cz = worldSize / 2;
+    const c = Math.ceil(layer/layerGrid);
+    let r = ((layer) % (layerGrid));
+    if (r == 0) r = layerGrid;
+    const absPosX = r * layerXLen;
+    const absPosZ = (c-1) * layerZLen;
+    const worldXZ = [absPosX - cx - layerXLen/2, - absPosZ + cz - layerZLen/2];
+    return new Vector3(worldXZ[0], yPos, worldXZ[1]);
+  }
+
+  if (props.isWorldHelper){
+    for (let i = 0; i < divisions; i++) {
+      for (let j = 0; j < divisions; j++) {
+        const number = i * divisions + j + 1;
+        const textPosition = getCenterPosFromLayer(number, 0.5, props.worldSize, divisions);
+        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.01, 0));
+        const isEven = (i + j) % 2 === 0;
+        const color1 = (isEven)? new Color(0x808080): new Color(0xd3d3d3);
+        const color2 = (isEven)? new Color(0xd3d3d3): new Color(0x808080);
+        numberElements.push(
+          <Text
+            key={number}
+            fontSize={cellSize * 0.25}
+            position={textPosition}
+            rotation={[-Math.PI/2, 0, 0]}
+            color={color1}
+          >
+            {number}
+          </Text>
+        );
+        numberPlanes.push(
+          <mesh
+            key={number}
+            position={planePosition}
+            rotation={[-Math.PI/2, 0, 0]}
+          >
+            <planeBufferGeometry args={[cellSize, cellSize]} />
+            <meshBasicMaterial color={color2} />
+          </mesh>
+        );
+      }
+    }
+  }
+
   return (
     <>
-      <gridHelper args={[4096, 4096]} />
+      <CameraControl cameraSpeed={props.cameraSpeed} cameraFar={props.cameraFar} />
+      {props.isGrid &&
+        <gridHelper args={[gridHelperSize, gridHelperSize]} />
+      }
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
       <Perf position={"bottom-right"} style={{ position: "absolute" }} minimal={true}/>
+      <>
+      {numberElements}
+      {numberPlanes}
+      </>
     </>
   )
 }
@@ -257,7 +447,11 @@ const SystemHelper = () => {
  * WASDカメラ視点移動
  * 補助操作
  */
-const SystemControl = () => {
+interface ICameraControl {
+  cameraFar: number;
+  cameraSpeed: number;
+}
+const CameraControl = (props: ICameraControl) => {
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
@@ -267,19 +461,24 @@ const SystemControl = () => {
 
   useLayoutEffect(() => {
     if (cameraRef && cameraRef.current) {
-      cameraRef.current.position.set(-5, 3, 5);
+      const initCameraPosition = new Vector3(3, 5, 10);
+      cameraRef.current.position.copy(initCameraPosition.clone());
+      cameraRef.current.lookAt(0, 0, 0);
+      camera.position.copy(initCameraPosition.clone());
+      camera.lookAt(0, 0, 0);
     }
   }, []);
 
   useEffect(() => {
     if (cameraRef && cameraRef.current) {
+      camera.far = props.cameraFar;
       cameraRef.current.far = camera.far;
     }
-  }, [camera]);
+  }, [props.cameraFar]);
 
   useFrame((_, delta) => {
     if (input.dash && (input.forward || input.backward || input.right || input.left)) {
-      const st = 0.5;
+      const st = props.cameraSpeed * delta;
       const cameraDirection = new Vector3();
       cameraRef.current.getWorldDirection(cameraDirection);
       const cameraPosition = cameraRef.current.position.clone();
