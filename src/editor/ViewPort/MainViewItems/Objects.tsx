@@ -1,7 +1,7 @@
 import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
-import { Box3, BoxHelper, Euler, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Vector3, WireframeGeometry } from "three";
+import { Box3, BoxHelper, Color, Euler, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3, WireframeGeometry } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
@@ -40,6 +40,8 @@ interface IStaticObject {
   isHelper: boolean;
 }
 
+const StandardMaterial = new MeshStandardMaterial();
+
 /**
  * 基本的なオブジェクトのみ
  * @param props 
@@ -56,6 +58,7 @@ const StaticObject = (props: IStaticObject) => {
     }
   })
   const ref = useRef<Group|Object3D|Mesh>();
+  const tempMaterialData = useRef<any>();
   const editor = useContext(NinjaEditorContext);
   const id = props.om.id;
 
@@ -94,6 +97,14 @@ const StaticObject = (props: IStaticObject) => {
       ref.current.position.copy(editor.getPosition(id));
       ref.current.rotation.copy(editor.getRotation(id));
       ref.current.scale.copy(editor.getScale(id));
+      const materialData = editor.getMaterialData(id);
+      if (materialData) {
+        ref.current.traverse((node: any) => {
+          if (node.isMesh && node instanceof Mesh) {
+            node.material = materialData.material;
+          }
+        })
+      }
     }
   }, []);
 
@@ -122,6 +133,18 @@ const StaticObject = (props: IStaticObject) => {
       ref.current.rotation.copy(rot);
       const sca = editor.getScale(id);
       ref.current.scale.copy(sca);
+      const materialData = editor.getMaterialData(id);
+      if (materialData && tempMaterialData.current !== materialData) {
+        tempMaterialData.current = materialData;
+        console.log("反映");
+        ref.current.traverse((node: any) => {
+          if (node.isMesh && node instanceof Mesh) {
+            const material = StandardMaterial.clone();
+            material.color.set(new Color(materialData.value));
+            node.material = material;
+          }
+        })
+      }
     }
   });
 

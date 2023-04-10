@@ -4,7 +4,7 @@ import {
   useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useState, useRef } from "react";
-import { BoxHelper, DirectionalLight, DirectionalLightHelper, DoubleSide, Euler, Material, Mesh, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
+import { BoxHelper, Color, DirectionalLight, DirectionalLightHelper, DoubleSide, Euler, Material, Mesh, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
@@ -78,6 +78,13 @@ export const MyLight = (prop: ILightProps) => {
     if (om.args.scale){
       ref.current.scale.copy(om.args.scale.clone());
     }
+    if (om.args.materialData){
+      const materialData = om.args.materialData;
+      if (ref.current.color && materialData.value){
+        ref.current.color.copy(new Color(materialData.value));
+      }
+      ref.current.needsUpdate = true;
+    }
   }, []);
 
   useFrame((_, delta) => {
@@ -90,20 +97,29 @@ export const MyLight = (prop: ILightProps) => {
 
     if (ref.current){
       if (state.editorFocus){
+        const materialData = editor.getMaterialData(id);
+        if (materialData){
+          if (ref.current.color && materialData.value){
+            ref.current.color.copy(new Color(materialData.value));
+          }
+          ref.current.needsUpdate = true;
+        }
+      }
+      else {
         const color = ref.current?.color;
-        if (color && color.isColor){
-          const meshStandardMaterial = ref.current? ref.current.material: new Material();
-          meshStandardMaterial.color.set(color);
-          editor.setMaterial(id, meshStandardMaterial);
+        if (color){
+          editor.setMaterialData(id, "standard", "#"+color.getHexString());
         }
       }
       const castShadow = editor.getCastShadow(id);
       const receiveShadow = editor.getreceiveShadow(id);
       ref.current.castShadow = castShadow;
       ref.current.receiveShadow = receiveShadow;
-      const material = editor.getMaterial(id);
-      if (material instanceof Material){
-        ref.current.material = material;
+      const materialData = editor.getMaterialData(id);
+      if (materialData && materialData.type == "standard"){
+        if (ref.current.color && materialData.color){
+          ref.current.color.copy(new Color(materialData.color));
+        }
         ref.current.needsUpdate = true;
       }
     }

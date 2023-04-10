@@ -33,7 +33,7 @@ export const MainViewInspector = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       myFrame();
-    }, 1000 / 10);
+    }, 1000 / 5);
     return () => clearInterval(interval);
   }, [id, globalStore.editorFocus, globalStore.pivotControl, position, rotation, scale, color]);
 
@@ -59,10 +59,14 @@ export const MainViewInspector = () => {
         setScale(scale);
       }
 
-      const material = editor.getMaterial(id);
-      if (material && material instanceof MeshStandardMaterial){
-        console.log("マテリアルかえんで");
-        setColor(material.color.getHexString());
+      const materialData = editor.getMaterialData(id);
+      if (materialData && materialData.type != "shader"){
+        if (materialType?.value != materialData.type){
+          setMaterialType(materialOptions.find((option) => option.value == materialData.type));
+        }
+        if (color != materialData.value){
+          setColor(materialData.value);
+        }
       }
     }
   }
@@ -170,12 +174,9 @@ export const MainViewInspector = () => {
   /**
    * 色の変更
    */
-  const changeMaterial = (type: "color" | "texture", value: any) => {
-    if (type == "color" && value){
-      const meshStandardMaterial = new MeshStandardMaterial();
-      meshStandardMaterial.color.set(value);
-      editor.setMaterial(id, meshStandardMaterial);
-      console.log("check color");
+  const changeMaterial = (value: any) => {
+    if (materialType.value !== "shader" && value){
+      editor.setMaterialData(id, materialType.value, value);
       setColor(value);
     }
   }
@@ -493,7 +494,7 @@ export const MainViewInspector = () => {
                   <input 
                     type={"color"} 
                     value={color} 
-                    onChange={(e) => changeMaterial("color", e.target.value)}
+                    onChange={(e) => changeMaterial(e.target.value)}
                     onFocus={() => globalStore.editorFocus = true}
                     onBlur={() => globalStore.editorFocus = false}
                   />

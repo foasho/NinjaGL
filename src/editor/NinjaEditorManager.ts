@@ -198,10 +198,13 @@ export class NinjaEditorManager {
    * @param id 
    * @param material Material
    */
-  setMaterial(id: string, material: Material){
+  setMaterialData(id: string, type: "standard"|"phong"|"tone"|"shader", value: any){
     const target = this.oms.find(om => om.id == id);
     if (target){
-      target.args.material = material;
+      target.args.materialData = {
+        type: type,
+        value: value
+      };
     }
   }
 
@@ -316,12 +319,12 @@ export class NinjaEditorManager {
    * 特定のオブジェクトからマテリアルを取得
    * @param id 
    */
-  getMaterial(id: string): Material{
+  getMaterialData(id: string){
     const target = this.oms.find(om => om.id == id);
-    if (!target || !target.args.material) {
+    if (!target || !target.args.materialData) {
       return null;
     }
-    return target.args.material;
+    return target.args.materialData;
   }
 
   /**

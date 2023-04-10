@@ -2,7 +2,7 @@ import { IObjectManagement } from "@/core/utils/NinjaProps";
 import { useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
-import { BoxHelper, Euler, Group, Material, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
+import { BoxHelper, Euler, Group, Material, Matrix4, Mesh, MeshPhongMaterial, MeshStandardMaterial, MeshToonMaterial, Object3D, ShaderMaterial, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager"
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
@@ -38,8 +38,9 @@ const ThreeObject = (props: IThreeObject) => {
   const ref = useRef<Mesh>();
   const editor = useContext(NinjaEditorContext);
   const [helper, setHelper] = useState<boolean>(false);
+  const [materialType, setMaterialType] = useState<"standard"|"phong"|"tone"|"shader">("standard");
   const id = props.om.id;
-  const matRef = useRef<Material>();
+  const matRef = useRef<any>();
   let geometry;
   if (om.args.type == "plane") {
     geometry = (<planeBufferGeometry />);
@@ -57,6 +58,11 @@ const ThreeObject = (props: IThreeObject) => {
     geometry = (<capsuleGeometry />);
   }
 
+  let material;
+  if (materialType == "standard") {
+    material = (<meshStandardMaterial ref={matRef} />);
+  }
+
   // 操作系
   const onDragStart = () => {
     globalStore.pivotControl = true;
@@ -64,15 +70,7 @@ const ThreeObject = (props: IThreeObject) => {
   const onDragEnd = () => {
     // globalStore.pivotControl = false;
   }
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.position.copy(editor.getPosition(id));
-      ref.current.rotation.copy(editor.getRotation(id));
-      ref.current.scale.copy(editor.getScale(id));
-    }
-  }, []);
-
+  
   const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
@@ -83,6 +81,22 @@ const ThreeObject = (props: IThreeObject) => {
     editor.setRotation(id, rotation);
     globalStore.pivotControl = true;
   }
+  
+    useEffect(() => {
+      if (ref.current) {
+        ref.current.position.copy(editor.getPosition(id));
+        ref.current.rotation.copy(editor.getRotation(id));
+        ref.current.scale.copy(editor.getScale(id));
+        const materialData = editor.getMaterialData(id);
+        if (materialData && materialData.type == "standard"){
+          if (materialType == "standard"){
+            if (matRef.current){
+              matRef.current.color.set(materialData.value);
+            }
+          }
+        }
+      }
+    }, []);
 
   useFrame((_, delta) => {
     if (state.currentId == id && state.editorFocus && ref.current) {
@@ -92,14 +106,13 @@ const ThreeObject = (props: IThreeObject) => {
       ref.current.rotation.copy(rot);
       const scale = editor.getScale(id);
       ref.current.scale.copy(scale);
-      const material = editor.getMaterial(id);
-      console.log("check m");
-      console.log(material);
-      if (material && matRef.current !== material){
-        console.log("set material");
-        console.log(material);
-        matRef.current = new MeshStandardMaterial({ color: 0x00ff00 });
-        matRef.current.needsUpdate = true;
+      const materialData = editor.getMaterialData(id);
+      if (materialData && materialData.type == "standard"){
+        if (materialType == "standard"){
+          if (matRef.current){
+            matRef.current.color.set(materialData.value);
+          }
+        }
       }
     }
     if (ref.current){
@@ -140,7 +153,7 @@ const ThreeObject = (props: IThreeObject) => {
             receiveShadow={true}
           >
             {geometry}
-            {matRef.current}
+            {material}
           </mesh>
         </>
       }

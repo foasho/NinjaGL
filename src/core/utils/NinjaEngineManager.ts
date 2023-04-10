@@ -367,8 +367,8 @@ export class NinjaEngine {
           )
         }
         else if (key == "threes"){
-          Object.keys(jsonData[key]).map((key: string) => {
-            const targetObj = jsonData[key][key];
+          Object.keys(jsonData[key]).map((_key: string) => {
+            const targetObj = jsonData[key][_key];
             const obj: IObjectManagement = targetObj;
             this.oms.push(obj);
             const om = this.oms.find((om: IObjectManagement) => om.id == targetObj.id);
