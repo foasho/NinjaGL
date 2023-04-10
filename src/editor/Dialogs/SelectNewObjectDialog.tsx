@@ -30,6 +30,12 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectThree = (value: string) => {
     prop.response({ type: "three", value: value });
   }
+  const selectFog = (value: string) => {
+    prop.response({ type: "fog", value: value });
+  }
+  const selectCamera = (value: string) => {
+    prop.response({ type: "camera", value: value });
+  }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
     console.log(e);
@@ -86,7 +92,22 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("ui")}
               </div>
             </div>
-            
+            <div className={styles.card} onClick={() => {setSelectType("camera")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/camera.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("camera")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("fog")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/fog.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("fog")}
+              </div>
+            </div>
           </>
           }
 
@@ -202,6 +223,41 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </div>
           </>
           }
+
+          {selectType == "fog" &&
+          <>
+            <div className={styles.card} onClick={() => {selectFog("fog")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/fog.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("fog")}
+              </div>
+            </div>
+          </>
+          }
+
+
+          {selectType == "camera" &&
+          <>
+            <div className={styles.card} onClick={() => {selectCamera("fixed")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/fixed-camera.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("fixedCamera")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectCamera("moveable")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/moveable-camera.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("moveableCamera")}
+              </div>
+            </div>
+          </>
+        }
         </div>
       </div>
     </div>
@@ -211,7 +267,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound" | "object" | "three" | "ui";
+  type: "light" | "sky" | "sound" | "object" | "three" | "ui" | "camera" | "fog";
   value: string;
 }
 /**

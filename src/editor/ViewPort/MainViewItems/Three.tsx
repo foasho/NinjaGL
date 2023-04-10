@@ -12,9 +12,6 @@ import { globalStore } from "@/editor/Store";
 export const ThreeObjects = () => {
   const editor = useContext(NinjaEditorContext);
   const [threeOMs, setThreeOMs] = useState<IObjectManagement[]>([]);
-  const enabledCamera = (trig: boolean) => {
-    editor.setEnabledCamera(trig);
-  }
   useEffect(() => {
     setThreeOMs(editor.getThreeObjects())
   }, [])
@@ -94,7 +91,7 @@ const ThreeObject = (props: IThreeObject) => {
       const rot = editor.getRotation(id);
       ref.current.rotation.copy(rot);
       const scale = editor.getScale(id);
-      // ref.current.scale.copy(scale);
+      ref.current.scale.copy(scale);
       const material = editor.getMaterial(id);
       console.log("check m");
       console.log(material);
@@ -117,7 +114,7 @@ const ThreeObject = (props: IThreeObject) => {
     }
   });
 
-  useHelper(((globalStore.currentId == id) && helper) && ref, BoxHelper);
+  useHelper(((state.currentId == id) && helper) && ref, BoxHelper);
 
   return (
     <>
@@ -125,8 +122,8 @@ const ThreeObject = (props: IThreeObject) => {
         <>
           {!state.editorFocus &&
             <PivotControls
-              object={(globalStore.currentId == id) ? ref : undefined}
-              visible={(globalStore.currentId == id)}
+              object={(state.currentId == id) ? ref : undefined}
+              visible={(state.currentId == id)}
               depthTest={false}
               lineWidth={2}
               anchor={[0, 0, 0]}

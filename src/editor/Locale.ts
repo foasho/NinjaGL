@@ -103,6 +103,9 @@ const resources = {
       touchController: "Touch Controller",
       aabb: "AABB",
       along: "Along Shape",
+      camera: "Camera",
+      fixedCamera: "Fixed Camera",
+      moveableCamera: "Moveable Camera by User",
     }
   },
   ja: {
@@ -210,6 +213,9 @@ const resources = {
       touchController: "タッチコントローラ",
       aabb: "AABB",
       along: "形状に沿う",
+      camera: "カメラ",
+      fixedCamera: "固定カメラ",
+      moveableCamera: "ユーザー操作可能カメラ",
     }
   }
 }

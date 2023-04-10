@@ -28,32 +28,23 @@ export const DebugPlay = () => {
     const sky = editor.getSky();
     const lights = editor.getLights();
     const threes = editor.getThreeObjects();
-    if (!avatar || !terrain){
-      Swal.fire({
-        icon: "error",
-        title: t("errorDebugPlay")
-      });
+    const jsonData: any = {
+      config: config,
+      terrain: terrain,
+      objects: objects,
+      threes: threes,
+      sky: sky,
+      lights: lights
     }
-    else {
-      // AvatarとTerrainは複製する
+    if (avatar){
       const _avatar = { ...avatar };
       const target = SkeletonUtils.clone(_avatar.object);
-      console.log("target: ", target);
       target.animations = avatar.animations;
       _avatar.object = target;
-      // _avatar.object = SkeletonUtilsClone(_avatar.object);
-      const jsonData = {
-        config: config,
-        avatar: _avatar,
-        terrain: terrain,
-        objects: objects,
-        threes: threes,
-        sky: sky,
-        lights: lights
-      }
-      _engine.setJsonData(jsonData);
-      setEngine(_engine);
+      jsonData.avatar = _avatar;
     }
+    _engine.setJsonData(jsonData);
+    setEngine(_engine);
     return () => {
     }
   }, []);

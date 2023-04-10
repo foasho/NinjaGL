@@ -10,13 +10,7 @@ import { reqApi } from "@/services/ServciceApi";
 import { useInputControl } from "./InputControls";
 import { NinjaShader } from "./NinjaShader";
 import { NJCFile } from "./NinjaFileControl";
-
-export interface INinjaEngineProps {
-  worldSize?: number;
-  jsonPath?: string;
-  layerGrid?: number;
-
-}
+import { InitDesktopConfipParams, InitMobileConfipParams, InitTabletConfipParams } from "./NinjaInit";
 
 let nowLoadedFiles: { [key: string]: number } = { "sample": 0 };
 export let totalFileSize: number = 1;
@@ -26,14 +20,12 @@ export let loadingText: string = "ファイルサイズを取得中...";
 export class NinjaEngine {
   jsonData: any = null;
   cameraLayer: number = 1;
-  layerGrid: number = 6;
-  layerLength: number = 3;
   possibleLayers: number[] = [];
+  config: IConfigParams = InitMobileConfipParams;
   nowLoading: boolean = false;
   loadCompleted: boolean = false;
   deviceType: "mobile" | "tablet" | "desktop" = "desktop";
   useGPU: boolean = false;
-  worldSize: number = 64;
   memory: { totalHeap: number, usedHeap: number, availableHeap: number } = {
     totalHeap: 0,
     usedHeap: 0,
@@ -58,38 +50,48 @@ export class NinjaEngine {
   canvasPos: Vector2 = new Vector2(0, 0);
   // ScriptWorker[ユーザースクリプト]
   worker: Worker; // Web Worker
+
+  /**
+   * コンストラクタ
+   */
   constructor() { 
-    this.worker = new Worker("worker.js");
-    this.worker.onmessage = (e: MessageEvent) => {
-      this.handleWorkerMessage(e);
-    }
+    // this.worker = new Worker("worker.js");
+    // this.worker.onmessage = (e: MessageEvent) => {
+    //   this.handleWorkerMessage(e);
+    // }
   }
 
   /**
    * セットアップ
    */
-  allSetup(props?: INinjaEngineProps) {
+  allSetup() {
+    this.config = InitMobileConfipParams;
     this.detectDevice();
     this.detectGPU();
     this.updateAvailableMemory();
-    if (props && props.worldSize) this.worldSize = props.worldSize;
     this.world = new World();
     const L = this.getOctreeL();
     this.octree = new Octree({
       min: new Vector3(
-        -this.worldSize / 2,
-        -this.worldSize / 2,
-        -this.worldSize / 2
+        -this.config.mapsize / 2,
+        -this.config.mapsize / 2,
+        -this.config.mapsize / 2
       ),
       max: new Vector3(
-        this.worldSize / 2,
-        this.worldSize / 2,
-        this.worldSize / 2
+        this.config.mapsize / 2,
+        this.config.mapsize / 2,
+        this.config.mapsize / 2
       ),
       maxDepth: L
     });
     this.world.addOctree(this.octree);
-    this.possibleLayers = [...Array((this.layerGrid * this.layerGrid))].map((_, idx) => { return idx + 1 });
+    // if (this.deviceType == "tablet") {
+    //   this.config = InitTabletConfipParams;
+    // }
+    // else if (this.deviceType == "desktop") {
+    //   this.config = InitDesktopConfipParams;
+    // }
+    this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
   }
 
   /**
@@ -212,7 +214,7 @@ export class NinjaEngine {
   getOctreeL = (): number => {
     const maxL = 7;
     let n = 0;
-    let l = this.worldSize;
+    let l = this.config.mapsize;
     for (l; l > 1; l = l / 2) {
       n++;
     }
@@ -317,7 +319,7 @@ export class NinjaEngine {
               }
             })
             // 物理世界に適応させる
-            this.octree.importThreeObj3D(key, object);
+            this.octree.importThreeObj3D(key, object, key);
             const obj: IObjectManagement = {
               id: jsonData[key].id,
               type: key,
@@ -342,10 +344,11 @@ export class NinjaEngine {
                 if (om.physics == "aabb" && om.object instanceof Object3D){
                   const aabb = new Box3();
                   aabb.setFromObject(om.object);
-                  this.octree.importAABB(om.id, aabb);
+                  console.log("inpirtAABB", key, aabb);
+                  this.octree.importAABB(om.id, aabb, "objects");
                 }
                 else if (om.physics == "along" && om.object instanceof Object3D){
-                  this.octree.importThreeObj3D(om.id, om.object);
+                  this.octree.importThreeObj3D(om.id, om.object, key);
                 }
                 // args.positionがあれば追加したFaceを移動させる
                 if (om.args.position){
@@ -379,10 +382,10 @@ export class NinjaEngine {
                 if (om.physics == "aabb" && om.object instanceof Object3D){
                   const aabb = new Box3();
                   aabb.setFromObject(om.object);
-                  this.octree.importAABB(om.id, aabb);
+                  this.octree.importAABB(om.id, aabb, key);
                 }
                 else if (om.physics == "along" && om.object instanceof Object3D){
-                  this.octree.importThreeObj3D(om.id, om.object);
+                  this.octree.importThreeObj3D(om.id, om.object, key);
                 }
                 // args.positionがあれば追加したFaceを移動させる
                 if (om.args.position){
@@ -867,71 +870,89 @@ export class NinjaEngine {
   /**
    * 現在のレイヤーから可視する周辺のレイヤー番号を取得する
    */
-  getActiveLayers(layerNum: number) {
-    const l = this.layerLength; // 監視グリッドエリア範囲
-    const g = this.layerGrid;   // グリッド数
-    const n = layerNum;        // 現在レイヤー
-
-    const r = n % g;// 現在レイヤーの列番号
-    const c = Math.ceil(n / g);// 現在レイヤーの行番号
+  getActiveLayers(
+    layerNum: number,
+    layerGrid: number = this.config.layerGridNum,
+    layerLength: number = this.config.viewGridLength,
+  ) {
+    const l = layerLength;
+    const g = layerGrid;
+    const n = layerNum;
+  
+    const r = (n - 1) % g; // 現在レイヤーの列番号
+    const c = Math.ceil((n - 1) / g); // 現在レイヤーの行番号
     const layers = [n];
-
-    [...Array(l)].map((_, idx) => {
+  
+    Array.from({ length: l }).map((_, idx) => {
       const i = idx + 1;
       // 中心
       layers.push((c - 1 - i) * g + r);
       layers.push((c - 1 + i) * g + r);
       layers.push((c - 1) * g + (r - i));
       layers.push((c - 1) * g + (r + i));
-
+  
       // 周辺
-      [...Array(l - i)].map((_none, _idx) => {
+      Array.from({ length: l - i }).map((_none, _idx) => {
         const _i = _idx + 1;
         layers.push((c - 1 - _i) * g + (r - _i));
         layers.push((c - 1 + _i) * g + (r - _i));
         layers.push((c - 1 - _i) * g + (r + _i));
         layers.push((c - 1 + _i) * g + (r + _i));
       });
-
+  
     });
-
+  
     // はみ出たレイヤーは削除する
     const availableLayers = layers.filter(layerNo => this.possibleLayers.includes(layerNo));
     return availableLayers;
   }
+  
 
   /**
    * 特定のPositionからレイヤー番号を取得する
    */
-  getLayerNumber(pos: Vector3) {
-    const layerXLen = this.worldSize / this.layerGrid;
-    const layerZLen = this.worldSize / this.layerGrid;
-    const cx = this.worldSize / 2;
-    const cz = this.worldSize / 2;
+  getLayerNumber(
+    pos: Vector3, 
+    worldSize: number = this.config.mapsize,
+    layerGrid: number = this.config.layerGridNum
+  ) {
+    const layerXLen = worldSize / layerGrid;
+    const layerZLen = worldSize / layerGrid;
+    const cx = worldSize / 2;
+    const cz = worldSize / 2;
     if (cx < Math.abs(pos.x)) return null; // ワールド範囲外X方向
     if (cz < Math.abs(pos.z)) return null; // ワールド範囲外Z方向
     const px = pos.x + cx;
     const pz = pos.z + cz;
-    const r = Math.ceil(px / layerXLen);
-    const c = Math.ceil((this.worldSize - pz) / layerZLen);
-    const layer = (c - 1) * this.layerGrid + r;
+    // const r = Math.ceil(px / layerXLen);
+    const r = Math.ceil((worldSize - px) / layerXLen); // この行を修正しました
+    const c = Math.ceil((worldSize - pz) / layerZLen);
+    const layer = (c - 1) * layerGrid + r;
     return layer;
   }
 
   /**
      * 特定のレイヤーの中心座標を取得する
      */
-  getCenterPosFromLayer(layer: number, yPos: number = 0.5, worldSize: number=this.worldSize, layerGrid:number = this.layerGrid): Vector3 {
-    const layerXLen = worldSize / this.layerGrid;
-    const layerZLen = worldSize / this.layerGrid;
+  getCenterPosFromLayer(
+    layer: number, 
+    yPos: number = 0.5, 
+    worldSize: number=this.config.mapsize, 
+    layerGrid:number = this.config.layerGridNum
+  ): Vector3 {
+    const layerXLen = worldSize / layerGrid;
+    const layerZLen = worldSize / layerGrid;
     const cx = worldSize / 2;
     const cz = worldSize / 2;
     const c = Math.ceil(layer/layerGrid);
-    let r = ((layer) % (layerGrid));
-    if (r == 0) r = layerGrid;
-    const absPosX = r * layerXLen;
+    let r = (layer) % (layerGrid);
+    if (r === 0) r = layerGrid;
+    const absPosX = (layerGrid - r) * layerXLen;
     const absPosZ = (c-1) * layerZLen;
-    const worldXZ = [absPosX - cx - layerXLen/2, - absPosZ + cz - layerZLen/2];
+    const worldXZ = [
+      absPosX - cx + layerXLen / 2,
+      - absPosZ + cz - layerZLen/2
+    ];
     return new Vector3(worldXZ[0], yPos, worldXZ[1]);
   }
 
@@ -999,19 +1020,17 @@ export class NinjaEngine {
           visibleLayers.push(nowAvatarLayer);
         }
         visibleLayers.map((layerNum) => {
-          // 見える範囲を表示する
+          // 見える範囲は表示する
           this.camera.layers.enable(layerNum);
         });
         const disableLayers = this.possibleLayers.filter(layerNum => !visibleLayers.includes(layerNum));
-  
         // みえない範囲を非表示にする
         disableLayers.map((layerNum) => {
             this.camera.layers.disable(layerNum);
         });
         this.cameraLayer = nowCameraLayer;
-        console.log("OFFにしました; ", disableLayers);
+        this.camera.layers.enable(0);
       }
-      console.log("現在のカメラレイヤー", nowCameraLayer);
     }
   }
 

@@ -80,13 +80,13 @@ export class Octree extends Box3 {
    * 物理世界へMeshデータを取り込む
    * @param threeMesh 
    */
-  importThreeMesh(name: string, threeMesh: Mesh) {
+  importThreeMesh(name: string, threeMesh: Mesh, type: string) {
     threeMesh.updateMatrix();
     var geometory = threeMesh.geometry;
     geometory.applyMatrix4(threeMesh.matrix);
     geometory.computeVertexNormals();
     if (geometory instanceof BufferGeometry) {
-      this.importGeometories(name, [geometory]);
+      this.importGeometories(name, [geometory], type);
     }
   }
 
@@ -95,9 +95,8 @@ export class Octree extends Box3 {
    * @param name 
    * @param geometries 
    */
-  importGeometories(name: string, geometries: BufferGeometry[]) {
+  importGeometories(name: string, geometries: BufferGeometry[], type: string) {
     geometries.map((geometry) => {
-      var geometryId = geometry.uuid;
       if (geometry.index) {
         var indices = geometry.index.array;
         if (geometry.attributes.position instanceof GLBufferAttribute) return;
@@ -124,7 +123,9 @@ export class Octree extends Box3 {
             var cb = new Vector3().subVectors(vC, vB);
             var ab = new Vector3().subVectors(vA, vB);
             var faceNormal = cb.cross(ab).normalize().clone();
-            var face = new Face({ a: vA, b: vB, c: vC, normal: faceNormal, meshID: geometryId, name: name });
+            var face = new Face(
+              { a: vA, b: vB, c: vC, normal: faceNormal, type, name: name }
+            );
             this.addFace(face);
           }
         }
@@ -142,7 +143,7 @@ export class Octree extends Box3 {
    * @param threeGLTF 
    * @returns 
    */
-  importThreeGLTF(name: string, threeGLTF: GLTF) {
+  importThreeGLTF(name: string, threeGLTF: GLTF, type: string) {
     const geometries = [];
     threeGLTF.scene.traverse((node: Mesh) => {
       if (node.isMesh) {
@@ -156,7 +157,7 @@ export class Octree extends Box3 {
         }
       }
     });
-    this.importGeometories(name, geometries);
+    this.importGeometories(name, geometries, type);
     return geometries;
   }
 
@@ -166,7 +167,7 @@ export class Octree extends Box3 {
    * @param threeObject
    * @returns 
    */
-  importThreeObj3D(name: string, threeObject: Object3D) {
+  importThreeObj3D(name: string, threeObject: Object3D, type: string) {
     const geometries = [];
     threeObject.traverse((node: Mesh) => {
       if (node.isMesh) {
@@ -180,14 +181,14 @@ export class Octree extends Box3 {
         }
       }
     });
-    this.importGeometories(name, geometries);
+    this.importGeometories(name, geometries, type);
     return geometries;
   }
 
   /**
    * AABBを物理世界に取り入れる
    */
-  importAABB(name: string, aabb: Box3) {
+  importAABB(name: string, aabb: Box3, type: string) {
     const corners = [
       new Vector3(aabb.min.x, aabb.min.y, aabb.min.z),
       new Vector3(aabb.max.x, aabb.min.y, aabb.min.z),
@@ -208,7 +209,9 @@ export class Octree extends Box3 {
       [4, 5, 1, 0, 0, -1, 0],
     ];
 
-    const createFace = (a, b, c, normal, name) => new Face({ a, b, c, normal: new Vector3(...normal), meshID: name, name });
+    const createFace = (a, b, c, normal, name) => new Face(
+      { a, b, c, normal: new Vector3(...normal), type, name }
+    );
 
     for (const [i1, i2, i3, i4, nx, ny, nz] of indices) {
       const f1 = createFace(corners[i1], corners[i2], corners[i3], [nx, ny, nz], name);
@@ -230,7 +233,7 @@ export class Octree extends Box3 {
     const faces = [];
     for (const node of this.nodes[0]) {
       for (const face of node.trianglePool) {
-        if (face.meshID === name) {
+        if (face.name === name) {
           faces.push(face);
         }
       }
@@ -293,10 +296,12 @@ export class Octree extends Box3 {
    */
   translateFaceByName(name: string, translation: Vector3) {
     const faces = this.getFacesByName(name);
-      faces.forEach((face) => {
-        face.a.add(translation);
-        face.b.add(translation);
-        face.c.add(translation);
+    console.log("Facesの移動確認");
+    console.log(faces);
+    faces.forEach((face) => {
+      face.a.add(translation);
+      face.b.add(translation);
+      face.c.add(translation);
     });
   }
 
@@ -305,14 +310,14 @@ export class Octree extends Box3 {
 
   /**
    * メッシュの削除
-   * @param meshId 
+   * @param type オブジェクトの種類
    */
-  removeThreeMesh(meshId: string) {
+  removeThreeMeshByType(type: string) {
     this.nodes.forEach((nodeDepth) => {
       nodeDepth.forEach((node) => {
         var newTrianglePool = [];
         node.trianglePool.forEach((face) => {
-          if (face.meshID !== meshId) {
+          if (face.type !== type) {
             newTrianglePool.push(face);
           }
         });
@@ -345,7 +350,7 @@ export class Octree extends Box3 {
    * @param depth Octreeの深さ
    * @returns 
    */
-  getIntersectedNodes(sphere: Sphere, depth: number) {
+  getIntersectedNodes(sphere: Sphere, depth: number): OctreeNode[] {
     var tmp = [];
     var intersectedNodes = [];
     var isIntersected = isInstersectSphereBox(sphere, this);
@@ -417,8 +422,8 @@ const getMortonNumber = (x: number, y: number, z: number) => {
 /**
  * ユニークな三角形からノードを生成
  */
-export const uniqTrianglesFromNodes = (nodes: OctreeNode[]) => {
-  const uniq = [];
+export const uniqTrianglesFromNodes = (nodes: OctreeNode[]): Face[] => {
+  const uniq: Face[] = [];
   let isContained = false;
   if (nodes.length === 0) return [];
   if (nodes.length === 1) return nodes[0].trianglePool.slice(0);
@@ -460,7 +465,7 @@ export class OctreeNode extends Box3 {
   mortonNumber: number;
   min: Vector3;
   max: Vector3;
-  trianglePool = [];
+  trianglePool: Face[] = [];
 
   constructor(props: IOctreeNodeProps) {
     super();
@@ -505,11 +510,11 @@ export class OctreeNode extends Box3 {
  */
 interface IFaceProps {
   name: string;
+  type: string;
   a: Vector3;
   b: Vector3;
   c: Vector3;
   normal: Vector3;
-  meshID: string;
 }
 export class Face {
   isMove: boolean;// 動くものかどうか
@@ -518,7 +523,7 @@ export class Face {
   b: Vector3;
   c: Vector3;
   normal: Vector3;
-  meshID: string;
+  type: string;
   node: OctreeNode | null = null;
   constructor(props: IFaceProps) {
     this.name = props.name;
@@ -526,6 +531,6 @@ export class Face {
     this.b = props.b.clone();
     this.c = props.c.clone();
     this.normal = props.normal.clone();
-    this.meshID = props.meshID;
+    this.type = props.type;
   }
 }

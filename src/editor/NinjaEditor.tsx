@@ -97,12 +97,39 @@ export const NinjaEditor = () => {
       // )
     }
     else if (data.type == "three"){
-      console.log("three", data.type);
       editor.setObjectManagement(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
           type: "three",
+          args: {
+            type: data.value
+          },
+          physics: "none",
+          visibleType: "auto",
+        }
+      );
+    }
+    else if (data.type == "camera"){
+      editor.setObjectManagement(
+        {
+          id: MathUtils.generateUUID(),
+          name: `*${data.value}`,
+          type: "camera",
+          args: {
+            type: data.value
+          },
+          physics: "none",
+          visibleType: "auto",
+        }
+      )
+    }
+    else if (data.type == "fog"){
+      editor.setObjectManagement(
+        {
+          id: MathUtils.generateUUID(),
+          name: `*${data.value}`,
+          type: "fog",
           args: {
             type: data.value
           },

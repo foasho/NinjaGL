@@ -1,12 +1,19 @@
 import { Object3D, Mesh, Group, Vector2, AnimationClip, AnimationMixer, Audio, Vector3 } from "three";
 
-export interface INinjaProps {
-  mode: "play" | "edit"
-}
-
+/**
+ * NinjaGLの基本パラメータ
+ */
 export interface IConfigParams {
-  physics: { octree: "auto" },
-  mapsize: number;
+  autoScale: boolean; // 自動スケールさせるか
+  antialias: boolean; // アンチエイリアスを有効にするか
+  shadowResolution: 128 | 256 | 512 | 1024; // 影の解像度レベル(128 | 256 | 512 | 1024)
+  mapsize: number; // マップサイズ
+  layerGridNum: number; // レイヤーグリッド数
+  cameraFar: number; // カメラの遠近感
+  lodDistance: number; // LODの切り替え距離
+  dpr: number| number[]; // デバイスピクセル比
+  viewGridLength: number; // ビューグリッドの長さ
+  initCameraPosition?: Vector3; // カメラの初期位置
 }
 
 /**
@@ -31,7 +38,7 @@ export interface IInputMovement {
 export interface IObjectManagement {
   id: string;
   name?: string;
-  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light" | "fog";
+  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light" | "fog" | "camera";
   filePath?: string;
   visibleType: "auto" | "force" | "none";
   layerNum?: number;

@@ -231,6 +231,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   )
 }
 
+
 export const ContentViewer = (props: IFileProps) => {
   let icon: JSX.Element;
   let tooltipTimer: NodeJS.Timeout = null;

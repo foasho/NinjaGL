@@ -1,6 +1,6 @@
 import { Sphere } from "three";
 import { IInputMovement } from "./NinjaProps";
-import { Octree, uniqTrianglesFromNodes } from "./Octree";
+import { Face, Octree, uniqTrianglesFromNodes } from "./Octree";
 import { AvatarController } from "./AvatarController";
 
 export class World {
@@ -36,7 +36,7 @@ export class World {
   step(timeDelta: number, input: IInputMovement) {
     for (var i = 0, l = this.avatarPool.length; i < l; i++) {
       var chara = this.avatarPool[i];
-      var faces = void 0;
+      var faces: Face[] = void 0;
       // octree で絞られた node に含まれる face だけを
       // character に渡して判定する
       for (var ii = 0, ll = this.octreePool.length; ii < ll; ii++) {
@@ -50,8 +50,16 @@ export class World {
         // 重複を削除する
         faces = uniqTrianglesFromNodes(intersectedNodes);
       }
-      // 重複を削除したものを渡す
+      // 衝突したものをAvatarデータに渡す
       chara.collisionCandidate = faces;
+      if (chara.collisionCandidate.length > 0) {
+        chara.collisionCandidate.forEach((face) => {
+          if (face.type == "objects") {
+            console.log("CAAollisionCandidate: ", faces.filter((f) => f.type == "objects").length);
+          }
+        }
+        );
+      }
       // キャラクターの更新
       chara.update(timeDelta, input);
     }

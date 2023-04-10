@@ -21,6 +21,8 @@ import styles from "@/App.module.scss";
 import { MeshoptDecoder } from "meshoptimizer";
 import { isNumber } from "@/commons/functional";
 import Swal from "sweetalert2";
+import { Cameras } from "./MainViewItems/Cameras";
+import { FogComponent } from "./MainViewItems/Fog";
 
 export const MainViewer = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -39,6 +41,11 @@ export const MainViewer = () => {
   const [isGizmo, setIsGizmo] = useState<boolean>(true);
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
   const [showUI, setShowUI] = useState<boolean>(false);
+
+  /**
+   * Editorの設定に同期
+   */
+  editor.setConfigMapsize
 
   /**
    * シーンへの直接ドラッグ＆ドロップ時
@@ -196,6 +203,8 @@ export const MainViewer = () => {
         <Avatar/>
         <MySky/>
         <ThreeObjects/>
+        <Cameras/>
+        <FogComponent/>
         <SystemHelper isGizmo={isGizmo} cameraFar={cameraFar} cameraSpeed={cameraSpeed} worldSize={worldSize} isGrid={isGrid} isWorldHelper={isWorldHelper} worldGridSize={worldGridSize} />
       </Canvas>
       <div className={styles.uiCanvas} style={{ display: showUI? "block": "none" }}>
@@ -383,11 +392,14 @@ const SystemHelper = (props: ISysytemHelper) => {
     const cx = worldSize / 2;
     const cz = worldSize / 2;
     const c = Math.ceil(layer/layerGrid);
-    let r = ((layer) % (layerGrid));
-    if (r == 0) r = layerGrid;
-    const absPosX = r * layerXLen;
+    let r = (layer) % (layerGrid);
+    if (r === 0) r = layerGrid;
+    const absPosX = (layerGrid - r) * layerXLen;
     const absPosZ = (c-1) * layerZLen;
-    const worldXZ = [absPosX - cx - layerXLen/2, - absPosZ + cz - layerZLen/2];
+    const worldXZ = [
+      absPosX - cx + layerXLen / 2,
+      - absPosZ + cz - layerZLen/2
+    ];
     return new Vector3(worldXZ[0], yPos, worldXZ[1]);
   }
 
@@ -395,8 +407,8 @@ const SystemHelper = (props: ISysytemHelper) => {
     for (let i = 0; i < divisions; i++) {
       for (let j = 0; j < divisions; j++) {
         const number = i * divisions + j + 1;
-        const textPosition = getCenterPosFromLayer(number, 0.5, props.worldSize, divisions);
-        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.01, 0));
+        const textPosition = getCenterPosFromLayer(number, 0, props.worldSize, divisions);
+        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.001, 0));
         const isEven = (i + j) % 2 === 0;
         const color1 = (isEven)? new Color(0x808080): new Color(0xd3d3d3);
         const color2 = (isEven)? new Color(0xd3d3d3): new Color(0x808080);
@@ -405,7 +417,7 @@ const SystemHelper = (props: ISysytemHelper) => {
             key={number}
             fontSize={cellSize * 0.25}
             position={textPosition}
-            rotation={[-Math.PI/2, 0, 0]}
+            rotation={[Math.PI/2, Math.PI, 0]}
             color={color1}
           >
             {number}
@@ -431,9 +443,11 @@ const SystemHelper = (props: ISysytemHelper) => {
       {props.isGrid &&
         <gridHelper args={[gridHelperSize, gridHelperSize]} />
       }
+      {props.isGizmo &&
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
+      }
       <Perf position={"bottom-right"} style={{ position: "absolute" }} minimal={true}/>
       <>
       {numberElements}
@@ -461,7 +475,7 @@ const CameraControl = (props: ICameraControl) => {
 
   useLayoutEffect(() => {
     if (cameraRef && cameraRef.current) {
-      const initCameraPosition = new Vector3(3, 5, 10);
+      const initCameraPosition = new Vector3(-3, 5, -10);
       cameraRef.current.position.copy(initCameraPosition.clone());
       cameraRef.current.lookAt(0, 0, 0);
       camera.position.copy(initCameraPosition.clone());

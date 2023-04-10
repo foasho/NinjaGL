@@ -16,9 +16,6 @@ import { globalStore } from "@/editor/Store";
 export const StaticObjects = () => {
   const editor = useContext(NinjaEditorContext);
   const [staticOMs, setStaticOMs] = useState<IObjectManagement[]>([]);
-  const enabledCamera = (trig: boolean) => {
-    editor.setEnabledCamera(trig);
-  }
   useEffect(() => {
     setStaticOMs(editor.getObjects())
   }, [])
@@ -31,7 +28,7 @@ export const StaticObjects = () => {
     <>
       {staticOMs.map(om => {
         if (om.type == "object") {
-          return <StaticObject om={om} onStopCamera={enabledCamera} isHelper={true} />
+          return <StaticObject om={om} isHelper={true} />
         }
       })}
     </>
@@ -40,7 +37,6 @@ export const StaticObjects = () => {
 
 interface IStaticObject {
   om: IObjectManagement;
-  onStopCamera: (value: boolean) => void;
   isHelper: boolean;
 }
 
@@ -59,20 +55,8 @@ const StaticObject = (props: IStaticObject) => {
       node.receiveShadow = true;
     }
   })
-  const ref = useRef<Group|Object3D>();
+  const ref = useRef<Group|Object3D|Mesh>();
   const editor = useContext(NinjaEditorContext);
-  const handleDrag = useRef<boolean>(false);
-  const editorData = useRef<{ 
-    focus: boolean; 
-    position: Vector3, 
-    rotation: Euler, 
-    scale: Vector3 
-  }>({ 
-    focus: false, 
-    position: new Vector3(), 
-    rotation: new Euler(), 
-    scale: new Vector3() 
-  });
   const id = props.om.id;
 
   // Get Size
@@ -89,7 +73,7 @@ const StaticObject = (props: IStaticObject) => {
   }
 
   const onDragStart = () => {
-    globalStore.editorFocus = true;
+    globalStore.pivotControl = true;
   }
   const onDragEnd = () => {
   }
@@ -99,14 +83,19 @@ const StaticObject = (props: IStaticObject) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    if (state.pivotControl){
-      console.log(position);
-      editor.setPosition(id, position);
-      editor.setScale(id, scale);
-      editor.setRotation(id, rotation);
-    }
-    globalStore.editorFocus = true;
+    editor.setPosition(id, position);
+    editor.setScale(id, scale);
+    editor.setRotation(id, rotation);
+    globalStore.pivotControl = true;
   }
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.position.copy(editor.getPosition(id));
+      ref.current.rotation.copy(editor.getRotation(id));
+      ref.current.scale.copy(editor.getScale(id));
+    }
+  }, []);
 
   const lineSegs = [];
   if (props.om.physics == "along"){
@@ -124,12 +113,9 @@ const StaticObject = (props: IStaticObject) => {
       }
     });
   }
-  else if (props.om.physics == "aabb" && (globalStore.currentId == id)){
-  }
-  useHelper(((globalStore.currentId == id) && props.om.physics != "none") && ref, BoxHelper);
-
+  
   useFrame((_, delta) => {
-    if (state.editorFocus && ref.current){
+    if (state.currentId == id && state.editorFocus && ref.current){
       const pos = editor.getPosition(id);
       ref.current.position.copy(pos);
       const rot = editor.getRotation(id);
@@ -139,12 +125,14 @@ const StaticObject = (props: IStaticObject) => {
     }
   });
 
+  useHelper(((state.currentId == id) && props.om.physics == "aabb") && ref, BoxHelper);
+  
   return (
     <>
       {!state.editorFocus &&
         <PivotControls 
-          object={(globalStore.currentId == id) ? ref : undefined}
-          visible={(globalStore.currentId == id)}
+          object={(state.currentId == id) ? ref : undefined}
+          visible={(state.currentId == id)}
           depthTest={false}
           lineWidth={2}
           anchor={[0, 0, 0]}
@@ -153,12 +141,13 @@ const StaticObject = (props: IStaticObject) => {
           onDragEnd={() => onDragEnd()}
         />
       }
-      <primitive
-        object={object}
-        ref={ref}
-        onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
-        onPointerMissed={(e) => (e.type === 'click' && !handleDrag.current) && (globalStore.init())}
-      />
+        <primitive
+          visible={state.hiddenList.indexOf(id) == -1}
+          ref={ref}
+          onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+          onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
+          object={object}
+        />
       {props.om.physics == "along" &&
         <>
           {lineSegs.map((lineSeg, index) => {

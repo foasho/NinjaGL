@@ -4,6 +4,7 @@ import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
 import { GLTFLoader, SkeletonUtils } from "three-stdlib";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 import JSZip from 'jszip';
+import { InitMobileConfipParams } from "./NinjaInit";
 
 /**
  * データ構成を定義
@@ -31,7 +32,7 @@ export class NJCFile {
     this.ums = [];
     this.tms = [];
     this.scs = [];
-    this.config = { physics: { octree: "auto" }, mapsize: 64 }
+    this.config = InitMobileConfipParams;
   }
   addOM(om: IObjectManagement): void {
     this.oms.push(om);
@@ -149,6 +150,18 @@ export const loadNJCFile = async (file: File): Promise<NJCFile> => {
     njcFile.addOM(om);
   }
   return njcFile;
+}
+
+/**
+ * NJCファイルPathから読み込む
+ * @param file Path
+ * @returns 
+ */
+export const loadNJCFileFromURL = async (url: string): Promise<NJCFile> => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const file = new File([blob], "file.njc", { type: 'application/octet-stream' });
+  return await loadNJCFile(file);
 }
 
 async function loadGLTFFromData(data: ArrayBuffer): Promise<Object3D> {

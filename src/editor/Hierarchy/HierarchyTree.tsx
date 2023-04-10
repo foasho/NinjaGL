@@ -126,6 +126,16 @@ const TreeItem = (prop: ITreeItem) => {
    * 表示非表示切り替え
    */
   const changeVisible = () => {
+    const changeVisible = !visible;
+    if (!changeVisible) {
+      state.hiddenList.includes(id) ? null : globalStore.hiddenList.push(id);
+    }
+    else {
+      const index = state.hiddenList.indexOf(id);
+      if (index !== -1) { 
+        globalStore.hiddenList.splice(index, 1);
+      }
+    }
     editor.setVisible(id, !visible);
     setVisible(!visible);
   }

@@ -1,9 +1,7 @@
 import { NinjaEngine, NinjaEngineContext } from "@/core/utils/NinjaEngineManager";
-import { InitNinja } from "@/core/utils/NinjaInit";
-import { INinjaProps } from "@/core/utils/NinjaProps";
 import { useEffect, useState } from "react";
 import { NinjaCanvas } from "./NinjaCanvas";
-import { NinjaUI } from "./NinjaUI";
+import { loadNJCFileFromURL } from "./utils/NinjaFileControl";
 
 export interface INinjaGLProps {
   jsonPath?: string;
@@ -21,7 +19,8 @@ export const NinjaGL = (props: INinjaGLProps) => {
         await _engine.setJson(props.jsonPath);
       }
       else if (props.njcPath && props.njcPath.length > 3){
-        await _engine.setNJCPath(props.njcPath);
+        const data = await loadNJCFileFromURL(props.njcPath);
+        _engine.setJsonData(data);
       }
       else {
         await _engine.setJson(defaultProjectJsonPath);

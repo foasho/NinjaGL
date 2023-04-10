@@ -7,6 +7,7 @@ interface IGlobalStore {
   currentId: string;
   editorFocus: boolean;
   pivotControl: boolean;
+  hiddenList: string[];
   init: () => void;
 }
 export const globalStore = proxy<IGlobalStore>(
@@ -14,6 +15,7 @@ export const globalStore = proxy<IGlobalStore>(
     currentId: null, 
     editorFocus: false,
     pivotControl: false,
+    hiddenList: [],
     init: () => {
       globalStore.currentId = null;
       globalStore.editorFocus = false;
@@ -30,6 +32,7 @@ interface IGlobalUIStore {
   currentId: string;
   editorFocus: boolean;
   moveableControl: boolean;
+  hiddenList: string[];
   init: () => void;
 }
 export const globalUIStore = proxy<IGlobalUIStore>(
@@ -37,6 +40,7 @@ export const globalUIStore = proxy<IGlobalUIStore>(
     currentId: null,
     editorFocus: false,
     moveableControl: false,
+    hiddenList: [],
     init: () => {
       globalUIStore.currentId = null;
       globalUIStore.editorFocus = false;

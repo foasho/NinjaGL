@@ -6,7 +6,10 @@ import { Fog } from "three";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
 
-
+/**
+ * 霧のコンポーネント
+ * @returns 
+ */
 export const FogComponent = () => {
     const state = useSnapshot(globalStore);
     const ref = useRef<Fog>();

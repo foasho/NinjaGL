@@ -4,6 +4,7 @@ import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
 import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
 import { NJCFile } from "@/core/utils/NinjaFileControl";
+import { InitMobileConfipParams } from "@/core/utils/NinjaInit";
 
 interface ISetObjectManagement {
   id?: string;
@@ -49,7 +50,7 @@ export class NinjaEditorManager {
   fileSelect: string = "";
   assetRoute: string = "";
   contentsSelect: boolean = false;
-  contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" = null;
+  contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "camera" = null;
   contentsSelectPath: string = "";// コンテンツブラウザ内のItemを選択した時にパスを設定する
   /**
    * 地形メーカー
@@ -79,14 +80,19 @@ export class NinjaEditorManager {
   initialize = () => {
     this.config = null;
     this.terrainManager = new TerrainMakerManager();
-    this.config = {
-      physics: { octree: "auto" },
-      mapsize: 128
-    };
+    this.config= InitMobileConfipParams;
     this.oms = [];
     this.ums = [];
     this.camera = null;
     this.tms = [];
+  }
+
+  /**
+   * レンダラー設定をセット
+   * @param config 
+   */
+  setConfig = (config: IConfigParams) => {
+    this.config = config;
   }
 
   /**
@@ -474,18 +480,12 @@ export class NinjaEditorManager {
   }
 
   /**
-   * カメラを停止稼働の切り替え
+   * カメラ取得
    */
-  setEnabledCamera = (trig: boolean) => {
-    this.camera.enabled = trig;
+  getCameras = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "camera");
+    return data;
   }
-
-  /**
-   * カメラの状態を取得
-   */
-  getEnabledCamera = (): boolean => {
-    return this.camera.enabled;
-  };
 
   /**
    * 
