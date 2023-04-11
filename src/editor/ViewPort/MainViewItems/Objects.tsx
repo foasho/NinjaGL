@@ -136,7 +136,6 @@ const StaticObject = (props: IStaticObject) => {
       const materialData = editor.getMaterialData(id);
       if (materialData && tempMaterialData.current !== materialData) {
         tempMaterialData.current = materialData;
-        console.log("反映");
         ref.current.traverse((node: any) => {
           if (node.isMesh && node instanceof Mesh) {
             const material = StandardMaterial.clone();
