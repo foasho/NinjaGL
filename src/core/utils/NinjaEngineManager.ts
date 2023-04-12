@@ -48,18 +48,15 @@ export class NinjaEngine {
   // Canvasのサイズ
   canvasSize: Vector2 = new Vector2(0, 0);
   canvasPos: Vector2 = new Vector2(0, 0);
-  // ScriptWorker[ユーザースクリプト]
-  worker: Worker; // Web Worker
+  /**
+   * Workerのインスタンス
+   */
+  worker: Worker;
 
   /**
    * コンストラクタ
    */
-  constructor() { 
-    // this.worker = new Worker("worker.js");
-    // this.worker.onmessage = (e: MessageEvent) => {
-    //   this.handleWorkerMessage(e);
-    // }
-  }
+  constructor() { }
 
   /**
    * セットアップ
@@ -162,6 +159,19 @@ export class NinjaEngine {
     this.tms = njcFile.tms;
     this.scs = njcFile.scs;
     if (njcFile.config){}
+  }
+
+  /**
+   * ユーザースクリプトを読み込む
+   */
+  private async loadUserScript(scriptPathes: string[]): Promise<void> {
+    const importScriptsCode = scriptPathes.map(scriptPath => `importScripts('${scriptPath}');`).join('\n');
+    const userScriptBlob = new Blob([`
+      ${importScriptsCode}
+    `], { type: 'application/javascript' });
+    
+    const userScriptURL = URL.createObjectURL(userScriptBlob);
+    this.worker = new Worker(userScriptURL);
   }
 
   /**
@@ -452,196 +462,6 @@ export class NinjaEngine {
         totalSize += nowLoadedFiles[key];
       })
       loadPer = 100 * Number((totalSize / totalFileSize).toFixed(2));
-    }
-  }
-
-  /**
-   * WebWorkerのメッセージを処理する
-   */
-  handleWorkerMessage = (e: MessageEvent) => {
-    const { type, data } = e.data;
-    if (type == "getOM") {
-      // OMを取得する
-      const { id } = data;
-      this.worker.postMessage({ type: "getOM", data: this.getOMById(id) })
-    }
-    else if (type == "setPosition"){
-      // 特定のIDのOMの位置を変更する
-      const { id, position } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        om.object.position.set(position.x, position.y, position.z);
-      }
-    }
-    else if (type == "getPosition") {
-      // 特定のIDのOMの位置を取得する
-      const { id } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        this.worker.postMessage({ type: "getPosition", data: om.object.position })
-      }
-    }
-    else if (type == "setRotation"){
-      // 特定のIDのOMの回転を変更する
-      const { id, rotation } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        om.object.rotation.set(rotation.x, rotation.y, rotation.z);
-      }
-    }
-    else if (type == "getRotation") {
-      // 特定のIDのOMの回転を取得する
-      const { id } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        this.worker.postMessage({ type: "getRotation", data: om.object.rotation })
-      }
-    }
-    else if (type == "setScale"){
-      // 特定のIDのOMのスケールを変更する
-      const { id, scale } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        om.object.scale.set(scale.x, scale.y, scale.z);
-      }
-    }
-    else if (type == "getScale") {
-      // 特定のIDのOMのスケールを取得する
-      const { id } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        this.worker.postMessage({ type: "getScale", data: om.object.scale })
-      }
-    }
-    else if (type == "setQuaternion"){
-      // 特定のIDのOMの回転を変更する
-      const { id, quaternion } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        om.object.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-      }
-    }
-    else if (type == "setAvatar"){
-      // アバターをセットする
-      const { threeMesh } = data;
-      this.setAvatar(threeMesh);
-    }
-    else if (type == "setAvatarPosition"){
-      // アバターの位置をセットする
-      const { position } = data;
-      const avatarObject = this.getAvatarObject();
-      if (avatarObject) {
-        avatarObject.object.position.set(position.x, position.y, position.z);
-        // 物理世界の位置も更新する
-        this.world.sphere.center.set(position.x, position.y, position.z);
-      }
-    }
-    else if (type == "changeAvatarOffset"){
-      // アバターのカメラオフセットを変更する
-      const { offset } = data;
-      this.avatar.cameraOffset = offset.clone();
-    }
-    else if (type == "changeUniforms"){
-      // 特定のIDのOMのuniformsを変更する
-      const { id, uniforms } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        if (om.object instanceof Mesh && om.object.material) {
-          Object.keys(uniforms).map((key) => {
-            if (om.object instanceof Mesh){
-              om.object.material.uniforms[key].value = uniforms[key];
-            }
-          });
-          om.object.material.needsUpdate = true;
-        }
-      }
-    }
-    else if (type == "changeVisible"){
-      // 特定のIDのOMのvisibleを変更する
-      const { id, visible } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        om.object.visible = visible;
-      }
-    }
-    else if (type == "changeVisibleType"){
-      // 特定のIDのOMのvisibleTypeを変更する
-      const { id, visibleType } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        om.visibleType = visibleType;
-      }
-    }
-    else if (type == "changeAnimation"){
-      // 特定のIDのOMのanimationを変更する
-      const { id, animation } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        if (om.object instanceof SkinnedMesh) {
-          om.mixer.stopAllAction();
-          om.mixer.clipAction(animation).play();
-        }
-      }
-    }
-    else if (type == "startAnimationByName"){
-      // 特定のIDのOMのanimationを開始する
-      const { id, animationName } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        if (om.object instanceof SkinnedMesh) {
-          const animation = om.animations.find(animation => animation.name == animationName);
-          if (animation) {
-            om.mixer.stopAllAction();
-            om.mixer.clipAction(animation).play();
-          }
-        }
-      }
-    }
-    else if (type == "stopAnimationByName"){
-      // 特定のIDのOMのanimationを停止する
-      const { id, animationName } = data;
-      const om = this.getOMById(id);
-      if (om) {
-        if (om.object instanceof SkinnedMesh) {
-          const animation = om.animations.find(animation => animation.name == animationName);
-          if (animation) {
-            om.mixer.stopAllAction();
-          }
-        }
-      }
-    }
-    else if (type == "startSound"){
-      // 特定のIDのサウンドを開始する
-      const { id } = data;
-      const sound = this.getSoundById(id);
-      if (sound) {
-        sound.sound.play();
-      }
-    }
-    else if (type == "loopSound"){
-      // 特定のIDのサウンドをループする
-      const { id } = data;
-      const sound = this.getSoundById(id);
-      if (sound) {
-        sound.sound.setLoop(true);
-        sound.sound.play();
-      }
-    }
-    else if (type == "stopSound"){
-      // 特定のIDのサウンドを停止する
-      const { id } = data;
-      const sound = this.getSoundById(id);
-      if (sound) {
-        sound.sound.stop();
-      }
-    }
-    else if (type == "setSoundVolume"){
-      // 特定のIDのサウンドの音量を変更する
-      const { id, volume } = data;
-      const sound = this.getSoundById(id);
-      if (sound) {
-        sound.sound.setVolume(volume);
-      }
     }
   }
 

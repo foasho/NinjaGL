@@ -7,7 +7,7 @@ import { useState, useEffect, useContext, useRef, createContext } from "react";
 import { MathUtils } from "three";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
-import { AiFillHome, AiFillSave, AiOutlinePlus } from "react-icons/ai";
+import { AiFillHome, AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMaker } from "./ViewPort/TerrainMaker";
 import { TerrainInspector } from "./Inspector/TerrainInspector";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
@@ -25,6 +25,9 @@ import { loadNJCFile } from "@/core/utils/NinjaFileControl";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
 import { globalStore } from "./Store";
+import { ScriptNavigation } from "./Hierarchy/ScriptNavigation";
+import { ShaderNavigation } from "./Hierarchy/ShaderNavigation";
+import { TextureNavigation } from "./Hierarchy/TextureNavigation";
 
 /**
  * NinjaEngineメインコンポネント
@@ -34,6 +37,7 @@ export const NinjaEditor = () => {
   const editor = useContext(NinjaEditorContext);
   const [projectName, setProjectName] = useState<string>(null);
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
+  const [selectSubNav, setSelectSubNav] = useState<"ui" | "shader" | "script" | "texture">("ui");
   const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [projectFiles, setProjectFiles] = useState<{name: string; path: string}[]>([]);
@@ -364,9 +368,42 @@ export const NinjaEditor = () => {
                 <HierarchyTree />
               </div>
             </div>
-            <div className={styles.uiNavArea}>
-              <div className={styles.uiNav}>
-                <UINavigation />
+            <div className={styles.subNavArea}>
+              <div className={styles.subSelect}>
+                <div className={`${styles.navItem} ${selectSubNav == "ui" && styles.active}`} onClick={() => setSelectSubNav("ui")}>
+                  <span className={styles.icon}>
+                    <AiOutlineAppstore />
+                  </span>
+                </div>
+                <div className={`${styles.navItem} ${selectSubNav == "script" && styles.active}`} onClick={() => setSelectSubNav("script")}>
+                  <span className={styles.icon}>
+                    <AiOutlineCode />
+                  </span>
+                </div>
+                <div className={`${styles.navItem} ${selectSubNav == "shader" && styles.active}`} onClick={() => setSelectSubNav("shader")}>
+                  <span className={styles.icon}>
+                    <AiOutlineHighlight />
+                  </span>
+                </div>
+                <div className={`${styles.navItem} ${selectSubNav == "texture" && styles.active}`} onClick={() => setSelectSubNav("texture")}>
+                  <span className={styles.icon}>
+                    <AiOutlinePicture />
+                  </span>
+                </div>
+              </div>
+              <div className={styles.subNav}>
+                {selectSubNav == "ui" &&
+                  <UINavigation />
+                }
+                {selectSubNav == "script" &&
+                  <ScriptNavigation/>
+                }
+                {selectSubNav == "shader" &&
+                  <ShaderNavigation/>
+                }
+                {selectSubNav == "texture" &&
+                  <TextureNavigation/>
+                }
               </div>
             </div>
             <div className={styles.contentsbrowser}>
@@ -447,7 +484,7 @@ export const NinjaEditor = () => {
               }
               {viewSelect == "scripteditor" &&
                 <>
-                  <ScriptEditor scriptPath={scriptPath} onChangeScriptPath={changeScriptEditor}/>
+                  <ScriptEditor />
                 </>
               }
               {viewSelect == "shadereditor" &&
@@ -461,7 +498,7 @@ export const NinjaEditor = () => {
           <div 
             className={styles.inspector}
             style={{
-              display: ((viewSelect == "mainview" && !state.currentId))?"none": "block",
+              display: ((viewSelect == "mainview" && state.currentId))?"block": "none",
             }}
           >
             {(viewSelect == "mainview") &&

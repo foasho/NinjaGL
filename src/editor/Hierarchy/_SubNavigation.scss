@@ -1,7 +1,29 @@
-.uiNavArea {
+.subNavArea {
     padding: 5px 12px;
     min-height: 20%;
-    .uiNav {
+    .subSelect {
+        text-align: center;
+        margin-bottom: 6px;
+        padding: 0;
+        height: 25px;
+        padding: 0;
+        color: #fff;
+        user-select: none;
+        .navItem {
+            background-color: #3b3b3b;
+            display: inline-block;
+            span {
+                padding: 0 10px;
+                font-size: 16px;
+                border-right: 2px solid #000;
+                cursor: pointer;
+            }
+        }
+        .active {
+            background-color: #000000;
+        }
+    }
+    .subNav {
         margin: 0;
         .title {
             color: #fff;

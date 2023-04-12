@@ -70,18 +70,29 @@ export interface ITextureManagement {
   id: string;
   name?: string;
   filePath?: string;
+}
+
+/**
+ * Shaderマネジメント
+ */
+export interface IShaderManagement {
+  id: string;
+  vertexShader?: string;
+  fragmentShader?: string;
+  name?: string;
+  filePath?: string;
   binary: Blob;
 }
+
 
 /**
  * スクリプトマネジメント
  */
 export interface IScriptManagement {
-  type: string;// 未定
-  id: string;
-  name?: string;
-  filePath?: string;
-  script?: string;
+  type: string;     // 種別: "script"今は一つだけ
+  id: string;       // ID: UUID
+  name: string;     // 名前
+  filePath: string; // ファイルパス
 }
 
 export interface ISoundProps {

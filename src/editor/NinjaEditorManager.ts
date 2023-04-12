@@ -31,6 +31,9 @@ interface IPlayerManager {
   
 }
 
+/**
+ * Ninjaエディタクラス
+ */
 export class NinjaEditorManager {
   render: WebGLRenderer;
   config: IConfigParams;

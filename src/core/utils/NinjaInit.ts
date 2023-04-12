@@ -1,4 +1,5 @@
-import { IConfigParams } from "./NinjaProps";
+import { MathUtils } from "three";
+import { IConfigParams, IScriptManagement } from "./NinjaProps";
 
 export const InitMobileConfipParams: IConfigParams = {
   shadowResolution: 256,
@@ -37,3 +38,10 @@ export const InitDesktopConfipParams: IConfigParams = {
   dpr: dpr,
   viewGridLength: 4,
 };
+
+export const InitScriptManagement: IScriptManagement = {
+  id: MathUtils.generateUUID(),
+  name: "nonname-script" + MathUtils.generateUUID().substring(0, 6),
+  type: "script",
+  filePath: null,
+}

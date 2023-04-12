@@ -1,3 +1,4 @@
+import { IScriptManagement } from '@/core/utils/NinjaProps';
 import { proxy } from 'valtio';
 
 /**
@@ -48,6 +49,28 @@ export const globalUIStore = proxy<IGlobalUIStore>(
     }
   }
 );
+
+/**
+ * スクリプト操作状態管理
+ */
+interface IGlobalScriptStore {
+  currentSM: IScriptManagement;
+  init: () => void;
+}
+export const globalScriptStore = proxy<IGlobalScriptStore>(
+  {
+    currentSM: null,
+    init: () => {
+      globalScriptStore.currentSM = null;
+    }
+  }
+);
+
+/**
+ * マテリアル操作状態管理
+ */
+
+
 
 /**
  * Addon操作状態管理

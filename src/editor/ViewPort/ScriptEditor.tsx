@@ -1,22 +1,106 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
-import MonacoEditor from "@monaco-editor/react";
+import MonacoEditor, { Monaco } from "@monaco-editor/react";
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { reqApi } from '@/services/ServciceApi';
 import { useTranslation } from 'react-i18next';
+import { Web3Instance } from '@/core/workers/Web3Instance';
+import { IScriptManagement } from '@/core/utils/NinjaProps';
+import { InitScriptManagement } from '@/core/utils/NinjaInit';
+import { useSnapshot } from 'valtio';
+import { globalScriptStore } from '../Store';
 
-interface IScriptEditor {
-  scriptPath: string;
-  onChangeScriptPath: (path: string) => void;
-}
-export const ScriptEditor = (props: IScriptEditor) => {
+
+export const ScriptEditor = () => {
+  const scriptState = useSnapshot(globalScriptStore);
   const [code, setCode] = useState<string>(initCode);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const { scriptPath } = props;
+  const { id, filePath, name } = scriptState.currentSM? scriptState.currentSM : InitScriptManagement;
   const { t } = useTranslation();
   const handleEditorChange = (value) => {
     setCode(value);
+  };
+
+  const loadCode = (script: string) => {
+    const data = script.replace(
+      `self['${id}'].initialize = initialize;\nself['${id}'].frameLoop = frameLoop;`,
+       ""
+    );
+    return data;
+  }
+
+  /**
+   * 予測変換を設定
+   * @param monaco 
+   */
+  const handleEditorDidMount = (monaco: Monaco, editor) => {
+    // 入力付加項目とSuggentionの設定
+    monaco.languages.registerCompletionItemProvider('javascript', {
+      provideCompletionItems: (model, position, token) => {
+        // 現在のカーソル位置の前のテキストを取得します。
+        const textUntilPosition = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        const suggestions = [];
+        if (textUntilPosition.includes("Web3Instance.")) {
+          suggestions.push({
+            label: "getWalletAddress",
+            kind: monaco.languages.CompletionItemKind.Function,
+            documentation: "Get Wallet Address",
+            insertText: "getWalletAddress()",
+          });
+        }
+        else if (textUntilPosition.includes("EngineInstance.")){
+          suggestions.push({
+            label: "getObjectById",
+            kind: monaco.languages.CompletionItemKind.Function,
+            documentation: "Get ObjectData by Id",
+            insertText: "getObjectById()",
+          });
+        }
+        else{
+          suggestions.push(
+            {
+              label: 'EngineInstance',
+              kind: monaco.languages.CompletionItemKind.Module,
+              documentation: 'EngineInstance',
+              insertText: 'EngineInstance',
+            },
+            {
+              label: 'Web3Instance',
+              kind: monaco.languages.CompletionItemKind.Module,
+              documentation: 'Web3Instance',
+              insertText: 'Web3Instance',
+            },
+            {
+              label: 'Web3Instance.getWalletAddress()',
+              kind: monaco.languages.CompletionItemKind.Function,
+              documentation: 'Get Wallet Address',
+              insertText: 'Web3Instance.getWalletAddress()',
+            },
+            {
+              label: 'userData',
+              kind: monaco.languages.CompletionItemKind.Variable,
+              documentation: 'userData',
+              insertText: 'userData',
+            },
+            {
+              label: 'MyTesting',
+              kind: monaco.languages.CompletionItemKind.Variable,
+              documentation: 'MyTesting',
+              insertText: 'MyTesting',
+            },
+          );
+        }
+
+        return Promise.resolve({ suggestions });
+      },
+    });
   };
 
   /**
@@ -26,9 +110,14 @@ export const ScriptEditor = (props: IScriptEditor) => {
    * @returns 
    */
   const saveCode = async(script: string, filename: string) => {
+    /**
+     * 保存前に、グローバルスコープを追加する
+     */
+    const UserScriptData = script + "\n\n"
+       + `self['${id}'].initialize = initialize;\nself['${id}'].frameLoop = frameLoop;`;
     return reqApi({ 
       route: "savescript",
-      data: { script: script, filename: filename } ,
+      data: { script: UserScriptData, filename: filename } ,
       method: "POST"
     })
   }
@@ -37,9 +126,8 @@ export const ScriptEditor = (props: IScriptEditor) => {
    * 保存
    */
   const onSave = async () => {
-    if (scriptPath){
-      const len = scriptPath.split("/").length;
-      const filename = scriptPath.split("/")[len - 1];
+    if (filePath){
+      const filename = name.replace(".js", "") + ".js";
       await saveCode(code, filename);
       toast(t("save"), {
         position: "top-right",
@@ -83,7 +171,6 @@ export const ScriptEditor = (props: IScriptEditor) => {
             progress: undefined,
             theme: "light",
           });
-          props.onChangeScriptPath("scripts/"+filename);
         }
       });
     }
@@ -108,15 +195,15 @@ export const ScriptEditor = (props: IScriptEditor) => {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (props.scriptPath){
+    if (filePath){
       const fetchData = async () => {
         try {
-          const response = await fetch(scriptPath, { signal });
+          const response = await fetch(filePath, { signal });
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
           const data = await response.text();
-          setCode(data);
+          setCode(loadCode(data));
         } catch (error) {
           if (error.name === 'AbortError') {
             console.log('Fetch aborted');
@@ -133,20 +220,14 @@ export const ScriptEditor = (props: IScriptEditor) => {
       document.removeEventListener('keydown', handlerSave);
       controller.abort();
     };
-  }, [scriptPath]);
-
-  let filename = t("nonNameScript");
-  if (scriptPath){
-    const len = scriptPath.split("/").length;
-    filename = scriptPath.split("/")[len - 1];
-  }
+  }, [scriptState.currentSM]);
 
   return (
     <>
     <div className={styles.scriptEditor}>
       <div className={styles.navigation}>
         <div className={styles.filename}>
-          {filename}
+          {name}
         </div>
         <div className={styles.save} onClick={() => onSave()}>
           Save
@@ -163,6 +244,8 @@ export const ScriptEditor = (props: IScriptEditor) => {
           theme="vs-dark"
           value={code}
           onChange={handleEditorChange}
+          onMount={(editor, monaco) => handleEditorDidMount(monaco, editor)}
+          // beforeMount={(monaco) => handleEditorWillMount(monaco)}
           options={{
             selectOnLineNumbers: true,
             roundedSelection: false,
@@ -183,19 +266,20 @@ const initCode = `
   * -公式ドキュメント: https://www.example.com/
   * -公式サンプル    : https://www.example.com/
   **/
-  const engine = this;
-    
+
   /**
    *  呼び出し時
    */
-  const init = () => {}
+  async function initialize() {
+    // your code
+  }
 
   /**
    * 毎フレーム事の処理
    * @param state: {  }
    * @param delta: 1フレーム時間(秒)
    */
-  const frameLoop = (state, delta) => {
-
+  async function frameLoop(state, delta) {
+    // your code
   }
 `;
