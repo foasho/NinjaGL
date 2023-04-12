@@ -218,7 +218,8 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           return (
             <>
               <ContentViewer 
-                {...file} onDoubleClick={onDoubleClick}
+                {...file} 
+                onDoubleClick={onDoubleClick}
                 changeScriptEditor={props.changeScriptEditor}
               />
             </>
@@ -367,6 +368,7 @@ export const ContentViewer = (props: IFileProps) => {
               text.includes(searchString) 
               && text.includes(searchString2)
             ) {  
+              sm.script = text;
               return true;
             }
           }

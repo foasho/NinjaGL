@@ -16,7 +16,7 @@ export const ScriptEditor = () => {
   const scriptState = useSnapshot(globalScriptStore);
   const [code, setCode] = useState<string>(initCode);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const { id, filePath, name } = scriptState.currentSM? scriptState.currentSM : InitScriptManagement;
+  const { id, filePath, name } = scriptState.currentSM? scriptState.currentSM : {...InitScriptManagement};
   const { t } = useTranslation();
   const handleEditorChange = (value) => {
     setCode(value);

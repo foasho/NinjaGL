@@ -551,7 +551,7 @@ export class NinjaEditorManager {
    * 
    * @returns 
    */
-  getOms = () => {
+  getOMs = () => {
     return this.oms;
   }
 

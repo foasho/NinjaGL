@@ -40,13 +40,13 @@ export const ScriptNavigation = () => {
           const response = await fetch(filePath);
           if (response.ok) {
             const text = await response.text();
-            // 特定の文字列をチェックします。例えば、'mySpecialString'を探す場合:
             const searchString = "initialize";
             const searchString2 = "frameLoop";
             if (
               text.includes(searchString) 
               && text.includes(searchString2)
             ) {  
+              sm.script = text;
               return true;
             }
           }

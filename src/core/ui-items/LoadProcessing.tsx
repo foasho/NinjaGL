@@ -1,36 +1,35 @@
-import { loadingText, loadPer, NinjaEngineContext, totalFileSize } from "@/core/utils/NinjaEngineManager"
+import { NinjaEngineContext } from "@/core/NinjaEngineManager"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-import { Vector2 } from "three";
 
-export const LoadProcessing = () => {
+const loadingText = "Loading...";
+
+interface ILoadProcessingProps {
+  loadingPercentages: number;
+  nowLoading: boolean;
+  loadCompleted: boolean;
+}
+
+export const LoadProcessing = (props: ILoadProcessingProps) => {
   const ref = useRef<HTMLDivElement>();
   const [per, setPer] = useState<number>(0);
   const engine = useContext(NinjaEngineContext);
-  const [timer, setTimer] = useState<NodeJS.Timer>()
-
-  const setPercentage = () => {
-    if (engine.nowLoading) {
-      setPer(loadPer);
-    }
-    else {
-      clearInterval(timer)
-      setTimer(null);
-    }
-    if (ref.current && engine.nowLoading){
-      const size = engine.getCanvasSize();
-      ref.current.style.width = size.x + "px";
-      ref.current.style.height = size.y + "px";
-    }
-  }
 
   useEffect(() => {
-    const _timer = setInterval(() => { setPercentage() }, 100)
-    setTimer(_timer)
-  }, []);
+    if (props.nowLoading) {
+      setPer(props.loadingPercentages);
+    }
+    if (!props.loadCompleted){
+      if (ref.current){
+        ref.current.style.display = "block";
+      }
+    }
+    else {
+      if (ref.current){
+        ref.current.style.display = "none";
+      }
+    }
+  }, [props.loadCompleted, props.nowLoading, props.loadingPercentages]);
 
-  const size = engine.getCanvasSize()? engine.getCanvasSize(): new Vector2(window.innerWidth, window.innerHeight);
-  const pos = engine.getCanvasPos()? engine.getCanvasPos(): new Vector2(0, 0);
-  
   return (
     <>
       {engine.nowLoading &&
@@ -38,11 +37,9 @@ export const LoadProcessing = () => {
           <div style={
             {
               zIndex: "99999",
-              position: "fixed",
-              top: `${pos.y}px`,
-              left: `${pos.x}px`,
-              height: `${size.y}px`,
-              width: `${size.x}px`,
+              position: "absolute",
+              height: `100%`,
+              width: `100%`,
               background: "#000000"
             }}
             ref={ref}
@@ -62,7 +59,7 @@ export const LoadProcessing = () => {
               <div>
                 {per}%
                 <br/>
-                サイズ: {totalFileSize}
+                サイズ: {props.loadingPercentages}
               </div>
               <div>
                 {loadingText}

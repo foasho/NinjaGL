@@ -10,6 +10,7 @@ export const InitMobileConfipParams: IConfigParams = {
   cameraFar: 500,
   lodDistance: 25,
   dpr: 1,
+  octreeDepth: 5,
   viewGridLength: 4,
 };
 
@@ -22,6 +23,7 @@ export const InitTabletConfipParams: IConfigParams = {
   cameraFar: 750,
   lodDistance: 50,
   dpr: [1, 1.5],
+  octreeDepth: 6,
   viewGridLength: 4,
 };
 
@@ -36,6 +38,7 @@ export const InitDesktopConfipParams: IConfigParams = {
   cameraFar: 1000,
   lodDistance: 100,
   dpr: dpr,
+  octreeDepth: 7,
   viewGridLength: 4,
 };
 
@@ -44,4 +47,5 @@ export const InitScriptManagement: IScriptManagement = {
   name: "nonname-script" + MathUtils.generateUUID().substring(0, 6),
   type: "script",
   filePath: null,
+  script: null,
 }

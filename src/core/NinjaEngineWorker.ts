@@ -1,19 +1,93 @@
 import { SkinnedMesh } from "three";
 import { NinjaEngine } from "./NinjaEngineManager";
+import { IScriptManagement } from "./utils/NinjaProps";
 
-interface IWorkerMessage {
-  type: "WEB3_CALL" | "ENGINE_CALL" | "AXIOS_CALL";
-}
+declare var self: any;
 
-
+/**
+ * NinjaEngineから呼び出されるWorker
+ */
 export class NinjaEngineWorker {
   engine: NinjaEngine;
   worker: Worker;
   constructor(engine: NinjaEngine) {
     this.engine = engine;
-    this.worker = new Worker("../NinjaWorkerApi.js");
-    this.worker.onmessage = (e: MessageEvent) => {
-      this.handleWorkerMessage(e);
+    // 追加
+    this.handleWorkerMessage = this.handleWorkerMessage.bind(this);
+  }
+
+  /**
+   * ユーザースクリプトを読み込む
+   */
+  public async loadUserScript(sms: IScriptManagement[]): Promise<void> {
+    const importScriptsCode = sms.filter((sm) => sm.script)
+      .map(
+        (sm) => `
+        ${sm.script}
+        (function(id) {
+          
+          self[id] = {
+
+            initialize: initialize,
+            frameLoop: frameLoop,
+          };
+        })('${sm.id}');
+      `
+      )
+      .join("\n");
+
+    const workerScript = `
+      ${importScriptsCode}
+      \n
+      self.addEventListener("message", (event) => {
+        const { type, id, state, delta } = event.data;
+        if (type === "runInitialize") {
+          if (self[id] && typeof self[id].initialize === "function") {
+            self[id].initialize();
+          } else {
+            console.error('Initialize function for id not found.');
+          }
+        } else if (type === "runFrameLoop") {
+          if (self[id] && typeof self[id].frameLoop === "function") {
+            self[id].frameLoop(state, delta);
+          } else {
+            console.error('FrameLoop function for id "" not found.');
+          }
+        }
+      });
+    `;
+  
+    const userScriptBlob = new Blob([`${workerScript}`], {
+      type: "application/javascript",
+    });
+  
+    const userScriptURL = URL.createObjectURL(userScriptBlob);
+    this.worker = new Worker(userScriptURL);
+    // initializeとframeLoopを実行できるようにする
+    this.worker.addEventListener("message", this.handleWorkerMessage);
+  }
+
+  /**
+   * Engine側から、
+   * 任意のIDスクリプトをもつユーザースクリプトのinitialize関数を実行する
+   * @param id 
+   */
+  public runInitialize(id: string): void {
+    this.worker.postMessage({ type: "runInitialize", id: id });
+  }
+
+  /**
+   * Engine側から、
+   * 任意のIDスクリプトをもつユーザースクリプトのframeLoop関数を実行する
+   * @param id 
+   * @param state 
+   * @param delta 
+   */
+  public runFrameLoop = (id: string, state: any, delta: number): void => {
+    if (this.worker) {
+      this.worker.postMessage({ type: "runFrameLoop", id: id, state: state, delta: delta });
+    } else {
+      console.error("Worker is not initialized yet.");
     }
   }
 
@@ -22,6 +96,7 @@ export class NinjaEngineWorker {
    */
   handleWorkerMessage = (e: MessageEvent) => {
     const { type, data } = e.data;
+    console.log("check handleWorkerMessage");
     if (type == "getOM") {
       // OMを取得する
       const { id } = data;

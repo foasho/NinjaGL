@@ -3,7 +3,7 @@ import { IInputMovement, ISetSoundOption, ISoundProps, IUpdateSoundOption } from
 import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./Intersects";
 import { Face } from "./Octree";
 import { World } from "./World";
-import { NinjaEngine } from "./NinjaEngineManager";
+import { NinjaEngine } from "../NinjaEngineManager";
 
 /**
  * ベース: https://github.com/yomotsu/meshwalk

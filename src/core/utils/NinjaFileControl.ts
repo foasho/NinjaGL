@@ -34,6 +34,21 @@ export class NJCFile {
     this.sms = [];
     this.config = InitMobileConfipParams;
   }
+  setConfig(config: IConfigParams): void {
+    this.config = config;
+  }
+  setOMs(oms: IObjectManagement[]): void {
+    this.oms = oms;
+  }
+  setUMs(ums: IUIManagement[]): void {
+    this.ums = ums;
+  }
+  setTMs(tms: ITextureManagement[]): void {
+    this.tms = tms;
+  }
+  setSMs(sms: IScriptManagement[]): void {
+    this.sms = sms;
+  }
   addOM(om: IObjectManagement): void {
     this.oms.push(om);
   }
@@ -80,11 +95,11 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
   }
 
   // JSONファイルを追加
-  zip.file('init.json', JSON.stringify({}));
-  zip.file('uis.json', JSON.stringify({}));
-  zip.file('textures.json', JSON.stringify({}));
-  zip.file('addons.json', JSON.stringify({}));
-  zip.file('scripts.json', JSON.stringify({}));
+  zip.file('config.json', JSON.stringify(njcFile.config));
+  zip.file('ums.json', JSON.stringify(njcFile.ums));
+  zip.file('tms.json', JSON.stringify(njcFile.tms));
+  // zip.file('addons.json', JSON.stringify({})); // Addonは未対応
+  zip.file('sms.json', JSON.stringify(njcFile.sms));
   zip.file('oms.json', JSON.stringify(njcFile.oms));
 
   // ZIPファイルを生成
@@ -99,29 +114,45 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
  * @param file 
  * @returns 
  */
-export const loadNJCFile = async (file: File): Promise<NJCFile> => {
+export const loadNJCFile = async (
+  file: File,
+  onProgress?: (itemsLoaded: number, itemsTotal: number) => void
+): Promise<NJCFile> => {
+  const totalSize = file.size;
   const zip = new JSZip();
 
   // ZIPファイルを読み込み
   const loadedZip = await zip.loadAsync(file);
 
   // JSONファイルを抽出
-  const initJson = JSON.parse(await loadedZip.file('init.json').async('text'));
-  const uisJson = JSON.parse(await loadedZip.file('uis.json').async('text'));
-  const texturesJson = JSON.parse(await loadedZip.file('textures.json').async('text'));
-  const scriptsJson = JSON.parse(await loadedZip.file('scripts.json').async('text'));
+  const configJson = JSON.parse(await loadedZip.file('config.json').async('text'));
+  const umsJson = JSON.parse(await loadedZip.file('ums.json').async('text'));
+  const tmsJson = JSON.parse(await loadedZip.file('tms.json').async('text'));
+  const smsJson = JSON.parse(await loadedZip.file('sms.json').async('text'));
   const omsJson = JSON.parse(await loadedZip.file('oms.json').async('text'));
 
   // NJCFileを生成
   const njcFile = new NJCFile();
 
-  // GLBモデルを読み込み
+  // 1. configを設定
+  njcFile.setConfig(configJson);
+  // 2. umsを設定
+  njcFile.setUMs(umsJson);
+  // 3. tmsを設定
+  njcFile.setTMs(tmsJson);
+  // 4. smsを設定
+  njcFile.setSMs(smsJson);
+  // 5. omとGLBモデルを読み込み
   const objectsDir = loadedZip.folder('objects');
   for (const om of omsJson) {
     const glbFile = objectsDir.file(`${om.id}.glb`);
     if (glbFile) {
       const glbData = await glbFile.async('arraybuffer');
-      const object = await loadGLTFFromData(glbData);
+      const object = await loadGLTFFromData(
+        glbData, 
+        onProgress,
+        totalSize
+      );
       om.object = object;
     }
     // Position,Rotation,Scale同期
@@ -149,6 +180,7 @@ export const loadNJCFile = async (file: File): Promise<NJCFile> => {
     }
     njcFile.addOM(om);
   }
+
   return njcFile;
 }
 
@@ -157,14 +189,25 @@ export const loadNJCFile = async (file: File): Promise<NJCFile> => {
  * @param file Path
  * @returns 
  */
-export const loadNJCFileFromURL = async (url: string): Promise<NJCFile> => {
+export const loadNJCFileFromURL = async (
+  url: string,
+  onProgress?: (itemsLoaded: number, itemsTotal: number) => void
+): Promise<NJCFile> => {
   const response = await fetch(url);
   const blob = await response.blob();
-  const file = new File([blob], "file.njc", { type: 'application/octet-stream' });
+  const file = new File(
+    [blob], 
+    "file.njc", 
+    { type: 'application/octet-stream' }
+  );
   return await loadNJCFile(file);
 }
 
-async function loadGLTFFromData(data: ArrayBuffer): Promise<Object3D> {
+async function loadGLTFFromData(
+  data: ArrayBuffer,
+  onProgress?: (itemsLoaded: number, itemsTotal: number) => void,
+  totalSize?: number
+): Promise<Object3D> {
   return new Promise<Object3D>((resolve, reject) => {
     const loader = new GLTFLoader();
     const blob = new Blob([data], { type: 'application/octet-stream' });
@@ -176,7 +219,11 @@ async function loadGLTFFromData(data: ArrayBuffer): Promise<Object3D> {
         resolve(gltf.scene);
         URL.revokeObjectURL(url);
       },
-      undefined,
+      (progress) => {
+        if (onProgress) {
+          onProgress(progress.loaded, totalSize);
+        }
+      },
       (error) => {
         reject(error);
         URL.revokeObjectURL(url);

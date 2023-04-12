@@ -14,6 +14,7 @@ export interface IConfigParams {
   dpr: number| number[]; // デバイスピクセル比
   viewGridLength: number; // ビューグリッドの長さ
   initCameraPosition?: Vector3; // カメラの初期位置
+  octreeDepth: number; // オクトリーツリーの深さ
   isDebug?: boolean; // デバッグモード
 }
 
@@ -94,6 +95,7 @@ export interface IScriptManagement {
   id: string;       // ID: UUID
   name: string;     // 名前
   filePath: string; // ファイルパス
+  script: string;  // JSスクリプトデータ
 }
 
 export interface ISoundProps {

@@ -1,76 +1,69 @@
-import { NinjaEngineContext } from "@/core/utils/NinjaEngineManager"
-import { Canvas, useThree } from "@react-three/fiber"
-import { useContext, useEffect, useRef, useState } from "react"
-import { Avatar } from "./canvas-items/Avatar"
-import { SkyComponents } from "./canvas-items/Sky"
-import { StaticObjects } from "./canvas-items/StaticObjects"
-import { System } from "./canvas-items/System"
-import { Terrain } from "./canvas-items/Terrain"
-import { NinjaUI } from "./NinjaUI"
-import { LoadProcessing } from "./ui-items/LoadProcessing"
-import { Lights } from "./canvas-items/Lights"
+import { NinjaEngineContext } from "@/core/NinjaEngineManager";
+import { Canvas, useThree, RenderProps } from "@react-three/fiber";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Avatar } from "./canvas-items/Avatar";
+import { SkyComponents } from "./canvas-items/Sky";
+import { StaticObjects } from "./canvas-items/StaticObjects";
+import { System } from "./canvas-items/System";
+import { Terrain } from "./canvas-items/Terrain";
+import { NinjaUI } from "./NinjaUI";
+import { LoadProcessing } from "./ui-items/LoadProcessing";
+import { Lights } from "./canvas-items/Lights";
 
-export const NinjaCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement>();
-  const [ready, setReady] = useState<boolean>(false)
-  const engine = useContext(NinjaEngineContext)
-
-  useEffect(() => {
-    const setup = async () => {
-      if (engine && !engine.loadCompleted) {
-        engine.allSetup();
-        await engine.loadJsonData();
-        setReady(true);
-      }
-    }
-    setup();
-    return () => {
-      if (ready) {
-        setReady(false);
-      }
-    }
-  }, []);
-
-  const onResize = () => {
-    const cv = document.getElementById("ninjagl") as HTMLCanvasElement;
-    const width = cv.width;
-    const height = cv.height;
-    if (canvasRef.current){
-    }
-    console.log(width, height);
-    console.log(cv.clientTop, cv.clientLeft);
-    engine.setCanvasSize(width, height);
+interface INinjaCanvasProps {
+  children?: React.ReactNode;
+  canvasProps?: RenderProps<HTMLCanvasElement>;
 }
-  
+export const NinjaCanvas = (props: INinjaCanvasProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>();
+  const [ready, setReady] = useState<boolean>(false);
+  const engine = useContext(NinjaEngineContext);
+
+  const [engineState, setEngineState] = useState({
+    nowLoading: false,
+    loadCompleted: false,
+    loadingPercentages: 0,
+  });
+
   useEffect(() => {
-    const viewer = document.getElementById("Ninjaviewer");
-    const rect = viewer.getBoundingClientRect();
-    engine.setCanvasSize(rect.width, rect.height);
-    engine.setCanvasPos(rect.left, rect.top);
-  }, [false]);
+    setEngineState({
+      nowLoading: engine.nowLoading,
+      loadCompleted: engine.loadCompleted,
+      loadingPercentages: engine.loadingPercentages,
+    });
+  }, [engine]);
 
   return (
     <>
-      <Canvas id="ninjagl" ref={canvasRef} shadows dpr={window.devicePixelRatio}>
-        {(ready && engine) &&
+      <Canvas 
+        id="ninjagl" 
+        ref={canvasRef} 
+        shadows 
+        dpr={window.devicePixelRatio}
+        {...props.canvasProps}
+      >
+        {(engineState.loadCompleted && engine) &&
           <>
             <System />
             <Terrain />
             <Avatar />
             <StaticObjects/>
-          </>
-        }
-        {engine &&
-          <>
             <Lights/>
             <SkyComponents />
           </>
         }
+        {props.children && props.children}
       </Canvas>
-      {(ready && engine) &&
+      {(engineState.loadCompleted) &&
         <NinjaUI />
       }
-      <LoadProcessing />
+      {engine &&
+        <LoadProcessing
+          loadingPercentages={engineState.loadingPercentages}
+          nowLoading={engineState.nowLoading}
+          loadCompleted={engineState.loadCompleted}
+        />
+      }
     </>
   )
 }

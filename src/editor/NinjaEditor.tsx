@@ -216,7 +216,7 @@ export const NinjaEditor = () => {
    */
   const onSave = () => {
     const njcFile = new NJCFile();
-    editor.getOms().map((om) => {
+    editor.getOMs().map((om) => {
       njcFile.addOM({...om});
     });
     editor.getUMs().map((um) => {

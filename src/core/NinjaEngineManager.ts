@@ -1,24 +1,17 @@
-import { World } from "./World";
-import { Octree } from "./Octree";
-import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
-import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
-import { AvatarController } from "./AvatarController";
+import { World } from "./utils/World";
+import { Octree } from "./utils/Octree";
+import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./utils/NinjaLoaders";
+import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./utils/NinjaProps";
+import { AvatarController } from "./utils/AvatarController";
 import { createContext } from "react";
-import { convertToGB } from "@/commons/functional";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2, SkinnedMesh, Box3 } from "three";
-import { reqApi } from "@/services/ServciceApi";
-import { useInputControl } from "./InputControls";
-import { NinjaShader } from "./NinjaShader";
-import { NJCFile } from "./NinjaFileControl";
-import { InitDesktopConfipParams, InitMobileConfipParams, InitTabletConfipParams } from "./NinjaInit";
-
-let nowLoadedFiles: { [key: string]: number } = { "sample": 0 };
-export let totalFileSize: number = 1;
-export let loadPer: number = 0;
-export let loadingText: string = "ファイルサイズを取得中...";
+import { NinjaShader } from "./utils/NinjaShader";
+import { NJCFile, loadNJCFile, loadNJCFileFromURL } from "./utils/NinjaFileControl";
+import { InitDesktopConfipParams, InitMobileConfipParams, InitTabletConfipParams } from "./utils/NinjaInit";
+import { NinjaEngineWorker } from "./NinjaEngineWorker";
 
 export class NinjaEngine {
-  jsonData: any = null;
+  loadingPercentages: number = 0;
   cameraLayer: number = 1;
   possibleLayers: number[] = [];
   config: IConfigParams = InitMobileConfipParams;
@@ -51,23 +44,22 @@ export class NinjaEngine {
   /**
    * Workerのインスタンス
    */
-  worker: Worker;
+  workerInstance: NinjaEngineWorker;
 
   /**
    * コンストラクタ
    */
-  constructor() { }
+  constructor() {
+    // WebWorkerのインスタンスを生成
+    this.workerInstance = new NinjaEngineWorker(this);
+  }
 
   /**
    * セットアップ
    */
   allSetup() {
     this.config = InitMobileConfipParams;
-    this.detectDevice();
-    this.detectGPU();
-    this.updateAvailableMemory();
     this.world = new World();
-    const L = this.getOctreeL();
     this.octree = new Octree({
       min: new Vector3(
         -this.config.mapsize / 2,
@@ -79,32 +71,10 @@ export class NinjaEngine {
         this.config.mapsize / 2,
         this.config.mapsize / 2
       ),
-      maxDepth: L
+      maxDepth: this.config.octreeDepth
     });
     this.world.addOctree(this.octree);
-    // if (this.deviceType == "tablet") {
-    //   this.config = InitTabletConfipParams;
-    // }
-    // else if (this.deviceType == "desktop") {
-    //   this.config = InitDesktopConfipParams;
-    // }
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
-  }
-
-  /**
-   * すべての情報をクリアにする
-   */
-  allClear = () => {
-    this.nowLoading = false;
-    this.loadCompleted = false;
-    this.useGPU = false;
-    this.world = null;
-    this.octree = null;
-    this.oms = [];
-    this.avatar = null;
-    this.camera = null;
-    this.removeSoundAll();
-    this.sounds = [];
   }
 
   /**
@@ -113,9 +83,7 @@ export class NinjaEngine {
    * @param y 
    */
   setConfig = (config: IConfigParams) => {
-    if (config.mapsize){
-      
-    }
+    this.config = config;
   }
 
   /**
@@ -138,131 +106,26 @@ export class NinjaEngine {
   }
 
   /**
-   * 設定JSONファイルをセットする
-   */
-  setJson = async (jsonPath: string) => {
-    const data = await this.loadJson(jsonPath);
-    this.jsonData = data;
-  }
-  /**
-   * 直接OMのJSONのデータをセットする
-   */
-  setOMParams = (data: any) => {
-    this.jsonData = data;
-  }
-  setSMParmas = (data: any) => {
-    this.sms = data;
-  }
-  /**
    * NJCをセットする
    */
-  setNJC = (njcFile: NJCFile) => {
+  setNJCFile = (njcFile: NJCFile) => {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
     this.tms = njcFile.tms;
     this.sms = njcFile.sms;
     if (njcFile.config){}
+    this.loadCompleted = true;
+    this.setSMsInWorker();
   }
 
   /**
    * ユーザースクリプトを読み込む
    */
-  private async loadUserScript(scriptPathes: string[]): Promise<void> {
-    const importScriptsCode = scriptPathes.map(scriptPath => `importScripts('${scriptPath}');`).join('\n');
-    const userScriptBlob = new Blob([`
-      ${importScriptsCode}
-    `], { type: 'application/javascript' });
-    
-    const userScriptURL = URL.createObjectURL(userScriptBlob);
-    this.worker = new Worker(userScriptURL);
-  }
-
-  /**
-   * 接続しているデバイス種別を検出
-   */
-  detectDevice = () => {
-    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    var isTablet = /iPad/i.test(navigator.userAgent);
-    var isPC = !isMobile && !isTablet;
-    if (isMobile) this.deviceType = "mobile";
-    else if (isTablet) this.deviceType = "tablet";
-    else if (isPC) this.deviceType = "desktop";
-    else {
-      console.log(`接続デバイスを検出しましたが、モバイル/タブレット/PCどれにも該当しないようです。詳細${navigator.userAgent.toString()}`);
+  private async setSMsInWorker(): Promise<void> {
+    if (this.workerInstance){
+      await this.workerInstance.loadUserScript(this.sms);
     }
   }
-
-  /**
-   * GPUを使用して描画しているか
-   */
-  detectGPU = () => {
-    if (typeof WebGLRenderingContext !== 'undefined') {
-      var canvas = document.createElement('canvas');
-      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (gl && gl instanceof WebGLRenderingContext) {
-        // WebGLがサポートされている場合、GPUが使用されている可能性がある
-        this.useGPU = true;
-      }
-    }
-  }
-
-  /**
-   * 利用できるメモリ量を更新
-   */
-  updateAvailableMemory = () => {
-    const _performance: any = performance;
-    if (_performance && _performance.memory) {
-      this.memory = {
-        totalHeap: _performance.memory.totalJSHeapSize,
-        usedHeap: _performance.memory.usedJSHeapSize,
-        availableHeap: _performance.memory.jsHeapSizeLimit
-      }
-    }
-  }
-
-
-  /**
-   * Octreeの段階数(L)を取得
-   */
-  getOctreeL = (): number => {
-    const maxL = 7;
-    let n = 0;
-    let l = this.config.mapsize;
-    for (l; l > 1; l = l / 2) {
-      n++;
-    }
-    const baseL = 5;
-    const hpGB = convertToGB(this.memory.availableHeap);
-    let L = (n - 5) + Math.round(hpGB ? hpGB : 1 / 2.4) + baseL;
-    if (this.deviceType == "desktop") {
-      if (L < maxL) {
-        L++;
-      }
-      if (L < maxL) {
-        if (this.useGPU) L++;
-      }
-    }
-    if (L >= maxL) {
-      L = maxL;
-    }
-    return L;
-  }
-
-  /**
-   * OctreeのBox数を取得
-   */
-  getOctreeS = (L: number): number => {
-    let S: number = 0;
-    [...Array(L)].map((_, idx) => {
-      const i = idx + 1;
-      S += Math.pow(8, i);
-    });
-    return S;
-  }
-
-  /**
-   * Octreeを再セット
-   */
 
   /**
    * 単純にJsonファイルを読み込む
@@ -279,174 +142,29 @@ export class NinjaEngine {
     })
   }
 
+  /**
+   * OMsの初期Loadをおこなう
+   */
+  initializeLoadOMs = async () => {
+    
+  }
 
   /**
-   * 設定JSONファイルをImportする
+   * プロジェクトデータを読み込む
+   * ※ Config, OM, UM, TM, SM
    */
-  loadJsonData = async():Promise<boolean> => {
+  loadingProjectData = async(NjcFilePath: string):Promise<boolean> => {
     if (this.loadCompleted || this.nowLoading) return null;
-    const jsonData = this.jsonData;
-    this.nowLoading = true;
-    totalFileSize = 1;
-    nowLoadedFiles = {};
-    const keys = Object.keys(jsonData);
-    await (async () => {
-      for await (const key of keys) {
-        if (key == "avatar") {
-          if (jsonData[key].object){
-            const obj: IObjectManagement = {
-              ...jsonData[key], 
-            }
-            // パラメータにisCenterがついていれば半径分ずらす
-            if (obj.args.isCenter){
-              console.log("Avatar -> isCenter");
-              AvatarDataSetter({
-                object: obj.object,
-                isCenter: true,
-                height: obj.args.height
-              });
-            }
-            obj.animations = obj.object.animations;
-            const mixer = new AnimationMixer(obj.object);
-            obj.mixer = mixer;
-            obj.layerNum = 0;
-            obj.visibleType = "force";
-            this.oms.push(obj);     
-          }
-        }
-        else if (key == "terrain") {
-          if (!jsonData[key]) continue;
-          let object: Object3D;
-          if (jsonData[key].object){
-            object = jsonData[key].object.clone();
-            object.traverse((node: any) => {
-              if (node.isMesh && node instanceof Mesh){
-                node.updateMatrix();
-                node.geometry.applyMatrix4(node.matrix);
-                // --- 見た目上の回転を正として、回転率を0に戻す
-                node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
-                node.rotation.set(0, 0, 0);
-                // ----
-                node.castShadow = true;
-                node.receiveShadow = true;
-              }
-            })
-            // 物理世界に適応させる
-            this.octree.importThreeObj3D(key, object, key);
-            const obj: IObjectManagement = {
-              id: jsonData[key].id,
-              type: key,
-              visibleType: "force",
-              object: object,
-              args: jsonData[key].args,
-              physics: "along",
-              layerNum: 0
-            };
-            this.oms.push(obj);
-          }
-        }
-        else if (key == "objects") {
-          const objs = jsonData[key];
-          await Promise.all(
-            Object.keys(objs).map(async (key: string) => {
-              const targetObj = objs[key];
-              this.oms.push(targetObj);
-              // PhysicsTypeがnoneでなければ、物理世界に入れる(今後)
-              const om = this.oms.find((om: IObjectManagement) => om.id == targetObj.id);
-              if (om.physics !== "none"){
-                if (om.physics == "aabb" && om.object instanceof Object3D){
-                  const aabb = new Box3();
-                  aabb.setFromObject(om.object);
-                  console.log("inpirtAABB", key, aabb);
-                  this.octree.importAABB(om.id, aabb, "objects");
-                }
-                else if (om.physics == "along" && om.object instanceof Object3D){
-                  this.octree.importThreeObj3D(om.id, om.object, key);
-                }
-                // args.positionがあれば追加したFaceを移動させる
-                if (om.args.position){
-                  const pos = om.args.position;
-                  const posVec = new Vector3(pos.x, pos.y, pos.z);
-                  om.object.position.copy(posVec.clone());
-                  this.octree.translateFaceByName(om.id, posVec.clone());
-                  om.layerNum = this.getLayerNumber(pos);
-                }
-                if (om.args.rotation){
-                  const rot = om.args.rotation;
-                  om.object.rotation.copy(rot.clone());
-                }
-              }
-            })
-          )
-        }
-        else if (key == "threes"){
-          Object.keys(jsonData[key]).map((_key: string) => {
-            const targetObj = jsonData[key][_key];
-            const obj: IObjectManagement = targetObj;
-            this.oms.push(obj);
-            const om = this.oms.find((om: IObjectManagement) => om.id == targetObj.id);
-            if (om.args.type){
-              if (om.args.type == "box"){}
-              else if (om.args.type == "sphere"){}
-              else if (om.args.type == "cylinder"){}
-              else if (om.args.type == "plane"){}
-              else if (om.args.type == "text"){}
-              if (om.physics !== "none"){
-                if (om.physics == "aabb" && om.object instanceof Object3D){
-                  const aabb = new Box3();
-                  aabb.setFromObject(om.object);
-                  this.octree.importAABB(om.id, aabb, key);
-                }
-                else if (om.physics == "along" && om.object instanceof Object3D){
-                  this.octree.importThreeObj3D(om.id, om.object, key);
-                }
-                // args.positionがあれば追加したFaceを移動させる
-                if (om.args.position){
-                  const pos = om.args.position;
-                  const posVec = new Vector3(pos.x, pos.y, pos.z);
-                  this.octree.translateFaceByName(om.id, posVec.clone());
-                  om.layerNum = this.getLayerNumber(pos);
-                }
-              }
-            }
-            if (om.layerNum === undefined){
-              om.layerNum = this.getLayerNumber(new Vector3(0, 0, 0));
-            }
-            if (om.visibleType == "force"){
-              om.layerNum = 0;
-            }
-            else if (om.visibleType == "none"){
-              om.layerNum = -1;
-            }
-          });
-        }
-        else if (key == "sky") {
-          if (!jsonData[key]) continue;
-          const obj: IObjectManagement = {
-            id: jsonData[key].id,
-            name: jsonData[key].name,
-            type: key,
-            args: jsonData[key],
-            visibleType: "force",
-            physics: jsonData[key].physics
-          }
-          this.oms.push(obj);
-        }
-        else if (key == "lights") {
-          const objs = jsonData[key];
-          Object.keys(objs).map((key: string) => {
-            const targetObj = objs[key];
-            const obj: IObjectManagement = targetObj;
-            this.oms.push(obj);
-          })
-        }
-        else if (key == "uis") {
-          // this.ui = jsonData[key];
-          // UI描画は調整中
-        }
-      }
 
-    })();
+    const njcFile = await loadNJCFileFromURL(
+      NjcFilePath, 
+      (itemsLoaded, itemsTotal) => {
+        console.log(`Loaded: ${itemsLoaded}, Total: ${itemsTotal}`);
+        this.loadingFileState(itemsLoaded, itemsTotal);
+      }
+    );
+    this.setNJCFile(njcFile);
+
     console.log("--- 全設定ファイルの読み込み完了 ---");
     this.nowLoading = false;
     this.loadCompleted = true;
@@ -456,16 +174,8 @@ export class NinjaEngine {
   /**
    * ロード状況を更新する
    */
-  loadingFileState = async(key: string, updateSize: number) => {
-    if (nowLoadedFiles) {
-      nowLoadedFiles[key] = updateSize;
-      // 最後に集計してPercentageを更新する
-      let totalSize = 0;
-      Object.keys(nowLoadedFiles).map((key) => {
-        totalSize += nowLoadedFiles[key];
-      })
-      loadPer = 100 * Number((totalSize / totalFileSize).toFixed(2));
-    }
+  loadingFileState = async(updateSize: number, totalSize: number) => {
+    this.loadingPercentages = 100 * Number((updateSize / totalSize).toFixed(2));
   }
 
   /**
@@ -858,6 +568,30 @@ export class NinjaEngine {
   }
 
   /**
+   * ユーザースクリプトの初期関数を実行する
+   */
+  runScriptsInit() {
+    this.sms.map(sm => {
+      this.workerInstance.runInitialize(
+        sm.id
+      );
+    });
+  }
+
+  /**
+   * ユーザースクリプトのフレームループを実行する
+   */
+  runScriptsFrameLoop(state: any, delta: number) {
+    this.sms.map(sm => {
+      this.workerInstance.runFrameLoop(
+        sm.id,
+        state,
+        delta,
+      );
+    });
+  }
+
+  /**
    * フレームによる更新
    * @param timeDelta 
    * @param input 
@@ -872,6 +606,8 @@ export class NinjaEngine {
       if (this.world) this.world.step(timeDelta, input);
       // 動態管理をリフレッシュする
       this.moveOrderKeys = [];
+      // スクリプトを実行する
+      if (this.workerInstance) this.runScriptsFrameLoop(null, timeDelta);
     }
   }
 

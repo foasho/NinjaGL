@@ -1,4 +1,4 @@
-import { NinjaEngine, NinjaEngineContext } from "@/core/utils/NinjaEngineManager";
+import { NinjaEngine, NinjaEngineContext } from "@/core/NinjaEngineManager";
 import { useEffect, useState } from "react";
 import { NinjaCanvas } from "./NinjaCanvas";
 import { loadNJCFileFromURL } from "./utils/NinjaFileControl";
