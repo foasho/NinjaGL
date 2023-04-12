@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
 import { toast } from 'react-toastify';
@@ -10,34 +10,32 @@ import { IScriptManagement } from '@/core/utils/NinjaProps';
 import { InitScriptManagement } from '@/core/utils/NinjaInit';
 import { useSnapshot } from 'valtio';
 import { globalScriptStore } from '../Store';
+import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';
+import { editor } from 'monaco-editor';
+import { NinjaEditorContext } from '../NinjaEditorManager';
 
 
 export const ScriptEditor = () => {
+  const myeditor = useContext(NinjaEditorContext);
   const scriptState = useSnapshot(globalScriptStore);
-  const [code, setCode] = useState<string>(initCode);
+  // const [code, setCode] = useState<string>();
+  const [pause, setPause] = useState<boolean>(true);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const { id, filePath, name } = scriptState.currentSM? scriptState.currentSM : {...InitScriptManagement};
+  const { id, filePath, name, script } = scriptState.currentSM? scriptState.currentSM : {...InitScriptManagement};
+  const code = useRef<string>(script);
   const { t } = useTranslation();
-  const handleEditorChange = (value) => {
-    setCode(value);
+  const handleEditorChange = (value: string) => {
+    code.current = value;
   };
-
-  const loadCode = (script: string) => {
-    const data = script.replace(
-      `self['${id}'].initialize = initialize;\nself['${id}'].frameLoop = frameLoop;`,
-       ""
-    );
-    return data;
-  }
 
   /**
    * 予測変換を設定
    * @param monaco 
    */
-  const handleEditorDidMount = (monaco: Monaco, editor) => {
+  const handleEditorDidMount = (monaco: any, editor: any) => {
     // 入力付加項目とSuggentionの設定
     monaco.languages.registerCompletionItemProvider('javascript', {
-      provideCompletionItems: (model, position, token) => {
+      provideCompletionItems: async (model:any, position:any, token:any) => {
         // 現在のカーソル位置の前のテキストを取得します。
         const textUntilPosition = model.getValueInRange({
           startLineNumber: position.lineNumber,
@@ -109,12 +107,45 @@ export const ScriptEditor = () => {
    * @param filename 
    * @returns 
    */
-  const saveCode = async(script: string, filename: string) => {
-    return reqApi({ 
+  const saveCode = async(filename: string) => {
+    const result = await reqApi({ 
       route: "savescript",
-      data: { script: script, filename: filename } ,
+      data: { script: code.current, filename: filename } ,
       method: "POST"
-    })
+    }).then(
+      (res) => {
+        if (res.status == 200){
+          if (scriptState.currentSM && globalScriptStore.currentSM?.script !== null){
+            globalScriptStore.setScript(script) // スクリプトデータを更新
+          }
+          else {
+            const newSM: IScriptManagement = {
+              id: id,
+              type: "script",
+              filePath: `scripts/${filename}`,
+              name: filename,
+              script: code.current,
+            }
+            myeditor.setSM(newSM);
+            globalScriptStore.currentSM = newSM;
+          }
+          return true;
+        }
+        return false;
+      }
+    );
+    if (result){
+      toast(t("completeSave"), {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
   }
 
   /**
@@ -123,17 +154,7 @@ export const ScriptEditor = () => {
   const onSave = async () => {
     if (filePath){
       const filename = name.replace(".js", "") + ".js";
-      await saveCode(code, filename);
-      toast(t("save"), {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      await saveCode(filename);
     }
     else {
       Swal.fire({
@@ -155,22 +176,13 @@ export const ScriptEditor = () => {
       }).then( async (result) => {
         if (result.value) {
           const filename = result.value + ".js";
-          await saveCode(code, filename);
-          toast(t("save"), {
-            position: "top-right",
-            autoClose: 2500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+          await saveCode(filename);
+
         }
       });
     }
   }
-  const handlerSave = (event) => {
+  const handlerSave = (event: any) => {
     if (event.ctrlKey && event.key === 's') {
       event.preventDefault();
       onSave();
@@ -181,7 +193,7 @@ export const ScriptEditor = () => {
    * プレビュー
    */
   const onPreview = () => {
-
+    setIsPreview(!isPreview);
   }
 
   /**
@@ -190,16 +202,17 @@ export const ScriptEditor = () => {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (filePath){
+    if (scriptState.currentSM){
       const fetchData = async () => {
         try {
           const response = await fetch(filePath, { signal });
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
-          const data = await response.text();
-          setCode(loadCode(data));
-        } catch (error) {
+          const script = await response.text();
+          // setCode(script);
+          code.current = script;
+        } catch (error: any) {
           if (error.name === 'AbortError') {
             console.log('Fetch aborted');
           } else {
@@ -208,6 +221,9 @@ export const ScriptEditor = () => {
         }
       };
       fetchData();
+    }
+    else {
+      code.current = initCode;
     }
     // 保存をオーバーライド
     document.addEventListener('keydown', handlerSave);
@@ -230,6 +246,16 @@ export const ScriptEditor = () => {
         <div className={styles.preview} onClick={() => onPreview()}>
           Preview
         </div>
+        {isPreview &&
+        <>
+          <div className={styles.preview}>
+            <AiOutlineReload/>
+          </div>
+          <div className={styles.preview}> 
+            {pause?<AiOutlinePause/>: <AiOutlineCaretRight/> }
+          </div>
+        </>
+        }
       </div>
       <div className={styles.editor}>
         <MonacoEditor
@@ -237,8 +263,8 @@ export const ScriptEditor = () => {
           width="100%"
           language="javascript"
           theme="vs-dark"
-          value={code}
-          onChange={handleEditorChange}
+          value={code.current}
+          onChange={(value: any) =>handleEditorChange(value)}
           onMount={(editor, monaco) => handleEditorDidMount(monaco, editor)}
           // beforeMount={(monaco) => handleEditorWillMount(monaco)}
           options={{

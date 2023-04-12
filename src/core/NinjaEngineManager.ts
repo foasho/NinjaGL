@@ -55,9 +55,9 @@ export class NinjaEngine {
   }
 
   /**
-   * セットアップ
+   * 初期化
    */
-  allSetup() {
+  async initialize() {
     this.config = InitMobileConfipParams;
     this.world = new World();
     this.octree = new Octree({
@@ -75,6 +75,8 @@ export class NinjaEngine {
     });
     this.world.addOctree(this.octree);
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
+    this.initializeLoadOMs();
+    this.runScriptsInitialize();
   }
 
   /**
@@ -116,6 +118,7 @@ export class NinjaEngine {
     if (njcFile.config){}
     this.loadCompleted = true;
     this.setSMsInWorker();
+    this.initialize();
   }
 
   /**
@@ -143,10 +146,84 @@ export class NinjaEngine {
   }
 
   /**
-   * OMsの初期Loadをおこなう
+   * OMsの初期設定を行う
    */
   initializeLoadOMs = async () => {
-    
+    await Promise.all(this.oms.map(async (om) => {
+      if (om.type === "avatar") {
+        if (om.args.isCenter && om.args.height){
+          AvatarDataSetter({
+            object: om.object,
+            isCenter: true,
+            height: om.args.height
+          });
+        }
+      }
+      else if (om.type == "terrain"){
+        om.object.traverse((node: any) => {
+          if (node.isMesh && node instanceof Mesh){
+            node.updateMatrix();
+            node.geometry.applyMatrix4(node.matrix);
+            // --- 見た目上の回転を正として、回転率を0に戻す
+            node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
+            node.rotation.set(0, 0, 0);
+            // ----
+            node.castShadow = true;
+            node.receiveShadow = true;
+          }
+        })
+        this.octree.importThreeObj3D(om.id, om.object, om.type);
+      }
+      else if (om.type == "object"){
+        this.octree.importThreeObj3D(om.id, om.object, om.type);
+        if (om.args.position){
+          const pos = om.args.position;
+          const posVec = new Vector3(pos.x, pos.y, pos.z);
+          om.object.position.copy(posVec.clone());
+          this.octree.translateFaceByName(om.id, posVec.clone());
+          om.layerNum = this.getLayerNumber(pos);
+        }
+        if (om.args.rotation){
+          const rot = om.args.rotation;
+          om.object.rotation.copy(rot.clone());
+        }
+      }
+      else if (om.type == "three"){
+        if (om.args.type == "box"){}
+        else if (om.args.type == "sphere"){}
+        else if (om.args.type == "cylinder"){}
+        else if (om.args.type == "plane"){}
+        else if (om.args.type == "capsule"){}
+        else if (om.args.type == "cone"){}
+        else if (om.args.type == "torus"){}
+        if (om.physics !== "none"){
+          if (om.physics == "aabb" && om.object instanceof Object3D){
+            const aabb = new Box3();
+            aabb.setFromObject(om.object);
+            this.octree.importAABB(om.id, aabb, om.args.type);
+          }
+          else if (om.physics == "along" && om.object instanceof Object3D){
+            this.octree.importThreeObj3D(om.id, om.object, om.args.type);
+          }
+          // args.positionがあれば追加したFaceを移動させる
+          if (om.args.position){
+            const pos = om.args.position;
+            const posVec = new Vector3(pos.x, pos.y, pos.z);
+            this.octree.translateFaceByName(om.id, posVec.clone());
+            om.layerNum = this.getLayerNumber(pos);
+          }
+        }
+        if (om.layerNum === undefined){
+          om.layerNum = this.getLayerNumber(new Vector3(0, 0, 0));
+        }
+        if (om.visibleType == "force"){
+          om.layerNum = 0;
+        }
+        else if (om.visibleType == "none"){
+          om.layerNum = -1;
+        }
+      }
+    }));
   }
 
   /**
@@ -164,10 +241,10 @@ export class NinjaEngine {
       }
     );
     this.setNJCFile(njcFile);
-
     console.log("--- 全設定ファイルの読み込み完了 ---");
     this.nowLoading = false;
     this.loadCompleted = true;
+    this.initialize();
     return true;
   }
 
@@ -465,8 +542,8 @@ export class NinjaEngine {
   }
 
   /**
-     * 特定のレイヤーの中心座標を取得する
-     */
+   * 特定のレイヤーの中心座標を取得する
+   */
   getCenterPosFromLayer(
     layer: number, 
     yPos: number = 0.5, 
@@ -570,7 +647,8 @@ export class NinjaEngine {
   /**
    * ユーザースクリプトの初期関数を実行する
    */
-  runScriptsInit() {
+  runScriptsInitialize() {
+    console.log("Start runScriptsInitialize");
     this.sms.map(sm => {
       this.workerInstance.runInitialize(
         sm.id

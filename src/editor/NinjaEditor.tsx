@@ -35,7 +35,7 @@ import { TextureNavigation } from "./Hierarchy/TextureNavigation";
 export const NinjaEditor = () => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const [projectName, setProjectName] = useState<string>(null);
+  const [projectName, setProjectName] = useState<string>();
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
   const [selectSubNav, setSelectSubNav] = useState<"ui" | "shader" | "script" | "texture">("ui");
   const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
@@ -48,6 +48,12 @@ export const NinjaEditor = () => {
     if (viewSelect !== viewType) {
       globalStore.init();
       setViewSelect(viewType);
+      if (viewType == "scripteditor"){
+        setSelectSubNav("script");
+      }
+      else if (viewType == "shadereditor"){
+        setSelectSubNav("shader");
+      }
     }
   }
 
@@ -160,7 +166,10 @@ export const NinjaEditor = () => {
    * テンプレート選択
    */
   const onClickSelectTemplate = () => {
-    Swal.fire(t("attention"), t("templatePrepare"));
+    Swal.fire(
+      t("attention").toString(), 
+      t("templatePrepare").toString()
+    );
   }
 
   /**
@@ -188,17 +197,16 @@ export const NinjaEditor = () => {
    */
   const changeProjectName = () => {
     Swal.fire({
-      title: t("changeProjectName"),
+      title: t("changeProjectName").toString(),
       input: 'text',
       showCancelButton: true,
-      confirmButtonText: t("change"),
+      confirmButtonText: t("change").toString(),
       showLoaderOnConfirm: true,
       preConfirm: async (inputStr) => {
-        //バリデーションを入れたりしても良い
-        if (inputStr.length == 0) {
+        if (inputStr.length === 0) {
           return Swal.showValidationMessage(t("leastInput"));
         }
-        return inputStr
+        return inputStr;
       },
       allowOutsideClick: function () {
         return !Swal.isLoading();
@@ -208,7 +216,8 @@ export const NinjaEditor = () => {
         setProjectName(result.value);
       }
     });
-  }
+  };
+  
 
   /**
    * プロジェクト全体を保存
@@ -227,12 +236,12 @@ export const NinjaEditor = () => {
     });
     if (!projectName){
       Swal.fire({
-        title: t("inputProjectName"),
+        title: t("inputProjectName").toString(),
         input: 'text',
         showCancelButton: true,
-        confirmButtonText: t("change"),
+        confirmButtonText: t("change").toString(),
         showLoaderOnConfirm: true,
-        preConfirm: async (inputStr) => {
+        preConfirm: async (inputStr: string) => {
           //バリデーションを入れたりしても良い
           if (inputStr.length == 0) {
             return Swal.showValidationMessage(t("leastInput"));
@@ -276,12 +285,11 @@ export const NinjaEditor = () => {
     input.accept = '.njc'; // NJCの拡張子を指定
     input.onchange = async (event) => {
       const target = event.target as HTMLInputElement;
-      if (target.files.length > 0){
+      const files = target.files;
+      if (files && files.length > 0){
         const file = (target.files as FileList)[0];
-        console.log("load file check");
-        console.log(file);
         const njcFile = await loadNJCFile(file);
-        console.log("ロードしたnjcFileを確認");
+        console.log("### ロードしたnjcFileを確認 ###");
         console.log(njcFile);
         editor.setNJCFile(njcFile);
       }

@@ -144,9 +144,9 @@ export class Octree extends Box3 {
    * @returns 
    */
   importThreeGLTF(name: string, threeGLTF: GLTF, type: string) {
-    const geometries = [];
-    threeGLTF.scene.traverse((node: Mesh) => {
-      if (node.isMesh) {
+    const geometries: BufferGeometry[] = [];
+    threeGLTF.scene.traverse((node: Object3D) => {
+      if (node instanceof Mesh && node.isMesh) {
         if (node.geometry) {
           const _node = node.clone();
           _node.updateMatrix();
@@ -168,9 +168,9 @@ export class Octree extends Box3 {
    * @returns 
    */
   importThreeObj3D(name: string, threeObject: Object3D, type: string) {
-    const geometries = [];
-    threeObject.traverse((node: Mesh) => {
-      if (node.isMesh) {
+    const geometries: BufferGeometry[] = [];
+    threeObject.traverse((node: Object3D) => {
+      if (node instanceof Mesh && node.isMesh) {
         if (node.geometry) {
           const _node = node.clone();
           _node.updateMatrix();
@@ -209,7 +209,7 @@ export class Octree extends Box3 {
       [4, 5, 1, 0, 0, -1, 0],
     ];
 
-    const createFace = (a, b, c, normal, name) => new Face(
+    const createFace = (a: Vector3, b: Vector3, c: Vector3, normal: number[], name: string) => new Face(
       { a, b, c, normal: new Vector3(...normal), type, name }
     );
 
@@ -247,7 +247,7 @@ export class Octree extends Box3 {
    * @param face 
    */
   addFace(face: Face) {
-    var tmp = [];
+    var tmp: OctreeNode[] = [];
     var targetNodes = this.nodes[0].slice(0);
     for (var i = 0, l = this.maxDepth; i < l; i++) {
       for (var ii = 0, ll = targetNodes.length; ii < ll; ii++) {
@@ -278,7 +278,7 @@ export class Octree extends Box3 {
   removeFace(face: Face) {
     this.nodes.forEach((nodeDepth) => {
       nodeDepth.forEach((node) => {
-        var newTrianglePool = [];
+        var newTrianglePool: Face[] = [];
         node.trianglePool.forEach((f) => {
           if (f !== face) {
             newTrianglePool.push(f);
@@ -296,8 +296,8 @@ export class Octree extends Box3 {
    */
   translateFaceByName(name: string, translation: Vector3) {
     const faces = this.getFacesByName(name);
-    console.log("Facesの移動確認");
-    console.log(faces);
+    // console.log("Facesの移動確認");// 調査中
+    // console.log(faces);
     faces.forEach((face) => {
       face.a.add(translation);
       face.b.add(translation);
@@ -315,7 +315,7 @@ export class Octree extends Box3 {
   removeThreeMeshByType(type: string) {
     this.nodes.forEach((nodeDepth) => {
       nodeDepth.forEach((node) => {
-        var newTrianglePool = [];
+        var newTrianglePool: Face[] = [];
         node.trianglePool.forEach((face) => {
           if (face.type !== type) {
             newTrianglePool.push(face);
@@ -333,7 +333,7 @@ export class Octree extends Box3 {
   removeThreeMeshByName(name: string) {
     this.nodes.forEach((nodeDepth: OctreeNode[]) => {
       nodeDepth.forEach((node: OctreeNode) => {
-        var newTrianglePool = [];
+        var newTrianglePool: Face[] = [];
         node.trianglePool.forEach((face) => {
           if (face.name !== name) {
             newTrianglePool.push(face);
@@ -351,7 +351,7 @@ export class Octree extends Box3 {
    * @returns 
    */
   getIntersectedNodes(sphere: Sphere, depth: number): OctreeNode[] {
-    var tmp = [];
+    var tmp: OctreeNode[] = [];
     var intersectedNodes = [];
     var isIntersected = isInstersectSphereBox(sphere, this);
     if (!isIntersected) return [];
@@ -387,7 +387,7 @@ export class Octree extends Box3 {
     let isFind = false;
     this.nodes.forEach((nodeDepth: OctreeNode[]) => {
       nodeDepth.forEach((node: OctreeNode) => {
-        var newTrianglePool = [];
+        var newTrianglePool: Face[] = [];
         node.trianglePool.forEach((face) => {
           if (face.name !== name) {
             isFind = true;
@@ -404,7 +404,7 @@ export class Octree extends Box3 {
  * @param n 
  * @returns 
  */
-const separate3Bit = (n) => {
+const separate3Bit = (n: number) => {
   n = (n | n << 8) & 0x0000f00f;
   n = (n | n << 4) & 0x000c30c3;
   n = (n | n << 2) & 0x00249249;
@@ -449,7 +449,7 @@ export const uniqTrianglesFromNodes = (nodes: OctreeNode[]): Face[] => {
  * Octree傘下にあるTreeNode
  * <Box3の拡張としてクラス定義>
  */
-export class IOctreeNodeProps {
+export interface IOctreeNodeProps {
   tree: Octree;
   depth: number;
   mortonNumber: number;
@@ -488,7 +488,7 @@ export class OctreeNode extends Box3 {
 
   getChildNodes(): any[] {
     if (this.tree.maxDepth === this.depth) {
-      return null;
+      return [];
     }
     var firstChild = this.mortonNumber << 3;
     return [
@@ -532,5 +532,6 @@ export class Face {
     this.c = props.c.clone();
     this.normal = props.normal.clone();
     this.type = props.type;
+    this.isMove = false;
   }
 }

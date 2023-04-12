@@ -5,7 +5,7 @@ import { proxy } from 'valtio';
  * オブジェクト操作状態管理
  */
 interface IGlobalStore {
-  currentId: string;
+  currentId: string|null;
   editorFocus: boolean;
   pivotControl: boolean;
   hiddenList: string[];
@@ -30,7 +30,7 @@ export const globalStore = proxy<IGlobalStore>(
  * UI操作状態管理
  */
 interface IGlobalUIStore {
-  currentId: string;
+  currentId: string|null;
   editorFocus: boolean;
   moveableControl: boolean;
   hiddenList: string[];
@@ -54,14 +54,20 @@ export const globalUIStore = proxy<IGlobalUIStore>(
  * スクリプト操作状態管理
  */
 interface IGlobalScriptStore {
-  currentSM: IScriptManagement;
+  currentSM: IScriptManagement|null;
   init: () => void;
+  setScript: (script: string) => void;
 }
 export const globalScriptStore = proxy<IGlobalScriptStore>(
   {
     currentSM: null,
     init: () => {
       globalScriptStore.currentSM = null;
+    },
+    setScript: (script: string) => {
+      if (globalScriptStore.currentSM) {
+        globalScriptStore.currentSM.script = script;
+      }
     }
   }
 );

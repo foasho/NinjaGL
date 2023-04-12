@@ -9,7 +9,7 @@
    *  呼び出し時
    */
   async function initialize() {
-    // your code
+    // your code okgllgle
   }
 
   /**

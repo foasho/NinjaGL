@@ -10,6 +10,7 @@
    */
   async function initialize() {
     // your code
+    conosle.log("test");
   }
 
   /**

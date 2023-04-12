@@ -23,11 +23,9 @@ export class NinjaEngineWorker {
     const importScriptsCode = sms.filter((sm) => sm.script)
       .map(
         (sm) => `
-        ${sm.script}
         (function(id) {
-          
+          ${sm.script}
           self[id] = {
-
             initialize: initialize,
             frameLoop: frameLoop,
           };
@@ -73,7 +71,11 @@ export class NinjaEngineWorker {
    * @param id 
    */
   public runInitialize(id: string): void {
-    this.worker.postMessage({ type: "runInitialize", id: id });
+    if (this.worker) {
+      this.worker.postMessage({ type: "runInitialize", id: id });
+    } else {
+      console.error("Worker is not initialized yet.");
+    }
   }
 
   /**

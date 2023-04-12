@@ -19,12 +19,28 @@
             padding: 0 10px;
             font-weight: bold;
             float: right;
+            user-select: none;
         }
         .preview {
             background-color: #494949;
             padding: 0 10px;
             float: right;
             color: #fff;
+            user-select: none;
+        }
+        .reload {
+            background-color: $mainColor;
+            padding: 0 10px;
+            float: right;
+            color: #fff;
+            user-select: none;
+        }
+        .pause {
+            background-color: #494949;
+            padding: 0 10px;
+            float: right;
+            color: #fff;
+            user-select: none;
         }
     }
     .editor {
