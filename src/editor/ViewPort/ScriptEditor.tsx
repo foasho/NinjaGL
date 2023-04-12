@@ -110,14 +110,9 @@ export const ScriptEditor = () => {
    * @returns 
    */
   const saveCode = async(script: string, filename: string) => {
-    /**
-     * 保存前に、グローバルスコープを追加する
-     */
-    const UserScriptData = script + "\n\n"
-       + `self['${id}'].initialize = initialize;\nself['${id}'].frameLoop = frameLoop;`;
     return reqApi({ 
       route: "savescript",
-      data: { script: UserScriptData, filename: filename } ,
+      data: { script: script, filename: filename } ,
       method: "POST"
     })
   }

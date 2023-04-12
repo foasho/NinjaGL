@@ -3,46 +3,131 @@ import { NinjaEditorContext } from "../NinjaEditorManager";
 import { IScriptManagement } from "@/core/utils/NinjaProps";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
+import { InitScriptManagement } from "@/core/utils/NinjaInit";
+import { useSnapshot } from "valtio";
+import { globalScriptStore } from "../Store";
+import { MathUtils } from "three";
+import Swal from "sweetalert2";
 
 export const ScriptNavigation = () => {
   const editor = useContext(NinjaEditorContext);
-  const [scripts, setScripts] = useState<IScriptManagement[]>([]);
+  const [sms, setSMs] = useState<IScriptManagement[]>([]);
   const { t } = useTranslation();
   useEffect(() => {
-      // setScripts(editor.getScripts());
-  }, []);
+    setSMs([...editor.getSMs()]);
+    const handleSMsChanged = () => {
+      setSMs([...editor.getSMs()]);
+    }
+    editor.onSMsChanged(handleSMsChanged);
+    return () => {
+      editor.offSMsChanged(handleSMsChanged);
+    }
+  }, [editor]);
+
+  /**
+   * Scriptをドラッグ＆ドロップしたときの処理
+   */
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const type = editor.contentsSelectType;
+    if (type === "js") {
+      const filePath = editor.contentsSelectPath;
+      const sm = {...InitScriptManagement};
+      sm.id = MathUtils.generateUUID();
+      sm.filePath = filePath;
+      const scriptCheck = async () => {
+        try {
+          const response = await fetch(filePath);
+          if (response.ok) {
+            const text = await response.text();
+            // 特定の文字列をチェックします。例えば、'mySpecialString'を探す場合:
+            const searchString = "initialize";
+            const searchString2 = "frameLoop";
+            if (
+              text.includes(searchString) 
+              && text.includes(searchString2)
+            ) {  
+              return true;
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching file:", error);
+        }
+        return false;
+      };
+      const result = await scriptCheck();
+      if (result) {
+        sm.name = filePath.split("/").pop() || "";
+        const success = editor.setSM(sm);
+        if (!success) {
+          Swal.fire({
+            title: t("scriptError"),
+            text: t("scriptErrorAlreadyText"),
+            icon: "error",
+          });
+        }
+      }
+      else {
+        Swal.fire({
+          title: t("scriptError"),
+          text: t("scriptErrorText"),
+          icon: "error",
+        });
+      }
+    };
+
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
+  };
+
   return (
-      <>
-          <div>
-              <div className={styles.title}>
-                  {t("scriptNavigator")}
-              </div>
-              <div className={styles.tree}>
-                  {scripts.map((script, idx) => {
-                      return (
-                          <ScriptItem script={script} index={idx} />
-                      )
-                  })}
-              </div>
-          </div>
-      </>
+    <>
+      <div>
+        <div className={styles.title}>
+          {t("scriptNavigator")}
+        </div>
+        <div 
+          className={styles.tree}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {sms.map((sm, idx) => {
+            return (
+              <ScriptItem sm={sm} index={idx} />
+            )
+          })}
+        </div>
+      </div>
+    </>
   )
 }
 
-const ScriptItem = (prop: { index: number, script: IScriptManagement }) => {
+const ScriptItem = (prop: { index: number, sm: IScriptManagement }) => {
+  const scriptState = useSnapshot(globalScriptStore);
   const { t } = useTranslation();
   let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
-      lineStyle = styles.darkLine;
+    lineStyle = styles.darkLine;
   }
+  const selectStyle = (scriptState.currentSM && scriptState.currentSM.id == prop.sm.id) ? styles.select : "";
+  
+  const onClickItem = () => {
+    if (scriptState.currentSM && scriptState.currentSM.id == prop.sm.id) {
+      globalScriptStore.currentSM = null;
+      return;
+    }
+    globalScriptStore.currentSM = prop.sm;
+  }
+  
   return (
-      <div className={styles.treeItem}>
-          <div className={lineStyle}></div>
-          <div className={styles.item}>
-              <div className={styles.itemName}>
-                  {prop.script.name}
-              </div>
-          </div>
+    <div className={styles.treeNode + " " + selectStyle} onClick={onClickItem}>
+      <div className={lineStyle}>
+        <div className={styles.name}>
+          {prop.sm.name}
+        </div>
       </div>
+    </div>
   )
 }

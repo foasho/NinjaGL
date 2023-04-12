@@ -26,12 +26,12 @@ export class NJCFile {
   oms: IObjectManagement[];
   ums: IUIManagement[];
   tms: ITextureManagement[];
-  scs: IScriptManagement[];
+  sms: IScriptManagement[];
   constructor() {
     this.oms = [];
     this.ums = [];
     this.tms = [];
-    this.scs = [];
+    this.sms = [];
     this.config = InitMobileConfipParams;
   }
   addOM(om: IObjectManagement): void {
@@ -43,8 +43,8 @@ export class NJCFile {
   addTM(tm: ITextureManagement):void {
     this.tms.push(tm)
   }
-  addSC(sc: IScriptManagement):void {
-    this.scs.push(sc)
+  addSM(sm: IScriptManagement):void {  
+    this.sms.push(sm)
   }
 }
 

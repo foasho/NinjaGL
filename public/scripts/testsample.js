@@ -4,18 +4,20 @@
   * -公式ドキュメント: https://www.example.com/
   * -公式サンプル    : https://www.example.com/
   **/
-  const engine = this;
-    
+
   /**
    *  呼び出し時
    */
-  const init = () => {}
+  async function initialize() {
+    // your code
+  }
 
   /**
    * 毎フレーム事の処理
    * @param state: {  }
    * @param delta: 1フレーム時間(秒)
    */
-  const frameLoop = (state, delta) => {
-
+  async function frameLoop(state, delta) {
+    // your code
+    console.log("save test");
   }

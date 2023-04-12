@@ -14,6 +14,7 @@ export interface IConfigParams {
   dpr: number| number[]; // デバイスピクセル比
   viewGridLength: number; // ビューグリッドの長さ
   initCameraPosition?: Vector3; // カメラの初期位置
+  isDebug?: boolean; // デバッグモード
 }
 
 /**

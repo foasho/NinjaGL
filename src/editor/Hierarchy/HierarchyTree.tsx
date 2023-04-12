@@ -19,17 +19,14 @@ export const HierarchyTree = () => {
   const { t } = useTranslation();
   
   useEffect(() => {
-    const interval = setInterval(() => {
-      myFrame();
-    }, 1000 / 10);
-    return () => clearInterval(interval);
-  }, [oms, selectOM])
-
-  const myFrame = () => {
-    if (oms.length !== editor.getObjectManagements().length) {
-      setOMs([...editor.getObjectManagements()]);
+    const handleOMsChanged = () => {
+      setOMs(editor.getObjectManagements());
     }
-  }
+    editor.onOMsChanged(handleOMsChanged);
+    return () => {
+      editor.offOMsChanged(handleOMsChanged);
+    }
+  }, [editor]);
 
   return (
     <>

@@ -55,7 +55,8 @@ export class World {
       if (chara.collisionCandidate.length > 0) {
         chara.collisionCandidate.forEach((face) => {
           if (face.type == "objects") {
-            console.log("CAAollisionCandidate: ", faces.filter((f) => f.type == "objects").length);
+            // 調整中
+            // console.log("CAAollisionCandidate: ", faces.filter((f) => f.type == "objects").length);
           }
         }
         );

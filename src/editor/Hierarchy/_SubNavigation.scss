@@ -46,6 +46,7 @@
                 padding: 0px 5px;
                 padding-top: 2px;
                 align-items: center; /* 縦方向に中央揃え */
+                cursor: pointer;
                 // display: flex;
                 // width: 100%;
                 .type {
@@ -59,6 +60,7 @@
                     cursor: pointer;
                     user-select: none;
                     padding-left: 3px;
+                    user-select: none;
                 }
                 .visible {
                     display: inline-block;

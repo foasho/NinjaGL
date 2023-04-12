@@ -40,7 +40,7 @@ export class NinjaEditorManager {
   oms: IObjectManagement[] = []; //Canvas表示系
   ums: IUIManagement[] = [];// 操作UI系
   tms: ITextureManagement[] = []; // テクスチャ
-  scs: IScriptManagement[] = []; // スクリプト
+  sms: IScriptManagement[] = []; // スクリプト
   attr: {[key: string] : any} = {};//その他任意属性
   camera: OrbitControlsImpl;
   transformDecimal: number = 2; 
@@ -377,7 +377,6 @@ export class NinjaEditorManager {
 
 
   /** --- OM関係 --- */
-
   /**
    * 特定のOMにObejctをセットする
    * @returns 
@@ -394,13 +393,68 @@ export class NinjaEditorManager {
   getObjectManagements = (): IObjectManagement[] => {
     return this.oms;
   }
+  /**
+   * OMの変更リスナー
+   */
+  private objectManagementsChangedListeners: (() => void)[] = [];
+  onOMsChanged(listener: () => void) {
+    this.objectManagementsChangedListeners.push(listener);
+  }
+  offOMsChanged(listener: () => void) {
+    this.objectManagementsChangedListeners = this.objectManagementsChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  // OMの変更を通知する
+  protected notifyOMsChanged() {
+    this.objectManagementsChangedListeners.forEach(l => l());
+  }
+  /**
+   * SMの変更リスナー
+   */
+  private scriptManagementChangedListeners: (() => void)[] = [];
+  onSMsChanged(listener: () => void) {
+    this.scriptManagementChangedListeners.push(listener);
+  }
+  offSMsChanged(listener: () => void) {
+    this.scriptManagementChangedListeners = this.scriptManagementChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  // SMの変更を通知する
+  protected notifySMsChanged() {
+    this.scriptManagementChangedListeners.forEach(l => l());
+  }
+
+  /**
+   * すべてのSMを取得
+   */
+  getScriptManagements = (): IScriptManagement[] => {
+    return this.sms;
+  }
 
   /**
    * OMの追加
    * @param props 
    */
-  setObjectManagement = (props: IObjectManagement) => {
+  setOM = (props: IObjectManagement) => {
     this.oms.push(props);
+    this.notifyOMsChanged();
+  }
+
+  /**
+   * SMの追加
+   */
+  setSM = (props: IScriptManagement): boolean => {
+    if (this.sms.find(sm => sm.id == props.id)) {
+      return false;
+    }
+    if (this.sms.find(sm => sm.name == props.name)) {
+      return false;
+    }
+    this.sms.push(props);
+    this.notifySMsChanged();
+    return true;
   }
 
   /**
@@ -518,8 +572,8 @@ export class NinjaEditorManager {
   /**
    * すべてのScriptを取得する
    */
-  getSCs= () => {
-    return this.scs;
+  getSMs= () => {
+    return this.sms;
   }
 
   /**

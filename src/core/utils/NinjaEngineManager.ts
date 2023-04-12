@@ -34,7 +34,7 @@ export class NinjaEngine {
   oms: IObjectManagement[] = [];
   ums: IUIManagement[] = [];
   tms: ITextureManagement[] = [];
-  scs: IScriptManagement[] = [];
+  sms: IScriptManagement[] = [];
   world: World;
   octree: Octree;
   avatar: AvatarController;
@@ -145,10 +145,13 @@ export class NinjaEngine {
     this.jsonData = data;
   }
   /**
-   * 直接JSONのデータをセットする
+   * 直接OMのJSONのデータをセットする
    */
-  setJsonData = (data: any) => {
+  setOMParams = (data: any) => {
     this.jsonData = data;
+  }
+  setSMParmas = (data: any) => {
+    this.sms = data;
   }
   /**
    * NJCをセットする
@@ -157,7 +160,7 @@ export class NinjaEngine {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
     this.tms = njcFile.tms;
-    this.scs = njcFile.scs;
+    this.sms = njcFile.sms;
     if (njcFile.config){}
   }
 

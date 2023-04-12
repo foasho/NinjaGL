@@ -57,7 +57,7 @@ export const NinjaEditor = () => {
   const onClickNewObject = async () => {
     const data = await showSelectNewObjectDialog();
     if (data.type == "light"){
-      editor.setObjectManagement(
+      editor.setOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -73,7 +73,7 @@ export const NinjaEditor = () => {
       )
     }
     else if (data.type == "sky"){
-      editor.setObjectManagement(
+      editor.setOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -101,7 +101,7 @@ export const NinjaEditor = () => {
       // )
     }
     else if (data.type == "three"){
-      editor.setObjectManagement(
+      editor.setOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -115,7 +115,7 @@ export const NinjaEditor = () => {
       );
     }
     else if (data.type == "camera"){
-      editor.setObjectManagement(
+      editor.setOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -129,7 +129,7 @@ export const NinjaEditor = () => {
       )
     }
     else if (data.type == "fog"){
-      editor.setObjectManagement(
+      editor.setOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -178,9 +178,9 @@ export const NinjaEditor = () => {
   /**
    * JSScriptで特定のスクリプトを開く
    */
-  const changeScriptEditor = (scriptPath: string) => {
-    setScriptPath(scriptPath);
+  const changeScriptEditor = () => {
     setViewSelect("scripteditor");
+    setSelectSubNav("script");
   }
 
   /**
@@ -212,6 +212,7 @@ export const NinjaEditor = () => {
 
   /**
    * プロジェクト全体を保存
+   * ビルド処理
    */
   const onSave = () => {
     const njcFile = new NJCFile();
@@ -220,6 +221,9 @@ export const NinjaEditor = () => {
     });
     editor.getUMs().map((um) => {
       njcFile.addUM({...um});
+    });
+    editor.getSMs().map((sm) => {
+      njcFile.addSM({...sm});
     });
     if (!projectName){
       Swal.fire({

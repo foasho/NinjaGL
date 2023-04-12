@@ -108,7 +108,7 @@ export const MainViewer = () => {
                 if (editor.getAvatar()){
                   editor.removeAvatar();
                 }
-                editor.setObjectManagement({
+                editor.setOM({
                   id: MathUtils.generateUUID(),
                   filePath: filePath,
                   type: "avatar",
@@ -144,7 +144,7 @@ export const MainViewer = () => {
               }
               else {
                 // Animationがあればセットする
-                editor.setObjectManagement({
+                editor.setOM({
                   id: MathUtils.generateUUID(),
                   filePath: filePath,
                   type: "object",
@@ -161,7 +161,7 @@ export const MainViewer = () => {
               }
             }
             if (type == "ter") {
-              editor.setObjectManagement({
+              editor.setOM({
                 id: MathUtils.generateUUID(),
                 filePath: filePath,
                 type: "terrain",

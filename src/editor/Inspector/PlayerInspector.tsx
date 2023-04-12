@@ -24,7 +24,7 @@ export const PlayerInspector = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       myFrame();
-    }, 1000 / 10);
+    }, 1000 / 5);
     return () => clearInterval(interval);
   }, [playerManager])
 

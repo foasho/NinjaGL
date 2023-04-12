@@ -7,19 +7,22 @@ import {
 import { useContext, useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { AmbientLight, DirectionalLight, LoadingManager, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
+import { AmbientLight, DirectionalLight, LoadingManager, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 import { DRACOLoader, GLTFLoader, KTX2Loader } from "three-stdlib";
 import { MeshoptDecoder } from "meshoptimizer";
 import { useTranslation } from "react-i18next";
 import { AiFillHome } from "react-icons/ai";
 import Swal from "sweetalert2";
+import { InitScriptManagement } from "@/core/utils/NinjaInit";
+import { useSnapshot } from "valtio";
+import { globalScriptStore } from "../Store";
 
 export interface IFileProps {
   size: number;
   isFile: boolean;
   isDirectory: boolean;
   name: string;
-  onChangeScriptPath: (path: string) => void;
+  changeScriptEditor: () => void;
   onDoubleClick?: (type: string, value: string) => void;
   imageUrl?: string;
 }
@@ -78,7 +81,7 @@ const formatBytes = (bytes: number, decimals = 2): string => {
 }
 
 interface IContentsBrowser {
-  changeScriptEditor: (path: string) => void;
+  changeScriptEditor: () => void;
 } 
 
 export const ContentsBrowser = (props: IContentsBrowser) => {
@@ -216,7 +219,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             <>
               <ContentViewer 
                 {...file} onDoubleClick={onDoubleClick}
-                onChangeScriptPath={props.changeScriptEditor}
+                changeScriptEditor={props.changeScriptEditor}
               />
             </>
           )
@@ -235,6 +238,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
 export const ContentViewer = (props: IFileProps) => {
   let icon: JSX.Element;
   let tooltipTimer: NodeJS.Timeout = null;
+  let tooltipHideTimer: NodeJS.Timeout = null;
   let tooltip = useRef<HTMLDivElement>();
   const editor = useContext(NinjaEditorContext);
   const { t } = useTranslation();
@@ -277,7 +281,10 @@ export const ContentViewer = (props: IFileProps) => {
     else if (isJS(props.name)) {
       icon = (
         <>
-          <img src={js_icon} className={styles.iconImg} data-path={props.name} />
+          <img src={js_icon} 
+            className={styles.iconImg} 
+            data-path={props.name} 
+          />
         </>
       )
       contentsSelectType = "js";
@@ -303,8 +310,16 @@ export const ContentViewer = (props: IFileProps) => {
     )
   }
 
+  const hideTooltip = () => {
+    tooltip.current.style.display = "none";
+  }
+
   const viewTooltip = () => {
     tooltip.current.style.display = "block";
+    if (tooltipHideTimer) {
+      clearTimeout(tooltipHideTimer);
+    }
+    tooltipHideTimer = setTimeout(hideTooltip, 2000);
   }
 
   const onHover = (e) => {
@@ -328,7 +343,7 @@ export const ContentViewer = (props: IFileProps) => {
     tooltip.current.style.display = "none";
   }
 
-  const onDoubleClick = (type: string) => {
+  const onDoubleClick = async (type: string) => {
     if (props.isDirectory) {
       const newRoute = editor.assetRoute + "/" + props.name;
       if (props.onDoubleClick) {
@@ -336,7 +351,53 @@ export const ContentViewer = (props: IFileProps) => {
       }
     }
     else if (props.isFile && type == "js"){
-      props.onChangeScriptPath(`${editor.assetRoute}/${props.name}`);
+      const filePath = `${editor.assetRoute}/${props.name}`;
+      const sm = {...InitScriptManagement};
+      sm.id = MathUtils.generateUUID();
+      sm.filePath = filePath;
+      const scriptCheck = async () => {
+        try {
+          const response = await fetch(filePath);
+          if (response.ok) {
+            const text = await response.text();
+            // 特定の文字列をチェックします。
+            const searchString = "initialize";
+            const searchString2 = "frameLoop";
+            if (
+              text.includes(searchString) 
+              && text.includes(searchString2)
+            ) {  
+              return true;
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching file:", error);
+        }
+        return false;
+      };
+      const result = await scriptCheck();
+      if (result) {
+        sm.name = filePath.split("/").pop() || "";
+        const success = editor.setSM(sm);
+        if (!success) {
+          Swal.fire({
+            title: t("scriptError"),
+            text: t("scriptErrorAlreadyText"),
+            icon: "error",
+          });
+        }
+        else {
+          globalScriptStore.currentSM = sm;
+          props.changeScriptEditor();
+        }
+      }
+      else {
+        Swal.fire({
+          title: t("scriptError"),
+          text: t("scriptErrorText"),
+          icon: "error",
+        });
+      }
     }
   }
 
