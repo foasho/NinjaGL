@@ -1,5 +1,30 @@
+# Standard
+.vscode/*
+*.tsbuildinfo
+next-env.d.ts
+__pycache__/*
+.idea/*
+/.next/
 .github/*
 *.glb
 *.gltf
-/pages/*
-/editor/*
+public/assets/*
+public/mp3/*
+fileicons/*.glb
+
+# NodeModule
+/node_modules
+*/node_modules/*
+
+# production
+/build
+src/core/build
+src/core/dist
+
+# ENV
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+next-env.d.ts

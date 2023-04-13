@@ -8,7 +8,7 @@ import { DoubleSide, Mesh, ShaderMaterial, Matrix3, Matrix4, ShaderMaterialParam
 import { Canvas, useFrame, extend, useLoader } from '@react-three/fiber';
 import { Environment, OrbitControls, Sky, SoftShadows, shaderMaterial } from '@react-three/drei';
 import path from 'path';
-import { GLTFLoader } from 'three-stdlib/loaders/GLTFLoader';
+import { GLTFLoader } from 'three-stdlib';
 import Select from 'react-select';
 
 interface IShaderEditor {

@@ -58,7 +58,6 @@ export const MainViewer = () => {
     const loader = new GLTFLoader()
           .setCrossOrigin('anonymous')
           .setDRACOLoader( DRACO_LOADER )
-          .setKTX2Loader( KTX2_LOADER.detectSupport( editor.render ) )
           .setMeshoptDecoder( MeshoptDecoder );
     if (!editor.contentsSelect) {
       /**
@@ -470,7 +469,6 @@ const CameraControl = (props: ICameraControl) => {
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
   const editor = useContext(NinjaEditorContext);
-  editor.render = gl;
   const input = useInputControl("desktop");
 
   useLayoutEffect(() => {

@@ -3,7 +3,7 @@ import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { DragEventHandler, MutableRefObject, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils } from "three";
-import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
+import { GLTFLoader } from "three-stdlib";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { useTranslation } from "react-i18next";
 
