@@ -20,7 +20,7 @@ export const ShaderNavigation = () => {
               <div className={styles.tree}>
                   {shaders.map((shader, idx) => {
                       return (
-                          <ShaderItem shader={shader} index={idx} />
+                          <ShaderItem shader={shader} index={idx} key={idx} />
                       )
                   })}
               </div>

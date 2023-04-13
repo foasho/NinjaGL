@@ -352,9 +352,9 @@ export const NinjaEditor = () => {
                 <a>{t("recentProjects")}</a>
                 {showSubMenu &&
                 <ul className={styles.subMenu} onMouseLeave={() => handleSubMenuMouseLeave()}>
-                  {projectFiles.map((pf => {
+                  {projectFiles.map(((pf, idx) => {
                     return (
-                      <li>
+                      <li key={idx}>
                         <a>{pf.name}</a>
                         <a>{pf.path}</a>
                       </li>

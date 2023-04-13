@@ -1,4 +1,4 @@
-import { NinjaEngine, NinjaEngineContext } from "@/core/NinjaEngineManager";
+import { NinjaEngine, NinjaEngineContext } from "./NinjaEngineManager";
 import { useEffect, useState } from "react";
 import { loadNJCFileFromURL } from "./utils/NinjaFileControl";
 import { RenderProps } from "@react-three/fiber";

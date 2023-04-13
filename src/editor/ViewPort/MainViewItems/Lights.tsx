@@ -23,8 +23,8 @@ export const MyLights = () => {
   })
   return (
     <>
-      {lights.map((om) => {
-        return <MyLight om={om}/>
+      {lights.map((om, idx) => {
+        return <MyLight om={om} key={idx}/>
       })}
     </>
   )
@@ -41,15 +41,14 @@ export const MyLight = (prop: ILightProps) => {
   const catchRef = useRef<Mesh>();
   const { om } = prop;
   const id = om.id;
-  if (om.args.type == "direction"){
-    useHelper(ref, DirectionalLightHelper);
-  }
+  let _helperObject: any = DirectionalLightHelper;
   if (om.args.type == "spot"){
-    useHelper(ref, SpotLightHelper);
+    _helperObject = SpotLightHelper;
   }
   if (om.args.type == "point"){
-    useHelper(ref, PointLightHelper);
+    _helperObject = PointLightHelper;
   }
+  useHelper(ref, _helperObject);
 
   const onDragStart = () => {
     globalStore.pivotControl = true;

@@ -1,5 +1,5 @@
-import { NinjaEngineContext } from "@/core/NinjaEngineManager";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
+import { NinjaEngineContext } from "../NinjaEngineManager";
+import { IObjectManagement } from "../utils/NinjaProps";
 import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
 import { useContext } from "react"
 import { MathUtils } from "three";
@@ -71,8 +71,8 @@ export const Lights = () => {
   const lights = engine ? engine.getLights() : [];
   return (
     <>
-      {lights.map((light) => {
-        return <Light {...light} />
+      {lights.map((light, index) => {
+        return <Light {...light} key={index} />
       })}
     </>
   )

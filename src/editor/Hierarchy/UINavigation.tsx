@@ -23,7 +23,7 @@ export const UINavigation = () => {
         <div className={styles.tree}>
           {uis.map((ui, idx) => {
             return (
-              <UIItem ui={ui} index={idx} isSelect={false} />
+              <UIItem ui={ui} index={idx} isSelect={false} key={idx} />
             )
           })}
         </div>

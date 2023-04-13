@@ -95,8 +95,8 @@ export const Terrain = () => {
       }
       {helper &&
         <>
-          {lineSegs.map((lineSeg) => {
-            return <primitive object={lineSeg} />
+          {lineSegs.map((lineSeg, index) => {
+            return <primitive object={lineSeg} key={index} />
           })}
         </>
       }

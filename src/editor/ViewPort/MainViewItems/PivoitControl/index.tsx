@@ -319,4 +319,6 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
       </context.Provider>
     )
   }
-)
+);
+
+PivotControls.displayName = 'PivotControls';

@@ -14,8 +14,8 @@ export const Cameras = () => {
 
   return (
     <>
-      {cameras.map(om => {
-        return <Camera om={om} />
+      {cameras.map((om, idx) => {
+        return <Camera om={om} key={idx} />
       })}
     </>
   )

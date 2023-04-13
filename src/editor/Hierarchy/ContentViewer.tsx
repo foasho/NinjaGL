@@ -207,20 +207,21 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             return <></>
           }
           return (
-            <span className={styles.route} onClick={() => onMoveDic(route)}>
+            <span className={styles.route} onClick={() => onMoveDic(route)} key={idx}>
               /{route}
             </span>
           )
         })}
       </div>
       <div className={styles.itemContainer}>
-        {files.map((file) => {
+        {files.map((file, index) => {
           return (
             <>
               <ContentViewer 
                 {...file} 
                 onDoubleClick={onDoubleClick}
                 changeScriptEditor={props.changeScriptEditor}
+                key={index}
               />
             </>
           )
@@ -498,7 +499,6 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   const gltfLoader = new GLTFLoader()
         .setCrossOrigin('anonymous')
         .setDRACOLoader( DRACO_LOADER )
-        .setKTX2Loader( KTX2_LOADER.detectSupport( renderer ) )
         .setMeshoptDecoder( MeshoptDecoder );
 
   // Load GLTF and Making Image

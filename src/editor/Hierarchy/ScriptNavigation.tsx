@@ -95,7 +95,7 @@ export const ScriptNavigation = () => {
         >
           {sms.map((sm, idx) => {
             return (
-              <ScriptItem sm={sm} index={idx} />
+              <ScriptItem sm={sm} index={idx} key={idx} />
             )
           })}
         </div>

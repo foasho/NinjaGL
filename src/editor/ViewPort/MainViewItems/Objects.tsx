@@ -26,9 +26,9 @@ export const StaticObjects = () => {
   });
   return (
     <>
-      {staticOMs.map(om => {
+      {staticOMs.map((om, index) => {
         if (om.type == "object") {
-          return <StaticObject om={om} isHelper={true} />
+          return <StaticObject om={om} isHelper={true} key={index} />
         }
       })}
     </>
@@ -50,7 +50,7 @@ const StandardMaterial = new MeshStandardMaterial();
 const StaticObject = (props: IStaticObject) => {
   const state = useSnapshot(globalStore);
   const itemsRef = useRef([]);
-  const object: Object3D = props.om.object;
+  const object = props.om.object;
   object.traverse((node: any) => {
     if (node.isMesh && node instanceof Mesh) {
       node.castShadow = true;
@@ -173,7 +173,7 @@ const StaticObject = (props: IStaticObject) => {
       {props.om.physics == "along" &&
         <>
           {lineSegs.map((lineSeg, index) => {
-            return <primitive ref={el => (itemsRef.current[index] = el)} object={lineSeg} />
+            return <primitive ref={el => (itemsRef.current[index] = el)} object={lineSeg} key={index} />
           })}
         </>
       }

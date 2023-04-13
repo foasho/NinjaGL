@@ -22,8 +22,8 @@ export const ThreeObjects = () => {
   });
   return (
     <>
-      {threeOMs.map(om => {
-        return <ThreeObject om={om} />
+      {threeOMs.map((om, index: number) => {
+        return <ThreeObject om={om} key={index} />
       })}
     </>
   )

@@ -59,7 +59,7 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
    * 初期値
    */
   var myMesh = new Mesh();
-  const material = new MeshStandardMaterial({ wireframe: true, color: props.wireColor ? props.wireColor : 0xff0000 });
+  const material = new MeshStandardMaterial({ wireframe: true, color: 0xff0000 });
   material.flatShading = true
   material.side = DoubleSide;
   const modifier = new SimplifyModifier();

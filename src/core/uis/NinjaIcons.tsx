@@ -35,7 +35,7 @@ const generateKey = (): string => {
 }
 
 const CreateIcon = (prop: INinjaIconProps) => {
-    let icon: JSX.Element;
+    let icon: JSX.Element | undefined;
     const idName = generateKey() + "nicon";
     if (prop.template){
         if (prop.template == "gi"){
@@ -66,7 +66,7 @@ const CreateIcon = (prop: INinjaIconProps) => {
 
     useEffect(() => {
         if (icon){
-            if (prop.script && prop.script.length > 0){
+            if (prop.script && prop.script.length > 0 && prop.id && prop.id.length > 0){
                 try {
                     const Icon = document.getElementById(prop.id);
                     eval(prop.script);
@@ -76,7 +76,7 @@ const CreateIcon = (prop: INinjaIconProps) => {
             }
         }
         return () => {
-            icon = null;
+            icon = undefined;
         }
     }, []);
 
@@ -84,12 +84,12 @@ const CreateIcon = (prop: INinjaIconProps) => {
 
     return (
         <>
-            {icon &&
-            <>
-                <IconA id={prop.id}>
-                    {icon}
-                </IconA>
-            </>
+            {icon !== null &&
+                <>
+                    <IconA id={prop.id}>
+                        {icon}
+                    </IconA>
+                </>
             }
         </>
     )
@@ -98,9 +98,9 @@ const CreateIcon = (prop: INinjaIconProps) => {
 export const NinjaIcons = (props: INinjaIconsProps) => {
     return (
         <>
-            {props.icons.map((prop) => {
+            {props.icons.map((prop, index) => {
                 return (
-                    <CreateIcon {...prop}/>
+                    <CreateIcon {...prop} key={index}/>
                 )
             })}
         </>

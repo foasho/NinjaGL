@@ -1,9 +1,6 @@
-import { NinjaEngineContext } from "@/core/NinjaEngineManager";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
-import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
+import { NinjaEngineContext } from "../NinjaEngineManager";
+import { Sky } from "@react-three/drei"
 import { useContext } from "react"
-import { MathUtils } from "three";
-import { ShaderMaterial } from "three";
 
 export const SkyComponents = () => {
   const engine = useContext(NinjaEngineContext);

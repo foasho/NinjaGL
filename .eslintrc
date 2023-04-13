@@ -3,6 +3,6 @@
   "rules": {
     "import/prefer-default-export": "off",
     "no-console": "warn",
-    "no-var": "error"
+    "no-var": "warn"
   }
 }

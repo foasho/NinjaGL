@@ -41,7 +41,7 @@ export const HierarchyTree = () => {
               isSelect = true;
             }
             return (
-              <TreeItem om={om} index={idx} isSelect={isSelect} />
+              <TreeItem om={om} index={idx} isSelect={isSelect} key={idx} />
             )
           })}
         </div>

@@ -20,7 +20,7 @@ export const TextureNavigation = () => {
               <div className={styles.tree}>
                   {textures.map((texture, idx) => {
                       return (
-                          <TextureItem texture={texture} index={idx} />
+                          <TextureItem texture={texture} index={idx} key={idx} />
                       )
                   })}
               </div>

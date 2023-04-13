@@ -1,4 +1,4 @@
-import { NinjaEngineContext } from "@/core/NinjaEngineManager"
+import { NinjaEngineContext } from "../NinjaEngineManager"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 const loadingText = "Loading...";

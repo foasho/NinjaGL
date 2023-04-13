@@ -316,13 +316,14 @@ const ShaderViewer = (props: IShaderViewer) => {
         obj = <mesh></mesh>;
       }
       else {
-        const gltf: any = useLoader(GLTFLoader, props.url);
-        obj = (
-          <>
-            <primitive object={gltf.scene}/>
-            <primitive object={CustomShaderMaterial}/>
-          </>
-        )
+        // 美しくないので後で直す
+        // const gltf: any = useLoader(GLTFLoader, props.url);
+        // obj = (
+        //   <>
+        //     <primitive object={gltf.scene}/>
+        //     <primitive object={CustomShaderMaterial}/>
+        //   </>
+        // )
       }
     default:
       geometry = <boxGeometry args={[1, 1, 1]} />;
