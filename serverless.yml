@@ -5,7 +5,7 @@ provider:
   runtime: nodejs18.x
   lambdaHashingVersion: 20201221
   stage: ${opt:stage, 'dev'}
-  region: us-east-1
+  region: us-east-2
 
 plugins:
   - serverless-next.js
