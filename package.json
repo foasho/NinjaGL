@@ -21,9 +21,11 @@
     "export": "EXPORT=true next build && EXPORT=true next export",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
-    "cypress": "cypress open"
+    "cypress": "cypress open",
+    "deploy:dev": "serverless --stage=development"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^8.2.0",
     "@gltf-transform/core": "^3.1.1",
     "@gltf-transform/functions": "^3.1.1",
     "@monaco-editor/react": "^4.4.6",

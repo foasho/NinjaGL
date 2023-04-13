@@ -1,15 +1,6 @@
-service: nextjs-aws-lambda
+service: Ninja-Serverless-Setting
 
-provider:
-  name: aws
-  runtime: nodejs18.x
-  lambdaHashingVersion: 20201221
-  stage: ${opt:stage, 'dev'}
-  region: us-east-2
-
-plugins:
-  - serverless-next.js
-
-custom:
-  serverless-nextjs:
-    componentVersion: 1.19.0-alpha.0
+NinjaGLApp:
+  component: "@sls-next/serverless-component@v3.8.0-alpha.0" 
+  inputs:
+    bucketName: ninjagl
