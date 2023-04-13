@@ -35,40 +35,39 @@ interface IPlayerManager {
  * Ninjaエディタクラス
  */
 export class NinjaEditorManager {
-  render: WebGLRenderer;
-  config: IConfigParams;
+  config: IConfigParams = InitMobileConfipParams;
   oms: IObjectManagement[] = []; //Canvas表示系
   ums: IUIManagement[] = [];// 操作UI系
   tms: ITextureManagement[] = []; // テクスチャ
   sms: IScriptManagement[] = []; // スクリプト
   attr: {[key: string] : any} = {};//その他任意属性
-  camera: OrbitControlsImpl;
+  camera: OrbitControlsImpl | undefined;
   transformDecimal: number = 2; 
   /**
    * コンテンツブラウザ
    */
   mode: "position" | "scale" | "rotation" = "position";
-  gltfViewerObj: Object3D;
+  gltfViewerObj: Object3D | undefined;
   wireFrameColor = "#43D9D9";
   fileSelect: string = "";
   assetRoute: string = "";
   contentsSelect: boolean = false;
-  contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "camera" = null;
+  contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "camera" | null = null;
   contentsSelectPath: string = "";// コンテンツブラウザ内のItemを選択した時にパスを設定する
   /**
    * 地形メーカー
    */
-  terrainManager: TerrainMakerManager;
+  terrainManager: TerrainMakerManager = new TerrainMakerManager();
   /**
    * プレイヤーパラメータ
    */
   playerManager: IPlayerManager = {
     type: "avatar",
-    selectAnim: null,
+    selectAnim: "idle",
     height: 1.7,
     animations: [],
-    object: null,
-    animMapper: null,
+    object: new Group(),
+    animMapper: {},
     sounds: [],
     args: {}
   }
@@ -81,12 +80,9 @@ export class NinjaEditorManager {
    * 初期化
    */
   initialize = () => {
-    this.config = null;
-    this.terrainManager = new TerrainMakerManager();
-    this.config= InitMobileConfipParams;
     this.oms = [];
     this.ums = [];
-    this.camera = null;
+    this.camera = undefined;
     this.tms = [];
   }
 
@@ -381,9 +377,10 @@ export class NinjaEditorManager {
    * 特定のOMにObejctをセットする
    * @returns 
    */
-  setOMofObject(id, obj){
-    if (this.oms.find(om => om.id == id)) {
-      this.oms.find(om => om.id == id).object = obj;
+  setOMofObject(id: string, obj: Object3D){
+    const target = this.oms.find(om => om.id == id);
+    if (target) {
+      target.object = obj;
     }
   }
 
@@ -470,7 +467,7 @@ export class NinjaEditorManager {
    * 現在選択中のIDを取得
    * @returns 
    */
-  getOMById = (id: string):IObjectManagement => {
+  getOMById = (id: string):IObjectManagement|undefined => {
     return this.oms.find(om => om.id == id);
   }
 
@@ -496,7 +493,7 @@ export class NinjaEditorManager {
    * Terrainを取得する
    * @returns 
    */
-  getTerrain = (): IObjectManagement => {
+  getTerrain = (): IObjectManagement|undefined => {
     const data = this.oms.find(om => om.type == "terrain");
     return data;
   }
@@ -505,7 +502,7 @@ export class NinjaEditorManager {
    * Avatarを取得する
    * @returns 
    */
-  getAvatar = (): IObjectManagement => {
+  getAvatar = (): IObjectManagement|undefined => {
     const data = this.oms.find(om => om.type == "avatar");
     return data;
   }
@@ -517,7 +514,7 @@ export class NinjaEditorManager {
    * 空を取得
    * @param trig 
    */
-  getSky = (): IObjectManagement => {
+  getSky = (): IObjectManagement|undefined => {
     const data = this.oms.find(om => om.type == "sky");
     return data;
   }
@@ -534,7 +531,7 @@ export class NinjaEditorManager {
   /**
    * 霧を取得
    */
-  getFog = (): IObjectManagement => {
+  getFog = (): IObjectManagement|undefined => {
     const data = this.oms.find(om => om.type == "fog");
     return data;
   }
@@ -594,4 +591,4 @@ export class NinjaEditorManager {
   }
 }
 
-export const NinjaEditorContext = createContext<NinjaEditorManager>(null);
+export const NinjaEditorContext = createContext<NinjaEditorManager>(new NinjaEditorManager());

@@ -9,7 +9,7 @@ declare var self: any;
  */
 export class NinjaEngineWorker {
   engine: NinjaEngine;
-  worker: Worker;
+  worker: Worker | undefined;
   constructor(engine: NinjaEngine) {
     this.engine = engine;
     // 追加
@@ -97,6 +97,9 @@ export class NinjaEngineWorker {
    * WebWorkerのメッセージを処理する
    */
   handleWorkerMessage = (e: MessageEvent) => {
+    if (!this.worker) {
+      return;
+    }
     const { type, data } = e.data;
     console.log("check handleWorkerMessage");
     if (type == "getOM") {
@@ -108,62 +111,85 @@ export class NinjaEngineWorker {
       // 特定のIDのOMの位置を変更する
       const { id, position } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         om.object.position.set(position.x, position.y, position.z);
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "getPosition") {
       // 特定のIDのOMの位置を取得する
       const { id } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         this.worker.postMessage({ type: "getPosition", data: om.object.position })
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "setRotation"){
       // 特定のIDのOMの回転を変更する
       const { id, rotation } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         om.object.rotation.set(rotation.x, rotation.y, rotation.z);
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "getRotation") {
       // 特定のIDのOMの回転を取得する
       const { id } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         this.worker.postMessage({ type: "getRotation", data: om.object.rotation })
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "setScale"){
       // 特定のIDのOMのスケールを変更する
       const { id, scale } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         om.object.scale.set(scale.x, scale.y, scale.z);
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "getScale") {
       // 特定のIDのOMのスケールを取得する
       const { id } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         this.worker.postMessage({ type: "getScale", data: om.object.scale })
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "setQuaternion"){
       // 特定のIDのOMの回転を変更する
       const { id, quaternion } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         om.object.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+      }
+      else {
+        console.error("OM not found.");
       }
     }
     else if (type == "changeAvatarOffset"){
       // アバターのカメラオフセットを変更する
       const { offset } = data;
-      this.engine.avatar.cameraOffset = offset.clone();
+      if (this.engine.avatar){
+        this.engine.avatar.cameraOffset = offset.clone();
+      }
     }
     else if (type == "changeUniforms"){
       // 特定のIDのOMのuniformsを変更する
@@ -177,7 +203,7 @@ export class NinjaEngineWorker {
       // 特定のIDのOMのvisibleを変更する
       const { id, visible } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.object) {
         om.object.visible = visible;
       }
     }
@@ -193,18 +219,19 @@ export class NinjaEngineWorker {
       // 特定のIDのOMのanimationを変更する
       const { id, animation } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
-        if (om.object instanceof SkinnedMesh) {
-          om.mixer.stopAllAction();
-          om.mixer.clipAction(animation).play();
-        }
+      if (om && om.object instanceof SkinnedMesh && om.mixer) {
+        om.mixer.stopAllAction();
+        om.mixer.clipAction(animation).play();
+      }
+      else {
+        console.error("OM or object or mixer not found.");
       }
     }
     else if (type == "startAnimationByName"){
       // 特定のIDのOMのanimationを開始する
       const { id, animationName } = data;
       const om = this.engine.getOMById(id);
-      if (om) {
+      if (om && om.animations && om.animations.length > 0 && om.mixer) {
         if (om.object instanceof SkinnedMesh) {
           const animation = om.animations.find(animation => animation.name == animationName);
           if (animation) {
@@ -213,13 +240,16 @@ export class NinjaEngineWorker {
           }
         }
       }
+      else {
+        console.error("OM or Animation or mixer not found.");
+      }
     }
     else if (type == "stopAnimationByName"){
       // 特定のIDのOMのanimationを停止する
       const { id, animationName } = data;
       const om = this.engine.getOMById(id);
       if (om) {
-        if (om.object instanceof SkinnedMesh) {
+        if (om.animations && om.animations.length > 0 && om.mixer) {
           const animation = om.animations.find(animation => animation.name == animationName);
           if (animation) {
             om.mixer.stopAllAction();

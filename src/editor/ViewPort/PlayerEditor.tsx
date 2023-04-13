@@ -1,7 +1,7 @@
 import { reqApi } from "@/services/ServciceApi";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { DragEventHandler, MutableRefObject, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils } from "three";
 import { GLTFLoader } from "three-stdlib/loaders/GLTFLoader";
 import { NinjaEditorContext } from "../NinjaEditorManager";
@@ -10,19 +10,24 @@ import { useTranslation } from "react-i18next";
 export const PlayerEditor = () => {
   const editor = useContext(NinjaEditorContext);
   const playerManager = editor.playerManager;
-  const ref = useRef();
+  const ref: MutableRefObject<HTMLCanvasElement | null> = useRef<HTMLCanvasElement>(null);
   const [type, setType] = useState<"avatar" | "other" | "npc">("avatar");
   const [height, setHeight] = useState<number>(1.7);
-  const [selectAnim, setSelectAnim] = useState<string>();
-  const [scene, setScene] = useState<Object3D>(null)
+  const [selectAnim, setSelectAnim] = useState<string|undefined>();
+  const [scene, setScene] = useState<Object3D>();
   const [mixer, setMixer] = useState<AnimationMixer>();
   const [animations, setAnimations] = useState<AnimationClip[]>([]);
   const { t } = useTranslation();
-  const handleDrop = (e) => {
+  /**
+   * ドラッグアンドドロップでモデルを読み込む
+   * @param e 
+   */
+  const handleDrop: DragEventHandler<HTMLDivElement> = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const loader = new GLTFLoader();
-    if (!editor.contentsSelect) {
-      const file = e.dataTransfer.files[0];
+    if (!editor.contentsSelect && scene) {
+      const file = e.dataTransfer?.files[0];
+      if (!file) return;
       loader.load(URL.createObjectURL(file), (gltf) => {
         setScene(gltf.scene);
         const _mixer = new AnimationMixer(gltf.scene);
@@ -44,8 +49,8 @@ export const PlayerEditor = () => {
           editor.contentsSelectPath,
           async (gltf) => {
             const scene = gltf.scene || gltf.scenes[0] as Object3D;
-            scene.traverse((node: Mesh) => {
-              if ((node as Mesh).isMesh) {
+            scene.traverse((node: Object3D) => {
+              if (node instanceof Mesh && node.isMesh) {
                 if (node.geometry) {
                   node.castShadow = true;
                   node.receiveShadow = true;
@@ -74,7 +79,7 @@ export const PlayerEditor = () => {
     }
   }
 
-  const handleDragOver = (e) => {
+  const handleDragOver:DragEventHandler<HTMLDivElement>  = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
 
@@ -92,7 +97,7 @@ export const PlayerEditor = () => {
 
   const playAnimation = (name: string) => {
     const target = animations.find(a => a.name == name);
-    if (target){
+    if (target && mixer){
       const curAction = mixer.clipAction(target);
       curAction.enabled = true;
       curAction.play();
@@ -101,7 +106,7 @@ export const PlayerEditor = () => {
 
   const stopAnimation = (name: string) => {
     const target = animations.find(a => a.name == name);
-    if (target){
+    if (target && mixer){
       const curAction = mixer.clipAction(target);
       curAction.enabled = false;
       curAction.stop();
@@ -109,7 +114,7 @@ export const PlayerEditor = () => {
   }
 
   const changeSelectAnim = (name: string) => {
-      stopAnimation(selectAnim);
+      if (selectAnim) stopAnimation(selectAnim);
       setSelectAnim(name);
   }
 
@@ -127,9 +132,9 @@ export const PlayerEditor = () => {
             <gridHelper args={[4096, 4096]} />
             <primitive object={scene} />
             <PlayerEditorUpdate 
-              selectAnim={selectAnim} 
+              selectAnim={selectAnim?selectAnim:""} 
               animations={animations} 
-              mixer={mixer} 
+              mixer={mixer?mixer:new AnimationMixer(new Object3D())} 
               onCallback={changeSelectAnim}
             />
           </Canvas>

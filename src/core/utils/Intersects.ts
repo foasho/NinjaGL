@@ -1,4 +1,4 @@
-import { Box3, Plane, Sphere, Vector3 } from "three";
+import { Box3, Plane, Sphere, Vector2, Vector3 } from "three";
 import { Face } from "./Octree";
 
 export interface IIntersectProps {
@@ -252,7 +252,7 @@ export const isIntersectTriSphere = (
   b: Vector3,
   c: Vector3,
   normal: Vector3
-): IIntersectProps => {
+): IIntersectProps | null => {
   A.subVectors(a, sphere.center);
   B.subVectors(b, sphere.center);
   C.subVectors(c, sphere.center);
@@ -300,7 +300,7 @@ export const isIntersectTriSphere = (
   return {
     distance: distance,
     contactPoint: contactPoint,
-    face: null
+    face: undefined,
   };
 }
 
@@ -318,7 +318,7 @@ export const detectSegmentTriangle = (
   a: Vector3,
   b: Vector3,
   c: Vector3
-): Vector3 => {
+): Vector3 | null => {
   ab.subVectors(b, a);
   ac.subVectors(c, a);
   qp.subVectors(p, q);
@@ -389,49 +389,39 @@ const ACTION = Object.freeze({
 
 
 /**
- * カメラ
- */
-export const isPerspectiveCamera = (camera): any => {
-  return camera.isPerspectiveCamera;
-}
-export const isOrthographicCamera = (camera): any => {
-  return camera.isOrthographicCamera;
-}
-
-/**
  * 計算関数
  */
-export const clamp = (value, min, max) => {
+export const clamp = (value: number, min: number, max: number) => {
   return Math.max(min, Math.min(max, value));
 }
-export const approxZero = (number, error = EPSILON) => {
+export const approxZero = (number: number, error = EPSILON) => {
   return Math.abs(number) < error;
 }
-export const approxEquals = (a, b, error = EPSILON) => {
+export const approxEquals = (a: number, b: number, error = EPSILON) => {
   return approxZero(a - b, error);
 }
-export const roundToStep = (value, step) => {
+export const roundToStep = (value: number, step: number) => {
   return Math.round(value / step) * step;
 }
-export const infinityToMaxNumber = (value) => {
+export const infinityToMaxNumber = (value: number) => {
   if (isFinite(value))
     return value;
   if (value < 0)
     return -Number.MAX_VALUE;
   return Number.MAX_VALUE;
 }
-export const maxNumberToInfinity = (value) => {
+export const maxNumberToInfinity = (value: number) => {
   if (Math.abs(value) < Number.MAX_VALUE)
     return value;
   return value * Infinity;
 }
 export const smoothDamp = (
-  current,
-  target,
-  currentVelocityRef,
-  smoothTime,
+  current: number,
+  target: number,
+  currentVelocityRef: any,
+  smoothTime: number,
   maxSpeed = Infinity,
-  deltaTime
+  deltaTime: number
 ) => {
   // Based on Game Programming Gems 4 Chapter 1.10
   smoothTime = Math.max(0.0001, smoothTime);
@@ -455,13 +445,13 @@ export const smoothDamp = (
   return output;
 }
 export const smoothDampVec3 = (
-  current,
-  target,
-  currentVelocityRef,
-  smoothTime,
+  current: Vector3,
+  target: Vector3,
+  currentVelocityRef: any,
+  smoothTime: number,
   maxSpeed = Infinity,
-  deltaTime,
-  out
+  deltaTime: number,
+  out: Vector3
 ) => {
   // Based on Game Programming Gems 4 Chapter 1.10
   smoothTime = Math.max(0.0001, smoothTime);
@@ -514,8 +504,8 @@ export const smoothDampVec3 = (
   return out;
 }
 export const extractClientCoordFromEvent = (
-  pointers,
-  out
+  pointers: any[],
+  out: Vector2
 ) => {
   out.set(0, 0);
   pointers.forEach((pointer) => {
@@ -524,14 +514,4 @@ export const extractClientCoordFromEvent = (
   });
   out.x /= pointers.length;
   out.y /= pointers.length;
-}
-export const notSupportedInOrthographicCamera = (
-  camera,
-  message
-) => {
-  if (isOrthographicCamera(camera)) {
-    console.warn(`${message} is not supported in OrthographicCamera`);
-    return true;
-  }
-  return false;
 }

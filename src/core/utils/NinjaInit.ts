@@ -47,5 +47,5 @@ export const InitScriptManagement: IScriptManagement = {
   name: "nonname-script" + MathUtils.generateUUID().substring(0, 6),
   type: "script",
   filePath: null,
-  script: null,
+  script: "",
 }

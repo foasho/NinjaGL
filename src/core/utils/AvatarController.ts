@@ -42,7 +42,7 @@ export class AvatarController {
   objectUUIDs: string[] = [];
   center: Vector3;
   radius: number;
-  world: World;
+  world: World | undefined;
   groundPadding: number = .05;// 接地距離 デフォルト.5
   maxSlopeGradient: number = Math.cos(50 * MathUtils.DEG2RAD);
   // direction  = 0;     // ラジアン値(0~2π) => Degree * Math.PI/180
@@ -76,23 +76,25 @@ export class AvatarController {
 
   // 過去動作入力データ
   isFirstUpdate: boolean = true;
-  wasGrounded: boolean; // 着地していたか
-  wasOnSlope: boolean; // 減衰中か
-  wasWalking: boolean; // 歩いていたか
-  wasRunning: boolean; // 走っていたか
-  wasJumping: boolean; // ジャンプしていたか
+  wasGrounded: boolean = false; // 着地していたか
+  wasOnSlope: boolean = false;; // 減衰中か
+  wasWalking: boolean = false;; // 歩いていたか
+  wasRunning: boolean = false;; // 走っていたか
+  wasJumping: boolean = false;; // ジャンプしていたか
 
   // カメラ情報
-  camera: PerspectiveCamera | OrthographicCamera;
-  cameraOffset: Vector3 = new Vector3(-1, 1, -3.5);
+  camera: PerspectiveCamera | OrthographicCamera | undefined;
+  cameraOffset: Vector3 = new Vector3(-1, 1, -4.5);
   cameraLookAtOffset: Vector3 = new Vector3(0, 1.5, 4);
   raycaster: Raycaster = new Raycaster();
 
   // アニメーション情報
   isAnimation: boolean = false;;
   animations: AnimationClip[] = [];
-  animMapper: { [key: string]: string };
-  mixer: AnimationMixer;
+  animMapper: { [key: string]: string } = {};
+  mixer: AnimationMixer | undefined;
+  states: { [key: string]: IAnimStateProps } = {};
+  currentState: IAnimStateProps | undefined;
 
   /**
    * サウンド
@@ -108,7 +110,7 @@ export class AvatarController {
     animations?: AnimationClip[],
     mixer?: AnimationMixer,
     animMapper?: { [key: string]: string },
-    sounds?: any,
+    sounds?: ISoundProps[],
   ) {
     this.isCharacterController = true;
     this.object = object3d;
@@ -160,7 +162,7 @@ export class AvatarController {
       });
     }
 
-    this.object.traverse((node: Mesh) => {
+    this.object.traverse((node: Object3D) => {
       if (node.uuid) {
         this.objectUUIDs.push(node.uuid);
       }
@@ -306,7 +308,8 @@ export class AvatarController {
     direction2D.set(0, frontDirection);
     const negativeFrontAngle = Math.atan2(- direction2D.y, - direction2D.x);
     for (let i = 0, l = this.contactInfo.length; i < l; i++) {
-      const normal = this.contactInfo[i].face.normal;
+      const normal = this.contactInfo[i].face?.normal;
+      if (!normal) continue;
       if (this.maxSlopeGradient < normal.y || this.isOnSlope) {
         // フェイスは地面なので、壁としての衝突の可能性はない。
         // 速度の減衰はしないでいい
@@ -364,12 +367,11 @@ export class AvatarController {
     //    |
     //    |
     //    | segment (player's head to almost -infinity)
+    let groundContactInfoTmp: Vector3 | null;
     let groundContactInfo: IIntersectProps = {
-      face: null,
-      contactPoint: null,
-      distance: null
+      contactPoint: undefined as any,
+      distance: undefined
     };
-    let groundContactInfoTmp: Vector3;
     const faces = this.collisionCandidate;
 
     groundingHead.set(
@@ -411,7 +413,9 @@ export class AvatarController {
     }
 
     this.groundHeight = groundContactInfo.contactPoint.y;
-    this.groundNormal.copy(groundContactInfo.face.normal);
+    if (groundContactInfo.face){
+      this.groundNormal.copy(groundContactInfo.face.normal);
+    }
 
     const top = groundingHead.y;
     const bottom = this.center.y - this.radius - this.groundPadding;
@@ -501,7 +505,8 @@ export class AvatarController {
     for (let i = 0, l = this.contactInfo.length; i < l; i++) {
 
       face = this.contactInfo[i].face;
-      normal = this.contactInfo[i].face.normal;
+      normal = this.contactInfo[i].face?.normal;
+      if (!normal || !face) continue;
 
       // distance = this.contactInfo[ i ].distance;
       // if ( 0 <= distance ) {
@@ -647,12 +652,13 @@ export class AvatarController {
       const objectPosition = this.object.position.clone();
       const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
       const distance = cameraPosition.distanceTo(objectPosition);
-      const objects = this.parent.getAllvisibleObjects();
-      if (objects.length > 0) {
+      const om = this.parent.getAvatarObject();
+      const targetAvatarObject = om?.object? om.object : null;
+      if (targetAvatarObject) {
         this.raycaster.set(newPosition, direction);
         this.raycaster.far = distance - this.radius;
         this.raycaster.near = 0.1;
-        const intersects = this.raycaster.intersectObjects(objects, true);
+        const intersects = this.raycaster.intersectObject(targetAvatarObject, true);
         if (intersects.length > 0) {
           const intersect = intersects[0];
           this.camera.position.copy(intersect.point);
@@ -671,7 +677,7 @@ export class AvatarController {
 
     // アニメーションが有効であれば更新
     if (this.isAnimation) {
-      if (this.currentState) {
+      if (this.currentState && this.mixer) {
         this.currentState.Update(timeDelta, input);
         this.mixer.update(timeDelta);
       }
@@ -700,8 +706,6 @@ export class AvatarController {
    * Animation処理
    * ベース: [Mr.SimonDev] https://www.youtube.com/watch?v=UuNPHOJ_V5o
    */
-  states: { [key: string]: IAnimStateProps } = {};
-  currentState: IAnimStateProps = null;
   // AnimationMapper分だけ作成して、Statesにセットする
   AddState(name: string, state: IAnimStateProps) {
     this.states[name] = state;
@@ -735,10 +739,10 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const idleAction = this.mixer.clipAction(animation);
+        const idleAction = this.mixer!.clipAction(animation);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer.clipAction(prevAnimation);
+          const prevAction = this.mixer!.clipAction(prevAnimation!);
           idleAction.time = 0.0;
           idleAction.enabled = true;
           idleAction.setEffectiveTimeScale(1.0);
@@ -777,10 +781,10 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const curAction = this.mixer.clipAction(animation);
+        const curAction = this.mixer!.clipAction(animation);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer.clipAction(prevAnimation);
+          const prevAction = this.mixer!.clipAction(prevAnimation!);
           curAction.enabled = true;
           if (prevState.Name == this.animMapper.run) {
             const ratio = curAction.getClip().duration / prevAction.getClip().duration;
@@ -820,10 +824,13 @@ export class AvatarController {
       Enter: (prevState: IAnimStateProps) => {
         this.playSoundByAnim(actType);
         const animation = this.animations.find(a => a.name == this.animMapper.run);
-        const curAction = this.mixer.clipAction(animation);
+        if (!animation) {
+          throw `${this.animMapper.idle}というアニメーションが見つかりません`;
+        }
+        const curAction = this.mixer!.clipAction(animation);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer.clipAction(prevAnimation);
+          const prevAction = this.mixer!.clipAction(prevAnimation!);
           curAction.enabled = true;
           if (prevState.Name == this.animMapper.walk) {
             const ratio = curAction.getClip().duration / prevAction.getClip().duration;
@@ -842,7 +849,7 @@ export class AvatarController {
       Exit: () => {
         this.stopSoundByAnim(actType);
       },
-      Update: (_, input: IInputMovement) => {
+      Update: (delta: number, input: IInputMovement) => {
         if (input.forward || input.backward) {
           if (!input.dash) {
             this.SetState(this.animMapper.walk);
@@ -865,16 +872,16 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const curAction = this.mixer.clipAction(animation);
+        const curAction = this.mixer!.clipAction(animation);
         const cleanup = () => {
-          this.currentState.Finished = true;
+          this.currentState!.Finished = true;
           curAction.getMixer().removeEventListener("finished", cleanup);
           this.SetState(this.animMapper.idle);
         }
         curAction.getMixer().addEventListener('finished', cleanup);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer.clipAction(prevAnimation);
+          const prevAction = this.mixer!.clipAction(prevAnimation!);
           curAction.reset();
           curAction.setLoop(LoopOnce, 1);
           curAction.clampWhenFinished = true;
@@ -885,7 +892,7 @@ export class AvatarController {
         }
       },
       Exit: () => { },
-      Update: (_, input: IInputMovement) => {
+      Update: (delta: number,  input: IInputMovement) => {
         if (this.isJumping) {
           console.log("check");
         }
@@ -907,16 +914,16 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const curAction = this.mixer.clipAction(animation);
+        const curAction = this.mixer!.clipAction(animation);
         const cleanup = () => {
-          this.currentState.Finished = true;
+          this.currentState!.Finished = true;
           curAction.getMixer().removeEventListener("finished", cleanup);
           this.SetState(this.animMapper.idle);
         }
         curAction.getMixer().addEventListener('finished', cleanup);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer.clipAction(prevAnimation);
+          const prevAction = this.mixer!.clipAction(prevAnimation!);
           curAction.reset();
           curAction.setLoop(LoopOnce, 1);
           curAction.clampWhenFinished = true;
@@ -928,11 +935,11 @@ export class AvatarController {
       },
       CleanUp: () => { },
       Exit: () => {
-        if (this.currentState.CleanUp) {
+        if (this.currentState?.CleanUp) {
           this.currentState.CleanUp();
         }
       },
-      Update: (_, input: IInputMovement) => {
+      Update: (delta: number, input: IInputMovement) => {
       },
       Finished: false
     }

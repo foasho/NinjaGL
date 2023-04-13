@@ -29,9 +29,10 @@ export interface IInputMovement {
   jump: boolean;
   dash: boolean;
   action: boolean;
-  prevDrag?: Vector2; // カメラ向きに利用（あとで実装）
-  currDrag?: Vector2; // カメラ向きに利用（あとで実装）
+  prevDrag?: Vector2 | null; // カメラ向きに利用（あとで実装）
+  currDrag?: Vector2 | null; // カメラ向きに利用（あとで実装）
   deviceType: "mobile" | "tablet" | "desktop";
+  [key: string]: any;
 }
 
 /**
@@ -94,7 +95,7 @@ export interface IScriptManagement {
   type: string;     // 種別: "script"今は一つだけ
   id: string;       // ID: UUID
   name: string;     // 名前
-  filePath: string; // ファイルパス
+  filePath: string | null; // ファイルパス
   script: string;  // JSスクリプトデータ
 }
 

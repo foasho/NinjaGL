@@ -6,12 +6,12 @@ import { NinjaEditor } from "@/editor/NinjaEditor";
 import { ToastContainer } from "react-toastify";
 
 function Home() {
-  const [editor, setEditor] = useState<NinjaEditorManager>(null);
+  const [editor, setEditor] = useState<NinjaEditorManager>();
 
   useEffect(() => {
     setEditor(new NinjaEditorManager());
     return () => {
-      setEditor(null);
+      setEditor(undefined);
     }
   }, [false]);
 
@@ -26,11 +26,11 @@ function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <NinjaEditorContext.Provider value={editor}>
-          {editor &&
-            <NinjaEditor />
-          }
-        </NinjaEditorContext.Provider>
+        {editor &&
+          <NinjaEditorContext.Provider value={editor}>
+              <NinjaEditor />
+          </NinjaEditorContext.Provider>
+        }
         <ToastContainer
             position="top-right"
             autoClose={5000}

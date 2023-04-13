@@ -25,7 +25,7 @@ export const ScriptEditor = () => {
   const code = useRef<string>(script);
   const { t } = useTranslation();
   const handleEditorChange = (value: string) => {
-    code.current = value;
+    if (code.current) code.current = value;
   };
 
   /**
@@ -116,7 +116,7 @@ export const ScriptEditor = () => {
       (res) => {
         if (res.status == 200){
           if (scriptState.currentSM && globalScriptStore.currentSM?.script !== null){
-            globalScriptStore.setScript(script) // スクリプトデータを更新
+            if (script) globalScriptStore.setScript(script) // スクリプトデータを更新
           }
           else {
             const newSM: IScriptManagement = {
@@ -202,7 +202,7 @@ export const ScriptEditor = () => {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (scriptState.currentSM){
+    if (scriptState.currentSM && filePath){
       const fetchData = async () => {
         try {
           const response = await fetch(filePath, { signal });

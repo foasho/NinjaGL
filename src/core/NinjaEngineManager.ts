@@ -28,10 +28,10 @@ export class NinjaEngine {
   ums: IUIManagement[] = [];
   tms: ITextureManagement[] = [];
   sms: IScriptManagement[] = [];
-  world: World;
-  octree: Octree;
-  avatar: AvatarController;
-  camera: PerspectiveCamera | OrthographicCamera;
+  world: World | undefined;
+  octree: Octree | undefined;
+  avatar: AvatarController | undefined;
+  camera: PerspectiveCamera | OrthographicCamera | undefined;
   listener: AudioListener = new AudioListener();
   sounds: ISoundProps[] = [];
   shader: NinjaShader = new NinjaShader();
@@ -150,7 +150,7 @@ export class NinjaEngine {
    */
   initializeLoadOMs = async () => {
     await Promise.all(this.oms.map(async (om) => {
-      if (om.type === "avatar") {
+      if (om.type === "avatar" && om.object) {
         if (om.args.isCenter && om.args.height){
           AvatarDataSetter({
             object: om.object,
@@ -159,7 +159,7 @@ export class NinjaEngine {
           });
         }
       }
-      else if (om.type == "terrain"){
+      else if (om.type == "terrain" && om.object){
         om.object.traverse((node: any) => {
           if (node.isMesh && node instanceof Mesh){
             node.updateMatrix();
@@ -172,18 +172,24 @@ export class NinjaEngine {
             node.receiveShadow = true;
           }
         })
-        this.octree.importThreeObj3D(om.id, om.object, om.type);
+        if (this.octree){
+          this.octree.importThreeObj3D(om.id, om.object, om.type);
+        }
       }
       else if (om.type == "object"){
-        this.octree.importThreeObj3D(om.id, om.object, om.type);
-        if (om.args.position){
+        if (this.octree && om.object){
+          this.octree.importThreeObj3D(om.id, om.object, om.type);
+        }
+        if (om.args.position && om.object){
           const pos = om.args.position;
           const posVec = new Vector3(pos.x, pos.y, pos.z);
           om.object.position.copy(posVec.clone());
-          this.octree.translateFaceByName(om.id, posVec.clone());
+          if (this.octree){
+            this.octree.translateFaceByName(om.id, posVec.clone());
+          }
           om.layerNum = this.getLayerNumber(pos);
         }
-        if (om.args.rotation){
+        if (om.args.rotation && om.object){
           const rot = om.args.rotation;
           om.object.rotation.copy(rot.clone());
         }
@@ -200,16 +206,22 @@ export class NinjaEngine {
           if (om.physics == "aabb" && om.object instanceof Object3D){
             const aabb = new Box3();
             aabb.setFromObject(om.object);
-            this.octree.importAABB(om.id, aabb, om.args.type);
+            if (this.octree){
+              this.octree.importAABB(om.id, aabb, om.args.type);
+            }
           }
           else if (om.physics == "along" && om.object instanceof Object3D){
-            this.octree.importThreeObj3D(om.id, om.object, om.args.type);
+            if (this.octree){
+              this.octree.importThreeObj3D(om.id, om.object, om.args.type);
+            }
           }
           // args.positionがあれば追加したFaceを移動させる
           if (om.args.position){
             const pos = om.args.position;
             const posVec = new Vector3(pos.x, pos.y, pos.z);
-            this.octree.translateFaceByName(om.id, posVec.clone());
+            if (this.octree){
+              this.octree.translateFaceByName(om.id, posVec.clone());
+            }
             om.layerNum = this.getLayerNumber(pos);
           }
         }
@@ -231,7 +243,7 @@ export class NinjaEngine {
    * ※ Config, OM, UM, TM, SM
    */
   loadingProjectData = async(NjcFilePath: string):Promise<boolean> => {
-    if (this.loadCompleted || this.nowLoading) return null;
+    if (this.loadCompleted || this.nowLoading) return false;
 
     const njcFile = await loadNJCFileFromURL(
       NjcFilePath, 
@@ -260,14 +272,14 @@ export class NinjaEngine {
    * @param id 
    * @returns 
    */
-  getOMById(id: string): IObjectManagement {
+  getOMById(id: string): IObjectManagement | undefined {
     return this.oms.find(om => om.id == id);
   }
 
   /**
    * 特定のIDのサウンドを取得する
    */
-  getSoundById(id: string): ISoundProps {
+  getSoundById(id: string): ISoundProps | undefined {
     return this.sounds.find(sound => sound.id == id);
   }
 
@@ -332,7 +344,7 @@ export class NinjaEngine {
   /**
    * アバターのオブジェクトマネジメントを取得
    */
-  getAvatarObject(): IObjectManagement {
+  getAvatarObject(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "avatar");
   }
 
@@ -368,7 +380,9 @@ export class NinjaEngine {
         avatarObject.args.sounds
       );
       // 物理世界に対応させる
-      this.world.addAvatar(this.avatar);
+      if (this.world){
+        this.world.addAvatar(this.avatar);
+      }
       if (this.camera) {
         this.avatar.setCamera(this.camera);
       }
@@ -391,14 +405,14 @@ export class NinjaEngine {
   /**
    * 地形データを取得する
    */
-  getTerrain(): IObjectManagement {
+  getTerrain(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "terrain");
   }
 
   /**
    * そらデータを取得する
    */
-  getSky(): IObjectManagement {
+  getSky(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "sky");
   }
 
@@ -525,13 +539,13 @@ export class NinjaEngine {
     pos: Vector3, 
     worldSize: number = this.config.mapsize,
     layerGrid: number = this.config.layerGridNum
-  ) {
+  ): number {
     const layerXLen = worldSize / layerGrid;
     const layerZLen = worldSize / layerGrid;
     const cx = worldSize / 2;
     const cz = worldSize / 2;
-    if (cx < Math.abs(pos.x)) return null; // ワールド範囲外X方向
-    if (cz < Math.abs(pos.z)) return null; // ワールド範囲外Z方向
+    if (cx < Math.abs(pos.x)) return -1; // ワールド範囲外X方向
+    if (cz < Math.abs(pos.z)) return -1; // ワールド範囲外Z方向
     const px = pos.x + cx;
     const pz = pos.z + cz;
     // const r = Math.ceil(px / layerXLen);
@@ -592,35 +606,10 @@ export class NinjaEngine {
   }
 
   /**
-   * 全てのオブジェクトを取得する
-   */
-  getAllObjects(): Object3D[] {
-    const objects = this.oms.filter(om => om.object);
-    return objects.map(obj => obj.object);
-  }
-
-  /**
-   * 可視上のオブジェクトを全て取得する
-   */
-  getAllvisibleObjects(): Object3D[] {
-    const objects = this.oms.filter(om => {
-      let isVisible = false;
-      if (om.object && om.visibleType == "force") return true;
-      if (om.object && om.visibleType == "auto") {
-        if (om.layerNum !== undefined) {
-          return true;
-        }
-      }
-      return isVisible;
-    });
-    return objects.map(obj => obj.object);
-  }
-
-  /**
    * 可視上オブジェクトの更新
    */
   updateViewableObject() {
-    if (this.camera) {
+    if (this.camera !== undefined) {
       const nowCameraLayer = this.getLayerNumber(this.camera.position);
       if (nowCameraLayer !== this.cameraLayer){
         const visibleLayers = this.getActiveLayers(nowCameraLayer);
@@ -631,12 +620,12 @@ export class NinjaEngine {
         }
         visibleLayers.map((layerNum) => {
           // 見える範囲は表示する
-          this.camera.layers.enable(layerNum);
+          this.camera?.layers.enable(layerNum);
         });
         const disableLayers = this.possibleLayers.filter(layerNum => !visibleLayers.includes(layerNum));
         // みえない範囲を非表示にする
         disableLayers.map((layerNum) => {
-            this.camera.layers.disable(layerNum);
+            this.camera?.layers.disable(layerNum);
         });
         this.cameraLayer = nowCameraLayer;
         this.camera.layers.enable(0);
@@ -691,4 +680,4 @@ export class NinjaEngine {
 
 }
 
-export const NinjaEngineContext = createContext<NinjaEngine>(null);
+export const NinjaEngineContext = createContext<NinjaEngine>(undefined as any);

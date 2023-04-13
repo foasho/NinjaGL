@@ -5,7 +5,18 @@ import { IInputMovement } from "./NinjaProps";
 /**
  * ActionキーのリストEnum
  */
-export const EActionKey = {
+interface IActionKey {
+  KeyW: "forward";
+  KeyS: "backward";
+  KeyA: "left";
+  KeyD: "right";
+  Space: "jump";
+  ShiftLeft: "dash";
+  ShiftRight: "dash";
+  Shift: "dash";
+  [key: string]: any;
+}
+export const EActionKey: IActionKey = {
   KeyW: "forward",
   KeyS: "backward",
   KeyA: "left",
@@ -81,7 +92,12 @@ interface HTMLElementEvent<T extends HTMLElement> extends Event {
 }
 export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => {
 
-  const moveKeyFromCode = (key: string) => EActionKey[key];
+  const moveKeyFromCode = (key: string) => {
+    if (EActionKey[key] === undefined) {
+      return "action";
+    }
+    return EActionKey[key];
+  };
 
   let movement = useRef<IInputMovement>({
     forward: false,
@@ -100,10 +116,10 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
     /**
      * キーボード対応
      */
-    const handleKeyDown = (e: HTMLElementEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       movement.current[moveKeyFromCode(e.code)] = true;
     }
-    const handleKeyUp = (e: HTMLElementEvent<HTMLInputElement>) => {
+    const handleKeyUp = (e: KeyboardEvent) => {
       movement.current[moveKeyFromCode(e.code)] = false;
     };
     const handleClickDown = () => {
@@ -134,14 +150,6 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
      * ゲームパッド対応 (あとで実装)
      */
     // handleGamePad
-    const handleGamePad = (e) => {
-      var gamepad = navigator.getGamepads()[e.gamepad.index];
-      console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-        gamepad.index, gamepad.id,
-        gamepad.buttons.length, gamepad.axes.length
-      );
-    }
-    document.addEventListener("gamepadconnected", handleGamePad);
 
     return () => {
       if (deviceType == "desktop") {

@@ -81,7 +81,7 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
       clone.animations = om.object.animations?om.object.animations: [];
       exportScene.add(clone);
       const glbData = await exportGLTF(exportScene);
-      objectsDir.file(`${om.id}.glb`, glbData);
+      objectsDir!.file(`${om.id}.glb`, glbData);
       om.filePath = `objects/${om.id}.glb`;
     }
     delete om.object;
@@ -123,13 +123,16 @@ export const loadNJCFile = async (
 
   // ZIPファイルを読み込み
   const loadedZip = await zip.loadAsync(file);
+  if (!loadedZip) {
+    throw new Error('ZIPファイルの読み込みに失敗しました');
+  }
 
   // JSONファイルを抽出
-  const configJson = JSON.parse(await loadedZip.file('config.json').async('text'));
-  const umsJson = JSON.parse(await loadedZip.file('ums.json').async('text'));
-  const tmsJson = JSON.parse(await loadedZip.file('tms.json').async('text'));
-  const smsJson = JSON.parse(await loadedZip.file('sms.json').async('text'));
-  const omsJson = JSON.parse(await loadedZip.file('oms.json').async('text'));
+  const configJson = JSON.parse(await loadedZip.file('config.json')!.async('text'));
+  const umsJson = JSON.parse(await loadedZip.file('ums.json')!.async('text'));
+  const tmsJson = JSON.parse(await loadedZip.file('tms.json')!.async('text'));
+  const smsJson = JSON.parse(await loadedZip.file('sms.json')!.async('text'));
+  const omsJson = JSON.parse(await loadedZip.file('oms.json')!.async('text'));
 
   // NJCFileを生成
   const njcFile = new NJCFile();
@@ -144,41 +147,43 @@ export const loadNJCFile = async (
   njcFile.setSMs(smsJson);
   // 5. omとGLBモデルを読み込み
   const objectsDir = loadedZip.folder('objects');
-  for (const om of omsJson) {
-    const glbFile = objectsDir.file(`${om.id}.glb`);
-    if (glbFile) {
-      const glbData = await glbFile.async('arraybuffer');
-      const object = await loadGLTFFromData(
-        glbData, 
-        onProgress,
-        totalSize
-      );
-      om.object = object;
+  if (objectsDir) {
+    for (const om of omsJson) {
+      const glbFile = objectsDir.file(`${om.id}.glb`);
+      if (glbFile) {
+        const glbData = await glbFile.async('arraybuffer');
+        const object = await loadGLTFFromData(
+          glbData, 
+          onProgress,
+          totalSize
+        );
+        om.object = object;
+      }
+      // Position,Rotation,Scale同期
+      if (om.args && om.args.rotation) {
+        om.args.rotation = new Euler(
+          om.args.rotation._x, 
+          om.args.rotation._y, 
+          om.args.rotation._z, 
+          om.args.rotation._order
+        );
+      }
+      if (om.args && om.args.position){
+        om.args.position = new Vector3(
+          om.args.position.x, 
+          om.args.position.y, 
+          om.args.position.z
+        );
+      }
+      if (om.args && om.args.scale){
+        om.args.scale = new Vector3(
+          om.args.scale.x, 
+          om.args.scale.y, 
+          om.args.scale.z
+        );
+      }
+      njcFile.addOM(om);
     }
-    // Position,Rotation,Scale同期
-    if (om.args && om.args.rotation) {
-      om.args.rotation = new Euler(
-        om.args.rotation._x, 
-        om.args.rotation._y, 
-        om.args.rotation._z, 
-        om.args.rotation._order
-      );
-    }
-    if (om.args && om.args.position){
-      om.args.position = new Vector3(
-        om.args.position.x, 
-        om.args.position.y, 
-        om.args.position.z
-      );
-    }
-    if (om.args && om.args.scale){
-      om.args.scale = new Vector3(
-        om.args.scale.x, 
-        om.args.scale.y, 
-        om.args.scale.z
-      );
-    }
-    njcFile.addOM(om);
   }
 
   return njcFile;
@@ -221,7 +226,7 @@ async function loadGLTFFromData(
       },
       (progress) => {
         if (onProgress) {
-          onProgress(progress.loaded, totalSize);
+          onProgress(progress.loaded, totalSize!);
         }
       },
       (error) => {
@@ -252,7 +257,9 @@ const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
           reject(new Error('GLTFExporter returned a non-binary result.'));
         }
       },
-      undefined,
+      (error) => {
+        reject(error);
+      },
       options
     );
   });
@@ -264,7 +271,7 @@ const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
  * @param scene 
  * @returns 
  */
-export const convertObjectToArrayBuffer = async (scene): Promise<ArrayBuffer> => {
+export const convertObjectToArrayBuffer = async (scene: Scene): Promise<ArrayBuffer> => {
   return new Promise((resolve) => {
     var exporter = new GLTFExporter();
     const options: GLTFExporterOptions = {

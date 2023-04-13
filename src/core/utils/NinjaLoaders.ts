@@ -16,10 +16,11 @@ import {
   GLBufferAttribute,
   MathUtils
 } from "three";
-import { MeshoptDecoder } from "three-stdlib/libs/MeshoptDecoder";
+import { MeshoptDecoder } from "meshoptimizer";
 import { GLTFLoader, GLTF } from "three-stdlib/loaders/GLTFLoader";
 import { SimplifyModifier } from "three-stdlib/modifiers/SimplifyModifier";
 import { IObjectManagement } from "./NinjaProps";
+
 
 /**
  * 基本的な3Dオブジェクトのロード
@@ -115,7 +116,7 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
    * @param geometry2 
    * @returns 
    */
-  const mergeBufferGeometry = (geometry1: BufferGeometry, geometry2: BufferGeometry): BufferGeometry => {
+  const mergeBufferGeometry = (geometry1: BufferGeometry, geometry2: BufferGeometry): BufferGeometry | undefined => {
     // 頂点属性のオフセット
     var offset = geometry1.attributes.position.count;
 
@@ -153,8 +154,9 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
     mergedGeometry.setAttribute('uv', new BufferAttribute(mergedUVs, 2));
 
     // インデックスを結合する
-    var indices1 = geometry1.index.array;
-    var indices2 = geometry2.index.array;
+    var indices1 = geometry1.index?.array;
+    var indices2 = geometry2.index?.array;
+    if (indices1 === undefined || indices2 === undefined) return;
     var mergedIndices = new (indices1.length > 65535 ? Uint32Array : Uint16Array)(indices1.length + indices2.length);
     mergedIndices.set(indices1, 0);
     for (var i = 0; i < indices2.length; i++) {
@@ -176,7 +178,7 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
         console.log("GLTFモデルの初期値確認");
         console.log(gltf);
         // ジオメトリの取得処理
-        let geometry: BufferGeometry;
+        let geometry: BufferGeometry | undefined;
         let mat: Material[] = [];
         const gltfCenter = new Vector3();
         gltf.scene.updateMatrixWorld();
@@ -206,7 +208,7 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
             else {
               const _geo = mesh.geometry.clone();
               _geo.uuid = MathUtils.generateUUID();
-              geometry = mergeBufferGeometry(geometry, _geo);
+              geometry = mergeBufferGeometry(geometry, _geo) as BufferGeometry;
             }
             node.castShadow = props.shadows ? true : false;
             node.receiveShadow = props.shadows ? true : false;
@@ -217,10 +219,11 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
             }
           }
         });
-
+        if (geometry === undefined) return;
         const cg = geometry.clone();
         cg.computeBoundingBox();
         let bbox = cg.boundingBox;
+        if (bbox === null) return;
         let baseHeight = bbox.max.y - bbox.min.y;
         let baseWidth = bbox.max.x - bbox.min.x;
         if (props.height) {
@@ -490,8 +493,8 @@ export const TerrainLoader = async (props: IGLTFLoadProps): Promise<{ gltf: GLTF
       async (gltf) => {
         const scene = gltf.scene || gltf.scenes[0];
         // scene.updateMatrixWorld();// 回転情報なども同期
-        scene.traverse((node: Mesh) => {
-          if ((node as Mesh).isMesh) {
+        scene.traverse((node: Object3D) => {
+          if (node instanceof Mesh && (node as Mesh).isMesh) {
             if (node.geometry) {
               node.updateMatrix();
               node.geometry.applyMatrix4(node.matrix);

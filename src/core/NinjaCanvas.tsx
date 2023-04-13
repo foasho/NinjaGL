@@ -9,13 +9,10 @@ import { Terrain } from "./canvas-items/Terrain";
 import { NinjaUI } from "./NinjaUI";
 import { LoadProcessing } from "./ui-items/LoadProcessing";
 import { Lights } from "./canvas-items/Lights";
+import { INinjaGLProps } from "./NinjaGL";
 
-interface INinjaCanvasProps {
-  children?: React.ReactNode;
-  canvasProps?: RenderProps<HTMLCanvasElement>;
-}
-export const NinjaCanvas = (props: INinjaCanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>();
+
+export const NinjaCanvas = (props: INinjaGLProps) => {
   const [ready, setReady] = useState<boolean>(false);
   const engine = useContext(NinjaEngineContext);
 
@@ -37,7 +34,6 @@ export const NinjaCanvas = (props: INinjaCanvasProps) => {
     <>
       <Canvas 
         id="ninjagl" 
-        ref={canvasRef} 
         shadows 
         dpr={window.devicePixelRatio}
         {...props.canvasProps}

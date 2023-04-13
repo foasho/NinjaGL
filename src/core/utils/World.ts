@@ -36,7 +36,7 @@ export class World {
   step(timeDelta: number, input: IInputMovement) {
     for (var i = 0, l = this.avatarPool.length; i < l; i++) {
       var chara = this.avatarPool[i];
-      var faces: Face[] = void 0;
+      var faces: Face[] = [];
       // octree で絞られた node に含まれる face だけを
       // character に渡して判定する
       for (var ii = 0, ll = this.octreePool.length; ii < ll; ii++) {
