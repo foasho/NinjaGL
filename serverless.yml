@@ -1,6 +1,0 @@
-service: Ninja-Serverless-Setting
-
-NinjaGLApp:
-  component: "@sls-next/serverless-component@v3.8.0-alpha.0" 
-  inputs:
-    bucketName: ninjagl
