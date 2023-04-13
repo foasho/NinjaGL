@@ -1,0 +1,15 @@
+service: nextjs-aws-lambda
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+
+plugins:
+  - serverless-next.js
+
+custom:
+  serverless-nextjs:
+    componentVersion: 1.19.0-alpha.0
