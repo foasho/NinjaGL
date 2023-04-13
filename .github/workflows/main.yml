@@ -34,7 +34,7 @@ jobs:
       run: npm run build
 
     - name: Deploy to AWS Lambda
-      run: npm run dev
+      run: npm run deploy:dev
     
     env:
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
