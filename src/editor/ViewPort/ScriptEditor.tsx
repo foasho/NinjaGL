@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { reqApi } from '@/services/ServciceApi';
 import { useTranslation } from 'react-i18next';
-import { Web3Instance } from '@/core/workers/Web3Instance';
+// import { Web3Instance } from '@/core/workers/Web3Instance';
 import { IScriptManagement } from '@/core/utils/NinjaProps';
 import { InitScriptManagement } from '@/core/utils/NinjaInit';
 import { useSnapshot } from 'valtio';

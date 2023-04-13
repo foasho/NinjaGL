@@ -17,8 +17,8 @@ import {
   MathUtils
 } from "three";
 import { MeshoptDecoder } from "meshoptimizer";
-import { GLTFLoader, GLTF } from "three-stdlib/loaders/GLTFLoader";
-import { SimplifyModifier } from "three-stdlib/modifiers/SimplifyModifier";
+import { GLTFLoader, GLTF } from "three-stdlib";
+import { SimplifyModifier } from "three-stdlib";
 import { IObjectManagement } from "./NinjaProps";
 
 
