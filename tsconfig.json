@@ -32,10 +32,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", 
-    "src/core/workers/Web3Instance.js", 
-    "src/core/workers/ScriptSample.js", 
-    "src/core/workers/EngineInstance.js"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules"
