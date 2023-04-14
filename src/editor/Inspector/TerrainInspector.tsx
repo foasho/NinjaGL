@@ -28,23 +28,6 @@ export const TerrainInspector = () => {
   const { data: session } = useSession();
   const { t } = useTranslation();
 
-  const keyDown = (event: HTMLElementEvent<HTMLInputElement>) => {
-    if (event.code.toString() == "KeyE") {
-      if (terrainState.mode == "view"){
-        globalTerrainStore.mode = "edit";
-      }
-      else {
-        globalTerrainStore.mode = "view";
-      }
-    }
-  }
-  useEffect(() => {
-    document.addEventListener("keydown", keyDown);
-    return () => {
-      document.removeEventListener("keydown", keyDown);
-    }
-  }, []);
-
   const changeWF = () => {
     globalTerrainStore.wireFrame = !terrainState.wireFrame;
   }
@@ -246,7 +229,7 @@ export const TerrainInspector = () => {
             value={terrainState.radius}
             onInput={(e) => changeRadius(e)}
             min={0.1}
-            max={10.0}
+            max={terrainState.mapSize/4}
             step={0.1}
           />
         </div>

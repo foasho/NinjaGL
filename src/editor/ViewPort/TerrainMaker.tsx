@@ -1,6 +1,13 @@
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { Environment, GizmoHelper, GizmoViewport, OrbitControls, SpotLight } from "@react-three/drei";
-import { useContext, useEffect, useState, useRef } from "react";
+import { 
+  Environment, 
+  GizmoHelper, 
+  GizmoViewport, 
+  OrbitControls, 
+  PerspectiveCamera as DPerspectiveCamera,
+  SpotLight
+} from "@react-three/drei";
+import { useContext, useEffect, useState, useRef, useLayoutEffect, KeyboardEventHandler } from "react";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import {
   Mesh,
@@ -17,20 +24,23 @@ import {
   WebGLRenderTarget,
   BufferAttribute,
   GLBufferAttribute,
-  Material
+  Material,
+  PerspectiveCamera
 } from "three";
 import { useInputControl } from "@/core/utils/InputControls";
 import { CameraControl } from "./MainViewer";
 import { useSnapshot } from "valtio";
 import { globalTerrainStore } from "../Store";
 import { Perf } from "r3f-perf";
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+
 
 const TerrainMakeComponent = () => {
   const terrainState = useSnapshot(globalTerrainStore);
   /**
    * 初期値
    */
-  const ref = useRef<Mesh>();
+  const meshRef = useRef<Mesh>();
   const lightRef = useRef<SL>();
   const gridRef = useRef<GridHelper>();
   const matRef = useRef<MeshStandardMaterial>();
@@ -39,13 +49,68 @@ const TerrainMakeComponent = () => {
   const { mouse, gl, camera } = useThree();
   const input = useInputControl("desktop");
   const isMouseDown = useRef(false);
+  const isReverse = useRef(false);
   // ブラシ用
   const [brushPosition, setBrushPosition] = useState(new Vector3());
   const [brushColor] = useState(new Color(1, 0, 0));
   const [brushSize] = useState(terrainState.radius);
+  
+  const ref = useRef<OrbitControlsImpl>(null);
+  const cameraRef = useRef<PerspectiveCamera>(null);
+
+  const keyDown = (event: KeyboardEvent) => {
+    if (event.code.toString() == "KeyE") {
+      if (terrainState.mode == "view"){
+        globalTerrainStore.mode = "edit";
+      }
+      else {
+        globalTerrainStore.mode = "view";
+      }
+    }
+    if (
+      event.code.toString() == "ShiftLeft" 
+      || event.code.toString() == "ShiftRight" 
+      || event.code.toString() == "KeyR"
+      || event.code.toString() == "Shift"
+    ) {
+      if (isReverse.current) {
+        isReverse.current = false;
+      }
+      else {
+        isReverse.current = true;
+      }
+    }
+  }
+
+  useLayoutEffect(() => {
+    if (cameraRef && cameraRef.current) {
+      const initCameraPosition = new Vector3(-terrainState.mapSize/3, terrainState.mapSize/2, -terrainState.mapSize);
+      cameraRef.current.position.copy(initCameraPosition.clone());
+      cameraRef.current.lookAt(0, 0, 0);
+      camera.position.copy(initCameraPosition.clone());
+      camera.lookAt(0, 0, 0);
+    }
+  }, [terrainState.mapSize]);
+
+  useEffect(() => {
+    if (cameraRef && cameraRef.current) {
+      camera.far = terrainState.mapSize*3;
+      cameraRef.current.far = camera.far;
+    }
+  }, [terrainState.mapSize]);
 
   useEffect(() => {
     console.log("TerrainMakeComponent");
+    document.addEventListener("keydown", keyDown);
+    document.addEventListener("pointermove", onMouseMove, false);
+    document.addEventListener("mousedown", onMouseDown, false);
+    document.addEventListener("mouseup", onMouseUp, false);
+    return () => {
+      document.removeEventListener("pointermove", onMouseMove);
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("keydown", keyDown);
+    }
   }, [
     terrainState.type,
     terrainState.radius, 
@@ -102,12 +167,12 @@ const TerrainMakeComponent = () => {
    * @returns 
    */
   const onMouseMove = (event) => {
-    raycaster.setFromCamera(mouse, camera);
-    if (!ref.current) {
+    if (!meshRef.current || !cameraRef.current) {
       return;
     };
-    const intersects = raycaster.intersectObject(ref.current);
-    if (terrainState.isMouseDown && terrainState.mode == "edit") {
+    raycaster.setFromCamera(mouse, cameraRef.current);
+    const intersects = raycaster.intersectObject(meshRef.current);
+    if (isMouseDown.current && terrainState.mode == "edit") {
       if (terrainState.brush == "normal" || terrainState.brush == "flat"){
         const { vertexIndexes, values } = getVertexes(intersects, terrainState.radius);
         if (intersects.length > 0 && intersects[0]) {
@@ -122,13 +187,13 @@ const TerrainMakeComponent = () => {
               if (terrainState.type == "create"){
                 position.setZ(
                   index,
-                  (position.getZ(index) + (terrainState.power * value * (input.shift ? -1 : 1)))
+                  (position.getZ(index) + (terrainState.power * value * (isReverse.current ? -1 : 1)))
                 );
               }
               else {
                 position.setY(
                   index,
-                  (position.getY(index) + (terrainState.power * value * (input.shift ? -1 : 1)))
+                  (position.getY(index) + (terrainState.power * value * (isReverse.current ? -1 : 1)))
                 );
               }
               position.needsUpdate = true;
@@ -176,7 +241,7 @@ const TerrainMakeComponent = () => {
           const positionArray = Array.from(cloneGeometry.attributes.position.array);
           for (let i = 0; i <= positionArray.length - 3; i += 3) {
             vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
-            vertex.applyMatrix4(ref.current.matrixWorld); // Consider rotation
+            vertex.applyMatrix4(meshRef.current.matrixWorld); // Consider rotation
             const distance = vertex.distanceTo(intersectPosition);
             if (distance <= radius) {
               colors.set(color.toArray(), i);
@@ -203,21 +268,8 @@ const TerrainMakeComponent = () => {
     isMouseDown.current = false;
   }
 
-
-  useEffect(() => {
-    document.addEventListener("pointermove", onMouseMove, false);
-    document.addEventListener("mousedown", onMouseDown, false);
-    document.addEventListener("mouseup", onMouseUp, false);
-    // globalTerrainStore.terrainMesh = ref.current;
-    return () => {
-      document.removeEventListener("pointermove", onMouseMove);
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mouseup", onMouseUp);
-    }
-  }, []);
-
   useFrame((_, delta) => {
-    if (ref.current && matRef.current && lightRef.current) {
+    if (meshRef.current && matRef.current && lightRef.current) {
       lightRef.current.position.set(
         -terrainState.mapSize / 1.6,
         terrainState.mapSize / 1.6,
@@ -240,19 +292,58 @@ const TerrainMakeComponent = () => {
         matRef.current.wireframe = terrainState.wireFrame;
       }
     }
-  });
 
-  console.log(terrainState);
+    // カメラ処理
+    if (input.dash && (input.forward || input.backward || input.right || input.left)) {
+      const st = terrainState.mapSize/2 * delta;
+      const cameraDirection = new Vector3();
+      cameraRef.current.getWorldDirection(cameraDirection);
+      const cameraPosition = cameraRef.current.position.clone();
+
+      if (input.forward) {
+        cameraPosition.add(cameraDirection.clone().multiplyScalar(st));
+      }
+      if (input.backward) {
+        cameraPosition.sub(cameraDirection.clone().multiplyScalar(st));
+      }
+      if (input.right) {
+        const cameraRight = new Vector3();
+        cameraRight.crossVectors(cameraDirection, cameraRef.current.up).normalize();
+        cameraPosition.add(cameraRight.multiplyScalar(st));
+      }
+      if (input.left) {
+        const cameraLeft = new Vector3();
+        cameraLeft.crossVectors(cameraDirection, cameraRef.current.up).normalize();
+        cameraPosition.sub(cameraLeft.multiplyScalar(st));
+      }
+
+      cameraRef.current.position.copy(cameraPosition);
+      ref.current.target.copy(cameraPosition.add(cameraDirection));
+
+    } else {
+      if (ref.current && cameraRef.current) {
+        cameraRef.current.position.copy(ref.current.object.position);
+        cameraRef.current.rotation.copy(ref.current.object.rotation);
+        cameraRef.current.lookAt(ref.current.target);
+      }
+    }
+  });
 
   return (
     <>
-      <OrbitControls />
-      {/* <CameraControl cameraSpeed={terrainState.mapSize/2} cameraFar={4000} enable={terrainState.mode == "view"} /> */}
+      <DPerspectiveCamera makeDefault ref={cameraRef} />
+      <OrbitControls
+        ref={ref}
+        args={[cameraRef.current, gl.domElement]}
+        camera={cameraRef.current}
+        makeDefault={true}
+        enabled={terrainState.mode === "view"}
+      />
       <axesHelper />
       <gridHelper ref={gridRef} args={[terrainState.mapSize * 2, Number(terrainState.mapResolution / 2)]} />
       
       <mesh 
-        ref={ref} 
+        ref={meshRef} 
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow 
         castShadow
