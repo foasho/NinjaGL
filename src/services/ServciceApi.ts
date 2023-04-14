@@ -16,12 +16,18 @@ export const sapi = axios.create({
 });
 
 export interface IApiProps {
-  route: "filesize" | "uploadgltf" | "assets" | "savescript" | "saveshader" | "createlod";
+  route: "storage/list" | "storage/download" | "storage/upload";
   queryObject?: { [key: string]: string | number };
-  method?: "GET" | "POST";
-  contentType?: "json" | "form";
-  formData?: FormData;
   data?: any;
+}
+
+const ConvertToMethod = (route: "storage/list" | "storage/download" | "storage/upload"): "GET"|"POST" => {
+  switch (route) {
+    case "storage/upload":
+      return "POST";
+    default:
+      return "GET";
+  }
 }
 
 /**
@@ -29,6 +35,7 @@ export interface IApiProps {
  * @param params 
  * @returns 
  */
+const baseAPIUrl = "/api/";
 export const reqApi = async (props: IApiProps): Promise<any> => {
   let query = "";
   if (props.queryObject) {
@@ -42,27 +49,14 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
       query += encodeURIComponent(props.queryObject[key]);
     });
   }
-  if (props.method === undefined || props.method == "GET") {
+  const method = ConvertToMethod(props.route);
+  if (method == "GET") {
     return await sapi.get(
-      BASE_URL + "/api/" + props.route + query
+      BASE_URL + baseAPIUrl + props.route + query
     )
   }
   else {
-    if (props.contentType == "form") {
-      return await axios.post(
-        "/api/" + props.route + query,
-        props.formData,
-        {
-          timeout: 300000,
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      )
-    }
-    else {
-      sapi.options(BASE_URL, { headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-    }
+    sapi.options(BASE_URL, { headers: { 'Content-Type': 'application/json;charset=utf-8' } });
     return await sapi.post(
       "/api/" + props.route + query,
       props.data

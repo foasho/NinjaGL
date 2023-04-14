@@ -45,7 +45,6 @@ export const MainViewer = () => {
   /**
    * Editorの設定に同期
    */
-  editor.setConfigMapsize
 
   /**
    * シーンへの直接ドラッグ＆ドロップ時

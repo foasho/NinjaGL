@@ -1,4 +1,4 @@
-
+import { Buffer } from "buffer";
 
 export const convertToGB = (number: number): number => {
   var gb = number / 1073741824; // 1 GB = 1,073,741,824 bytes
@@ -35,4 +35,13 @@ export const isIOS = () => {
   ].includes(navigator.platform)
   // iPad on iOS 13 detection
   || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+}
+
+
+
+export const b64EncodeUnicode = (str: string): string  => {
+  const encodedStr = encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+    return String.fromCharCode(parseInt(p1, 16));
+  });
+  return Buffer.from(encodedStr).toString("base64");
 }

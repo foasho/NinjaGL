@@ -12,7 +12,7 @@ import { TerrainMaker } from "./ViewPort/TerrainMaker";
 import { TerrainInspector } from "./Inspector/TerrainInspector";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
-import { BsPlay, BsStop } from "react-icons/bs";
+import { BsPerson, BsPlay, BsStop } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
@@ -28,11 +28,14 @@ import { globalStore } from "./Store";
 import { ScriptNavigation } from "./Hierarchy/ScriptNavigation";
 import { ShaderNavigation } from "./Hierarchy/ShaderNavigation";
 import { TextureNavigation } from "./Hierarchy/TextureNavigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 /**
  * NinjaEngineメインコンポネント
  */
 export const NinjaEditor = () => {
+  const { data: session } = useSession();
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
   const [projectName, setProjectName] = useState<string>();
@@ -341,6 +344,13 @@ export const NinjaEditor = () => {
                   {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
                 
               </a>
+            </li>
+            <li className={`${styles.navItem} ${styles.right}`}>
+              <Link className={styles.isLoggedIn} href={"/login"}>
+                <span className={styles.icon}>
+                  {(session)? <><BsPerson /></>: <>LogIn</>}
+                </span>
+              </Link>
             </li>
           </ul>
           {showFileMenu &&

@@ -45,7 +45,7 @@
                 }
                 &:hover {
                     color: #43D9D9;
-                    background-color: #201f1f;
+                    background-color: $hoverBgColor;
                     cursor: pointer;
                 }
             }
@@ -60,7 +60,16 @@
                 }
                 &:hover {
                     color: #ffffff;
-                    background-color: #096775;
+                    background-color: $hoverBgColor;
+                    cursor: pointer;
+                }
+            }
+            .isLoggedIn {
+                background-color: $mainColor;
+                color: #000000;
+                &:hover {
+                    color: #ffffff;
+                    background-color: $hoverBgColor;
                     cursor: pointer;
                 }
             }
