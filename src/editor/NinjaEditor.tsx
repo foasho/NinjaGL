@@ -520,7 +520,13 @@ export const NinjaEditor = () => {
           <div 
             className={styles.inspector}
             style={{
-              display: ((viewSelect == "mainview" && state.currentId))?"block": "none",
+              display: (
+                (viewSelect == "mainview" && state.currentId)
+                ||
+                (viewSelect == "terrainmaker")
+                ||
+                (viewSelect == "playereditor")
+              )?"block": "none",
             }}
           >
             {(viewSelect == "mainview") &&

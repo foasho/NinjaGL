@@ -23,7 +23,7 @@ import {
 import Swal from "sweetalert2";
 import { InitScriptManagement } from "@/core/utils/NinjaInit";
 import { useSnapshot } from "valtio";
-import { globalScriptStore } from "../Store";
+import { globalContentStore, globalScriptStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
 import { b64EncodeUnicode } from "@/commons/functional";
@@ -106,7 +106,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const { data: session } = useSession();
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const editor = useContext(NinjaEditorContext);
+  const [isPersonalDir, setIsPersonalDir] = useState(false);
   const [path, setPath] = useState("");
   const [offset, setOffset] = useState(0);
   const [maxPages, setMaxPages] = useState(1);
@@ -130,16 +130,18 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   /**
    * 表示するファイルを移動
    */
-  const MoveDirectory = () => {
-    // 頭に"/"がついている場合は除去する
-    let _path = path;
-    if (_path.startsWith("/")){
-      _path = _path.substring(1);
+  const MoveDirectory = async () => {
+    loadRef.current.style.display = "block";
+    let prefix = isPersonalDir ? `users/${b64EncodeUnicode(session.user.email)}/${path}`: path; 
+    // 最初に/を削除
+    if (prefix.charAt(0) == "/"){
+      prefix = prefix.slice(1);
     }
-    reqApi({ route: "storage/list", queryObject: { prefix: _path, offset: offset } }).then(async (res) => {
+    await reqApi({ route: "storage/list", queryObject: { 
+      prefix: prefix.replaceAll("//", "/"), 
+      offset: offset 
+    } }).then(async (res) => {
       if (res.status == 200) {
-        console.log(res.data);
-        loadRef.current.style.display = "block";
         const files: IFileProps[] = [];
         const items = res.data.items;
         for (const item of items){
@@ -152,7 +154,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             changeScriptEditor: null,
           }
           if (file.isDirectory){
-            file.url = _path + "/" + file.name;
+            file.url = path + "/" + file.name;
           }
           const imageUrl = await getGLTFImage(item.signedUrl, item.Key);
           if (imageUrl){
@@ -169,20 +171,20 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
         if (res.data.maxPages){
           setMaxPages(res.data.maxPages);
         }
-        loadRef.current.style.display = "none";
       }
     });
+    loadRef.current.style.display = "none";
   }
 
 
   useEffect(() => {
     MoveDirectory();
     return () => {}
-  }, [path, offset]);
+  }, [path, offset, isPersonalDir]);
 
   const onDoubleClick = (type: "directory" | "gltf" | "js", path: string) => {
     if (type == "directory" && path) {
-      setPath(path);
+      setPath(path.replaceAll("//", "/"));
     }
   }
 
@@ -228,53 +230,30 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   };
 
   /**
-   * 
-   * @param file 
-   * @returns 
-   */
-  const readFileAsDataURL = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-
-      reader.onerror = (error) => {
-        reject(error);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  };
-
-  /**
    * 任意のファイルをアップロード
    */
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     const files = e.dataTransfer.files;
-    if (files.length > 0) {
+    if (files.length > 0 && session) {
       const file = files[0];
-      const data = await readFileAsDataURL(file);
-      const contentType = file.type;
-
+      const formData = new FormData();
+      formData.append("file", file);
+      let _path = path;
+      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/${_path}`;
+      const keyPath = (uploadPath + "/" + file.name).replaceAll("//", "/");
+      formData.append("filePath", keyPath);
       try {
         const response = await fetch("/api/storage/upload", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ file: data, contentType }),
+          body: formData,
         });
 
         if (!response.ok) {
           throw new Error("Error uploading file");
         }
-
         const result = await response.json();
-        console.log("File uploaded successfully:", result);
         MoveDirectory();//Directoryの更新
       } catch (error) {
         console.error("Error:", error.message);
@@ -289,11 +268,13 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     <>
       <div 
         className={styles.pathName}
-        
       >
         <div className={styles.title}>
           {t("contentsBrowser")}
-          <span className={styles.home} onClick={() => onMoveDic("")}>
+          <span className={styles.home} onClick={() => {
+            setIsPersonalDir(false);
+            onMoveDic("");
+          }}>
             <AiFillHome />
           </span>
         </div>
@@ -321,14 +302,18 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             </>
           )
         })}
-        {(session && path == "") && 
+        {(session && !isPersonalDir) && 
         <>
           <div
             className={styles.itemCard}
             onContextMenu={handleContextMenu} 
             onClick={handleClick}
             onMouseLeave={() => setShowMenu(false)}
-            onDoubleClick={() => onDoubleClick("directory", b64EncodeUnicode(session.user.email))}
+            onDoubleClick={() => {
+              setPath("");
+              setOffset(0);
+              setIsPersonalDir(true);
+            }}
           >
             {showMenu && <AssetsContextMenu position={menuPosition} />}
             <div
@@ -345,7 +330,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           </div>
         </>
         }
-        {session &&path.includes(b64EncodeUnicode(session.user.email)) &&
+        {isPersonalDir &&
         <>
           <div
             className={styles.uploadZone}
@@ -357,7 +342,6 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             >
               <a 
                 className={styles.iconImg}
-
               >
                 <MdUploadFile />
               </a>
@@ -596,14 +580,12 @@ export const ContentViewer = (props: IContenetViewerProps) => {
    * ファイルを選択して追加
    */
   const onDragStart = () => {
-    editor.contentsSelectType = contentsSelectType;
-    editor.contentsSelectPath = `${editor.assetRoute}/${props.name}`;
-    editor.contentsSelect = true;
+    globalContentStore.currentType = contentsSelectType;
+    globalContentStore.currentUrl = `${props.url}`;
   }
   const onDragEnd = () => {
-    editor.contentsSelectType = null;
-    editor.contentsSelectPath = "";
-    editor.contentsSelect = false;
+    globalContentStore.currentType = null;
+    globalContentStore.currentUrl = null;
   }
 
   return (

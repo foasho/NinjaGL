@@ -25,6 +25,22 @@ export const globalStore = proxy<IGlobalStore>(
   }
 );
 
+/**
+ * コンテンツブラウザ操作状態管理
+ */
+interface IGlobalContentStore {
+  currentUrl: string|null;
+  currentType: string|null;
+  catchFocus: boolean;
+}
+export const globalContentStore = proxy<IGlobalContentStore>(
+  {
+    currentUrl: null,
+    currentType: null,
+    catchFocus: false
+  }
+);
+
 
 /**
  * UI操作状態管理

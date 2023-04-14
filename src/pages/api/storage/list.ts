@@ -41,12 +41,16 @@ async function listFilesAndFoldersFromS3(prefix: string, limit: number, offset: 
   const hasMore = items.length > limit;
   const maxPages = Math.ceil(fetchedItems / limit);
 
+  const _items = items.filter((item) => {
+    return item.Key !== prefix;
+  });
+
   if (hasMore) {
-    items.pop(); // Remove the extra file
+    _items.pop(); // Remove the extra file
   }
 
   // Generate signed URLs for files
-  const signedFiles = await Promise.all(items.map(async (item) => {
+  const signedFiles = await Promise.all(_items.map(async (item) => {
     if (item.Size) { // It's a file
       const signedUrl = await s3.getSignedUrlPromise('getObject', {
         Bucket: process.env.S3_BUCKET_NAME!,
@@ -66,7 +70,13 @@ async function listFilesAndFoldersFromS3(prefix: string, limit: number, offset: 
     }
   }));
 
-  return { items: signedFiles, maxPages };
+  // usersファルダは、除外する
+  const filteredItems = signedFiles.filter((item) => {
+    return item.Key !== "users/";
+  });
+
+  
+  return { items: filteredItems, maxPages };
 }
 
 
@@ -83,7 +93,7 @@ async function listFilesAndFoldersFromLocal(directory: string, limit: number, of
   // Generate relative URLs for files
   const itemsWithUrls = items.map((item) => ({
     ...item,
-    signedUrl: `/uploads/${directory}/${item.name}`,
+    signedUrl: `/${AssetDir}/${directory}/${item.name}`,
   }));
 
   return { items: itemsWithUrls, maxPages };
@@ -102,6 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       res.status(200).json(result);
     } catch (error) {
+      console.error(error);
       res.status(500).json({ error: "Error listing files" });
     }
   } else {
