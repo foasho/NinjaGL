@@ -1,6 +1,6 @@
 {
   "name": "ninjagl",
-  "version": "0.1.1",
+  "version": "0.1.5",
   "description": "R3F-WEBGL FastGameEditor",
   "private": false,
   "author": "ShoOsaka",
@@ -12,17 +12,28 @@
   "engines": {
     "node": ">=18"
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "lint": "yarn prettier && yarn eslint",
     "eslint": "next lint --fix --dir src",
     "prettier": "prettier -l \"./src/**/*.{js,jsx,md}\"",
     "dev": "next dev",
     "build": "next build",
+    "build:lib": "tsc --noEmit false",
     "export": "EXPORT=true next build && EXPORT=true next export",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "cypress": "cypress open",
     "deploy:dev": "serverless --stage=development"
+  },
+  "peerDependencies": {
+    "@react-three/fiber": ">=8.11.0",
+    "three": ">=0.149.0",
+    "react": ">=18.0"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^8.2.0",

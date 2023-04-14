@@ -68,3 +68,6 @@ public/scripts/*.*
 .savedata/*.json
 
 .env
+
+# SampleProject Ignore
+examples/*
