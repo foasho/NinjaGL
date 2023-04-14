@@ -8,7 +8,7 @@ import { MathUtils } from "three";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
-import { TerrainMaker } from "./ViewPort/TerrainMaker";
+import { TerrainMakerCanvas } from "./ViewPort/TerrainMaker";
 import { TerrainInspector } from "./Inspector/TerrainInspector";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
@@ -496,7 +496,7 @@ export const NinjaEditor = () => {
               }
               {viewSelect == "terrainmaker" &&
                 <>
-                  <TerrainMaker />
+                  <TerrainMakerCanvas />
                 </>
               }
               {viewSelect == "playereditor" &&

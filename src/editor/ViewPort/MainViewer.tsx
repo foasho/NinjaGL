@@ -456,12 +456,12 @@ const SystemHelper = (props: ISysytemHelper) => {
 interface ICameraControl {
   cameraFar: number;
   cameraSpeed: number;
+  enable?: boolean;
 }
-const CameraControl = (props: ICameraControl) => {
+export const CameraControl = (props: ICameraControl) => {
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
-  const editor = useContext(NinjaEditorContext);
   const input = useInputControl("desktop");
 
   useLayoutEffect(() => {

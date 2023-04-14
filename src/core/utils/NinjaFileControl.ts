@@ -237,7 +237,7 @@ async function loadGLTFFromData(
   });
 }
 
-const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
+export const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
   return new Promise<ArrayBuffer>((resolve, reject) => {
     const exporter = new GLTFExporter();
 

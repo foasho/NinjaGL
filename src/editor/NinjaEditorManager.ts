@@ -2,7 +2,6 @@ import { AnimationClip, AnimationMixer, Euler, Group, Material, Matrix4, Object3
 import { createContext } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@/core/utils/NinjaProps";
-import { TerrainMakerManager } from "./ViewPort/TerrainMakerManager";
 import { NJCFile } from "@/core/utils/NinjaFileControl";
 import { InitMobileConfipParams } from "@/core/utils/NinjaInit";
 
@@ -54,10 +53,6 @@ export class NinjaEditorManager {
   contentsSelect: boolean = false;
   contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "camera" | null = null;
   contentsSelectPath: string = "";// コンテンツブラウザ内のItemを選択した時にパスを設定する
-  /**
-   * 地形メーカー
-   */
-  terrainManager: TerrainMakerManager = new TerrainMakerManager();
   /**
    * プレイヤーパラメータ
    */
