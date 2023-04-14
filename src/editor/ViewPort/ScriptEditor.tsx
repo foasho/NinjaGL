@@ -109,9 +109,8 @@ export const ScriptEditor = () => {
    */
   const saveCode = async(filename: string) => {
     const result = await reqApi({ 
-      route: "savescript",
-      data: { script: code.current, filename: filename } ,
-      method: "POST"
+      route: "control/savescript",
+      data: { script: code.current, filename: filename }
     }).then(
       (res) => {
         if (res.status == 200){

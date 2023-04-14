@@ -23,8 +23,12 @@ import { isNumber } from "@/commons/functional";
 import Swal from "sweetalert2";
 import { Cameras } from "./MainViewItems/Cameras";
 import { FogComponent } from "./MainViewItems/Fog";
+import { useSnapshot } from "valtio";
+import { globalContentStore } from "../Store";
+import { useSession } from "next-auth/react";
 
 export const MainViewer = () => {
+  const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const cameraSpeedRef = useRef<HTMLInputElement>();
   const [cameraSpeed, setCameraSpeed] = useState<number>(10);
@@ -41,17 +45,17 @@ export const MainViewer = () => {
   const [isGizmo, setIsGizmo] = useState<boolean>(true);
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
   const [showUI, setShowUI] = useState<boolean>(false);
+  const { data: session } = useSession();
 
   /**
    * Editorの設定に同期
    */
-  editor.setConfigMapsize
 
   /**
    * シーンへの直接ドラッグ＆ドロップ時
    * @param e 
    */
-  const handleDrop = (e) => {
+  const handleDrop = async (e) => {
     e.preventDefault();
     const DRACO_LOADER = new DRACOLoader();
     const KTX2_LOADER = new KTX2Loader();
@@ -59,30 +63,37 @@ export const MainViewer = () => {
           .setCrossOrigin('anonymous')
           .setDRACOLoader( DRACO_LOADER )
           .setMeshoptDecoder( MeshoptDecoder );
-    if (!editor.contentsSelect) {
+    if (!contentsState.currentUrl) {
       /**
        * ここは、一度アセットに落として、表示する必要がある
        */
-      // const file = e.dataTransfer.files[0];
-      // loader.load(URL.createObjectURL(file), (gltf) => {
-      //   editor.setObjectManagement({
-      //     id: generateUUID(),
-      //     type: "object",
-      //     visibleType: "auto",
-      //     args: null,
-      //     physics: "aabb",
-      //     object: gltf.scene
-      //   });
-      // });
+      if (session){
+        // Upload
+        Swal.fire({
+          title: "Now Developing...",
+          icon: "info",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      else {
+        // ログインしてください
+        Swal.fire({
+          title: "ログインしてください",
+          icon: "info",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
     }
     else {
-      const type = editor.contentsSelectType;
+      const type = contentsState.currentType;
       if (
         type == "gltf" ||
         type == "ter" ||
         type == "avt"
       ) {
-        const filePath = editor.contentsSelectPath;
+        const filePath = contentsState.currentUrl;
         loader.load(
           filePath,
           async (gltf) => {
@@ -117,24 +128,6 @@ export const MainViewer = () => {
                     height: 1.7,
                     isCenter: true,
                     animMapper: userData.animMapper? userData.animMapper: null,
-                    sounds: [
-                      {
-                        key: "grassWalk",
-                        filePath: "mp3/grassWalk.mp3",
-                        volume: 0.5,
-                        loop: true,
-                        trigAnim: "walk",
-                        stopAnim: "walk"
-                      },
-                      {
-                        key: "grassRun",
-                        filePath: "mp3/grassRun.mp3",
-                        volume: 0.5,
-                        loop: true,
-                        trigAnim: "run",
-                        stopAnim: "run"
-                      }
-                    ]
                   },
                   object: scene,
                   animations: gltf.animations,
@@ -463,12 +456,12 @@ const SystemHelper = (props: ISysytemHelper) => {
 interface ICameraControl {
   cameraFar: number;
   cameraSpeed: number;
+  enable?: boolean;
 }
-const CameraControl = (props: ICameraControl) => {
+export const CameraControl = (props: ICameraControl) => {
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
-  const editor = useContext(NinjaEditorContext);
   const input = useInputControl("desktop");
 
   useLayoutEffect(() => {

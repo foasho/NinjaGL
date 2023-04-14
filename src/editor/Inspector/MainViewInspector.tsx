@@ -193,17 +193,18 @@ export const MainViewInspector = () => {
    * LoD対応
    */
   const onCheckLoD = async () => {
-    if (!isLod && selectOM.filePath ){
-      const data = await reqApi({route: "createlod", queryObject: { 
-        filePath: selectOM.filePath 
-      }});
-      if (data.status == 200){
-        setIsLod(!isLod);
-      }
-    }
-    else {
-      setIsLod(!isLod);
-    }
+    // Lod処理の見直し
+    // if (!isLod && selectOM.filePath ){
+    //   const data = await reqApi({route: "createlod", queryObject: { 
+    //     filePath: selectOM.filePath 
+    //   }});
+    //   if (data.status == 200){
+    //     setIsLod(!isLod);
+    //   }
+    // }
+    // else {
+    //   setIsLod(!isLod);
+    // }
   }
 
   /**

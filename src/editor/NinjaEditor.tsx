@@ -8,11 +8,11 @@ import { MathUtils } from "three";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
-import { TerrainMaker } from "./ViewPort/TerrainMaker";
+import { TerrainMakerCanvas } from "./ViewPort/TerrainMaker";
 import { TerrainInspector } from "./Inspector/TerrainInspector";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
-import { BsPlay, BsStop } from "react-icons/bs";
+import { BsPerson, BsPlay, BsStop } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
@@ -28,11 +28,14 @@ import { globalStore } from "./Store";
 import { ScriptNavigation } from "./Hierarchy/ScriptNavigation";
 import { ShaderNavigation } from "./Hierarchy/ShaderNavigation";
 import { TextureNavigation } from "./Hierarchy/TextureNavigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 /**
  * NinjaEngineメインコンポネント
  */
 export const NinjaEditor = () => {
+  const { data: session } = useSession();
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
   const [projectName, setProjectName] = useState<string>();
@@ -342,6 +345,13 @@ export const NinjaEditor = () => {
                 
               </a>
             </li>
+            <li className={`${styles.navItem} ${styles.right}`}>
+              <Link className={styles.isLoggedIn} href={"/login"}>
+                <span className={styles.icon}>
+                  {(session)? <><BsPerson /></>: <>LogIn</>}
+                </span>
+              </Link>
+            </li>
           </ul>
           {showFileMenu &&
           <div className={styles.filemenu}>
@@ -486,7 +496,7 @@ export const NinjaEditor = () => {
               }
               {viewSelect == "terrainmaker" &&
                 <>
-                  <TerrainMaker />
+                  <TerrainMakerCanvas />
                 </>
               }
               {viewSelect == "playereditor" &&
@@ -510,7 +520,13 @@ export const NinjaEditor = () => {
           <div 
             className={styles.inspector}
             style={{
-              display: ((viewSelect == "mainview" && state.currentId))?"block": "none",
+              display: (
+                (viewSelect == "mainview" && state.currentId)
+                ||
+                (viewSelect == "terrainmaker")
+                ||
+                (viewSelect == "playereditor")
+              )?"block": "none",
             }}
           >
             {(viewSelect == "mainview") &&

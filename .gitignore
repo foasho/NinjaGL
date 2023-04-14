@@ -46,6 +46,8 @@ __pycache__/*
 .idea/*
 
 public/assets/*.*
+public/scripts/*.*
 
 .savedata/*.json
-.env*
+
+.env

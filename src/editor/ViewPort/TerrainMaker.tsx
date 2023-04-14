@@ -20,38 +20,43 @@ import {
   Material
 } from "three";
 import { useInputControl } from "@/core/utils/InputControls";
-import { colors } from "react-select/dist/declarations/src/theme";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
+import { CameraControl } from "./MainViewer";
+import { useSnapshot } from "valtio";
+import { globalTerrainStore } from "../Store";
+import { Perf } from "r3f-perf";
 
 const TerrainMakeComponent = () => {
-  const editor = useContext(NinjaEditorContext);
-  const terrainManager = editor.terrainManager;
-  const input = useInputControl("desktop");
+  const terrainState = useSnapshot(globalTerrainStore);
   /**
    * 初期値
    */
   const ref = useRef<Mesh>();
-  const camRef = useRef<any>();
   const lightRef = useRef<SL>();
   const gridRef = useRef<GridHelper>();
   const matRef = useRef<MeshStandardMaterial>();
   const mouseCircleRef = useRef<Mesh>();
   const raycaster = new Raycaster();
-  const { camera, mouse, gl } = useThree();
-  camera.position.set(
-    terrainManager.mapSize / 2,
-    terrainManager.mapSize / 2,
-    -terrainManager.mapSize / 2
-  );
-  terrainManager.camera = camera;
-  let isReverse = useRef<boolean>(false);
-  let isGrid = false;
+  const { mouse, gl, camera } = useThree();
+  const input = useInputControl("desktop");
+  const isMouseDown = useRef(false);
   // ブラシ用
-  const [renderTarget] = useState(() => new WebGLRenderTarget(terrainManager.mapSize, terrainManager.mapSize));
-  const [texture] = useState(() => renderTarget.texture);
   const [brushPosition, setBrushPosition] = useState(new Vector3());
   const [brushColor] = useState(new Color(1, 0, 0));
-  const [brushSize] = useState(terrainManager.radius);
+  const [brushSize] = useState(terrainState.radius);
+
+  useEffect(() => {
+    console.log("TerrainMakeComponent");
+  }, [
+    terrainState.type,
+    terrainState.radius, 
+    terrainState.power, 
+    terrainState.mode, 
+    terrainState.wireFrame,
+    terrainState.brush,
+    terrainState.mapSize,
+    terrainState.mapResolution,
+    terrainState.color,
+  ]);
 
   /**
    * 範囲内の頂点を取得
@@ -98,38 +103,40 @@ const TerrainMakeComponent = () => {
    */
   const onMouseMove = (event) => {
     raycaster.setFromCamera(mouse, camera);
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    };
     const intersects = raycaster.intersectObject(ref.current);
-    if (terrainManager.isMouseDown && terrainManager.mode == "edit") {
-      if (terrainManager.brush == "normal" || terrainManager.brush == "flat"){
-        const { vertexIndexes, values } = getVertexes(intersects, terrainManager.radius);
+    if (terrainState.isMouseDown && terrainState.mode == "edit") {
+      if (terrainState.brush == "normal" || terrainState.brush == "flat"){
+        const { vertexIndexes, values } = getVertexes(intersects, terrainState.radius);
         if (intersects.length > 0 && intersects[0]) {
           const intersectPosition = intersects[0].point;
           const object: Mesh = intersects[0].object as Mesh;
           if (!object) return;
           vertexIndexes.map((index, i) => {
             const value = values[i];
-            if (terrainManager.brush == "normal"){
+            if (terrainState.brush == "normal"){
               let position = object.geometry.attributes.position;
               if (position instanceof GLBufferAttribute) return;
-              if (terrainManager.type == "create"){
+              if (terrainState.type == "create"){
                 position.setZ(
                   index,
-                  (position.getZ(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
+                  (position.getZ(index) + (terrainState.power * value * (input.shift ? -1 : 1)))
                 );
               }
               else {
                 position.setY(
                   index,
-                  (position.getY(index) + (terrainManager.power * value * (isReverse.current ? -1 : 1)))
+                  (position.getY(index) + (terrainState.power * value * (input.shift ? -1 : 1)))
                 );
               }
               position.needsUpdate = true;
             }
-            else if (terrainManager.brush == "flat") {
+            else if (terrainState.brush == "flat") {
               let position = object.geometry.attributes.position;
               if (position instanceof GLBufferAttribute) return;
-              if (terrainManager.type == "create"){
+              if (terrainState.type == "create"){
                 position.setZ(
                   index,
                   intersectPosition.z
@@ -146,9 +153,9 @@ const TerrainMakeComponent = () => {
           });
         }
       }
-      else if (terrainManager.brush == "paint"){
+      else if (terrainState.brush == "paint"){
         if (intersects.length > 0 && intersects[0]) {
-          const radius = terrainManager.radius;
+          const radius = terrainState.radius;
           const intersectPosition = intersects[0].point;
           const object: Mesh = intersects[0].object as Mesh;
           if (!object) return;
@@ -164,7 +171,7 @@ const TerrainMakeComponent = () => {
           ) return;
           const numVertices = cloneGeometry.attributes.color.array;
           let colors = new Float32Array(numVertices);
-          const color = new Color(terrainManager.color);
+          const color = new Color(terrainState.color);
           const vertex = new Vector3();
           const positionArray = Array.from(cloneGeometry.attributes.position.array);
           for (let i = 0; i <= positionArray.length - 3; i += 3) {
@@ -181,7 +188,7 @@ const TerrainMakeComponent = () => {
       }
     }
     if (intersects.length > 0 && mouseCircleRef.current){
-      const raduis = terrainManager.radius;
+      const raduis = terrainState.radius;
       mouseCircleRef.current.geometry = new CircleGeometry(raduis);
       const intersectPosition = intersects[0].point;
       const mouseCirclePos = new Vector3().addVectors(intersectPosition, new Vector3(0, 0.01, 0));
@@ -190,21 +197,10 @@ const TerrainMakeComponent = () => {
   }
 
   const onMouseDown = (e) => {
-    terrainManager.isMouseDown = true;
+    isMouseDown.current = true;
   }
   const onMouseUp = () => {
-    terrainManager.isMouseDown = false;
-    isReverse.current = false;
-  }
-  const onKeyDown = (event) => {
-    if (event.code.toString() == "ShiftLeft") {
-      isReverse.current = true;
-    }
-  }
-  const onKeyUp = (event) => {
-    if (event.code.toString() == "ShiftLeft") {
-      isReverse.current = false;
-    }
+    isMouseDown.current = false;
   }
 
 
@@ -212,111 +208,73 @@ const TerrainMakeComponent = () => {
     document.addEventListener("pointermove", onMouseMove, false);
     document.addEventListener("mousedown", onMouseDown, false);
     document.addEventListener("mouseup", onMouseUp, false);
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("keyup", onKeyUp);
-    terrainManager.terrainMesh = ref.current;
+    // globalTerrainStore.terrainMesh = ref.current;
     return () => {
       document.removeEventListener("pointermove", onMouseMove);
       document.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mouseup", onMouseUp);
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("keyup", onKeyUp);
     }
   }, []);
 
   useFrame((_, delta) => {
-    if (isReverse.current) {
-      const st = 1;
-      var cameraDirection = new Vector3();
-      camera.getWorldDirection(cameraDirection);
-      var cameraPosition = camera.position.clone();
-      if (input.forward) {
-        cameraPosition.add(cameraDirection.multiplyScalar(st));
-        camera.position.copy(cameraPosition);
+    if (ref.current && matRef.current && lightRef.current) {
+      lightRef.current.position.set(
+        -terrainState.mapSize / 1.6,
+        terrainState.mapSize / 1.6,
+        -terrainState.mapSize / 2
+      );
+      lightRef.current.distance = terrainState.mapSize * 2;
+      if (lightRef.current.distance <= 100) {
+        lightRef.current.intensity = lightRef.current.distance / 4;
       }
-      if (input.backward) {
-        cameraPosition.sub(cameraDirection.multiplyScalar(st));
-        camera.position.copy(cameraPosition);
+      else if (lightRef.current.distance > 100) {
+        lightRef.current.intensity = lightRef.current.distance / 16;
       }
-      if (input.right) {
-        var cameraRight = new Vector3();
-        cameraRight.crossVectors(cameraDirection, camera.up).normalize();
-        cameraPosition.add(cameraRight.multiplyScalar(st));
-        camera.position.copy(cameraPosition);
-        var cameraTarget = cameraPosition.clone().add(cameraDirection);
-        camera.lookAt(cameraTarget); // LookAt Update
+      else if (lightRef.current.distance > 300) {
+        lightRef.current.intensity = lightRef.current.distance / 24;
       }
-      if (input.left) {
-        var cameraLeft = new Vector3();
-        cameraLeft.crossVectors(cameraDirection, camera.up).normalize();
-        cameraPosition.sub(cameraLeft.multiplyScalar(st));
-        camera.position.copy(cameraPosition);
-        camera.lookAt(cameraPosition.clone().add(cameraDirection));
+      else {
+        lightRef.current.intensity = lightRef.current.distance / 32;
       }
-    }
-    if (terrainManager.mode == "edit") {
-      camRef.current.enabled = false;
-    }
-    else {
-      camRef.current.enabled = true;
-    }
-    lightRef.current.position.set(
-      -terrainManager.mapSize / 1.6,
-      terrainManager.mapSize / 1.6,
-      -terrainManager.mapSize / 2
-    );
-    lightRef.current.distance = terrainManager.mapSize * 2;
-    if (lightRef.current.distance <= 100) {
-      lightRef.current.intensity = lightRef.current.distance / 4;
-    }
-    else if (lightRef.current.distance > 100) {
-      lightRef.current.intensity = lightRef.current.distance / 16;
-    }
-    else if (lightRef.current.distance > 300) {
-      lightRef.current.intensity = lightRef.current.distance / 24;
-    }
-    else {
-      lightRef.current.intensity = lightRef.current.distance / 32;
-    }
-    if (texture){
-      texture.needsUpdate = true;
-      gl.setRenderTarget(null);
-    }
-    if (matRef.current && matRef.current instanceof MeshStandardMaterial){
-      matRef.current.wireframe = terrainManager.getWireFrame();
+      if (matRef.current && matRef.current instanceof MeshStandardMaterial){
+        matRef.current.wireframe = terrainState.wireFrame;
+      }
     }
   });
 
-  if (terrainManager.type == "edit"){
-    if (terrainManager.terrainMesh.material){
-      matRef.current = terrainManager.terrainMesh.material as MeshStandardMaterial;
-    }
-  }
+  console.log(terrainState);
 
   return (
     <>
-      <OrbitControls 
-        makeDefault={true} 
-        ref={camRef}
-      />
+      <OrbitControls />
+      {/* <CameraControl cameraSpeed={terrainState.mapSize/2} cameraFar={4000} enable={terrainState.mode == "view"} /> */}
       <axesHelper />
-      <gridHelper visible={isGrid} ref={gridRef} args={[terrainManager.mapSize * 2, Number(terrainManager.mapResolution / 2)]} />
+      <gridHelper ref={gridRef} args={[terrainState.mapSize * 2, Number(terrainState.mapResolution / 2)]} />
       
-      {terrainManager.type == "create"?
-        <mesh 
-          ref={ref} 
-          rotation={[-Math.PI / 2, 0, 0]}
-          receiveShadow 
-          castShadow
-        >
-          <planeGeometry args={[terrainManager.mapSize, terrainManager.mapSize, terrainManager.mapResolution, terrainManager.mapResolution]} />
-          <meshStandardMaterial ref={matRef} wireframe={terrainManager.wireFrame} side={DoubleSide} vertexColors={true} color={0xffffff} />
-        </mesh>
-        :
-        <>
-          <primitive object={terrainManager.terrainMesh} ref={ref} />
-        </>
-      }
+      <mesh 
+        ref={ref} 
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow 
+        castShadow
+      >
+        <planeGeometry 
+          args={
+            [
+              terrainState.mapSize, 
+              terrainState.mapSize, 
+              terrainState.mapResolution, 
+              terrainState.mapResolution
+            ]
+          }
+        />
+        <meshStandardMaterial 
+          ref={matRef} 
+          wireframe={terrainState.wireFrame} 
+          side={DoubleSide} 
+          vertexColors={true} 
+          color={0xffffff} 
+        />
+      </mesh>
 
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
@@ -329,40 +287,20 @@ const TerrainMakeComponent = () => {
       />
       
         <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleBufferGeometry args={[terrainManager.radius]} />
+          <circleBufferGeometry args={[terrainState.radius]} />
           <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
         </mesh>
-      
+      <Perf position={"bottom-right"}/>
     </>
   )
 }
 
-const TerrainMakerCanvas = () => {
+export const TerrainMakerCanvas = () => {
   return (
     <Canvas shadows>
       <Environment preset="dawn" background blur={0.7} resolution={512}>
       </Environment>
       <TerrainMakeComponent />
     </Canvas>
-  )
-}
-
-export const TerrainMaker = () => {
-  const editor = useContext(NinjaEditorContext);
-  const terrain = editor.getTerrain();
-  if (terrain){
-    editor.terrainManager.setTerrain(terrain.object);
-  }
-  const terrainManager = editor.terrainManager;
-  return (
-    <>
-      {terrainManager &&
-        <>
-          <div style={{ height: "100%", width: "100%" }} onContextMenu={() => { return false }}>
-            <TerrainMakerCanvas />
-          </div>
-        </>
-      }
-    </>
   )
 }

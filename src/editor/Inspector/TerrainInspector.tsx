@@ -6,6 +6,12 @@ import { reqApi } from "@/services/ServciceApi";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { GiFlatPlatform, GiMountainCave, GiMountaintop, GiPaintBrush } from "react-icons/gi";
+import { useSnapshot } from "valtio";
+import { globalTerrainStore } from "../Store";
+import { convertObjectToBlob, exportGLTF } from "@/core/utils/NinjaFileControl";
+import { Object3D, Scene } from "three";
+import { useSession } from "next-auth/react";
+import { b64EncodeUnicode, isNumber } from "@/commons/functional";
 
 /**
  * 入力イベント / 入力の型
@@ -18,28 +24,21 @@ interface HTMLElementEvent<T extends HTMLElement> extends Event {
 
 
 export const TerrainInspector = () => {
-  const editor = useContext(NinjaEditorContext);
-  const terrainManager = editor.terrainManager;
-  const [mode, setMode] = useState<"view" | "edit">(terrainManager.mode);
-  const [brush, setBrush] = useState<"normal" | "flat" | "paint">(terrainManager.brush);
-  const [wf, setWF] = useState<boolean>(terrainManager.wireFrame);
-  const [power, setPower] = useState<number>(terrainManager.power);
-  const [radius, setRadius] = useState<number>(terrainManager.radius);
-  const [mapSize, setMapSize] = useState<number>(terrainManager.mapSize);
-  const [mapResolution, setMapResolution] = useState<number>(terrainManager.mapResolution);
-  const [color, setColor] = useState<string>(terrainManager.color);
+  const terrainState = useSnapshot(globalTerrainStore);
+  const { data: session } = useSession();
   const { t } = useTranslation();
 
   const keyDown = (event: HTMLElementEvent<HTMLInputElement>) => {
     if (event.code.toString() == "KeyE") {
-      terrainManager.changeMode();
-      setMode(terrainManager.mode);
+      if (terrainState.mode == "view"){
+        globalTerrainStore.mode = "edit";
+      }
+      else {
+        globalTerrainStore.mode = "view";
+      }
     }
   }
-
-
   useEffect(() => {
-    setMode(terrainManager.mode);
     document.addEventListener("keydown", keyDown);
     return () => {
       document.removeEventListener("keydown", keyDown);
@@ -47,18 +46,17 @@ export const TerrainInspector = () => {
   }, []);
 
   const changeWF = () => {
-    terrainManager.changeWireFrame();
-    setWF(terrainManager.wireFrame);
+    globalTerrainStore.wireFrame = !terrainState.wireFrame;
   }
 
   const changePower = (e: any) => {
-    terrainManager.changePower(Number(e.target.value));
-    setPower(Number(e.target.value));
+    if (isNumber(e.target.value)){
+      globalTerrainStore.power = Number(e.target.value);
+    }
   }
 
   const changeRadius = (e: any) => {
-    terrainManager.changeRaduis(Number(e.target.value));
-    setRadius(Number(e.target.value));
+    if (isNumber(e.target.value)) globalTerrainStore.radius = Number(e.target.value);
   }
 
   const changeMapSize = (e) => {
@@ -66,7 +64,7 @@ export const TerrainInspector = () => {
       e.target.value && Number(e.target.value) > 0 &&
       e.target.value && Number(e.target.value) < 4096
     ) {
-      setMapSize(Number(e.target.value));
+      if (isNumber(e.target.value)) globalTerrainStore.mapSize = Number(e.target.value);
     }
     else if (e.target.value && Number(e.target.value) >= 4096){
       Swal.fire(
@@ -83,7 +81,7 @@ export const TerrainInspector = () => {
       e.target.value && Number(e.target.value) > 0 &&
       e.target.value && Number(e.target.value) < 4096
     ) {
-      setMapResolution(Number(e.target.value));
+      if (isNumber(e.target.value)) globalTerrainStore.mapResolution = Number(e.target.value);
     }
     else if (e.target.value && Number(e.target.value) >= 4096){
       Swal.fire(
@@ -96,61 +94,63 @@ export const TerrainInspector = () => {
   }
 
   const changeColor = (e) => {
-    setColor(e.target.value);
-    terrainManager.changeColor(e.target.value);
+    globalTerrainStore.color = e.target.value;
   }
 
   const changeBrush = (brushType: "normal" | "flat" | "paint") => {
-    setBrush(brushType);
-    terrainManager.changeBrush(brushType);
-  }
-
-  const updateMap = () => {
-    terrainManager.changeMapSize(mapSize);
-    terrainManager.changeMapResolution(mapResolution);
-    terrainManager.reset();
+    globalTerrainStore.brush = brushType;
   }
 
   /**
    * 地形データを送信/保存する
    */
   const saveTerrain = async () => {
-    const file = await terrainManager.exportTerrainMesh();
-
+    const obj3d = new Object3D();
+    // obj3d.add(terrainState.terrainMesh.clone());
+    const blob = await convertObjectToBlob(obj3d);
     Swal.fire({
       title: t("inputFileName"),
       input: 'text',
       showCancelButton: true,
       confirmButtonText: '実行',
       showLoaderOnConfirm: true,
-      preConfirm: async (inputStr) => {
+      preConfirm: async (inputStr: string) => {
         //バリデーションを入れたりしても良い
         if (inputStr.length == 0) {
           return Swal.showValidationMessage(t("leastInput"));
         }
+        if (session){
+          const formData = new FormData();
+          formData.append('file', blob);
+          const keyPath = `users/${b64EncodeUnicode(session.user.email)}/terrains/${inputStr}.ter`;
+          formData.append("filePath", keyPath);
+          try {
+            const response = await fetch("/api/storage/upload", {
+              method: "POST",
+              body: formData,
+            });
 
-        const formData = new FormData();
-        formData.append('file', file, `${inputStr}.ter`);
-        return await reqApi({
-          route: "uploadgltf",
-          method: "POST",
-          formData: formData,
-          contentType: "form"
-        }).then((res) => {
-          if (res.status == 200) {
-            return res.data;
+            if (!response.ok) {
+              throw new Error("Error uploading file");
+            }
+            Swal.fire({
+              title: t("completeSave"),
+              text: keyPath
+            });
+          } catch (error) {
+            console.error("Error:", error.message);
           }
-        });
+        }
+        else {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${inputStr}.ter`;
+          link.click();
+          link.remove();
+        }
       },
       allowOutsideClick: function () {
         return !Swal.isLoading();
-      }
-    }).then((result) => {
-      if (result.value) {
-        Swal.fire({
-          title: t("completeSave")
-          , text: result.value
-        });
       }
     });
   }
@@ -160,10 +160,10 @@ export const TerrainInspector = () => {
       <div className={styles.mode}>
         <div className={styles.title}>{t("mode")}</div>
         <div className={styles.select}>
-          <span className={mode == "view" ? styles.active : styles.disable}>
+          <span className={terrainState.mode == "view" ? styles.active : styles.disable}>
             {t("view")}
           </span>
-          <span className={mode == "edit" ? styles.active : styles.disable}>
+          <span className={terrainState.mode == "edit" ? styles.active : styles.disable}>
             {t("edit")}
           </span>
         </div>
@@ -172,7 +172,7 @@ export const TerrainInspector = () => {
         <div className={styles.title}>{t("brushType")}</div>
         <div className={styles.select}>
           <div
-            className={(brush == "normal" ? styles.active : styles.disable) + ` ${styles.brush}`}
+            className={(terrainState.brush == "normal" ? styles.active : styles.disable) + ` ${styles.brush}`}
             onClick={() => changeBrush("normal")}
           >
             <div className={styles.icon}>
@@ -183,7 +183,7 @@ export const TerrainInspector = () => {
             </div>
           </div>
           <div 
-            className={(brush == "flat" ? styles.active : styles.disable) + ` ${styles.brush}`}
+            className={(terrainState.brush == "flat" ? styles.active : styles.disable) + ` ${styles.brush}`}
             onClick={() => changeBrush("flat")}
           >
             <div className={styles.icon}>
@@ -194,7 +194,7 @@ export const TerrainInspector = () => {
             </div>
           </div>
           <div 
-            className={(brush == "paint" ? styles.active : styles.disable) + ` ${styles.brush}`}
+            className={(terrainState.brush == "paint" ? styles.active : styles.disable) + ` ${styles.brush}`}
             onClick={() => changeBrush("paint")}
           >
             <div className={styles.icon}>
@@ -215,7 +215,7 @@ export const TerrainInspector = () => {
             className={styles.checkbox} 
             type="checkbox" 
             onInput={() => changeWF()} 
-            checked={wf} 
+            // checked={terrainState.wireFrame} 
           />
         </div>
       </div>
@@ -227,7 +227,7 @@ export const TerrainInspector = () => {
           <input
             className={styles.customRange}
             type={"range"}
-            value={power}
+            value={terrainState.power}
             onInput={(e) => changePower(e)}
             min={0.01}
             max={0.29}
@@ -243,7 +243,7 @@ export const TerrainInspector = () => {
           <input
           className={styles.customRange}
             type={"range"}
-            value={radius}
+            value={terrainState.radius}
             onInput={(e) => changeRadius(e)}
             min={0.1}
             max={10.0}
@@ -261,17 +261,35 @@ export const TerrainInspector = () => {
         <div className={styles.inputContainer}>
           <input
             type={"color"}
-            value={color}
+            value={terrainState.color}
             onInput={(e) => changeColor(e)}
           />
-          <input type={"text"} min={1} max={4096} value={mapSize} onChange={(e) => changeMapSize(e)} />
-          <input type={"text"} min={4} max={4096} value={mapResolution} onChange={(e) => changeMapResolution(e)} />
+          <input 
+            type={"text"} 
+            min={1} 
+            max={4096} 
+            // value={terrainState.mapSize} 
+            placeholder={terrainState.mapSize?.toString()}
+            // onChange={(e) => changeMapSize(e)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                changeMapSize(e);
+              }
+            }}
+          />
+          <input 
+            type={"text"} 
+            min={4} 
+            max={4096} 
+            // value={terrainState.mapResolution} 
+            placeholder={terrainState.mapResolution?.toString()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                changeMapResolution(e);
+              }
+            }}
+          />
         </div>
-      </div>
-      <div className={styles.change}>
-        <a className={styles.btn} onClick={() => updateMap()}>
-          {t("updateTerrain")}
-        </a>
       </div>
       <div className={styles.save}>
         <a className={styles.btn} onClick={() => saveTerrain()} >

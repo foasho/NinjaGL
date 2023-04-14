@@ -9,7 +9,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   const withPWA = require('@ducanh2912/next-pwa').default({
     dest: 'public',
     disable: process.env.NODE_ENV === 'development',
-  })
+  });
+
+  const TerserPlugin = require("terser-webpack-plugin"); // 追加
   
   const nextConfig = {
     // uncomment the following snippet if using styled components
@@ -47,7 +49,24 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
         test: /\.(glsl|vs|fs|vert|frag)$/,
         exclude: /node_modules/,
         use: ['raw-loader', 'glslify-loader'],
-      })
+      });
+
+      // InstanceAPIのクラス名と変数名を変更しないように設定
+      if (!isServer) {
+        const terserIndex = config.optimization.minimizer.findIndex(
+          (item) => item instanceof TerserPlugin
+        );
+  
+        if (terserIndex > -1) {
+          const options = config.optimization.minimizer[terserIndex].options;
+  
+          // クラス名と変数名の変更を防ぐための設定を追加
+          options.terserOptions.keep_classnames = /Web3Instance|EngineInstance|AxiosInstance/;
+          options.terserOptions.keep_fnames = /Web3Instance|EngineInstance|AxiosInstance/;
+  
+          config.optimization.minimizer[terserIndex] = new TerserPlugin(options);
+        }
+      }
   
       return config
     },
@@ -63,12 +82,19 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
       ...nextConfig,
     })
   
-    const finalConfig = {}
+    const finalConfig = {
+      env: {
+        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+        AWS_REGION: process.env.AWS_REGION,
+        S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+        STORAGE_TYPE: process.env.STORAGE_TYPE, 
+      },
+    }
     Object.keys(wConfig).forEach((key) => {
       if (!KEYS_TO_OMIT.includes(key)) {
         finalConfig[key] = wConfig[key]
       }
-    })
-  
+    });
     return finalConfig
   }

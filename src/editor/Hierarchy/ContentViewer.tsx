@@ -11,13 +11,26 @@ import { AmbientLight, DirectionalLight, LoadingManager, MathUtils, PerspectiveC
 import { DRACOLoader, GLTFLoader, KTX2Loader } from "three-stdlib";
 import { MeshoptDecoder } from "meshoptimizer";
 import { useTranslation } from "react-i18next";
-import { AiFillHome } from "react-icons/ai";
+import { 
+  AiFillHome, 
+  AiOutlineCloudUpload, 
+  AiOutlineDoubleLeft, 
+  AiOutlineDoubleRight, 
+  AiOutlineLeft, 
+  AiOutlineRight,
+  AiFillFolderOpen
+} from "react-icons/ai";
 import Swal from "sweetalert2";
 import { InitScriptManagement } from "@/core/utils/NinjaInit";
 import { useSnapshot } from "valtio";
-import { globalScriptStore } from "../Store";
+import { globalContentStore, globalScriptStore } from "../Store";
+import { useSession } from "next-auth/react";
+import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
+import { b64EncodeUnicode } from "@/commons/functional";
+import { MdUploadFile } from "react-icons/md";
 
 export interface IFileProps {
+  url: string;
   size: number;
   isFile: boolean;
   isDirectory: boolean;
@@ -84,69 +97,99 @@ interface IContentsBrowser {
   changeScriptEditor: () => void;
 } 
 
+/**
+ * コンテンツブラウザ
+ * @param props 
+ * @returns 
+ */
 export const ContentsBrowser = (props: IContentsBrowser) => {
-  const editor = useContext(NinjaEditorContext);
+  const { data: session } = useSession();
+  const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [isPersonalDir, setIsPersonalDir] = useState(false);
+  const [path, setPath] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [maxPages, setMaxPages] = useState(1);
   const { t } = useTranslation();
   const [files, setFiles] = useState<IFileProps[]>([]);
   const loadRef = useRef<HTMLDivElement>();
 
-  const getGLTFImage = async (file: IFileProps): Promise<string> => {
-    if (file.isFile && isGLTF(file.name)){
-      return await CreateGLTFImage(`${editor.assetRoute}/${file.name}`);
+  /**
+   * GLTFの画像を取得する
+   * @param url 
+   * @param key 
+   * @returns 
+   */
+  const getGLTFImage = async (url: string, key: string): Promise<string> => {
+    if (isGLTF(key)){
+      return await CreateGLTFImage(url);
     }
     return null
   }
 
-  useEffect(() => {
-    // アセットをロードする
-    reqApi({ route: "filesize", queryObject: { routePath: "/" } }).then(async (res) => {
+  /**
+   * 表示するファイルを移動
+   */
+  const MoveDirectory = async () => {
+    loadRef.current.style.display = "block";
+    let prefix = isPersonalDir ? `users/${b64EncodeUnicode(session.user.email)}/${path}`: path; 
+    // 最初に/を削除
+    if (prefix.charAt(0) == "/"){
+      prefix = prefix.slice(1);
+    }
+    await reqApi({ route: "storage/list", queryObject: { 
+      prefix: prefix.replaceAll("//", "/"), 
+      offset: offset 
+    } }).then(async (res) => {
       if (res.status == 200) {
-        loadRef.current.style.display = "block";
-        const _files = res.data.files;
-        const newFiles = [];
-        for (const file of _files){
-          const imageUrl = await getGLTFImage(file);
+        const files: IFileProps[] = [];
+        const items = res.data.items;
+        for (const item of items){
+          const file: IFileProps = {
+            url: item.signedUrl,
+            size: item.Size,
+            isFile: item.signedUrl ? true : false,
+            isDirectory: item.signedUrl ? false : true,
+            name: item.Key,
+            changeScriptEditor: null,
+          }
+          if (file.isDirectory){
+            file.url = path + "/" + file.name;
+          }
+          const imageUrl = await getGLTFImage(item.signedUrl, item.Key);
           if (imageUrl){
             file.imageUrl = imageUrl;
           }
           else {
-            if (isGLTF(file.name)){
+            if (isGLTF(item.Key)){
               continue;
             }
           }
-          newFiles.push(file);
+          files.push(file);
         }
-        setFiles(newFiles);
-        loadRef.current.style.display = "none";
+        setFiles(files);
+        if (res.data.maxPages){
+          setMaxPages(res.data.maxPages);
+        }
       }
-    })
-  }, []);
+    });
+    loadRef.current.style.display = "none";
+  }
+
+
+  useEffect(() => {
+    MoveDirectory();
+    return () => {}
+  }, [path, offset, isPersonalDir]);
 
   const onDoubleClick = (type: "directory" | "gltf" | "js", path: string) => {
-    if (type == "directory") {
-      reqApi({ route: "filesize", queryObject: { routePath: path } }).then(async (res) => {
-        if (res.status == 200) {
-          loadRef.current.style.display = "block";
-          editor.assetRoute = (path != "/") ? path : "";
-          const _files = res.data.files;
-          const newFiles = [];
-          for (const file of _files){
-            const imageUrl = await getGLTFImage(file);
-            if (imageUrl){
-              file.imageUrl = imageUrl;
-            }
-            else {
-              if (isGLTF(file.name)){
-                continue;
-              }
-            }
-            newFiles.push(file);
-          }
-          setFiles(newFiles);
-          loadRef.current.style.display = "none";
-        }
-      })
+    if (type == "directory" && path) {
+      setPath(path.replaceAll("//", "/"));
     }
+  }
+
+  const changeOffset = (value: number) => {
+    setOffset(value);
   }
 
   /**
@@ -154,55 +197,88 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
    * @param value 
    */
   const onMoveDic = (value: string) => {
-    const routes = editor.assetRoute.split("/");
-    let path = "";
+    const routes = path.split("/");
+    let _path = "";
     if (value.length > 0) {
       for (const route of routes) {
-        if (route.length > 0) {
-          path += `/${route}`;
-          if (route == value) {
-            break;
-          }
+        if (route.length == 0) {
+          continue;
+        }
+        _path += route + "/";
+        if (route == value) {
+          break;
         }
       }
     }
-    else {
-      path = "/";
-    }
-    reqApi({ route: "filesize", queryObject: { routePath: path } }).then(async (res) => {
-      if (res.status == 200) {
-        loadRef.current.style.display = "block";
-        editor.assetRoute = (path != "/") ? path : "";
-        const _files = res.data.files;
-        const newFiles = [];
-        for (const file of _files){
-          const imageUrl = await getGLTFImage(file);
-          if (imageUrl){
-            file.imageUrl = imageUrl;
-          }
-          else {
-            if (isGLTF(file.name)){
-              continue;
-            }
-          }
-          newFiles.push(file);
-        }
-        setFiles(newFiles);
-        loadRef.current.style.display = "none";
-      }
-    })
+    setPath(_path);
+    setOffset(0);
   }
+
+
+  /**
+   * 右クリックメニューの表示
+   * @param event 
+   */
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    setShowMenu(true);
+    setMenuPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleClick = () => {
+    setShowMenu(false);
+  };
+
+  /**
+   * 任意のファイルをアップロード
+   */
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && session) {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+      let _path = path;
+      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/${_path}`;
+      const keyPath = (uploadPath + "/" + file.name).replaceAll("//", "/");
+      formData.append("filePath", keyPath);
+      try {
+        const response = await fetch("/api/storage/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Error uploading file");
+        }
+        const result = await response.json();
+        MoveDirectory();//Directoryの更新
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+    }
+  }
+  const handleDragOver = (e) => {
+    e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
+  };
 
   return (
     <>
-      <div className={styles.pathName}>
+      <div 
+        className={styles.pathName}
+      >
         <div className={styles.title}>
           {t("contentsBrowser")}
-          <span className={styles.home} onClick={() => onMoveDic("")}>
+          <span className={styles.home} onClick={() => {
+            setIsPersonalDir(false);
+            onMoveDic("");
+          }}>
             <AiFillHome />
           </span>
         </div>
-        {editor.assetRoute.split("/").map((route, idx) => {
+        {path.split("/").map((route, idx) => {
           if (route.length == 0) {
             return <></>
           }
@@ -226,30 +302,128 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             </>
           )
         })}
+        {(session && !isPersonalDir) && 
+        <>
+          <div
+            className={styles.itemCard}
+            onContextMenu={handleContextMenu} 
+            onClick={handleClick}
+            onMouseLeave={() => setShowMenu(false)}
+            onDoubleClick={() => {
+              setPath("");
+              setOffset(0);
+              setIsPersonalDir(true);
+            }}
+          >
+            {showMenu && <AssetsContextMenu position={menuPosition} />}
+            <div
+              className={styles.icon}
+
+            >
+              <a className={styles.iconImg}>
+                <AiFillFolderOpen />
+              </a>
+            </div>
+            <div className={styles.itemName}>
+              Personal
+            </div>
+          </div>
+        </>
+        }
+        {isPersonalDir &&
+        <>
+          <div
+            className={styles.uploadZone}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+          >
+            <div
+              className={styles.icon}
+            >
+              <a 
+                className={styles.iconImg}
+              >
+                <MdUploadFile />
+              </a>
+            </div>
+            <div className={styles.itemName}>
+              Drag and Drop Here
+            </div>
+          </div>
+        </>
+        }
         <div className={styles.loader} ref={loadRef}>
           <div className={styles.now}>
             {t("nowLoading")}
           </div>
         </div>
       </div>
+      <>
+        {maxPages > 1 &&
+          <div className={styles.pageContainer}>
+            {offset > 0 &&
+              <>
+                <div className={`${styles.page} ${styles.first}`} onClick={() => changeOffset(0)}>
+                  <AiOutlineDoubleLeft />
+                </div>
+                <div className={`${styles.page} ${styles.prev}`} onClick={() => changeOffset(offset - 1)}>
+                  <AiOutlineLeft />
+                </div>
+              </>
+            }
+            <div className={styles.pageInfo}>
+              {offset + 1} / {maxPages}
+            </div>
+            {offset + 1 < maxPages &&
+              <>
+                <div className={`${styles.page} ${styles.next}`} onClick={() => changeOffset(offset + 1)}>
+                  <AiOutlineRight />
+                </div>
+                <div className={`${styles.page} ${styles.last}`} onClick={() => changeOffset(maxPages - 1)}>
+                  <AiOutlineDoubleRight />
+                </div>
+              </>
+            }
+          </div>
+        }
+      </>
     </>
   )
 }
 
+interface IContenetViewerProps extends IFileProps {
+}
 
-export const ContentViewer = (props: IFileProps) => {
+export const ContentViewer = (props: IContenetViewerProps) => {
   let icon: JSX.Element;
+  const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   let tooltipTimer: NodeJS.Timeout = null;
   let tooltipHideTimer: NodeJS.Timeout = null;
   let tooltip = useRef<HTMLDivElement>();
   const editor = useContext(NinjaEditorContext);
   const { t } = useTranslation();
+
+  /**
+ * 右クリックメニューの表示
+ * @param event 
+ */
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    setShowMenu(true);
+    setMenuPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleClick = () => {
+    setShowMenu(false);
+  };
+
   let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" = null;
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
         <>
-          <img src={`${editor.assetRoute}/${props.name}`} className={styles.iconImg} />
+          <img src={props.url} className={styles.iconImg} />
         </>
       )
       contentsSelectType = "image";
@@ -347,19 +521,17 @@ export const ContentViewer = (props: IFileProps) => {
 
   const onDoubleClick = async (type: string) => {
     if (props.isDirectory) {
-      const newRoute = editor.assetRoute + "/" + props.name;
       if (props.onDoubleClick) {
-        props.onDoubleClick("directory", newRoute);
+        props.onDoubleClick("directory", props.url);
       }
     }
     else if (props.isFile && type == "js"){
-      const filePath = `${editor.assetRoute}/${props.name}`;
       const sm = {...InitScriptManagement};
       sm.id = MathUtils.generateUUID();
-      sm.filePath = filePath;
+      sm.filePath = props.url;
       const scriptCheck = async () => {
         try {
-          const response = await fetch(filePath);
+          const response = await fetch(props.url);
           if (response.ok) {
             const text = await response.text();
             // 特定の文字列をチェックします。
@@ -380,7 +552,7 @@ export const ContentViewer = (props: IFileProps) => {
       };
       const result = await scriptCheck();
       if (result) {
-        sm.name = filePath.split("/").pop() || "";
+        sm.name = props.name.split("/").pop() || "";
         const success = editor.setSM(sm);
         if (!success) {
           Swal.fire({
@@ -404,25 +576,30 @@ export const ContentViewer = (props: IFileProps) => {
     }
   }
 
+  /**
+   * ファイルを選択して追加
+   */
   const onDragStart = () => {
-    editor.contentsSelectType = contentsSelectType;
-    editor.contentsSelectPath = `${editor.assetRoute}/${props.name}`;
-    editor.contentsSelect = true;
+    globalContentStore.currentType = contentsSelectType;
+    globalContentStore.currentUrl = `${props.url}`;
   }
   const onDragEnd = () => {
-    editor.contentsSelectType = null;
-    editor.contentsSelectPath = "";
-    editor.contentsSelect = false;
+    globalContentStore.currentType = null;
+    globalContentStore.currentUrl = null;
   }
 
   return (
     <>
       <div
+        onContextMenu={handleContextMenu} 
+        onClick={handleClick}
         onDoubleClick={(e) => onDoubleClick(contentsSelectType)}
         className={styles.itemCard}
         onDragStart={(e) => onDragStart()}
         onDragEnd={(e) => onDragEnd()}
+        onMouseLeave={() => setShowMenu(false)}
       >
+        {showMenu && <AssetsContextMenu position={menuPosition} file={props} />}
         <div
           className={styles.tooltip}
           ref={tooltip}
@@ -448,6 +625,12 @@ export const ContentViewer = (props: IFileProps) => {
   )
 }
 
+
+/**
+ * 
+ * @param gltfUrl 
+ * @returns 
+ */
 const CreateGLTFImage = (gltfUrl): Promise<string> => {
   const canvas = document.createElement("canvas");
   canvas.width = 100;

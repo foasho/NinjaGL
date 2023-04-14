@@ -1,4 +1,5 @@
 import { IScriptManagement } from '@/core/utils/NinjaProps';
+import { Mesh } from 'three';
 import { proxy } from 'valtio';
 
 /**
@@ -22,6 +23,22 @@ export const globalStore = proxy<IGlobalStore>(
       globalStore.editorFocus = false;
       globalStore.pivotControl = false;
     }
+  }
+);
+
+/**
+ * コンテンツブラウザ操作状態管理
+ */
+interface IGlobalContentStore {
+  currentUrl: string|null;
+  currentType: string|null;
+  catchFocus: boolean;
+}
+export const globalContentStore = proxy<IGlobalContentStore>(
+  {
+    currentUrl: null,
+    currentType: null,
+    catchFocus: false
   }
 );
 
@@ -91,5 +108,35 @@ export const globalAddonStore = proxy<IGlobalAddonStore>(
     init: () => {
       globalAddonStore.params = {};
     }
+  }
+);
+
+/**
+ * 地形メーカー操作状態管理
+ */
+interface IGlobalTerrainStore {
+  type: "create"|"edit";
+  mode: "edit"|"view";
+  brush: "normal"|"flat"|"paint";
+  color: string;
+  isMouseDown: boolean;
+  mapSize: number;
+  mapResolution: number;
+  power: number;
+  wireFrame: boolean;
+  radius: number;
+}
+export const globalTerrainStore = proxy<IGlobalTerrainStore>(
+  {
+    mode: "view",
+    type: "create",
+    brush: "normal",
+    color: "#00ff00",
+    isMouseDown: false,
+    mapSize: 128,
+    mapResolution: 128,
+    power: 0.1,
+    wireFrame: false,
+    radius: 10,
   }
 );
