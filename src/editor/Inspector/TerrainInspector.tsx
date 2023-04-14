@@ -106,7 +106,7 @@ export const TerrainInspector = () => {
    */
   const saveTerrain = async () => {
     const obj3d = new Object3D();
-    obj3d.add(terrainState.terrainMesh.clone());
+    // obj3d.add(terrainState.terrainMesh.clone());
     const blob = await convertObjectToBlob(obj3d);
     Swal.fire({
       title: t("inputFileName"),

@@ -16,12 +16,12 @@ export const sapi = axios.create({
 });
 
 export interface IApiProps {
-  route: "storage/list" | "storage/download" | "storage/upload";
+  route: "storage/list" | "storage/download" | "storage/upload" | "control/savescript";
   queryObject?: { [key: string]: string | number };
   data?: any;
 }
 
-const ConvertToMethod = (route: "storage/list" | "storage/download" | "storage/upload"): "GET"|"POST" => {
+const ConvertToMethod = (route: "storage/list" | "storage/download" | "storage/upload" | "control/savescript"): "GET"|"POST" => {
   switch (route) {
     case "storage/upload":
       return "POST";

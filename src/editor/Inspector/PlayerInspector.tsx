@@ -122,26 +122,19 @@ export const PlayerInspector = () => {
 
           const formData = new FormData();
           formData.append('file', file, `${inputStr.replace(".", "")}.glb`);
-          return await reqApi({
-            route: "uploadgltf",
-            method: "POST",
-            formData: formData,
-            contentType: "form"
-          }).then((res) => {
-            if (res.status == 200) {
-              return res.data;
-            }
-          });
+          // return await reqApi({
+          //   route: "uploadgltf",
+          //   method: "POST",
+          //   formData: formData,
+          //   contentType: "form"
+          // }).then((res) => {
+          //   if (res.status == 200) {
+          //     return res.data;
+          //   }
+          // });
         },
         allowOutsideClick: function () {
           return !Swal.isLoading();
-        }
-      }).then((result) => {
-        if (result.value) {
-          Swal.fire({
-            title: t("completeSave")
-            , text: result.value
-          });
         }
       });
     }
