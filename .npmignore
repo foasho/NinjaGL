@@ -29,5 +29,42 @@ src/core/dist
 .env.production.local
 next-env.d.ts
 
+#Assets
+/public/assets/*
+/public/mp3/*
+
+
 # Add
 serverless.yml
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+.vscode/*
+
+__pycache__/*
+.idea/*
+
+public/assets/*.*
+public/scripts/*.*
+
+.savedata/*.json
+
+.env
