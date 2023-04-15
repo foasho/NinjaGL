@@ -403,6 +403,14 @@ export class NinjaEngine {
   }
 
   /**
+   * カメラを取得する
+   */
+  getCameras = () => {
+    const cameras = this.oms.filter(om => om.type == "camera");
+    return cameras;
+  }
+
+  /**
    * 地形データを取得する
    */
   getTerrain(): IObjectManagement | undefined {

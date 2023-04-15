@@ -11,6 +11,8 @@ import { LoadProcessing } from "./ui-items/LoadProcessing";
 import { Lights } from "./canvas-items/Lights";
 import { INinjaGLProps } from "./NinjaGL";
 import { ThreeObjects } from "./canvas-items/ThreeObjects";
+import { Cameras } from "./canvas-items/Camera";
+import { proxy } from "valtio";
 
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
@@ -48,6 +50,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
             <Lights/>
             <SkyComponents />
             <ThreeObjects/>
+            <Cameras/>
           </>
         }
         {props.children && props.children}
@@ -65,3 +68,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     </>
   )
 }
+
+interface IEngineState {
+}
+export const globalEngineStore = proxy<IEngineState>({})

@@ -2,8 +2,6 @@ import { NinjaEngineContext } from "../NinjaEngineManager";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Mesh, Object3D, Vector3 } from "three";
-import { CameraControl } from "./MoveableCamera";
-
 
 export interface IAvatarProps { }
 
@@ -30,14 +28,10 @@ export const Avatar = () => {
 
   return (
     <>
-      {engine.getAvatarObject() ?
+      {engine.getAvatarObject() &&
         <mesh ref={ref} layers={0}>
           <primitive object={engine.getAvatarObject().object} />
         </mesh>
-        :
-        <>
-          <CameraControl cameraSpeed={10} cameraFar={500} />
-        </>
       }
     </>
   )
