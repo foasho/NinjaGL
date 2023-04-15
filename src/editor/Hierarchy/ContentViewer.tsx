@@ -42,6 +42,7 @@ export interface IFileProps {
 
 
 const getExtension = (filename: string) => {
+  if (filename === undefined) return "";
   return filename.split('.').pop().toLowerCase();
 }
 

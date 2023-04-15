@@ -1,6 +1,5 @@
 import { NinjaEngineContext } from "../NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
-import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
 import { useContext } from "react"
 import { Color, MathUtils } from "three";
 import { ShaderMaterial } from "three";
@@ -25,7 +24,7 @@ const ThreeObject = (om: IObjectManagement) => {
   }
 
   if (om.args.materialData) {
-    const color = om.args.materialData.type != "shader" ? new Color(om.args.materialData.value): undefined;
+    const color = om.args.materialData.type != "shader" ? new Color(om.args.materialData.value): new Color(0xffffff);
     if (om.args.materialData.type == "standard") {
       material = (<meshStandardMaterial color={color} />);
     }

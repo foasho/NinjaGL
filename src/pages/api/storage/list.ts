@@ -81,7 +81,7 @@ async function listFilesAndFoldersFromS3(prefix: string, limit: number, offset: 
 
 
 async function listFilesAndFoldersFromLocal(directory: string, limit: number, offset: number): Promise<{ items: any[], maxPages: number }> {
-  const localDirectoryPath = path.join(process.cwd(), "uploads", directory);
+  const localDirectoryPath = path.join(process.cwd(), AssetDir, directory);
   const allItems = await fs.promises.readdir(localDirectoryPath, { withFileTypes: true });
   const items = allItems.slice(offset, offset + limit).filter((item) => {
     const itemPath = path.join(localDirectoryPath, item.name);
