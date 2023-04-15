@@ -431,6 +431,13 @@ export class NinjaEngine {
   }
 
   /**
+   * 光源データを取得する
+  */
+  getThreeObjects(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "three");
+  }
+
+  /**
  * サウンドをセットする
  */
   setSound(params: ISetSoundOption) {

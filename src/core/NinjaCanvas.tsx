@@ -10,10 +10,10 @@ import { NinjaUI } from "./NinjaUI";
 import { LoadProcessing } from "./ui-items/LoadProcessing";
 import { Lights } from "./canvas-items/Lights";
 import { INinjaGLProps } from "./NinjaGL";
+import { ThreeObjects } from "./canvas-items/ThreeObjects";
 
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
-  const [ready, setReady] = useState<boolean>(false);
   const engine = useContext(NinjaEngineContext);
 
   const [engineState, setEngineState] = useState({
@@ -23,6 +23,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
   });
 
   useEffect(() => {
+    if (!engine) return;
     setEngineState({
       nowLoading: engine.nowLoading,
       loadCompleted: engine.loadCompleted,
@@ -46,6 +47,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
             <StaticObjects/>
             <Lights/>
             <SkyComponents />
+            <ThreeObjects/>
           </>
         }
         {props.children && props.children}
