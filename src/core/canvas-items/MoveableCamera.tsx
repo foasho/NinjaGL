@@ -41,7 +41,7 @@ export const MoveableCamera = (props: IMoveableCamera) => {
 
   useFrame((_, delta) => {
     if (input.dash && (input.forward || input.backward || input.right || input.left)) {
-      const st = props.cameraSpeed * delta;
+      const st = cameraSpeed * delta;
       const cameraDirection = new Vector3();
       cameraRef.current.getWorldDirection(cameraDirection);
       const cameraPosition = cameraRef.current.position.clone();

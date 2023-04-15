@@ -40,7 +40,10 @@ export const Cameras = () => {
           })}
         </>
         :
-        <MoveableCamera/>
+        <>
+          <MoveableCamera/>
+          {/* <OrbitControls/> */}
+        </>
       }
     </>
   )

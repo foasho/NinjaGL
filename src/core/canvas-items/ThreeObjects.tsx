@@ -38,10 +38,14 @@ const ThreeObject = (om: IObjectManagement) => {
       material = (<shaderMaterial />);
     }
   }
+  let castShadow = true;
+  if (om.args.castShadow != undefined) {
+    castShadow = om.args.castShadow;
+  }
   return (
     <>
       {geometry &&
-      <mesh>
+      <mesh castShadow={castShadow}>
         {geometry}
         {material}
       </mesh>

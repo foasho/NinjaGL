@@ -30,11 +30,26 @@ export const MainViewInspector = () => {
   const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
   const { t } = useTranslation();
 
+
+  const deleteObject = (id: string) => {
+    editor.deleteOM(id);
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
       myFrame();
     }, 1000 / 5);
-    return () => clearInterval(interval);
+    // DelKeyを押したときに選択中のオブジェクトを削除する
+    const onKeyDown = (e) => {
+      if (e.key == "Delete"){
+        deleteObject(id);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      clearInterval(interval);
+    };
   }, [id, globalStore.editorFocus, globalStore.pivotControl, position, rotation, scale, color]);
 
   const myFrame = () => {

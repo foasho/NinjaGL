@@ -38,6 +38,7 @@ export class NinjaEngine {
   viewableKeys: string[] = []; // 可視化管理
   moveOrderKeys: string[] = []; // 動態管理
   ui: any = null; // UIリスト
+  debugTree: any = {}; // デバッグ用のツリー
   // Canvasのサイズ
   canvasSize: Vector2 = new Vector2(0, 0);
   canvasPos: Vector2 = new Vector2(0, 0);
@@ -58,7 +59,7 @@ export class NinjaEngine {
    * 初期化
    */
   async initialize() {
-    this.config = InitMobileConfipParams;
+    this.config = this.config?this.config: InitMobileConfipParams;
     this.world = new World();
     this.octree = new Octree({
       min: new Vector3(
@@ -110,15 +111,17 @@ export class NinjaEngine {
   /**
    * NJCをセットする
    */
-  setNJCFile = (njcFile: NJCFile) => {
+  setNJCFile = async (njcFile: NJCFile) => {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
     this.tms = njcFile.tms;
     this.sms = njcFile.sms;
-    if (njcFile.config){}
+    if (njcFile.config){
+      this.config = njcFile.config;
+    }
+    await this.setSMsInWorker();
+    await this.initialize();
     this.loadCompleted = true;
-    this.setSMsInWorker();
-    this.initialize();
   }
 
   /**
@@ -437,6 +440,22 @@ export class NinjaEngine {
   getLights(): IObjectManagement[] {
     return this.oms.filter(om => om.type == "light");
   }
+  /**
+   * 光源の変更リスナー
+   */
+  private LightsChangedListeners: (() => void)[] = [];
+  onLightsChanged(listener: () => void) {
+    this.LightsChangedListeners.push(listener);
+  }
+  offLightsChanged(listener: () => void) {
+    this.LightsChangedListeners = this.LightsChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  // OMの変更を通知する
+  protected notifyLightsChanged() {
+    this.LightsChangedListeners.forEach(l => l());
+  }
 
   /**
    * 光源データを取得する
@@ -640,7 +659,7 @@ export class NinjaEngine {
         const disableLayers = this.possibleLayers.filter(layerNum => !visibleLayers.includes(layerNum));
         // みえない範囲を非表示にする
         disableLayers.map((layerNum) => {
-            this.camera?.layers.disable(layerNum);
+            // this.camera?.layers.disable(layerNum);
         });
         this.cameraLayer = nowCameraLayer;
         this.camera.layers.enable(0);
@@ -681,9 +700,9 @@ export class NinjaEngine {
   frameUpdate(timeDelta: number, input: IInputMovement) {
     if (this.loadCompleted) {
       // アバターのレイヤー番号を更新する
-      this.updateAvatarLayerNumber();
+      // this.updateAvatarLayerNumber();
       // 可視上のオブジェクトを更新する
-      this.updateViewableObject();
+      // this.updateViewableObject();
       // 物理ワールドを更新する
       if (this.world) this.world.step(timeDelta, input);
       // 動態管理をリフレッシュする
@@ -691,6 +710,17 @@ export class NinjaEngine {
       // スクリプトを実行する
       if (this.workerInstance) this.runScriptsFrameLoop(null, timeDelta);
     }
+  }
+
+  debugFrameUpdate(timeDelta: number, params: any) {
+    if (this.config.isDebug){
+      console.log("debugFrameUpdate");
+      this.debugTree = [...this.oms];
+    }
+  }
+
+  getDebugTree() {
+    return this.debugTree;
   }
 
 }

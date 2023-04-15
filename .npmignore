@@ -71,3 +71,6 @@ public/scripts/*.*
 
 # SampleProject Ignore
 examples/*
+
+# ProjectData
+*.njc

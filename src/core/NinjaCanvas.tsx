@@ -13,7 +13,7 @@ import { INinjaGLProps } from "./NinjaGL";
 import { ThreeObjects } from "./canvas-items/ThreeObjects";
 import { Cameras } from "./canvas-items/Camera";
 import { proxy } from "valtio";
-
+import { JSONTree } from 'react-json-tree';
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
@@ -65,6 +65,36 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
           loadCompleted={engineState.loadCompleted}
         />
       }
+      {engine && engine.config.isDebug &&
+        <>
+          <DebugComponent />
+        </>
+      }
+    </>
+  )
+}
+
+const DebugComponent = () => {
+  const treeRef = useRef<any>({});
+  const engine = useContext(NinjaEngineContext);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      myFrame(1000 / 5);
+    }, 1000 / 5);
+    return () => clearInterval(interval);
+  }, [engine])
+
+  const myFrame = (timeDelta: number) => {
+    if (!engine) return;
+    engine.debugFrameUpdate(timeDelta, {});
+    treeRef.current = engine.getDebugTree();
+  }
+
+  return (
+    <>
+      <div style={{ position: "absolute", bottom: 0, zIndex: 9999  }}>
+        <JSONTree data={treeRef} />;
+      </div>
     </>
   )
 }

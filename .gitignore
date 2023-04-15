@@ -53,3 +53,6 @@ public/scripts/*.*
 .env
 # lib-build
 dist/*
+
+# ProjectData
+*.njc
