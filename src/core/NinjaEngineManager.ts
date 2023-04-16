@@ -278,6 +278,31 @@ export class NinjaEngine {
   getOMById(id: string): IObjectManagement | undefined {
     return this.oms.find(om => om.id == id);
   }
+  /**
+   * 特定の名前のOMを取得する
+   */
+  getOMByName(name: string): IObjectManagement | undefined {
+    return this.oms.find(om => om.name == name);
+  }
+
+  /**
+   * 特定のOMにObject3Dをセットする
+   */
+  setOMObjectById(id: string, object: Object3D) {
+    const om = this.getOMById(id);
+    if (om) {
+      om.object = object;
+    }
+  }
+
+  /**
+ * 特定のIDのSMを取得する
+ * @param id 
+ * @returns 
+ */
+  getSMById(id: string): IScriptManagement | undefined {
+    return this.sms.find(sm => sm.id == id);
+  }
 
   /**
    * 特定のIDのサウンドを取得する

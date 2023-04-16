@@ -22,7 +22,6 @@ export const ScriptEditor = () => {
   const { data: session } = useSession();
   const myeditor = useContext(NinjaEditorContext);
   const scriptState = useSnapshot(globalScriptStore);
-  const [id, setId] = useState<string>();
   const [name, setName] = useState<string>();
   const [pause, setPause] = useState<boolean>(true);
   const [isPreview, setIsPreview] = useState<boolean>(false);
@@ -64,10 +63,10 @@ export const ScriptEditor = () => {
         }
         else if (textUntilPosition.includes("EngineInstance.")){
           suggestions.push({
-            label: "getObjectById",
+            label: "getPositionByName",
             kind: monaco.languages.CompletionItemKind.Function,
-            documentation: "Get ObjectData by Id",
-            insertText: "getObjectById()",
+            documentation: "Get ObjectPosition by Name",
+            insertText: "getPositionByName()",
           });
         }
         else{
@@ -141,14 +140,15 @@ export const ScriptEditor = () => {
         throw new Error("Error uploading file");
       }
       if (response.ok){
-        if (scriptState.currentSM && globalScriptStore.currentSM?.script !== null){
+        if (scriptState.currentSM){
+          const sm = myeditor.getSMById(scriptState.currentSM.id);
+          if (sm) sm.script = code.current;
           globalScriptStore.currentSM.script = code.current;
         }
         else {
           const newSM: IScriptManagement = {
-            id: id,
+            id: scriptState.currentSM? scriptState.currentSM.id: MathUtils.generateUUID(),
             type: "script",
-            filePath: `scripts/${filename}`,
             name: filename,
             script: code.current,
           }
@@ -169,14 +169,13 @@ export const ScriptEditor = () => {
     }
     else {
       // ログインしてなければ、SMに追加のみおこなう
-      if (scriptState.currentSM && globalScriptStore.currentSM?.script !== null){
+      if (scriptState.currentSM){
         globalScriptStore.currentSM.script = code.current;
       }
       else {
         const newSM: IScriptManagement = {
-          id: id,
+          id: scriptState.currentSM? scriptState.currentSM.id: MathUtils.generateUUID(),
           type: "script",
-          filePath: `scripts/${filename}`,
           name: filename,
           script: code.current,
         }
@@ -190,8 +189,8 @@ export const ScriptEditor = () => {
    * 保存
    */
   const onSave = async () => {
-    if (name){
-      const filename = name.replace(".js", "") + ".js";
+    if (scriptState.currentSM){
+      const filename = scriptState.currentSM.name.replace(".js", "") + ".js";
       await saveCode(filename);
     }
     else {
@@ -240,12 +239,10 @@ export const ScriptEditor = () => {
   useEffect(() => {
     if (scriptState.currentSM){
       code.current = scriptState.currentSM.script;
-      setId(scriptState.currentSM.id);
       setName(scriptState.currentSM.name);
     }
     else {
       code.current = initCode;
-      setId(MathUtils.generateUUID());
       setName(undefined);
     }
     // 保存をオーバーライド
@@ -318,7 +315,8 @@ const initCode = `
 
   /**
    * 毎フレーム事の処理
-   * @param state: {  }
+   * @docs https://docs.pmnd.rs/react-three-fiber/api/hooks
+   * @param state: { scene, clock, mouse, ... }
    * @param delta: 1フレーム時間(秒)
    */
   async function frameLoop(state, delta) {

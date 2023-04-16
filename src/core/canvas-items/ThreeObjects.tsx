@@ -1,10 +1,11 @@
 import { NinjaEngineContext } from "../NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
-import { useContext } from "react"
-import { Color, MathUtils } from "three";
+import { useContext, useEffect, useRef } from "react"
+import { Color, MathUtils, Object3D } from "three";
 import { ShaderMaterial } from "three";
 
 const ThreeObject = (om: IObjectManagement) => {
+  const engine = useContext(NinjaEngineContext);
   let geometry;
   let material;
   if (om.args.type == "plane") {
@@ -42,10 +43,21 @@ const ThreeObject = (om: IObjectManagement) => {
   if (om.args.castShadow != undefined) {
     castShadow = om.args.castShadow;
   }
+  const ref = useRef();
+  useEffect(() => {
+    if (ref.current) {
+      engine.setOMObjectById(om.id, ref.current as Object3D);
+    }
+  }, [ref.current]);
+
   return (
     <>
       {geometry &&
-      <mesh castShadow={castShadow}>
+      <mesh 
+        ref={ref}
+        castShadow={castShadow}
+        position={om.args.position ? om.args.position : [0, 0, 0]}
+      >
         {geometry}
         {material}
       </mesh>

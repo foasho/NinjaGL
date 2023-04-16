@@ -1,25 +1,39 @@
-
 export class EngineInstance {
+  public messageIdCounter = 0;
+  public responseHandlers = new Map<number, (value: any) => void>();
+
   constructor() {
+    self.addEventListener("message", this.handleResponseMessage.bind(this));
   }
 
-  public getOMByID(id: string) {
-    self.postMessage({ type: "getOMByID", id: id });
+  /**
+   * 任意のメッセージを送る
+   */
+  public async requestMessage(type: string, data: any): Promise<any> {
+    return new Promise((resolve) => {
+      const messageId = this.messageIdCounter++;
+      this.responseHandlers.set(messageId, resolve);
+      self.postMessage({ type, data, messageId });
+
+    });
   }
 
-  public getOMByName(name: string) {
-    self.postMessage({ type: "getOMByName", name: name });
-}
-
-  public getPosition(id: string) {
-    self.postMessage({ type: "getPosition", id: id });
+  /**
+   * レスポンスメッセージを処理する
+   */
+  public handleResponseMessage(e: MessageEvent) {
+    const { type, data, messageId } = e.data;
+    if (type === "response") {
+      const handler = this.responseHandlers.get(messageId);
+      if (handler) {
+        handler(data);
+        this.responseHandlers.delete(messageId);
+      }
+    }
   }
-  
-}
 
-(window as any).EngineInstance = new EngineInstance();
-declare global {
-  interface Window {
-    EngineInstance: typeof EngineInstance;
+  public async getPositionByName(name: string): Promise<any> {
+    const data = await this.requestMessage("getPositionByName", { name });
+    return data;
   }
 }

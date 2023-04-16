@@ -109,7 +109,6 @@ export const MyLight = (prop: ILightProps) => {
       else {
         const color = ref.current?.color;
         if (color){
-          console.log("color同期" + color.getHexString());
           editor.setMaterialData(id, "standard", "#"+color.getHexString());
         }
       }

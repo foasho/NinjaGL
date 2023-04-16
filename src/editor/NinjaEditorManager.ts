@@ -458,6 +458,15 @@ export class NinjaEditorManager {
   }
 
   /**
+   * 特定のIDのSMを取得する
+   * @param id 
+   * @returns 
+   */
+  getSMById(id: string): IScriptManagement | undefined {
+    return this.sms.find(sm => sm.id == id);
+  }
+
+  /**
    * 全てのObjectを取得する
    * @returns 
    */
