@@ -291,6 +291,7 @@ export const ScriptEditor = () => {
             readOnly: false,
             cursorStyle: 'line',
             automaticLayout: true,
+            tabSize: 2,
           }}
         />
       </div>
@@ -300,26 +301,26 @@ export const ScriptEditor = () => {
 }
 
 const initCode = `
-  /**
-  * NinjaGL
-  * -公式ドキュメント: https://www.example.com/
-  * -公式サンプル    : https://www.example.com/
-  **/
+/**
+* NinjaGL
+* -公式ドキュメント: https://www.example.com/
+* -公式サンプル    : https://www.example.com/
+**/
 
-  /**
-   *  呼び出し時
-   */
-  async function initialize() {
-    // your code
-  }
+/**
+ *  呼び出し時
+ */
+async function initialize() {
+  // your code
+}
 
-  /**
-   * 毎フレーム事の処理
-   * @docs https://docs.pmnd.rs/react-three-fiber/api/hooks
-   * @param state: { scene, clock, mouse, ... }
-   * @param delta: 1フレーム時間(秒)
-   */
-  async function frameLoop(state, delta) {
-    // your code
-  }
+/**
+ * 毎フレーム事の処理
+ * @param state: { elapsedTime: 経過時間, mouse: { x, y } }
+ * @param delta: 1フレーム時間(秒)
+ * @param input: { forward, backward, left, right, jump, dash, action }
+ */
+async function frameLoop(state, delta) {
+  // your code
+}
 `;

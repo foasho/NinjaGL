@@ -1,5 +1,6 @@
 import { World } from "./utils/World";
 import { Octree } from "./utils/Octree";
+import { RootState } from "@react-three/fiber";
 import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./utils/NinjaLoaders";
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./utils/NinjaProps";
 import { AvatarController } from "./utils/AvatarController";
@@ -707,12 +708,13 @@ export class NinjaEngine {
   /**
    * ユーザースクリプトのフレームループを実行する
    */
-  runScriptsFrameLoop(state: any, delta: number) {
+  runScriptsFrameLoop(state: RootState, delta: number, input: IInputMovement) {
     this.sms.map(sm => {
       this.workerInstance.runFrameLoop(
         sm.id,
         state,
         delta,
+        input
       );
     });
   }
@@ -722,7 +724,7 @@ export class NinjaEngine {
    * @param timeDelta 
    * @param input 
    */
-  frameUpdate(timeDelta: number, input: IInputMovement) {
+  frameUpdate(state: RootState, timeDelta: number, input: IInputMovement) {
     if (this.loadCompleted) {
       // アバターのレイヤー番号を更新する
       // this.updateAvatarLayerNumber();
@@ -733,7 +735,7 @@ export class NinjaEngine {
       // 動態管理をリフレッシュする
       this.moveOrderKeys = [];
       // スクリプトを実行する
-      if (this.workerInstance) this.runScriptsFrameLoop(null, timeDelta);
+      if (this.workerInstance) this.runScriptsFrameLoop(state, timeDelta, input);
     }
   }
 

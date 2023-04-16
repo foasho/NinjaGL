@@ -1,8 +1,8 @@
 import { SkinnedMesh } from "three";
 import { NinjaEngine } from "./NinjaEngineManager";
-import { IScriptManagement } from "./utils/NinjaProps";
-import { Web3Instance } from "./workers/Web3Instance";
+import { IInputMovement, IScriptManagement } from "./utils/NinjaProps";
 import { EngineInstance } from "./workers/EngineInstance";
+import { RootState } from "@react-three/fiber";
 
 declare var self: any;
 declare var window: any;
@@ -16,6 +16,7 @@ declare global {
  * NinjaEngineから呼び出されるWorker
  */
 export class NinjaEngineWorker {
+  ThreeJSVer: string = "0.149.0";
   engine: NinjaEngine;
   worker: Worker | undefined;
   engineInstance: EngineInstance | undefined;
@@ -24,7 +25,6 @@ export class NinjaEngineWorker {
     (window as any).EngineInstance = new EngineInstance();
     this.engineInstance = (window as any).EngineInstance;
     this.engineInstance = self.EngineInstance;
-    // self.addEventListener("message", this.handleWorkerMessage.bind(this));
   }
 
   /**
@@ -45,13 +45,18 @@ export class NinjaEngineWorker {
       )
       .join("\n");
 
+    const threeCDN = `https://unpkg.com/three@${this.ThreeJSVer}/build/three.min.js`;
+
     const workerScript = `
+      // Add ThreeJS
+      importScripts("${threeCDN}");
+
 
       // Add UserScripts
       ${importScriptsCode}
 
       self.addEventListener("message", (event) => {
-        const { type, id, state, delta, data, messageId } = event.data;
+        const { type, id, state, delta, input, data, messageId } = event.data;
         if (type === "runInitialize") {
           if (self[id] && typeof self[id].initialize === "function") {
             self[id].initialize();
@@ -60,7 +65,7 @@ export class NinjaEngineWorker {
           }
         } else if (type === "runFrameLoop") {
           if (self[id] && typeof self[id].frameLoop === "function") {
-            self[id].frameLoop(state, delta);
+            self[id].frameLoop(state, delta, input);
           } else {
             console.error('FrameLoop function for id "" not found.');
           }
@@ -119,10 +124,23 @@ export class NinjaEngineWorker {
    * @param id 
    * @param state 
    * @param delta 
+   * @param input
    */
-  public runFrameLoop = (id: string, state: any, delta: number): void => {
+  public runFrameLoop = (
+    id: string, 
+    state: RootState, 
+    delta: number,
+    input: IInputMovement
+  ): void => {
     if (this.worker) {
-      this.worker.postMessage({ type: "runFrameLoop", id: id, state: state, delta: delta });
+      const _state = { elapsedTime: state.clock.getElapsedTime(), mouse: state.mouse }
+      this.worker.postMessage({ 
+        type: "runFrameLoop", 
+        id: id, 
+        state: _state, 
+        delta: delta,
+        input: input
+       });
     } else {
       console.error("Worker is not initialized yet.");
     }
@@ -146,7 +164,70 @@ export class NinjaEngineWorker {
         this.worker.postMessage({ type: "response", data: om.object.position, messageId: messageId });
       }
       else {
-        console.error("OM not found.");
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+    }
+    else if (type == "getRotationByName"){
+      // 特定の名前のOMの回転を取得する
+      const { name } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        this.worker.postMessage({ type: "response", data: om.object.rotation, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+    }
+    else if (type == "getScaleByName"){
+      // 特定の名前のOMのスケールを取得する
+      const { name } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        this.worker.postMessage({ type: "response", data: om.object.scale, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+    }
+    else if (type == "setPositionByName"){
+      // 特定の名前のOMの位置を設定する
+      const { name, position } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        om.object.position.copy(position);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+    }
+    else if (type == "setRotationByName"){
+      // 特定の名前のOMの回転を設定する
+      const { name, rotation } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        om.object.rotation.copy(rotation);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+    }
+    else if (type == "setScaleByName"){
+      // 特定の名前のOMのスケールを設定する
+      const { name, scale } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        om.object.scale.copy(scale);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
         this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
