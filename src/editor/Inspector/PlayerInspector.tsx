@@ -6,12 +6,21 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
-import { convertObjectToBlob } from "@/core/utils/NinjaFileControl";
+import { convertObjectToFile } from "@/core/utils/NinjaFileControl";
+import { useSnapshot } from "valtio";
+import { globalPlayerStore } from "../Store";
+import { useSession } from "next-auth/react";
+import { b64EncodeUnicode } from "@/commons/functional";
+import { AnimationClip, MathUtils } from "three";
 
-export const PlayerInspector = () => {
+interface IPlayerInspectorProps {
+  onSave: (animMapper: { [key: string]: string }) => void;
+}
+export const PlayerInspector = (props:IPlayerInspectorProps) => {
+  const { data: session } = useSession();
+  const playerState = useSnapshot(globalPlayerStore);
   const [selectedOption, setSelectedOption] = useState<{ value: string, label: string }>(null);
   const editor = useContext(NinjaEditorContext);
-  const [playerManager, setPlayerManager] = useState(editor.playerManager);
   const [playerType, setPlayerType] = useState<{ value: string, label: string }>({ value: "avatar", label: "操作プレイヤー" });
   const [idleOption, setIdleOption] = useState<{ value: string, label: string }>(null);
   const [walkOption, setWalkOption] = useState<{ value: string, label: string }>(null);
@@ -21,21 +30,8 @@ export const PlayerInspector = () => {
   const [customActions, setCustomActions] = useState<{ value: string, label: string, keyInputValue: string }[]>([]);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      myFrame();
-    }, 1000 / 5);
-    return () => clearInterval(interval);
-  }, [playerManager])
-
-  const myFrame = () => {
-    if (editor.getPlayerManager().object != playerManager.object) {
-      setPlayerManager(editor.getPlayerManager());
-    }
-  }
-
   const options: { value: string, label: string }[] = [];
-  playerManager.animations.map((anim, idx) => {
+  globalPlayerStore.animations.map((anim, idx) => {
     options.push({
       value: idx.toString(),
       label: anim.name ? anim.name : `未設定${idx + 1}`
@@ -48,9 +44,15 @@ export const PlayerInspector = () => {
     { value: "npc", label: "NPC (敵など)" }
   ];
 
-  const onHandleChange = (selected: { value: string, label: string }) => {
+  useEffect(() => {
+    const opt = options.find((opt) => opt.value === playerState.type);
+    setPlayerType(opt);
+  }, [playerState.type]);
+
+  const onHandleChange = (selected: { value: "avatar"|"other"|"npc", label: string }) => {
     setSelectedOption(selected);
     editor.setSelectPlayerAnimation(selected.label);
+    globalPlayerStore.type = selected.value;
   }
 
   const onHandleChangeType = (selected: { value: string, label: string }) => {
@@ -78,10 +80,7 @@ export const PlayerInspector = () => {
    */
   const onSave = async () => {
     // 最低限typeが選択されていればOK
-    if (playerType) {
-      //ファイル名の確認
-      const target = SkeletonUtils.clone(playerManager.object);
-      target.animations = playerManager.animations;
+    if (playerState.type) {
       const animMapper: {[key: string]: string} = {};
       if (idleOption){
         animMapper.idle = idleOption.label;
@@ -101,160 +100,130 @@ export const PlayerInspector = () => {
       customActions.map((option) => {
         animMapper[option.keyInputValue] = option.label;
       });
-      const file = await convertObjectToBlob(
-        target, 
-        { 
-          animMapper: animMapper,
-          type: playerType.value
-        }
-      );
+      props.onSave(animMapper);
+    }
+    else {
       Swal.fire({
-        title: t("inputFileName"),
-        input: 'text',
-        showCancelButton: true,
-        confirmButtonText: t("confirmSave"),
-        showLoaderOnConfirm: true,
-        preConfirm: async (inputStr) => {
-          //バリデーションを入れたりしても良い
-          if (inputStr.length == 0) {
-            return Swal.showValidationMessage(t("leastInput"));
-          }
-
-          const formData = new FormData();
-          formData.append('file', file, `${inputStr.replace(".", "")}.glb`);
-          // return await reqApi({
-          //   route: "uploadgltf",
-          //   method: "POST",
-          //   formData: formData,
-          //   contentType: "form"
-          // }).then((res) => {
-          //   if (res.status == 200) {
-          //     return res.data;
-          //   }
-          // });
-        },
-        allowOutsideClick: function () {
-          return !Swal.isLoading();
-        }
+        icon: 'error',
+        title: t("error"),
+        text: t("leastSelect"),
       });
     }
   }
 
   return (
-    <>
-      {playerManager.object &&
-        <div className={styles.playerInspector}>
-          <div className={styles.selectAnim}>
-            <div className={styles.title}>
-              {t("animations")}
-            </div>
-            <div className={styles.select}>
-              <Select
-                options={options}
-                value={selectedOption}
-                onChange={onHandleChange}
-                styles={normalStyles}
-              />
-            </div>
+    <div className={styles.inspector}>
+      <div className={styles.playerInspector}>
+        <div className={styles.selectAnim}>
+          <div className={styles.title}>
+            {t("animations")}
           </div>
-          <div className={styles.selectType}>
-            <div className={styles.title}>
-              {t("type")}
-            </div>
-            <div className={styles.select}>
-              <Select
-                options={typeOptions}
-                value={playerType}
-                onChange={onHandleChangeType}
-                styles={darkThemeStyles}
-              />
-            </div>
-          </div>
-          <div className={styles.motionMapper}>
-            <div className={styles.title}>
-              {t("motionSelect")}
-            </div>
-            <div className={styles.mappers}>
-              <div className={styles.idle}>
-                <div className={styles.name}>
-                  {t("idle")}
-                </div>
-                <div>
-                  <Select
-                    options={options}
-                    value={idleOption}
-                    onChange={onHandleChangeIdle}
-                    styles={darkThemeStyles}
-                  />
-                </div>
-              </div>
-              <div className={styles.walk}>
-                <div className={styles.name}>
-                  {t("walk")}
-                </div>
-                <div>
-                  <Select
-                    options={options}
-                    value={walkOption}
-                    onChange={onHandleChangeWalk}
-                    styles={darkThemeStyles}
-                  />
-                </div>
-              </div>
-              <div className={styles.run}>
-                <div className={styles.name}>
-                  {t("run")}
-                </div>
-                <div>
-                  <Select
-                    options={options}
-                    value={runOption}
-                    onChange={onHandleChangeRun}
-                    styles={darkThemeStyles}
-                  />
-                </div>
-              </div>
-              <div className={styles.jump}>
-                <div className={styles.name}>
-                  {t("jump")}
-                </div>
-                <div>
-                  <Select
-                    options={options}
-                    value={jumpOption}
-                    onChange={onHandleChangeJump}
-                    styles={darkThemeStyles}
-                  />
-                </div>
-              </div>
-              <div className={styles.action1}>
-                <div className={styles.name}>
-                  {t("action")}
-                </div>
-                <div>
-                  <Select
-                    options={options}
-                    value={actionOption}
-                    onChange={onHandleChangeAction}
-                    styles={darkThemeStyles}
-                  />
-                </div>
-              </div>
-              <div className={styles.addAction}>
-                <a className={styles.btn}>
-                  {t("addAction")}
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className={styles.save}>
-            <a className={styles.btn} onClick={() => onSave()}>
-              {t("saveAvatar")}
-            </a>
+          <div className={styles.select}>
+            <Select
+              options={options}
+              value={selectedOption}
+              onChange={onHandleChange}
+              styles={normalStyles}
+            />
           </div>
         </div>
-      }
-    </>
+        <div className={styles.selectType}>
+          <div className={styles.title}>
+            {t("type")}
+          </div>
+          <div className={styles.select}>
+            <Select
+              options={typeOptions}
+              value={playerType}
+              onChange={onHandleChangeType}
+              styles={darkThemeStyles}
+            />
+          </div>
+        </div>
+        <div className={styles.motionMapper}>
+          <div className={styles.title}>
+            {t("motionSelect")}
+          </div>
+          <div className={styles.mappers}>
+            <div className={styles.idle}>
+              <div className={styles.name}>
+                {t("idle")}
+              </div>
+              <div>
+                <Select
+                  options={options}
+                  value={idleOption}
+                  onChange={onHandleChangeIdle}
+                  styles={darkThemeStyles}
+                />
+              </div>
+            </div>
+            <div className={styles.walk}>
+              <div className={styles.name}>
+                {t("walk")}
+              </div>
+              <div>
+                <Select
+                  options={options}
+                  value={walkOption}
+                  onChange={onHandleChangeWalk}
+                  styles={darkThemeStyles}
+                />
+              </div>
+            </div>
+            <div className={styles.run}>
+              <div className={styles.name}>
+                {t("run")}
+              </div>
+              <div>
+                <Select
+                  options={options}
+                  value={runOption}
+                  onChange={onHandleChangeRun}
+                  styles={darkThemeStyles}
+                />
+              </div>
+            </div>
+            <div className={styles.jump}>
+              <div className={styles.name}>
+                {t("jump")}
+              </div>
+              <div>
+                <Select
+                  options={options}
+                  value={jumpOption}
+                  onChange={onHandleChangeJump}
+                  styles={darkThemeStyles}
+                />
+              </div>
+            </div>
+            <div className={styles.action1}>
+              <div className={styles.name}>
+                {t("action")}
+              </div>
+              <div>
+                <Select
+                  options={options}
+                  value={actionOption}
+                  onChange={onHandleChangeAction}
+                  styles={darkThemeStyles}
+                />
+              </div>
+            </div>
+            <div className={styles.addAction}>
+              <a className={styles.btn}>
+                {t("addAction")}
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className={styles.save}>
+          <a className={styles.btn} onClick={() => onSave()}>
+            {t("saveAvatar")}
+          </a>
+        </div>
+      </div>
+    </div>
   )
 }
 

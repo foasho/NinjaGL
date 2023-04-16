@@ -1,5 +1,5 @@
 import { IScriptManagement } from '@/core/utils/NinjaProps';
-import { Mesh } from 'three';
+import { AnimationClip, Group, Mesh, Object3D } from 'three';
 import { proxy } from 'valtio';
 
 /**
@@ -140,3 +140,26 @@ export const globalTerrainStore = proxy<IGlobalTerrainStore>(
     radius: 10,
   }
 );
+
+export interface IGlobalPlayerStore {
+  type: "avatar"|"other"|"npc";
+  height: number;
+  selectAnim: string;
+  animMapper: {[key: string]: string};
+  animations: AnimationClip[];
+  init: () => void;
+}
+export const globalPlayerStore = proxy<IGlobalPlayerStore>({
+  type: "avatar",
+  height: 1.7,
+  selectAnim: undefined,
+  animMapper: {},
+  animations: [],
+  init: () => {
+    globalPlayerStore.type = "avatar";
+    globalPlayerStore.height = 1.7;
+    globalPlayerStore.selectAnim = undefined;
+    globalPlayerStore.animMapper = {};
+    globalPlayerStore.animations = [];
+  }
+});

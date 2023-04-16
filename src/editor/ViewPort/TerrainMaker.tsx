@@ -1,14 +1,17 @@
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import styles from "@/App.module.scss";
 import { 
-  Environment, 
+  Environment,
   GizmoHelper, 
   GizmoViewport, 
   OrbitControls, 
   PerspectiveCamera as DPerspectiveCamera,
   SpotLight
 } from "@react-three/drei";
-import { useContext, useEffect, useState, useRef, useLayoutEffect, KeyboardEventHandler } from "react";
-import { NinjaEditorContext } from "../NinjaEditorManager";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+import { b64EncodeUnicode } from "@/commons/functional";
+import { useContext, useEffect, useState, useRef, useLayoutEffect } from "react";
 import {
   Mesh,
   MeshStandardMaterial,
@@ -24,23 +27,26 @@ import {
   WebGLRenderTarget,
   BufferAttribute,
   GLBufferAttribute,
-  Material,
+  Object3D,
   PerspectiveCamera
 } from "three";
 import { useInputControl } from "@/core/utils/InputControls";
-import { CameraControl } from "./MainViewer";
 import { useSnapshot } from "valtio";
-import { globalTerrainStore } from "../Store";
+import { globalTerrainStore, globalStore } from "../Store";
 import { Perf } from "r3f-perf";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { TerrainInspector } from "../Inspector/TerrainInspector";
+import Swal from 'sweetalert2';
+import { convertObjectToBlob } from "@/core/utils/NinjaFileControl";
+import { NinjaEditorContext } from "../NinjaEditorManager";
+import { Material } from "@gltf-transform/core";
 
 
-const TerrainMakeComponent = () => {
+const TerrainMakeComponent = ({ meshRef, object }) => {
   const terrainState = useSnapshot(globalTerrainStore);
   /**
    * 初期値
    */
-  const meshRef = useRef<Mesh>();
   const lightRef = useRef<SL>();
   const gridRef = useRef<GridHelper>();
   const matRef = useRef<MeshStandardMaterial>();
@@ -58,6 +64,10 @@ const TerrainMakeComponent = () => {
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
 
+  /**
+   * キーボード操作
+   * @param event 
+   */
   const keyDown = (event: KeyboardEvent) => {
     if (event.code.toString() == "KeyE") {
       if (terrainState.mode == "view"){
@@ -73,12 +83,17 @@ const TerrainMakeComponent = () => {
       || event.code.toString() == "KeyR"
       || event.code.toString() == "Shift"
     ) {
-      if (isReverse.current) {
-        isReverse.current = false;
-      }
-      else {
-        isReverse.current = true;
-      }
+      isReverse.current = true;
+    }
+  }
+  const keyUp = (event: KeyboardEvent) => {
+    if (
+      event.code.toString() == "ShiftLeft" 
+      || event.code.toString() == "ShiftRight" 
+      || event.code.toString() == "KeyR"
+      || event.code.toString() == "Shift"
+    ) {
+      isReverse.current = false;
     }
   }
 
@@ -90,18 +105,19 @@ const TerrainMakeComponent = () => {
       camera.position.copy(initCameraPosition.clone());
       camera.lookAt(0, 0, 0);
     }
-  }, [terrainState.mapSize]);
+  }, [terrainState.mapSize, terrainState.type]);
 
   useEffect(() => {
+    if (terrainState.type == "edit" && object) meshRef.current = object;
     if (cameraRef && cameraRef.current) {
       camera.far = terrainState.mapSize*3;
       cameraRef.current.far = camera.far;
     }
-  }, [terrainState.mapSize]);
+  }, [terrainState.mapSize, terrainState.type]);
 
   useEffect(() => {
-    console.log("TerrainMakeComponent");
     document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
     document.addEventListener("pointermove", onMouseMove, false);
     document.addEventListener("mousedown", onMouseDown, false);
     document.addEventListener("mouseup", onMouseUp, false);
@@ -110,6 +126,7 @@ const TerrainMakeComponent = () => {
       document.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("keydown", keyDown);
+      document.removeEventListener("keyup", keyUp);
     }
   }, [
     terrainState.type,
@@ -341,31 +358,40 @@ const TerrainMakeComponent = () => {
       />
       <axesHelper />
       <gridHelper ref={gridRef} args={[terrainState.mapSize * 2, Number(terrainState.mapResolution / 2)]} />
-      
-      <mesh 
-        ref={meshRef} 
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow 
-        castShadow
-      >
-        <planeGeometry 
-          args={
-            [
-              terrainState.mapSize, 
-              terrainState.mapSize, 
-              terrainState.mapResolution, 
-              terrainState.mapResolution
-            ]
+      {terrainState.type == "create"?
+        <mesh 
+          ref={meshRef} 
+          rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow 
+          castShadow
+        >
+          <planeGeometry 
+            args={
+              [
+                terrainState.mapSize, 
+                terrainState.mapSize, 
+                terrainState.mapResolution, 
+                terrainState.mapResolution
+              ]
+            }
+          />
+          <meshStandardMaterial 
+            ref={matRef} 
+            wireframe={terrainState.wireFrame} 
+            side={DoubleSide} 
+            vertexColors={true} 
+            color={0xffffff} 
+          />
+        </mesh>
+        :
+        <>
+          {meshRef && meshRef.current &&
+           <>
+            <primitive object={meshRef.current} />
+           </>
           }
-        />
-        <meshStandardMaterial 
-          ref={matRef} 
-          wireframe={terrainState.wireFrame} 
-          side={DoubleSide} 
-          vertexColors={true} 
-          color={0xffffff} 
-        />
-      </mesh>
+        </>
+      }
 
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
           <GizmoViewport labelColor="white" axisHeadScale={1} />
@@ -387,11 +413,126 @@ const TerrainMakeComponent = () => {
 }
 
 export const TerrainMakerCanvas = () => {
+  const terrainState = useSnapshot(globalTerrainStore);
+  const [ready, setReady] = useState(false);
+  const state = useSnapshot(globalStore);
+  const editor = useContext(NinjaEditorContext);
+  const meshRef = useRef<Mesh>();
+  // const [type, setType] = useState<"create" | "edit">("create");
+  const { data: session } = useSession();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (state.currentId){
+      const om = editor.getOMById(state.currentId);
+      if (om.type == "terrain"){
+        if (meshRef.current){
+          meshRef.current.geometry.dispose();
+          if (meshRef.current.material){
+            if (meshRef.current.material instanceof Material){
+              meshRef.current.material.dispose();
+            }
+            else if (meshRef.current.material instanceof Array){
+              meshRef.current.material.forEach((m) => {
+                if (m instanceof Material){
+                  m.dispose();
+                }
+              });
+            }
+          }
+          meshRef.current = undefined;
+        }
+        globalTerrainStore.type = "edit";
+      }
+    }
+    else {
+      if (terrainState.type == "edit") {
+        meshRef.current = undefined;
+        globalTerrainStore.type = "create";
+      };
+    }
+    setReady(true);
+  }, [state.currentId]);
+
+  /**
+   * 地形データを送信/保存する
+   */
+  const onSave = async () => {
+    if (!meshRef.current) return;
+    const obj3d = new Object3D();
+    obj3d.add(meshRef.current.clone());
+    const blob = await convertObjectToBlob(obj3d);
+    Swal.fire({
+      title: t("inputFileName"),
+      input: 'text',
+      showCancelButton: true,
+      confirmButtonText: '実行',
+      showLoaderOnConfirm: true,
+      preConfirm: async (inputStr: string) => {
+        //バリデーションを入れたりしても良い
+        if (inputStr.length == 0) {
+          return Swal.showValidationMessage(t("leastInput"));
+        }
+        if (session){
+          const formData = new FormData();
+          formData.append('file', blob);
+          const keyPath = `users/${b64EncodeUnicode(session.user.email)}/terrains/${inputStr}.ter`;
+          formData.append("filePath", keyPath);
+          try {
+            const response = await fetch("/api/storage/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error("Error uploading file");
+            }
+            Swal.fire({
+              title: t("completeSave"),
+              text: t("saveSuccess") + `\npersonal/terrains/${inputStr}.ter`,
+            });
+          } catch (error) {
+            console.error("Error:", error.message);
+          }
+        }
+        else {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${inputStr}.ter`;
+          link.click();
+          link.remove();
+        }
+      },
+      allowOutsideClick: function () {
+        return !Swal.isLoading();
+      }
+    });
+  }
+  
   return (
-    <Canvas shadows>
-      <Environment preset="dawn" background blur={0.7} resolution={512}>
-      </Environment>
-      <TerrainMakeComponent />
-    </Canvas>
+    <>
+      {ready &&
+      <>
+        <Canvas shadows>
+          {globalTerrainStore.type == "create" &&
+            <TerrainMakeComponent 
+              meshRef={meshRef} 
+              object={undefined}
+            />
+          }
+          {globalTerrainStore.type == "edit" &&
+            <TerrainMakeComponent 
+              meshRef={meshRef}
+              object={state.currentId ? editor.getOMById(state.currentId).object : undefined}
+            />
+          }
+          <Environment blur={.7} preset="dawn"/>
+        </Canvas>
+        <div className={styles.inspector}>
+          <TerrainInspector onSave={onSave} />
+        </div>
+      </>
+      }
+    </>
   )
 }

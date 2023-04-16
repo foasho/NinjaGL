@@ -534,20 +534,6 @@ export const NinjaEditor = () => {
                 <MainViewInspector />
               </>
             }
-            {viewSelect == "scripteditor" &&
-              <>
-              </>
-            }
-            {viewSelect == "terrainmaker" &&
-              <>
-                <TerrainInspector />
-              </>
-            }
-            {viewSelect == "playereditor" &&
-              <>
-                <PlayerInspector/>
-              </>
-            }
           </div>
         </div>
         <div className={styles.userScript}>
