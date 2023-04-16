@@ -28,7 +28,8 @@ import {
   BufferAttribute,
   GLBufferAttribute,
   Object3D,
-  PerspectiveCamera
+  PerspectiveCamera,
+  Quaternion
 } from "three";
 import { useInputControl } from "@/core/utils/InputControls";
 import { useSnapshot } from "valtio";
@@ -108,7 +109,15 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
   }, [terrainState.mapSize, terrainState.type]);
 
   useEffect(() => {
-    if (terrainState.type == "edit" && object) meshRef.current = object;
+    if (terrainState.type == "edit" && object){
+      // 回転があれば、考慮する
+      if (object.rotation){
+        const q = new Quaternion().setFromEuler(object.rotation);
+        object.applyQuaternion(q);
+        object.rotation.set(0, 0, 0);
+      }
+      meshRef.current = object;
+    };
     if (cameraRef && cameraRef.current) {
       camera.far = terrainState.mapSize*3;
       cameraRef.current.far = camera.far;
@@ -237,38 +246,90 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       }
       else if (terrainState.brush == "paint"){
         if (intersects.length > 0 && intersects[0]) {
-          const radius = terrainState.radius;
-          const intersectPosition = intersects[0].point;
-          const object: Mesh = intersects[0].object as Mesh;
-          if (!object) return;
-          const cloneGeometry = object.geometry.clone();
-          if (!cloneGeometry.attributes.color) {
-            const count = cloneGeometry.attributes.position.count;
-            const buffer = new BufferAttribute( new Float32Array( count * 3 ), 3 );
-            cloneGeometry.setAttribute("color", buffer);
-          }
-          if (
-            cloneGeometry.attributes.color instanceof GLBufferAttribute ||
-            cloneGeometry.attributes.position instanceof GLBufferAttribute
-          ) return;
-          const numVertices = cloneGeometry.attributes.color.array;
-          let colors = new Float32Array(numVertices);
-          const color = new Color(terrainState.color);
-          const vertex = new Vector3();
-          const positionArray = Array.from(cloneGeometry.attributes.position.array);
-          for (let i = 0; i <= positionArray.length - 3; i += 3) {
-            vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
-            vertex.applyMatrix4(meshRef.current.matrixWorld); // Consider rotation
-            const distance = vertex.distanceTo(intersectPosition);
-            if (distance <= radius) {
-              colors.set(color.toArray(), i);
+          if (terrainState.type == "create"){
+            const radius = terrainState.radius;
+            const intersectPosition = intersects[0].point;
+            const object: Mesh = intersects[0].object as Mesh;
+            if (!object) return;
+            const cloneGeometry = object.geometry.clone();
+            if (!cloneGeometry.attributes.color) {
+              const count = cloneGeometry.attributes.position.count;
+              const buffer = new BufferAttribute( new Float32Array( count * 3 ), 3 );
+              cloneGeometry.setAttribute("color", buffer);
             }
+            if (
+              cloneGeometry.attributes.color instanceof GLBufferAttribute ||
+              cloneGeometry.attributes.position instanceof GLBufferAttribute
+            ) return;
+            const numVertices = cloneGeometry.attributes.color.array;
+            let colors = new Float32Array(numVertices);
+            const color = new Color(terrainState.color);
+            const vertex = new Vector3();
+            const positionArray = Array.from(cloneGeometry.attributes.position.array);
+            for (let i = 0; i <= positionArray.length - 3; i += 3) {
+              vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
+              if (terrainState.type == "create") vertex.applyMatrix4(meshRef.current.matrixWorld); // Consider rotation
+              const distance = vertex.distanceTo(intersectPosition);
+              if (distance <= radius) {
+                colors.set(color.toArray(), i);
+              }
+            }
+            cloneGeometry.setAttribute("color", new BufferAttribute(colors, 3));
+            object.geometry.copy(cloneGeometry);
           }
-          cloneGeometry.setAttribute("color", new BufferAttribute(colors, 3));
-          object.geometry.copy(cloneGeometry);
+          else {
+
+            const radius = terrainState.radius;
+            const intersectPosition = intersects[0].point;
+            const object: Mesh = intersects[0].object as Mesh;
+            if (!object) return;
+
+            object.traverse((node: Object3D) => {
+              if (node instanceof Mesh && node.isMesh) {
+                if (node.geometry) {
+                  const geometry = node.geometry;
+            
+                  if (!geometry.attributes.color) {
+                    const count = geometry.attributes.position.count;
+                    const buffer = new BufferAttribute(new Float32Array(count * 3), 3);
+                    geometry.setAttribute("color", buffer);
+                  }
+            
+                  const numVertices = geometry.attributes.color.array;
+                  let colors = new Float32Array(numVertices);
+                  let originalColors = Array.from(geometry.attributes.color.array) as number[];
+            
+                  const color = new Color(terrainState.color);
+                  const vertex = new Vector3();
+                  const positionArray = Array.from(geometry.attributes.position.array) as number[];
+            
+                  for (let i = 0; i <= positionArray.length - 3; i += 3) {
+                    vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
+                    vertex.applyMatrix4(meshRef.current.matrixWorld);
+                    const distance = vertex.distanceTo(intersectPosition);
+            
+                    if (distance <= radius) {
+                      const blendedColor = new Color().fromArray(originalColors.slice(i, i + 3)).lerp(color, 1 - distance / radius);
+                      colors.set(blendedColor.toArray(), i);
+                    } else {
+                      colors.set(originalColors.slice(i, i + 3), i);
+                    }
+                  }
+            
+                  geometry.setAttribute("color", new BufferAttribute(colors, 3));
+                  const newMaterial = node.material.clone() as MeshStandardMaterial;
+                  newMaterial.vertexColors = true;
+                  newMaterial.color.set(0xffffff); // Set material color to white
+                  node.material = newMaterial;
+                }
+              }
+            });
+            
+          }
         }
       }
     }
+    // Mouse circle
     if (intersects.length > 0 && mouseCircleRef.current){
       const raduis = terrainState.radius;
       mouseCircleRef.current.geometry = new CircleGeometry(raduis);
@@ -305,7 +366,7 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       else {
         lightRef.current.intensity = lightRef.current.distance / 32;
       }
-      if (matRef.current && matRef.current instanceof MeshStandardMaterial){
+      if (terrainState.type == "create" && matRef.current && matRef.current instanceof MeshStandardMaterial){
         matRef.current.wireframe = terrainState.wireFrame;
       }
     }
@@ -387,7 +448,7 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
         <>
           {meshRef && meshRef.current &&
            <>
-            <primitive object={meshRef.current} />
+            <primitive object={meshRef.current} receiveShadow castShadow />
            </>
           }
         </>
@@ -427,7 +488,9 @@ export const TerrainMakerCanvas = () => {
       const om = editor.getOMById(state.currentId);
       if (om.type == "terrain"){
         if (meshRef.current){
-          meshRef.current.geometry.dispose();
+          if (meshRef.current.geometry){
+            meshRef.current.geometry.dispose();
+          }
           if (meshRef.current.material){
             if (meshRef.current.material instanceof Material){
               meshRef.current.material.dispose();
@@ -453,6 +516,10 @@ export const TerrainMakerCanvas = () => {
     }
     setReady(true);
   }, [state.currentId]);
+
+  useEffect(() => {
+    terrainState.init();
+  }, []);
 
   /**
    * 地形データを送信/保存する
@@ -526,7 +593,7 @@ export const TerrainMakerCanvas = () => {
               object={state.currentId ? editor.getOMById(state.currentId).object : undefined}
             />
           }
-          <Environment blur={.7} preset="dawn"/>
+          <Environment preset="dawn" background blur={0.7} resolution={512}/>
         </Canvas>
         <div className={styles.inspector}>
           <TerrainInspector onSave={onSave} />

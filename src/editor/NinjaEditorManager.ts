@@ -585,6 +585,7 @@ export class NinjaEditorManager {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
     console.log("<< Complete NJC File >>");
+    this.notifyOMsChanged();
   }
 }
 

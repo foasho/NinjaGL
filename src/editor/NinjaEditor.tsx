@@ -295,6 +295,7 @@ export const NinjaEditor = () => {
         console.log("### ロードしたnjcFileを確認 ###");
         console.log(njcFile);
         editor.setNJCFile(njcFile);
+        
       }
     };
     input.click();
