@@ -3,7 +3,7 @@ import { S3 } from "aws-sdk";
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
-import rimraf from "rimraf";
+import { AssetDir } from "./localconfig";
 
 const s3 = new S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -35,17 +35,18 @@ async function deleteFolderS3(prefix: string): Promise<void> {
 }
 
 async function deleteFolderLocal(directory: string): Promise<void> {
-  const localDirectoryPath = path.join(process.cwd(), "uploads", directory);
+  const localDirectoryPath = path.join(process.cwd(), AssetDir, directory);
 
-  return new Promise((resolve, reject) => {
-    rimraf(localDirectoryPath, (error) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
-  });
+  // fsライブラリで削除するように修正予定
+  // return new Promise((resolve, reject) => {
+  //   rimraf(localDirectoryPath, (error) => {
+  //     if (error) {
+  //       reject(error);
+  //     } else {
+  //       resolve();
+  //     }
+  //   });
+  // });
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

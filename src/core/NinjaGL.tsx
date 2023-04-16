@@ -14,16 +14,21 @@ export interface INinjaGLProps extends INinjaCanvasProps {
 
 export const NinjaGL = (props: INinjaGLProps) => {
   const [engine, setEngine] = useState<NinjaEngine>();
+
   useEffect(() => {
     const fetchEngine = async () => {
       const _engine = new NinjaEngine();
+      if (props.njcPath) {
+        const data = await loadNJCFileFromURL(props.njcPath);
+        _engine.setNJCFile(data);
+      }
       setEngine(_engine);
     }
     fetchEngine();
     return () => {
       setEngine(undefined);
     }
-  }, [engine]);
+  }, []);
 
   return (
     <>

@@ -450,20 +450,20 @@ export class NinjaEditorManager {
   }
 
   /**
-   * 選択中のOMを取得する
-   * @returns 
-   */
-  // getSelectOM = (): IObjectManagement => {
-  //   const data = this.oms.find(om => this.selectedId == om.id)
-  //   return data;
-  // }
-
-  /**
    * 現在選択中のIDを取得
    * @returns 
    */
   getOMById = (id: string):IObjectManagement|undefined => {
     return this.oms.find(om => om.id == id);
+  }
+
+  /**
+   * 特定のIDのSMを取得する
+   * @param id 
+   * @returns 
+   */
+  getSMById(id: string): IScriptManagement | undefined {
+    return this.sms.find(sm => sm.id == id);
   }
 
   /**
@@ -540,8 +540,19 @@ export class NinjaEditorManager {
   }
 
   /**
-   * 
-   * @returns 
+   * 削除処理
+   */
+  deleteOM = (id: string) => {
+    this.oms = this.oms.filter(om => om.id !== id);
+    this.notifyOMsChanged();
+  }
+
+  /**
+   * 全取得系処理
+   */
+
+  /**
+   * 全てのOMを取得する
    */
   getOMs = () => {
     return this.oms;
@@ -583,6 +594,7 @@ export class NinjaEditorManager {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
     console.log("<< Complete NJC File >>");
+    this.notifyOMsChanged();
   }
 }
 

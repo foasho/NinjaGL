@@ -332,3 +332,53 @@ const saveString = (text: string): Blob => {
 const saveArrayBuffer = (buffer: ArrayBuffer): Blob => {
   return new Blob([buffer], { type: "application/octet-stream" });
 }
+
+/**
+ * 特定のObjectをFileに変換する
+ */
+export const convertObjectToFile = (
+  object: Object3D, 
+  userData?: any, 
+  fileName = "model.glb"
+): Promise<File> => {
+  return new Promise((resolve) => {
+    var exporter = new GLTFExporter();
+    const options: GLTFExporterOptions = {
+      binary: true,
+      animations: object.animations,
+      includeCustomExtensions: true,
+      maxTextureSize: 4096
+    };
+
+    if (userData) {
+      object.userData = userData;
+    }
+
+    exporter.parse(
+      object,
+      (result) => {
+        let blob: Blob;
+        let mimeType: string;
+
+        if (result instanceof ArrayBuffer) {
+          blob = new Blob([result], { type: "application/octet-stream" });
+          mimeType = "application/octet-stream";
+          fileName += ".glb";
+        } else {
+          const output = JSON.stringify(result, null, 2);
+          blob = new Blob([output], { type: "application/json" });
+          mimeType = "application/json";
+          fileName += ".gltf";
+        }
+
+        const file = new File([blob], fileName, { type: mimeType });
+        return resolve(file);
+      },
+      (error) => {
+        console.error("Error exporting scene:" + fileName);
+        console.error(error);
+      },
+      options
+    );
+  });
+}

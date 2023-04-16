@@ -34,7 +34,6 @@ export const ScriptNavigation = () => {
       const filePath = editor.contentsSelectPath;
       const sm = {...InitScriptManagement};
       sm.id = MathUtils.generateUUID();
-      sm.filePath = filePath;
       const scriptCheck = async () => {
         try {
           const response = await fetch(filePath);

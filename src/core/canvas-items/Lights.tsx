@@ -1,59 +1,62 @@
 import { NinjaEngineContext } from "../NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
-import { Environment, Sky, SpotLight, SpotLightShadow } from "@react-three/drei"
-import { useContext } from "react"
+import { Environment, Sky, SpotLight, SpotLightShadow, Detailed } from "@react-three/drei"
+import { useContext, useEffect, useState } from "react"
 import { MathUtils } from "three";
 import { ShaderMaterial } from "three";
 
-const Light = (props: IObjectManagement) => {
+const Light = (om: IObjectManagement) => {
   let light = undefined;
-  if (props.args.type == "spot") {
+  let color: string = (om.args.materialData.value) ? om.args.materialData.value : '#fadcb9';
+  if (om.args.type == "spot") {
     light = (
       <>
         <SpotLight
-          position={props.args.position ? props.args.position : [0, 0, 0]}
+          position={om.args.position ? om.args.position : [0, 0, 0]}
           angle={MathUtils.degToRad(45)}
-          distance={props.args.distance ? props.args.distance : 25}
-          intensity={props.args.intensity ? props.args.intensity : 25}
+          distance={om.args.distance ? om.args.distance : 25}
+          intensity={om.args.intensity ? om.args.intensity : 25}
           castShadow
-          color={'#fadcb9'}
+          color={color}
           volumetric={false}
-          layers={props.layerNum}
+          layers={om.layerNum}
         />
       </>
     )
   }
-  else if (props.args.type == "point") {
+  else if (om.args.type == "point") {
     light = (
       <>
         <pointLight
-          position={props.args.position ? props.args.position : [0, 0, 0]}
-          intensity={props.args.intensity ? props.args.intensity : 0.5}
-          distance={props.args.distance ? props.args.distance : 25}
+          position={om.args.position ? om.args.position : [0, 0, 0]}
+          intensity={om.args.intensity ? om.args.intensity : 0.5}
+          distance={om.args.distance ? om.args.distance : 25}
           castShadow
-          layers={props.layerNum}
+          color={color}
+          layers={om.layerNum}
         />
       </>
     )
   }
-  else if (props.args.type == "ambient") {
+  else if (om.args.type == "ambient") {
     light = (
       <>
         <ambientLight
-          color={props.args.color ? props.args.color : '#fadcb9'}
-          intensity={props.args.intensity ? props.args.intensity : 0.5}
-          layers={props.layerNum}
+          intensity={om.args.intensity ? om.args.intensity : 0.5}
+          color={color}
+          layers={om.layerNum}
         />
       </>
     )
   }
-  else if (props.args.type == "direction") {
+  else if (om.args.type == "direction") {
     light = (
       <>
         <directionalLight
           castShadow
-          position={props.args.position? props.args.position: [5, 5, 5]}
-          layers={props.layerNum}
+          position={om.args.position? om.args.position: [5, 5, 5]}
+          color={color}
+          layers={om.layerNum}
         />
       </>
     )
@@ -68,7 +71,20 @@ const Light = (props: IObjectManagement) => {
 
 export const Lights = () => {
   const engine = useContext(NinjaEngineContext);
-  const lights = engine ? engine.getLights() : [];
+  const [lights, setLights] = useState(engine.getLights());
+
+  useEffect(() => {
+    console.log("Lights useEffect");
+    setLights(engine.getLights());
+    const handleLightsChanged = () => {
+      setLights(engine.getLights());
+    }
+    engine.onLightsChanged(handleLightsChanged);
+    return () => {
+      engine.offLightsChanged(handleLightsChanged);
+    }
+  }, [engine]);
+  
   return (
     <>
       {lights.map((light, index) => {

@@ -9,20 +9,22 @@ import { PerspectiveCamera, Vector3 } from "three";
  * WASDカメラ視点移動
  * 補助操作
  */
-interface ICameraControl {
-  cameraFar: number;
-  cameraSpeed: number;
+interface IMoveableCamera {
+  cameraFar?: number;
+  cameraSpeed?: number;
   initCameraPosition?: Vector3;
 }
-export const CameraControl = (props: ICameraControl) => {
+export const MoveableCamera = (props: IMoveableCamera) => {
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
   const input = useInputControl("desktop");
+  const cameraFar = props.cameraFar ? props.cameraFar : 1000;
+  const cameraSpeed = props.cameraSpeed ? props.cameraSpeed : 10;
+  const initCameraPosition = props.initCameraPosition ? props.initCameraPosition : new Vector3(-3, 5, -10);
 
   useLayoutEffect(() => {
     if (cameraRef && cameraRef.current) {
-      const initCameraPosition = props.initCameraPosition? props.initCameraPosition: new Vector3(3, 5, 10);
       cameraRef.current.position.copy(initCameraPosition.clone());
       cameraRef.current.lookAt(0, 0, 0);
       camera.position.copy(initCameraPosition.clone());
@@ -32,14 +34,14 @@ export const CameraControl = (props: ICameraControl) => {
 
   useEffect(() => {
     if (cameraRef && cameraRef.current) {
-      camera.far = props.cameraFar;
+      camera.far = cameraFar;
       cameraRef.current.far = camera.far;
     }
   }, [props.cameraFar]);
 
   useFrame((_, delta) => {
     if (input.dash && (input.forward || input.backward || input.right || input.left)) {
-      const st = props.cameraSpeed * delta;
+      const st = cameraSpeed * delta;
       const cameraDirection = new Vector3();
       cameraRef.current.getWorldDirection(cameraDirection);
       const cameraPosition = cameraRef.current.position.clone();

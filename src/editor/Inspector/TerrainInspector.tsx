@@ -1,9 +1,5 @@
 import styles from "@/App.module.scss";
-import { useContext, useEffect, useState } from "react";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import Swal from 'sweetalert2';
-import { reqApi } from "@/services/ServciceApi";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { GiFlatPlatform, GiMountainCave, GiMountaintop, GiPaintBrush } from "react-icons/gi";
 import { useSnapshot } from "valtio";
@@ -23,27 +19,9 @@ interface HTMLElementEvent<T extends HTMLElement> extends Event {
 }
 
 
-export const TerrainInspector = () => {
+export const TerrainInspector = ({ onSave }) => {
   const terrainState = useSnapshot(globalTerrainStore);
-  const { data: session } = useSession();
   const { t } = useTranslation();
-
-  const keyDown = (event: HTMLElementEvent<HTMLInputElement>) => {
-    if (event.code.toString() == "KeyE") {
-      if (terrainState.mode == "view"){
-        globalTerrainStore.mode = "edit";
-      }
-      else {
-        globalTerrainStore.mode = "view";
-      }
-    }
-  }
-  useEffect(() => {
-    document.addEventListener("keydown", keyDown);
-    return () => {
-      document.removeEventListener("keydown", keyDown);
-    }
-  }, []);
 
   const changeWF = () => {
     globalTerrainStore.wireFrame = !terrainState.wireFrame;
@@ -99,60 +77,6 @@ export const TerrainInspector = () => {
 
   const changeBrush = (brushType: "normal" | "flat" | "paint") => {
     globalTerrainStore.brush = brushType;
-  }
-
-  /**
-   * 地形データを送信/保存する
-   */
-  const saveTerrain = async () => {
-    const obj3d = new Object3D();
-    // obj3d.add(terrainState.terrainMesh.clone());
-    const blob = await convertObjectToBlob(obj3d);
-    Swal.fire({
-      title: t("inputFileName"),
-      input: 'text',
-      showCancelButton: true,
-      confirmButtonText: '実行',
-      showLoaderOnConfirm: true,
-      preConfirm: async (inputStr: string) => {
-        //バリデーションを入れたりしても良い
-        if (inputStr.length == 0) {
-          return Swal.showValidationMessage(t("leastInput"));
-        }
-        if (session){
-          const formData = new FormData();
-          formData.append('file', blob);
-          const keyPath = `users/${b64EncodeUnicode(session.user.email)}/terrains/${inputStr}.ter`;
-          formData.append("filePath", keyPath);
-          try {
-            const response = await fetch("/api/storage/upload", {
-              method: "POST",
-              body: formData,
-            });
-
-            if (!response.ok) {
-              throw new Error("Error uploading file");
-            }
-            Swal.fire({
-              title: t("completeSave"),
-              text: keyPath
-            });
-          } catch (error) {
-            console.error("Error:", error.message);
-          }
-        }
-        else {
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = `${inputStr}.ter`;
-          link.click();
-          link.remove();
-        }
-      },
-      allowOutsideClick: function () {
-        return !Swal.isLoading();
-      }
-    });
   }
 
   return (
@@ -246,7 +170,7 @@ export const TerrainInspector = () => {
             value={terrainState.radius}
             onInput={(e) => changeRadius(e)}
             min={0.1}
-            max={10.0}
+            max={terrainState.mapSize/4}
             step={0.1}
           />
         </div>
@@ -292,7 +216,7 @@ export const TerrainInspector = () => {
         </div>
       </div>
       <div className={styles.save}>
-        <a className={styles.btn} onClick={() => saveTerrain()} >
+        <a className={styles.btn} onClick={() => onSave()} >
           {t("saveTerrain")}
         </a>
       </div>

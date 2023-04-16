@@ -295,6 +295,7 @@ export const NinjaEditor = () => {
         console.log("### ロードしたnjcFileを確認 ###");
         console.log(njcFile);
         editor.setNJCFile(njcFile);
+        
       }
     };
     input.click();
@@ -532,20 +533,6 @@ export const NinjaEditor = () => {
             {(viewSelect == "mainview") &&
               <>
                 <MainViewInspector />
-              </>
-            }
-            {viewSelect == "scripteditor" &&
-              <>
-              </>
-            }
-            {viewSelect == "terrainmaker" &&
-              <>
-                <TerrainInspector />
-              </>
-            }
-            {viewSelect == "playereditor" &&
-              <>
-                <PlayerInspector/>
               </>
             }
           </div>

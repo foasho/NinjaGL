@@ -51,7 +51,7 @@ export const DebugPlay = () => {
     setEngine(_engine);
 
     return () => {
-      
+      setEngine(undefined);
     }
   }, []);
 

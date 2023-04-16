@@ -1,19 +1,25 @@
 import { SkinnedMesh } from "three";
 import { NinjaEngine } from "./NinjaEngineManager";
-import { IScriptManagement } from "./utils/NinjaProps";
+import { IInputMovement, IScriptManagement } from "./utils/NinjaProps";
+import { RootState } from "@react-three/fiber";
 
 declare var self: any;
+declare var window: any;
+declare global {
+  interface Window {
+    // EngineInstance: EngineInstance;
+  }
+}
 
 /**
  * NinjaEngineから呼び出されるWorker
  */
 export class NinjaEngineWorker {
+  ThreeJSVer: string = "0.149.0";
   engine: NinjaEngine;
   worker: Worker | undefined;
   constructor(engine: NinjaEngine) {
     this.engine = engine;
-    // 追加
-    this.handleWorkerMessage = this.handleWorkerMessage.bind(this);
   }
 
   /**
@@ -34,11 +40,21 @@ export class NinjaEngineWorker {
       )
       .join("\n");
 
+    const threeCDN = `https://unpkg.com/three@${this.ThreeJSVer}/build/three.min.js`;
+
     const workerScript = `
+      // Add ThreeJS
+      importScripts("${threeCDN}");
+
+
+      // Add UserScripts
       ${importScriptsCode}
-      \n
+
+      // Avairable UserData
+      let UserData = {};
+
       self.addEventListener("message", (event) => {
-        const { type, id, state, delta } = event.data;
+        const { type, id, state, delta, input, data, messageId } = event.data;
         if (type === "runInitialize") {
           if (self[id] && typeof self[id].initialize === "function") {
             self[id].initialize();
@@ -47,22 +63,44 @@ export class NinjaEngineWorker {
           }
         } else if (type === "runFrameLoop") {
           if (self[id] && typeof self[id].frameLoop === "function") {
-            self[id].frameLoop(state, delta);
+            self[id].frameLoop(state, delta, input);
           } else {
             console.error('FrameLoop function for id "" not found.');
           }
         }
+        else {
+          if (type === "response") {
+            const handler = responseHandlers.get(messageId);
+            if (handler) {
+              handler(data);
+              responseHandlers.delete(messageId);
+            }
+          }
+        }
       });
+
+      // Count Request ID
+      let messageIdCounter = 0;
+      let responseHandlers = new Map();
+
+      // Requset Message
+      async function Request(type, data) {
+        return new Promise((resolve) => {
+          const messageId = this.messageIdCounter++;
+          responseHandlers.set(messageId, resolve);
+          self.postMessage({ type, data, messageId });
+        });
+      }
+
     `;
-  
+
     const userScriptBlob = new Blob([`${workerScript}`], {
       type: "application/javascript",
     });
-  
+
     const userScriptURL = URL.createObjectURL(userScriptBlob);
     this.worker = new Worker(userScriptURL);
-    // initializeとframeLoopを実行できるようにする
-    this.worker.addEventListener("message", this.handleWorkerMessage);
+    this.worker.addEventListener("message", this.handleWorkerMessage.bind(this));
   }
 
   /**
@@ -84,10 +122,23 @@ export class NinjaEngineWorker {
    * @param id 
    * @param state 
    * @param delta 
+   * @param input
    */
-  public runFrameLoop = (id: string, state: any, delta: number): void => {
+  public runFrameLoop = (
+    id: string, 
+    state: RootState, 
+    delta: number,
+    input: IInputMovement
+  ): void => {
     if (this.worker) {
-      this.worker.postMessage({ type: "runFrameLoop", id: id, state: state, delta: delta });
+      const _state = { elapsedTime: state.clock.getElapsedTime(), mouse: state.mouse }
+      this.worker.postMessage({ 
+        type: "runFrameLoop", 
+        id: id, 
+        state: _state, 
+        delta: delta,
+        input: input
+       });
     } else {
       console.error("Worker is not initialized yet.");
     }
@@ -95,199 +146,87 @@ export class NinjaEngineWorker {
 
   /**
    * WebWorkerのメッセージを処理する
+   * @abstract self.postMessage: メインスレッドにメッセージを送信する
+   * @abstract self.worker.postMessage: Workerにメッセージを送信する
    */
-  handleWorkerMessage = (e: MessageEvent) => {
+  handleWorkerMessage = async (e: MessageEvent) => {
     if (!this.worker) {
       return;
     }
-    const { type, data } = e.data;
-    console.log("check handleWorkerMessage");
-    if (type == "getOM") {
-      // OMを取得する
-      const { id } = data;
-      this.worker.postMessage({ type: "getOM", data: this.engine.getOMById(id) })
-    }
-    else if (type == "setPosition"){
-      // 特定のIDのOMの位置を変更する
-      const { id, position } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        om.object.position.set(position.x, position.y, position.z);
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "getPosition") {
-      // 特定のIDのOMの位置を取得する
-      const { id } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        this.worker.postMessage({ type: "getPosition", data: om.object.position })
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "setRotation"){
-      // 特定のIDのOMの回転を変更する
-      const { id, rotation } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        om.object.rotation.set(rotation.x, rotation.y, rotation.z);
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "getRotation") {
-      // 特定のIDのOMの回転を取得する
-      const { id } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        this.worker.postMessage({ type: "getRotation", data: om.object.rotation })
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "setScale"){
-      // 特定のIDのOMのスケールを変更する
-      const { id, scale } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        om.object.scale.set(scale.x, scale.y, scale.z);
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "getScale") {
-      // 特定のIDのOMのスケールを取得する
-      const { id } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        this.worker.postMessage({ type: "getScale", data: om.object.scale })
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "setQuaternion"){
-      // 特定のIDのOMの回転を変更する
-      const { id, quaternion } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        om.object.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-      }
-      else {
-        console.error("OM not found.");
-      }
-    }
-    else if (type == "changeAvatarOffset"){
-      // アバターのカメラオフセットを変更する
-      const { offset } = data;
-      if (this.engine.avatar){
-        this.engine.avatar.cameraOffset = offset.clone();
-      }
-    }
-    else if (type == "changeUniforms"){
-      // 特定のIDのOMのuniformsを変更する
-      const { id, uniforms } = data;
-      const om = this.engine.getOMById(id);
+    const { type, data, messageId } = e.data;
+    if (type == "getPositionByName"){
+      // 特定の名前のOMの位置を取得する
+      const { name } = data;
+      const om = this.engine.getOMByName(name);
       if (om) {
-        // uniformsの値を変更する
-      }
-    }
-    else if (type == "changeVisible"){
-      // 特定のIDのOMのvisibleを変更する
-      const { id, visible } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object) {
-        om.object.visible = visible;
-      }
-    }
-    else if (type == "changeVisibleType"){
-      // 特定のIDのOMのvisibleTypeを変更する
-      const { id, visibleType } = data;
-      const om = this.engine.getOMById(id);
-      if (om) {
-        om.visibleType = visibleType;
-      }
-    }
-    else if (type == "changeAnimation"){
-      // 特定のIDのOMのanimationを変更する
-      const { id, animation } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.object instanceof SkinnedMesh && om.mixer) {
-        om.mixer.stopAllAction();
-        om.mixer.clipAction(animation).play();
+        this.worker.postMessage({ type: "response", data: om.object.position, messageId: messageId });
       }
       else {
-        console.error("OM or object or mixer not found.");
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
-    else if (type == "startAnimationByName"){
-      // 特定のIDのOMのanimationを開始する
-      const { id, animationName } = data;
-      const om = this.engine.getOMById(id);
-      if (om && om.animations && om.animations.length > 0 && om.mixer) {
-        if (om.object instanceof SkinnedMesh) {
-          const animation = om.animations.find(animation => animation.name == animationName);
-          if (animation) {
-            om.mixer.stopAllAction();
-            om.mixer.clipAction(animation).play();
-          }
-        }
+    else if (type == "getRotationByName"){
+      // 特定の名前のOMの回転を取得する
+      const { name } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        this.worker.postMessage({ type: "response", data: om.object.rotation, messageId: messageId });
       }
       else {
-        console.error("OM or Animation or mixer not found.");
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
-    else if (type == "stopAnimationByName"){
-      // 特定のIDのOMのanimationを停止する
-      const { id, animationName } = data;
-      const om = this.engine.getOMById(id);
+    else if (type == "getScaleByName"){
+      // 特定の名前のOMのスケールを取得する
+      const { name } = data;
+      const om = this.engine.getOMByName(name);
       if (om) {
-        if (om.animations && om.animations.length > 0 && om.mixer) {
-          const animation = om.animations.find(animation => animation.name == animationName);
-          if (animation) {
-            om.mixer.stopAllAction();
-          }
-        }
+        this.worker.postMessage({ type: "response", data: om.object.scale, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
-    else if (type == "startSound"){
-      // 特定のIDのサウンドを開始する
-      const { id } = data;
-      const sound = this.engine.getSoundById(id);
-      if (sound) {
-        sound.sound.play();
+    else if (type == "setPositionByName"){
+      // 特定の名前のOMの位置を設定する
+      const { name, position } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        om.object.position.copy(position);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
-    else if (type == "loopSound"){
-      // 特定のIDのサウンドをループする
-      const { id } = data;
-      const sound = this.engine.getSoundById(id);
-      if (sound) {
-        sound.sound.setLoop(true);
-        sound.sound.play();
+    else if (type == "setRotationByName"){
+      // 特定の名前のOMの回転を設定する
+      const { name, rotation } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        om.object.rotation.copy(rotation);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
+      }
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
-    else if (type == "stopSound"){
-      // 特定のIDのサウンドを停止する
-      const { id } = data;
-      const sound = this.engine.getSoundById(id);
-      if (sound) {
-        sound.sound.stop();
+    else if (type == "setScaleByName"){
+      // 特定の名前のOMのスケールを設定する
+      const { name, scale } = data;
+      const om = this.engine.getOMByName(name);
+      if (om) {
+        om.object.scale.copy(scale);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
-    }
-    else if (type == "setSoundVolume"){
-      // 特定のIDのサウンドの音量を変更する
-      const { id, volume } = data;
-      const sound = this.engine.getSoundById(id);
-      if (sound) {
-        sound.sound.setVolume(volume);
+      else {
+        console.error(`Name: ${name}, OM not found.`);
+        this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
     }
   }

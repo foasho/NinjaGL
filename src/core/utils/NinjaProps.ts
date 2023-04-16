@@ -95,7 +95,6 @@ export interface IScriptManagement {
   type: string;     // 種別: "script"今は一つだけ
   id: string;       // ID: UUID
   name: string;     // 名前
-  filePath: string | null; // ファイルパス
   script: string;  // JSスクリプトデータ
 }
 

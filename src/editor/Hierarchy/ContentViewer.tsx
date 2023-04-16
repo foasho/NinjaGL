@@ -42,6 +42,7 @@ export interface IFileProps {
 
 
 const getExtension = (filename: string) => {
+  if (filename === undefined) return "";
   return filename.split('.').pop().toLowerCase();
 }
 
@@ -528,7 +529,6 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     else if (props.isFile && type == "js"){
       const sm = {...InitScriptManagement};
       sm.id = MathUtils.generateUUID();
-      sm.filePath = props.url;
       const scriptCheck = async () => {
         try {
           const response = await fetch(props.url);

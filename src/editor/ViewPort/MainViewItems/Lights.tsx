@@ -34,9 +34,9 @@ interface ILightProps {
   om       : IObjectManagement;
 }
 export const MyLight = (prop: ILightProps) => {
+  const [ready, setReady] = useState<boolean>(false);
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const handleDrag = useRef<boolean>(false);
   const ref = useRef<any>();
   const catchRef = useRef<Mesh>();
   const { om } = prop;
@@ -79,14 +79,16 @@ export const MyLight = (prop: ILightProps) => {
     }
     if (om.args.materialData){
       const materialData = om.args.materialData;
-      if (ref.current.color && materialData.value){
+      if (materialData.value){
         ref.current.color.copy(new Color(materialData.value));
       }
       ref.current.needsUpdate = true;
     }
+    setReady(true);
   }, []);
 
   useFrame((_, delta) => {
+    if (!ready) return;
     // キャッチ用Boxを同期させる
     if (catchRef.current && ref.current){
       catchRef.current.position.copy(ref.current.position.clone());

@@ -1,5 +1,5 @@
 import { IScriptManagement } from '@/core/utils/NinjaProps';
-import { Mesh } from 'three';
+import { AnimationClip, Group, Mesh, Object3D } from 'three';
 import { proxy } from 'valtio';
 
 /**
@@ -125,6 +125,7 @@ interface IGlobalTerrainStore {
   power: number;
   wireFrame: boolean;
   radius: number;
+  init: () => void;
 }
 export const globalTerrainStore = proxy<IGlobalTerrainStore>(
   {
@@ -138,5 +139,40 @@ export const globalTerrainStore = proxy<IGlobalTerrainStore>(
     power: 0.1,
     wireFrame: false,
     radius: 10,
+    init: () => {
+      globalTerrainStore.mode = "view";
+      globalTerrainStore.type = "create";
+      globalTerrainStore.brush = "normal";
+      globalTerrainStore.color = "#00ff00";
+      globalTerrainStore.isMouseDown = false;
+      globalTerrainStore.mapSize = 128;
+      globalTerrainStore.mapResolution = 128;
+      globalTerrainStore.power = 0.1;
+      globalTerrainStore.wireFrame = false;
+      globalTerrainStore.radius = 10;
+    }
   }
 );
+
+export interface IGlobalPlayerStore {
+  type: "avatar"|"other"|"npc";
+  height: number;
+  selectAnim: string;
+  animMapper: {[key: string]: string};
+  animations: AnimationClip[];
+  init: () => void;
+}
+export const globalPlayerStore = proxy<IGlobalPlayerStore>({
+  type: "avatar",
+  height: 1.7,
+  selectAnim: undefined,
+  animMapper: {},
+  animations: [],
+  init: () => {
+    globalPlayerStore.type = "avatar";
+    globalPlayerStore.height = 1.7;
+    globalPlayerStore.selectAnim = undefined;
+    globalPlayerStore.animMapper = {};
+    globalPlayerStore.animations = [];
+  }
+});

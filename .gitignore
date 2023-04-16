@@ -51,3 +51,8 @@ public/scripts/*.*
 .savedata/*.json
 
 .env
+# lib-build
+dist/*
+
+# ProjectData
+*.njc

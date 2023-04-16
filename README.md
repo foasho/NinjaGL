@@ -1,7 +1,7 @@
 # NinjaGL
 
 - React18
-- Three.js(r150)
+- Three.js(r149)
 - ReactThreeFiber
 
 デモページ
@@ -20,12 +20,28 @@
 npm install ninjagl
 ```
 
-## デモ準備中
-調整中
+## 自分のプロダクトへ組み込み
+```
+npm install ninjagl
+```
+
+```:typescript
+import { NinjaGL } from "ninjagl";
+
+function App() {
+  return (
+    <div>
+      <NinjaGL njcPath={"<your-projects>"}>
+    </div>
+  )
+}
+```
 
 ## エディタの実行
 ```
+git clone https://github.com/foasho/NinjaGL.git
 npm install
+npm run dev
 ```
 
 ## ビルド

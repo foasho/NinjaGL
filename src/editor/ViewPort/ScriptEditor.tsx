@@ -13,17 +13,25 @@ import { globalScriptStore } from '../Store';
 import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';
 import { editor } from 'monaco-editor';
 import { NinjaEditorContext } from '../NinjaEditorManager';
+import { useSession } from 'next-auth/react';
+import { b64EncodeUnicode } from '@/commons/functional';
+import { MathUtils } from 'three';
 
 
 export const ScriptEditor = () => {
+  const { data: session } = useSession();
   const myeditor = useContext(NinjaEditorContext);
   const scriptState = useSnapshot(globalScriptStore);
-  // const [code, setCode] = useState<string>();
+  const [name, setName] = useState<string>();
   const [pause, setPause] = useState<boolean>(true);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const { id, filePath, name, script } = scriptState.currentSM? scriptState.currentSM : {...InitScriptManagement};
-  const code = useRef<string>(script);
+  const code = useRef<string>(undefined);
   const { t } = useTranslation();
+
+  /**
+   * エディタの変更値を反映
+   * @param value 
+   */
   const handleEditorChange = (value: string) => {
     if (code.current) code.current = value;
   };
@@ -55,10 +63,10 @@ export const ScriptEditor = () => {
         }
         else if (textUntilPosition.includes("EngineInstance.")){
           suggestions.push({
-            label: "getObjectById",
+            label: "getPositionByName",
             kind: monaco.languages.CompletionItemKind.Function,
-            documentation: "Get ObjectData by Id",
-            insertText: "getObjectById()",
+            documentation: "Get ObjectPosition by Name",
+            insertText: "getPositionByName()",
           });
         }
         else{
@@ -102,48 +110,78 @@ export const ScriptEditor = () => {
   };
 
   /**
+   * スクリプトをbinary化
+   */
+  const convertFile = async (textData: string): Promise<File>=> {
+    const blob = new Blob([textData], { type: "text/plain" });
+    const file = new File([blob], "myTextFile.txt");
+    return file;
+  }
+
+  /**
    * コードを保存する
    * @param script 
    * @param filename 
    * @returns 
    */
   const saveCode = async(filename: string) => {
-    const result = await reqApi({ 
-      route: "control/savescript",
-      data: { script: code.current, filename: filename }
-    }).then(
-      (res) => {
-        if (res.status == 200){
-          if (scriptState.currentSM && globalScriptStore.currentSM?.script !== null){
-            if (script) globalScriptStore.setScript(script) // スクリプトデータを更新
-          }
-          else {
-            const newSM: IScriptManagement = {
-              id: id,
-              type: "script",
-              filePath: `scripts/${filename}`,
-              name: filename,
-              script: code.current,
-            }
-            myeditor.setSM(newSM);
-            globalScriptStore.currentSM = newSM;
-          }
-          return true;
-        }
-        return false;
-      }
-    );
-    if (result){
-      toast(t("completeSave"), {
-        position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
+    if (session){
+      const file = await convertFile(code.current);
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/scripts`;
+      const keyPath = (uploadPath + `/${filename}`).replaceAll("//", "/");
+      formData.append("filePath", keyPath);
+      const response = await fetch("/api/storage/upload", {
+        method: "POST",
+        body: formData,
       });
+      if (!response.ok) {
+        throw new Error("Error uploading file");
+      }
+      if (response.ok){
+        if (scriptState.currentSM){
+          const sm = myeditor.getSMById(scriptState.currentSM.id);
+          if (sm) sm.script = code.current;
+          globalScriptStore.currentSM.script = code.current;
+        }
+        else {
+          const newSM: IScriptManagement = {
+            id: scriptState.currentSM? scriptState.currentSM.id: MathUtils.generateUUID(),
+            type: "script",
+            name: filename,
+            script: code.current,
+          }
+          myeditor.setSM(newSM);
+          globalScriptStore.currentSM = newSM;
+        }
+        toast(t("completeSave"), {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    }
+    else {
+      // ログインしてなければ、SMに追加のみおこなう
+      if (scriptState.currentSM){
+        globalScriptStore.currentSM.script = code.current;
+      }
+      else {
+        const newSM: IScriptManagement = {
+          id: scriptState.currentSM? scriptState.currentSM.id: MathUtils.generateUUID(),
+          type: "script",
+          name: filename,
+          script: code.current,
+        }
+        myeditor.setSM(newSM);
+        globalScriptStore.currentSM = newSM;
+      }
     }
   }
 
@@ -151,8 +189,8 @@ export const ScriptEditor = () => {
    * 保存
    */
   const onSave = async () => {
-    if (filePath){
-      const filename = name.replace(".js", "") + ".js";
+    if (scriptState.currentSM){
+      const filename = scriptState.currentSM.name.replace(".js", "") + ".js";
       await saveCode(filename);
     }
     else {
@@ -175,8 +213,8 @@ export const ScriptEditor = () => {
       }).then( async (result) => {
         if (result.value) {
           const filename = result.value + ".js";
+          setName(filename);
           await saveCode(filename);
-
         }
       });
     }
@@ -199,36 +237,18 @@ export const ScriptEditor = () => {
    * ファイル指定して起動する場合は、初期Codeはそのファイルを読み込む
    */
   useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    if (scriptState.currentSM && filePath){
-      const fetchData = async () => {
-        try {
-          const response = await fetch(filePath, { signal });
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const script = await response.text();
-          // setCode(script);
-          code.current = script;
-        } catch (error: any) {
-          if (error.name === 'AbortError') {
-            console.log('Fetch aborted');
-          } else {
-            console.error('Error fetching data:', error);
-          }
-        }
-      };
-      fetchData();
+    if (scriptState.currentSM){
+      code.current = scriptState.currentSM.script;
+      setName(scriptState.currentSM.name);
     }
     else {
       code.current = initCode;
+      setName(undefined);
     }
     // 保存をオーバーライド
     document.addEventListener('keydown', handlerSave);
     return () => {
       document.removeEventListener('keydown', handlerSave);
-      controller.abort();
     };
   }, [scriptState.currentSM]);
 
@@ -237,7 +257,7 @@ export const ScriptEditor = () => {
     <div className={styles.scriptEditor}>
       <div className={styles.navigation}>
         <div className={styles.filename}>
-          {name}
+          {name? name: "*Untitled.js"}
         </div>
         <div className={styles.save} onClick={() => onSave()}>
           Save
@@ -265,13 +285,13 @@ export const ScriptEditor = () => {
           value={code.current}
           onChange={(value: any) =>handleEditorChange(value)}
           onMount={(editor, monaco) => handleEditorDidMount(monaco, editor)}
-          // beforeMount={(monaco) => handleEditorWillMount(monaco)}
           options={{
             selectOnLineNumbers: true,
             roundedSelection: false,
             readOnly: false,
             cursorStyle: 'line',
             automaticLayout: true,
+            tabSize: 2,
           }}
         />
       </div>
@@ -281,25 +301,26 @@ export const ScriptEditor = () => {
 }
 
 const initCode = `
-  /**
-  * NinjaGL
-  * -公式ドキュメント: https://www.example.com/
-  * -公式サンプル    : https://www.example.com/
-  **/
+/**
+* NinjaGL
+* -公式ドキュメント: https://www.example.com/
+* -公式サンプル    : https://www.example.com/
+**/
 
-  /**
-   *  呼び出し時
-   */
-  async function initialize() {
-    // your code
-  }
+/**
+ *  呼び出し時
+ */
+async function initialize() {
+  // your code
+}
 
-  /**
-   * 毎フレーム事の処理
-   * @param state: {  }
-   * @param delta: 1フレーム時間(秒)
-   */
-  async function frameLoop(state, delta) {
-    // your code
-  }
+/**
+ * 毎フレーム事の処理
+ * @param state: { elapsedTime: 経過時間, mouse: { x, y } }
+ * @param delta: 1フレーム時間(秒)
+ * @param input: { forward, backward, left, right, jump, dash, action }
+ */
+async function frameLoop(state, delta) {
+  // your code
+}
 `;
