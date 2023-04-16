@@ -1,7 +1,6 @@
 import { SkinnedMesh } from "three";
 import { NinjaEngine } from "./NinjaEngineManager";
 import { IInputMovement, IScriptManagement } from "./utils/NinjaProps";
-import { EngineInstance } from "./workers/EngineInstance";
 import { RootState } from "@react-three/fiber";
 
 declare var self: any;
@@ -19,12 +18,8 @@ export class NinjaEngineWorker {
   ThreeJSVer: string = "0.149.0";
   engine: NinjaEngine;
   worker: Worker | undefined;
-  engineInstance: EngineInstance | undefined;
   constructor(engine: NinjaEngine) {
     this.engine = engine;
-    (window as any).EngineInstance = new EngineInstance();
-    this.engineInstance = (window as any).EngineInstance;
-    this.engineInstance = self.EngineInstance;
   }
 
   /**
@@ -54,6 +49,9 @@ export class NinjaEngineWorker {
 
       // Add UserScripts
       ${importScriptsCode}
+
+      // Avairable UserData
+      let UserData = {};
 
       self.addEventListener("message", (event) => {
         const { type, id, state, delta, input, data, messageId } = event.data;
