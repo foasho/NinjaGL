@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { LoadProcessing } from "../ui-items/LoadProcessing";
 // Icons
 import { TouchMove } from "../ui-items/TouchMove";

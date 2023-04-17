@@ -24,11 +24,11 @@
     "module": "esnext",
     "moduleResolution": "node",
     "isolatedModules": true,
-    "jsx": "preserve",
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
+    "jsx": "preserve",
     "plugins": [
       {
         "name": "next"

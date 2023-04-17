@@ -4,7 +4,7 @@ import { RootState } from "@react-three/fiber";
 import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
 import { AvatarController } from "./AvatarController";
-import { createContext } from "react";
+import React, { createContext } from "react";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2, SkinnedMesh, Box3 } from "three";
 import { NinjaShader } from "./NinjaShader";
 import { NJCFile, loadNJCFile, loadNJCFileFromURL } from "./NinjaFileControl";

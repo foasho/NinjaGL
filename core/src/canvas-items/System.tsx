@@ -1,7 +1,7 @@
 import { manualKeyState, useInputControl } from "../utils/InputControls";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { useFrame, RootState } from "@react-three/fiber"
-import { useContext } from "react";
+import React, { useContext } from "react";
 
 
 export const System = () => {

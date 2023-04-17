@@ -1,6 +1,6 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { Sky } from "@react-three/drei"
-import { useContext } from "react"
+import React, { useContext } from "react"
 
 export const SkyComponents = () => {
   const engine = useContext(NinjaEngineContext);

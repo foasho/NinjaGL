@@ -1,5 +1,5 @@
 import { Vector2 } from "three";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { IInputMovement } from "./NinjaProps";
 
 /**

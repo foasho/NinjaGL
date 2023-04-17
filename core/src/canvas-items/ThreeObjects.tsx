@@ -1,6 +1,6 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
-import { useContext, useEffect, useRef } from "react"
+import React, { useContext, useEffect, useRef } from "react"
 import { Color, MathUtils, Object3D } from "three";
 import { ShaderMaterial } from "three";
 

@@ -1,6 +1,6 @@
 import { initInput, manualKeyState, setManualInput } from "../utils/InputControls";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { MdOutlineGames } from "react-icons/md";
 import { Vector2 } from "three";
 

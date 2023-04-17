@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { 
     BsHandbagFill,
     BsFillBookmarkStarFill
@@ -36,7 +36,6 @@ const generateKey = (): string => {
 
 const CreateIcon = (prop: INinjaIconProps) => {
     let icon: JSX.Element | undefined;
-    const idName = generateKey() + "nicon";
     if (prop.template){
         if (prop.template == "gi"){
             switch (prop.type) {
@@ -45,8 +44,10 @@ const CreateIcon = (prop: INinjaIconProps) => {
                     break;
                 case "GiBroadsword":
                     icon = <GiBroadsword/>
+                    break;
                 case "GiJumpAcross":
                     icon = <GiJumpAcross/>
+                    break;
                 default:
                     break;
             }
@@ -58,6 +59,7 @@ const CreateIcon = (prop: INinjaIconProps) => {
                     break;
                 case "BsFillBookmarkStarFill":
                     icon = <BsFillBookmarkStarFill/>
+                    break;
                 default:
                     break;
             }

@@ -8,7 +8,8 @@
     "allowSyntheticDefaultImports": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -19,7 +20,9 @@
     "rootDir": "src"
   },
   "include": [
-    "src"
+    "src",
+    "**/*.tsx",
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",

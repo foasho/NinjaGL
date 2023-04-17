@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";

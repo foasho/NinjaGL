@@ -1,7 +1,7 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { Environment, Sky, SpotLight, SpotLightShadow, Detailed } from "@react-three/drei"
-import { useContext, useEffect, useState, useRef } from "react"
+import React, { useContext, useEffect, useState, useRef } from "react"
 import { MathUtils } from "three";
 import { ShaderMaterial } from "three";
 

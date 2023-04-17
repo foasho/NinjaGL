@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useEffect } from "react";
+import React, { useRef, useLayoutEffect, useEffect } from "react";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera as DPerspectiveCamera, OrbitControls } from "@react-three/drei";

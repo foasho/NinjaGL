@@ -1,5 +1,5 @@
 import { Environment } from "@react-three/drei";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 
