@@ -31,14 +31,14 @@ import {
   PerspectiveCamera,
   Quaternion
 } from "three";
-import { useInputControl } from "@/core/utils/InputControls";
+import { useInputControl } from "@/src/utils/InputControls";
 import { useSnapshot } from "valtio";
 import { globalTerrainStore, globalStore } from "../Store";
 import { Perf } from "r3f-perf";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { TerrainInspector } from "../Inspector/TerrainInspector";
 import Swal from 'sweetalert2';
-import { convertObjectToBlob } from "@/core/utils/NinjaFileControl";
+import { convertObjectToBlob } from "@/src/utils/NinjaFileControl";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { Material } from "@gltf-transform/core";
 

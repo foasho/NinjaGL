@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { LoadProcessing } from "./ui-items/LoadProcessing";
+import { LoadProcessing } from "../ui-items/LoadProcessing";
 // Icons
-import { TouchMove } from "./ui-items/TouchMove";
+import { TouchMove } from "../ui-items/TouchMove";
 import { NinjaEngineContext } from "./NinjaEngineManager";
-import { NinjaIcons } from "./uis/NinjaIcons";
+import { NinjaIcons } from "../uis/NinjaIcons";
 
 export const NinjaUI = () => {
   const [ready, setReady] = useState<boolean>(false);

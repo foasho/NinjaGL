@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { MoveableCamera } from "./MoveableCamera";

@@ -1,14 +1,14 @@
-import { World } from "./utils/World";
-import { Octree } from "./utils/Octree";
+import { World } from "./World";
+import { Octree } from "./Octree";
 import { RootState } from "@react-three/fiber";
-import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./utils/NinjaLoaders";
-import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./utils/NinjaProps";
-import { AvatarController } from "./utils/AvatarController";
+import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
+import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
+import { AvatarController } from "./AvatarController";
 import { createContext } from "react";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2, SkinnedMesh, Box3 } from "three";
-import { NinjaShader } from "./utils/NinjaShader";
-import { NJCFile, loadNJCFile, loadNJCFileFromURL } from "./utils/NinjaFileControl";
-import { InitDesktopConfipParams, InitMobileConfipParams, InitTabletConfipParams } from "./utils/NinjaInit";
+import { NinjaShader } from "./NinjaShader";
+import { NJCFile, loadNJCFile, loadNJCFileFromURL } from "./NinjaFileControl";
+import { InitDesktopConfipParams, InitMobileConfipParams, InitTabletConfipParams } from "./NinjaInit";
 import { NinjaEngineWorker } from "./NinjaEngineWorker";
 
 export class NinjaEngine {
@@ -222,6 +222,7 @@ export class NinjaEngine {
           // args.positionがあれば追加したFaceを移動させる
           if (om.args.position){
             const pos = om.args.position;
+            console.log(pos);
             const posVec = new Vector3(pos.x, pos.y, pos.z);
             if (this.octree){
               this.octree.translateFaceByName(om.id, posVec.clone());

@@ -1,13 +1,11 @@
-import { NinjaEngine, NinjaEngineContext } from "@/core/NinjaEngineManager";
-import { NinjaCanvas } from "@/core/NinjaCanvas";
+import { NinjaEngine, NinjaEngineContext } from "@/src/utils/NinjaEngineManager";
+import { NinjaCanvas } from "@/src/utils/NinjaCanvas";
 import { useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";
-import Swal from "sweetalert2";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
-import { clone as SkeletonUtilsClone } from "three/examples/jsm/utils/SkeletonUtils";
-import { NJCFile } from "@/core/utils/NinjaFileControl";
-import { IConfigParams } from "@/core/utils/NinjaProps";
+import { NJCFile } from "@/src/utils/NinjaFileControl";
+import { IConfigParams } from "@/src/utils/NinjaProps";
 
 /**
 * OMとUIから一時的なJSONデータを生成し、
@@ -29,6 +27,7 @@ export const DebugPlay = () => {
       }
       return _om;
     });
+    console.log("oms length: ", oms.length);
     const ums = [...editor.getUMs()];
     const tms = [...editor.getTMs()];
     const sms = [...editor.getSMs()];

@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import { use, useContext, useEffect, useRef, useState } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
+import { IObjectManagement } from "@/src/utils/NinjaProps";
 import { Fog } from "three";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";

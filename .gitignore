@@ -2,7 +2,7 @@
 
 # dependencies
 /node_modules
-src/core/node_modules
+core/node_modules/*
 */node_modules/*
 
 /.pnp
@@ -17,8 +17,8 @@ src/core/node_modules
 
 # production
 /build
-src/core/build
-src/core/dist
+core/build/*
+core/dist/*
 
 # misc
 .DS_Store

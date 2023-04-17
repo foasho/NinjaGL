@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Euler, Vector3 } from "three";
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 
 export interface IStaticObjectsProps { }

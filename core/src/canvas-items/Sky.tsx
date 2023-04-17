@@ -1,4 +1,4 @@
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { Sky } from "@react-three/drei"
 import { useContext } from "react"
 

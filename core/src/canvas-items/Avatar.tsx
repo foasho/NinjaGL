@@ -1,4 +1,4 @@
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Mesh, Object3D, Vector3 } from "three";

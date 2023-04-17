@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/core/utils/NinjaProps";
+import { IObjectManagement } from "@/src/utils/NinjaProps";
 import { 
   // PivotControls, 
   useHelper } from "@react-three/drei";

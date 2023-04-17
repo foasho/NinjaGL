@@ -1,6 +1,6 @@
 import { Environment } from "@react-three/drei";
 import { useContext } from "react";
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 
 const EnvirmentComponent = (om: IObjectManagement) => {

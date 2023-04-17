@@ -1,5 +1,5 @@
 import { manualKeyState, useInputControl } from "../utils/InputControls";
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { useFrame, RootState } from "@react-three/fiber"
 import { useContext } from "react";
 

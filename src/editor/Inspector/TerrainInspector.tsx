@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { GiFlatPlatform, GiMountainCave, GiMountaintop, GiPaintBrush } from "react-icons/gi";
 import { useSnapshot } from "valtio";
 import { globalTerrainStore } from "../Store";
-import { convertObjectToBlob, exportGLTF } from "@/core/utils/NinjaFileControl";
+import { convertObjectToBlob, exportGLTF } from "@/src/utils/NinjaFileControl";
 import { Object3D, Scene } from "three";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode, isNumber } from "@/commons/functional";

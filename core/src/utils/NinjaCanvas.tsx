@@ -1,19 +1,20 @@
-import { NinjaEngineContext } from "./NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { Canvas, useThree, RenderProps } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Avatar } from "./canvas-items/Avatar";
-import { SkyComponents } from "./canvas-items/Sky";
-import { StaticObjects } from "./canvas-items/StaticObjects";
-import { System } from "./canvas-items/System";
-import { Terrain } from "./canvas-items/Terrain";
+import { Avatar } from "../canvas-items/Avatar";
+import { SkyComponents } from "../canvas-items/Sky";
+import { StaticObjects } from "../canvas-items/StaticObjects";
+import { System } from "../canvas-items/System";
+import { Terrain } from "../canvas-items/Terrain";
 import { NinjaUI } from "./NinjaUI";
-import { LoadProcessing } from "./ui-items/LoadProcessing";
-import { Lights } from "./canvas-items/Lights";
+import { LoadProcessing } from "../ui-items/LoadProcessing";
+import { Lights } from "../canvas-items/Lights";
 import { INinjaGLProps } from "./NinjaGL";
-import { ThreeObjects } from "./canvas-items/ThreeObjects";
-import { Cameras } from "./canvas-items/Camera";
+import { ThreeObjects } from "../canvas-items/ThreeObjects";
+import { Cameras } from "../canvas-items/Camera";
 import { proxy } from "valtio";
 import { JSONTree } from 'react-json-tree';
+import { MyEnvirments } from "../canvas-items/MyEnvirments";
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
@@ -51,6 +52,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
             <SkyComponents />
             <ThreeObjects/>
             <Cameras/>
+            <MyEnvirments/>
           </>
         }
         {props.children && props.children}

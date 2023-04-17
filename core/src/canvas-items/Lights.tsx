@@ -1,13 +1,14 @@
-import { NinjaEngineContext } from "../NinjaEngineManager";
+import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { Environment, Sky, SpotLight, SpotLightShadow, Detailed } from "@react-three/drei"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState, useRef } from "react"
 import { MathUtils } from "three";
 import { ShaderMaterial } from "three";
 
 const Light = (om: IObjectManagement) => {
+  const ref = useRef<any>();
   let light = undefined;
-  let color: string = (om.args.materialData.value) ? om.args.materialData.value : '#fadcb9';
+  let color: string = (om.args.materialData && om.args.materialData.value) ? om.args.materialData.value : '#fadcb9';
   if (om.args.type == "spot") {
     light = (
       <>
@@ -20,6 +21,7 @@ const Light = (om: IObjectManagement) => {
           color={color}
           volumetric={false}
           layers={om.layerNum}
+          ref={ref}
         />
       </>
     )
@@ -34,6 +36,7 @@ const Light = (om: IObjectManagement) => {
           castShadow
           color={color}
           layers={om.layerNum}
+          ref={ref}
         />
       </>
     )
@@ -45,6 +48,7 @@ const Light = (om: IObjectManagement) => {
           intensity={om.args.intensity ? om.args.intensity : 0.5}
           color={color}
           layers={om.layerNum}
+          ref={ref}
         />
       </>
     )
@@ -57,10 +61,28 @@ const Light = (om: IObjectManagement) => {
           position={om.args.position? om.args.position: [5, 5, 5]}
           color={color}
           layers={om.layerNum}
+          ref={ref}
         />
       </>
     )
   }
+
+  useEffect(() => {
+    if (ref.current) {
+      if (om.layerNum){
+        ref.current.layers.set(om.layerNum);
+      }
+      if (om.args.position) ref.current.position.copy(om.args.position);
+      if (om.args.rotation) ref.current.rotation.copy(om.args.rotation);
+      if (om.args.scale) ref.current.scale.copy(om.args.scale);
+      if (om.args.castShadow) ref.current.castShadow = om.args.castShadow;
+      if (om.args.receiveShadow) ref.current.receiveShadow = om.args.receiveShadow;
+      if (om.args.intensity) ref.current.intensity = om.args.intensity;
+      if (om.args.distance) ref.current.distance = om.args.distance;
+      if (om.args.angle) ref.current.angle = om.args.angle;
+      if (om.args.penumbra) ref.current.penumbra = om.args.penumbra;
+    }
+  }, [light]);
 
   return (
     <>
@@ -74,7 +96,6 @@ export const Lights = () => {
   const [lights, setLights] = useState(engine.getLights());
 
   useEffect(() => {
-    console.log("Lights useEffect");
     setLights(engine.getLights());
     const handleLightsChanged = () => {
       setLights(engine.getLights());
