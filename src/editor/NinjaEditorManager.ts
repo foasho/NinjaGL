@@ -257,6 +257,36 @@ export class NinjaEditorManager {
   }
 
   /**
+   * EnvironmentのPresetを変更
+   */
+  setEnvironmentPreset(id: string, preset: "sunset" | "forest" | "night" | "dawn" ){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.preset = preset;
+    }
+  }
+
+  /**
+   * EnvironmentのBlurを変更
+   */
+  setEnvironmentBlur(id: string, blur: number){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.blur = blur;
+    }
+  }
+
+  /**
+   * EnvironmentのBackgroundフラグを変更
+   */
+  setEnvironmentBackground(id: string, background: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.background = background;
+    }
+  }
+
+  /**
    * 表示を非表示にする
    * @param id 
    * @param value 

@@ -15,23 +15,27 @@
 - NinjaEditor: 汎用ゲームエンジンライクなUIの制作用エディタ
 - NinjaCore: エディタで作成した3DコンテンツをReact上のコンポネント組み込めるCoreライブラリ
 
-## インストール(USAGE)
+## 使い方(USAGE)
 ```:commandline
-npm install ninjagl
+git clone https://github.com/foasho/NinjaGL.git
+cd NinjaGL
+npm i
+npm run dev
 ```
 
 ## 自分のプロダクトへ組み込み
 ```
-npm install ninjagl
+npm install ninja-core
 ```
 
-```:typescript
-import { NinjaGL } from "ninjagl";
+Reactコンポネントへ
+```tsx
+import { NinjaGL } from "ninjagl-core";
 
 function App() {
   return (
     <div>
-      <NinjaGL njcPath={"<your-projects>"}>
+      <NinjaGL njcPath={"<your-projects>"}/>
     </div>
   )
 }

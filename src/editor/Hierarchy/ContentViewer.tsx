@@ -625,6 +625,10 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   )
 }
 
+const MANAGER = new LoadingManager();
+const THREE_PATH = `https://unpkg.com/three@0.149.0`;
+export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
+export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
 
 /**
  * 
@@ -677,8 +681,6 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   scene.add(directionalLight);
 
   // Create GLTF Loader
-  const DRACO_LOADER = new DRACOLoader();
-  const KTX2_LOADER = new KTX2Loader();
   const gltfLoader = new GLTFLoader()
         .setCrossOrigin('anonymous')
         .setDRACOLoader( DRACO_LOADER )
