@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three-stdlib";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
+import { IObjectManagement } from "ninja-core";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";

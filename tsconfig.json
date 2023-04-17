@@ -4,7 +4,8 @@
     "paths": {
       "@/*": [
         "app/*",
-        "src/*"
+        "src/*",
+        "core/*"
       ]
     },
     "target": "es5",
@@ -23,11 +24,11 @@
     "module": "esnext",
     "moduleResolution": "node",
     "isolatedModules": true,
-    "jsx": "preserve",
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
+    "jsx": "preserve",
     "plugins": [
       {
         "name": "next"
@@ -42,6 +43,7 @@
   ],
   "exclude": [
     "node_modules",
-    "examples"
+    "core/examples",
+    "core"
   ]
 }

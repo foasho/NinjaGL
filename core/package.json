@@ -1,0 +1,60 @@
+{
+  "name": "ninja-core",
+  "version": "0.1.7",
+  "private": false,
+  "author": "ShoOsaka",
+  "license": "MIT",
+  "description": "R3F-WEBGL FastGameEditorCore",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foasho/NinjaGL.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "react",
+    "components",
+    "webgl"
+  ],
+  "dependencies": {
+    "@react-three/drei": "^9.56.18",
+    "@react-three/fiber": ">=8.11.0",
+    "@react-three/postprocessing": "^2.7.0",
+    "axios": "^1.3.3",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "meshoptimizer": "^0.18.1",
+    "react-icons": "^4.7.1",
+    "react-json-tree": "^0.18.0",
+    "styled-components": "^5.3.8",
+    "three": ">=0.149.0",
+    "three-stdlib": "^2.21.6",
+    "valtio": "^1.10.4",
+    "web3": "^1.9.0"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "prepublishOnly": "npm run build",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.5",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.23",
+    "@types/react": "^18.0.35",
+    "@types/react-dom": "^18.0.11",
+    "@types/styled-components": "^5.1.26",
+    "rimraf": "^5.0.0",
+    "typescript": "4.9.5"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}

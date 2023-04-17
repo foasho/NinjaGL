@@ -1,5 +1,5 @@
 import styles from "@/App.module.scss";
-import { IObjectManagement } from "@/core/utils/NinjaProps"
+import { IObjectManagement } from "ninja-core"
 import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";

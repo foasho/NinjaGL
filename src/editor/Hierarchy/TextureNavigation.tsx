@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { ITextureManagement } from "@/core/utils/NinjaProps";
+import { ITextureManagement } from "ninja-core";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
 

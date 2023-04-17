@@ -3,7 +3,7 @@ import { Box3, BoxHelper, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh,
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "@/core/utils/NinjaProps";
+import { IObjectManagement } from "ninja-core";
 import { PivotControls } from "./PivoitControl";
 import { globalStore } from "@/editor/Store";
 import { useSnapshot } from "valtio";

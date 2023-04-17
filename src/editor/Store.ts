@@ -1,4 +1,4 @@
-import { IScriptManagement } from '@/core/utils/NinjaProps';
+import { IScriptManagement } from 'ninja-core';
 import { AnimationClip, Group, Mesh, Object3D } from 'three';
 import { proxy } from 'valtio';
 
