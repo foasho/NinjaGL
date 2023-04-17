@@ -43,6 +43,7 @@
   ],
   "exclude": [
     "node_modules",
-    "core/examples"
+    "core/examples",
+    "core"
   ]
 }
