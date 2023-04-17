@@ -1,11 +1,11 @@
-import { NinjaEngine, NinjaEngineContext } from "@/src/utils/NinjaEngineManager";
-import { NinjaCanvas } from "@/src/utils/NinjaCanvas";
+import { NinjaEngine, NinjaEngineContext } from "ninja-core";
+import { NinjaCanvas } from "ninja-core";
 import { useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
-import { NJCFile } from "@/src/utils/NinjaFileControl";
-import { IConfigParams } from "@/src/utils/NinjaProps";
+import { NJCFile } from "ninja-core";
+import { IConfigParams } from "ninja-core";
 
 /**
 * OMとUIから一時的なJSONデータを生成し、

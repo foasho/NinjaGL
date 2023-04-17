@@ -6,7 +6,7 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
-import { convertObjectToFile } from "@/src/utils/NinjaFileControl";
+import { convertObjectToFile } from "ninja-core";
 import { useSnapshot } from "valtio";
 import { globalPlayerStore } from "../Store";
 import { useSession } from "next-auth/react";

@@ -1,8 +1,7 @@
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
 import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
-import { GLTFLoader, SkeletonUtils } from "three-stdlib";
-import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
+import { GLTFLoader, SkeletonUtils, GLTFExporter, GLTFExporterOptions } from "three-stdlib";
 import JSZip from 'jszip';
 import { InitMobileConfipParams } from "./NinjaInit";
 
@@ -245,7 +244,7 @@ export const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
       binary: true,
       animations: scene.animations,
       includeCustomExtensions: true,
-      maxTextureSize: 4096
+      // maxTextureSize: 4096
     };
 
     exporter.parse(
@@ -257,9 +256,9 @@ export const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
           reject(new Error('GLTFExporter returned a non-binary result.'));
         }
       },
-      (error) => {
-        reject(error);
-      },
+      // (error) => {
+      //   reject(error);
+      // },
       options
     );
   });
@@ -278,7 +277,7 @@ export const convertObjectToArrayBuffer = async (scene: Scene): Promise<ArrayBuf
       binary: true,
       animations: scene.animations,
       includeCustomExtensions: true,
-      maxTextureSize: 4096
+      // maxTextureSize: 4096
     };
     exporter.parse(
       scene,
@@ -287,7 +286,7 @@ export const convertObjectToArrayBuffer = async (scene: Scene): Promise<ArrayBuf
           return result;
         }
       },
-      (error) => {},
+      // (error) => {},
       options,
       );
   });
@@ -303,7 +302,7 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
       binary: true,
       animations: object.animations,
       includeCustomExtensions: true,
-      maxTextureSize: 4096
+      // maxTextureSize: 4096
     };
 
     if (userData){
@@ -321,8 +320,9 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
           return resolve(saveString(output));
         }
       },
-      (error) => {},
-      options);
+      // (error) => {},
+      options
+      );
   });
 }
 
@@ -347,7 +347,7 @@ export const convertObjectToFile = (
       binary: true,
       animations: object.animations,
       includeCustomExtensions: true,
-      maxTextureSize: 4096
+      // maxTextureSize: 4096
     };
 
     if (userData) {
@@ -374,10 +374,10 @@ export const convertObjectToFile = (
         const file = new File([blob], fileName, { type: mimeType });
         return resolve(file);
       },
-      (error) => {
-        console.error("Error exporting scene:" + fileName);
-        console.error(error);
-      },
+      // (error) => {
+      //   console.error("Error exporting scene:" + fileName);
+      //   console.error(error);
+      // },
       options
     );
   });

@@ -21,7 +21,7 @@ import {
   AiFillFolderOpen
 } from "react-icons/ai";
 import Swal from "sweetalert2";
-import { InitScriptManagement } from "@/src/utils/NinjaInit";
+import { InitScriptManagement } from "ninja-core";
 import { useSnapshot } from "valtio";
 import { globalContentStore, globalScriptStore } from "../Store";
 import { useSession } from "next-auth/react";

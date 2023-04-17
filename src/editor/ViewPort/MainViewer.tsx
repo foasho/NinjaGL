@@ -14,7 +14,7 @@ import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
 import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
-import { useInputControl } from "@/src/utils/InputControls";
+import { useInputControl } from "ninja-core";
 import { AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";

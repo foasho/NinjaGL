@@ -1,4 +1,4 @@
-import { IObjectManagement } from "@/src/utils/NinjaProps";
+import { IObjectManagement } from "ninja-core";
 import { useHelper } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"

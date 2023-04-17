@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { IScriptManagement } from "@/src/utils/NinjaProps";
+import { IScriptManagement } from "ninja-core";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
-import { InitScriptManagement } from "@/src/utils/NinjaInit";
+import { InitScriptManagement } from "ninja-core";
 import { useSnapshot } from "valtio";
 import { globalScriptStore } from "../Store";
 import { MathUtils } from "three";

@@ -13,7 +13,7 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
-import { convertObjectToFile } from "@/src/utils/NinjaFileControl";
+import { convertObjectToFile } from "ninja-core";
 
 
 export const PlayerEditor = () => {
