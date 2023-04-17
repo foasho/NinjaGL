@@ -1,7 +1,7 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useContext, useEffect, useRef, useState } from "react";
-import { Mesh, Object3D, Vector3 } from "three";
+import { useThree } from "@react-three/fiber";
+import React from "react";
+import { useContext, useEffect, useRef } from "react";
 
 export interface IAvatarProps { }
 

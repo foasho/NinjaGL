@@ -1,6 +1,6 @@
 import { SkinnedMesh } from "three";
 import { NinjaEngine } from "./NinjaEngineManager";
-import { IInputMovement, IScriptManagement } from "./utils/NinjaProps";
+import { IInputMovement, IScriptManagement } from "./NinjaProps";
 import { RootState } from "@react-three/fiber";
 
 declare var self: any;

@@ -1,5 +1,5 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
-import { Canvas, useThree, RenderProps } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Avatar } from "../canvas-items/Avatar";
 import { SkyComponents } from "../canvas-items/Sky";

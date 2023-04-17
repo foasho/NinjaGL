@@ -29,10 +29,10 @@ export class NinjaEngine {
   ums: IUIManagement[] = [];
   tms: ITextureManagement[] = [];
   sms: IScriptManagement[] = [];
-  world: World | undefined;
-  octree: Octree | undefined;
-  avatar: AvatarController | undefined;
-  camera: PerspectiveCamera | OrthographicCamera | undefined;
+  world: World;
+  octree: Octree;
+  avatar: AvatarController;
+  camera: PerspectiveCamera | OrthographicCamera;
   listener: AudioListener = new AudioListener();
   sounds: ISoundProps[] = [];
   shader: NinjaShader = new NinjaShader();
@@ -374,7 +374,7 @@ export class NinjaEngine {
   /**
    * アバターのオブジェクトマネジメントを取得
    */
-  getAvatarObject(): IObjectManagement | undefined {
+  getAvatarObject(): IObjectManagement {
     return this.oms.find(om => om.type == "avatar");
   }
 
@@ -443,28 +443,28 @@ export class NinjaEngine {
   /**
    * 地形データを取得する
    */
-  getTerrain(): IObjectManagement | undefined {
+  getTerrain(): IObjectManagement {
     return this.oms.find(om => om.type == "terrain");
   }
 
   /**
    * そらデータを取得する
    */
-  getSky(): IObjectManagement | undefined {
+  getSky(): IObjectManagement {
     return this.oms.find(om => om.type == "sky");
   }
 
   /**
    * 雲データを取得する
    */
-  getCloud(): IObjectManagement | undefined {
+  getCloud(): IObjectManagement {
     return this.oms.find(om => om.type == "cloud");
   }
 
   /**
    * Environmentデータを取得する
    */
-  getEnvironment(): IObjectManagement | undefined {
+  getEnvironment(): IObjectManagement {
     return this.oms.find(om => om.type == "environment");
   }
 
