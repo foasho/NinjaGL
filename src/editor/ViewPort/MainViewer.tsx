@@ -26,6 +26,7 @@ import { FogComponent } from "./MainViewItems/Fog";
 import { useSnapshot } from "valtio";
 import { globalContentStore } from "../Store";
 import { useSession } from "next-auth/react";
+import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 
 export const MainViewer = () => {
   const contentsState = useSnapshot(globalContentStore);
@@ -197,6 +198,7 @@ export const MainViewer = () => {
         <ThreeObjects/>
         <Cameras/>
         <FogComponent/>
+        <MyEnviroment/>
         <SystemHelper isGizmo={isGizmo} cameraFar={cameraFar} cameraSpeed={cameraSpeed} worldSize={worldSize} isGrid={isGrid} isWorldHelper={isWorldHelper} worldGridSize={worldGridSize} />
       </Canvas>
       <div className={styles.uiCanvas} style={{ display: showUI? "block": "none" }}>

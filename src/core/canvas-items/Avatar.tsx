@@ -11,7 +11,7 @@ export interface IAvatarProps { }
  * @returns 
  */
 export const Avatar = () => {
-  const ref = useRef<Mesh>();
+  const ref = useRef<any>();
   const engine = useContext(NinjaEngineContext);
   const { camera } = useThree();
 

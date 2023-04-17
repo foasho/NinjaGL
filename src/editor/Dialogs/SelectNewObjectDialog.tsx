@@ -36,6 +36,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectCamera = (value: string) => {
     prop.response({ type: "camera", value: value });
   }
+  const selectLightFormer = (value: string) => {
+    prop.response({ type: "lightformer", value: value });
+  }
+  const selectCloud = (value: string) => {
+    prop.response({ type: "cloud", value: value });
+  }
+  const selectEnvironment = (value: string) => {
+    prop.response({ type: "environment", value: value });
+  }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
     console.log(e);
@@ -66,6 +75,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
               <div className={styles.name}>
                 {t("sky")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("cloud")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/cloud.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("cloud")}
               </div>
             </div>
             <div className={styles.card} onClick={() => {setSelectType("sound")}} >
@@ -100,12 +117,20 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("camera")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {setSelectType("fog")}} >
+            <div className={styles.card} onClick={() => {setSelectType("environment")}} >
               <div className={styles.icon}>
-                <img className={styles.img} src="fileicons/fog.png"/>
+                <img className={styles.img} src="fileicons/environment.png"/>
               </div>
               <div className={styles.name}>
-                {t("fog")}
+                {t("environment")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("lightformer")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/lightformer.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("lightformer")}
               </div>
             </div>
           </>
@@ -113,7 +138,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 
           {selectType == "light" &&
           <>
-            <div className={styles.card} onClick={() => {selectLight("direction")}} >
+            <div className={styles.card} onClick={() => {selectLight("directional")}} >
               <div className={styles.icon}>
                 <img className={styles.img} src="fileicons/directionlight.png"/>
               </div>
@@ -258,6 +283,57 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </div>
           </>
         }
+
+        {selectType == "cloud" &&
+          <>
+            <div className={styles.card} onClick={() => {selectCloud("cloud")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/cloud.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("cloud")}
+              </div>
+            </div>
+          </>
+        }
+
+        {selectType == "environment" &&
+          <>
+            <div className={styles.card} onClick={() => {selectEnvironment("sunset")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/sunset.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("sunset")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectEnvironment("dawn")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/dawn.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("dawn")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectEnvironment("night")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/night.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("night")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectEnvironment("forest")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/forest.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("forest")}
+              </div>
+            </div>
+          </>
+        }
+
         </div>
       </div>
     </div>
@@ -267,7 +343,8 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound" | "object" | "three" | "ui" | "camera" | "fog";
+  type: "light" | "sky" | "sound" | "object" | "three" 
+    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer";
   value: string;
 }
 /**

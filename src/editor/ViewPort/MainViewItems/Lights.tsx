@@ -157,7 +157,7 @@ export const MyLight = (prop: ILightProps) => {
             </mesh>
           </>
         }
-        {om.args.type == "direction" &&
+        {om.args.type == "directional" &&
           <>
               <PivotControls
                 scale={5}

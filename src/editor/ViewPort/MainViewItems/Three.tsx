@@ -38,7 +38,7 @@ const ThreeObject = (props: IThreeObject) => {
   const ref = useRef<Mesh>();
   const editor = useContext(NinjaEditorContext);
   const [helper, setHelper] = useState<boolean>(false);
-  const [materialType, setMaterialType] = useState<"standard"|"phong"|"tone"|"shader">("standard");
+  const [materialType, setMaterialType] = useState<"standard"|"phong"|"toon"|"shader">("standard");
   const id = props.om.id;
   const matRef = useRef<any>();
   let geometry;
@@ -59,9 +59,17 @@ const ThreeObject = (props: IThreeObject) => {
   }
 
   let material;
+  let color;
   if (materialType == "standard") {
     material = (<meshStandardMaterial ref={matRef} />);
   }
+  else if (materialType == "phong") {
+    material = (<meshPhongMaterial ref={matRef} />);
+  }
+  else if (materialType == "toon") {
+    material = (<meshToonMaterial ref={matRef} />);
+  }
+
 
   // 操作系
   const onDragStart = () => {
@@ -88,8 +96,8 @@ const ThreeObject = (props: IThreeObject) => {
         ref.current.rotation.copy(editor.getRotation(id));
         ref.current.scale.copy(editor.getScale(id));
         const materialData = editor.getMaterialData(id);
-        if (materialData && materialData.type == "standard"){
-          if (materialType == "standard"){
+        if (materialData){
+          if (materialType !== "shader"){
             if (matRef.current){
               matRef.current.color.set(materialData.value);
             }
@@ -107,8 +115,8 @@ const ThreeObject = (props: IThreeObject) => {
       const scale = editor.getScale(id);
       ref.current.scale.copy(scale);
       const materialData = editor.getMaterialData(id);
-      if (materialData && materialData.type == "standard"){
-        if (materialType == "standard"){
+      if (materialData){
+        if (materialType !== "shader"){
           if (matRef.current){
             matRef.current.color.set(materialData.value);
           }
