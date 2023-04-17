@@ -375,7 +375,10 @@ export class NinjaEditorManager {
   setOMofObject(id: string, obj: Object3D){
     const target = this.oms.find(om => om.id == id);
     if (target) {
-      target.object = obj;
+      if (target.object) {
+        target.object.parent.remove(target.object);
+      }
+      (target as any).object = obj;
     }
   }
 
@@ -515,6 +518,14 @@ export class NinjaEditorManager {
   }
 
   /**
+   * 雲を取得
+   */
+  getCloud = (): IObjectManagement|undefined => {
+    const data = this.oms.find(om => om.type == "cloud");
+    return data;
+  }
+
+  /**
    * Three.js標準のObjectを取得
    * @param trig 
    */
@@ -536,6 +547,22 @@ export class NinjaEditorManager {
    */
   getCameras = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "camera");
+    return data;
+  }
+
+  /**
+   * Environmentを取得
+   */
+  getEnvironment = (): IObjectManagement|undefined => {
+    const data = this.oms.find(om => om.type == "environment");
+    return data;
+  }
+
+  /**
+   * LightFormerを取得
+   */
+  getLightFormer = (): IObjectManagement|undefined => {
+    const data = this.oms.find(om => om.type == "lightformer");
     return data;
   }
 

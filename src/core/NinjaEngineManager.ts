@@ -422,7 +422,7 @@ export class NinjaEngine {
    * アバター用カメラをセットする
    * @param camera 
    */
-  setAvatarCamera(camera: PerspectiveCamera | OrthographicCamera) {
+  setAvatarCamera(camera: any) {
     this.camera = camera;
     if (this.avatar) {
       this.avatar.setCamera(this.camera);
@@ -451,6 +451,20 @@ export class NinjaEngine {
    */
   getSky(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "sky");
+  }
+
+  /**
+   * 雲データを取得する
+   */
+  getCloud(): IObjectManagement | undefined {
+    return this.oms.find(om => om.type == "cloud");
+  }
+
+  /**
+   * Environmentデータを取得する
+   */
+  getEnvironment(): IObjectManagement | undefined {
+    return this.oms.find(om => om.type == "environment");
   }
 
   /**

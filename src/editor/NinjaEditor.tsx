@@ -4,7 +4,7 @@ import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef, createContext } from "react";
-import { MathUtils } from "three";
+import { Euler, MathUtils, Vector3 } from "three";
 import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
@@ -150,6 +150,34 @@ export const NinjaEditor = () => {
           visibleType: "auto",
         }
       )
+    }
+    else if (data.type == "environment"){
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: `*${data.value}`,
+          type: "environment",
+          args: {
+            preset: data.value,
+          },
+          physics: "none",
+          visibleType: "force",
+        }
+      );
+    }
+    else if (data.type == "lightformer"){
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: `*${data.value}`,
+          type: "lightformer",
+          args: {
+            type: data.value,
+          },
+          physics: "none",
+          visibleType: "force",
+        }
+      );
     }
   }
 
@@ -300,6 +328,114 @@ export const NinjaEditor = () => {
     };
     input.click();
   }
+
+  /**
+   * プロジェクトが何もないときは、
+   * BoxとPlane, DirectionalLight, SpotLightを追加
+   * Environment(Sunset)を追加
+   */
+  useEffect(() => {
+    if (editor.getOMs().length == 0){
+      // Box
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: "movebox",
+          type: "three",
+          args: {
+            type: "box",
+            position: new Vector3(0, .5, 0),
+            materialData: {
+              type: "phong",
+              value: "#49D3D3",
+            },
+            castShadow: true,
+          },
+          physics: "none",
+          visibleType: "auto",
+        }
+      );
+      // DirectionalLight
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: "Directional1",
+          type: "light",
+          args: {
+            type: "directional",
+            position: new Vector3(14, 7, 8),
+            materialData: {
+              type: "standard",
+              value: "#fefefe",
+            },
+            intensity: 1,
+            castShadow: true,
+          },
+          physics: "none",
+          visibleType: "auto",
+        }
+      );
+      // SpotLight
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: "Spot1",
+          type: "light",
+          args: {
+            type: "spot",
+            position: new Vector3(-6, 7, -8),
+            materialData: {
+              type: "standard",
+              value: "#FDF1D9",
+            },
+            intensity: 1,
+            castShadow: true,
+            receiveShadow: true,
+          },
+          physics: "none",
+          visibleType: "auto",
+        }
+      );
+      // Plane
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: "Plane",
+          type: "three",
+          args: {
+            type: "plane",
+            position: new Vector3(0, 0, 0),
+            rotation: new Euler(-Math.PI / 2, 0, 0),
+            scale: new Vector3(10, 10, 10),
+            materialData: {
+              type: "standard",
+              value: "#F2F2F2",
+            },
+            castShadow: true,
+            receiveShadow: true,
+          },
+          physics: "none",
+          visibleType: "auto",
+        }
+      );
+      // Environment
+      editor.setOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: "Environment",
+          type: "environment",
+          args: {
+            preset: "sunset",
+            blur: 0.7,
+            background: true,
+          },
+          physics: "none",
+          visibleType: "force",
+        }
+      );
+    }
+  }
+  , []);
   
 
   return (

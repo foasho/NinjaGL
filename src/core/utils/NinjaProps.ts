@@ -41,7 +41,8 @@ export interface IInputMovement {
 export interface IObjectManagement {
   id: string;
   name?: string;
-  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "sky" | "light" | "fog" | "camera";
+  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" 
+    | "sky" | "light" | "fog" | "camera" | "cloud" | "environment" | "lightformer";
   filePath?: string;
   visibleType: "auto" | "force" | "none";
   layerNum?: number;

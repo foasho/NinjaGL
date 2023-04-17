@@ -49,7 +49,7 @@ const Light = (om: IObjectManagement) => {
       </>
     )
   }
-  else if (om.args.type == "direction") {
+  else if (om.args.type == "directional") {
     light = (
       <>
         <directionalLight
