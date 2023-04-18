@@ -20,7 +20,7 @@ export const HierarchyTree = () => {
   
   useEffect(() => {
     const handleOMsChanged = () => {
-      setOMs(editor.getObjectManagements());
+      setOMs(editor.getOMs());
     }
     editor.onOMsChanged(handleOMsChanged);
     return () => {

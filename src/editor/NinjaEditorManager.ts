@@ -542,6 +542,18 @@ export class NinjaEditorManager {
   removeAvatar = () => {
     this.oms = this.oms.filter(om => om.type !== "avatar");
   }
+  private avatarChangedListeners: (() => void)[] = [];
+  onAvatarChanged(listener: () => void) {
+    this.avatarChangedListeners.push(listener);
+  }
+  offAvatarChanged(listener: () => void) {
+    this.avatarChangedListeners = this.avatarChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  protected notifyAvatarChanged() {
+    this.avatarChangedListeners.forEach(l => l());
+  }
 
   /**
    * Skyを取得
@@ -556,15 +568,15 @@ export class NinjaEditorManager {
    */
   private skyChangedListeners: (() => void)[] = [];
   onSkyChanged(listener: () => void) {
-    this.scriptManagementChangedListeners.push(listener);
+    this.skyChangedListeners.push(listener);
   }
   offSkyChanged(listener: () => void) {
-    this.scriptManagementChangedListeners = this.scriptManagementChangedListeners.filter(
+    this.skyChangedListeners = this.skyChangedListeners.filter(
       l => l !== listener
     );
   }
   protected notifySkyChanged() {
-    this.scriptManagementChangedListeners.forEach(l => l());
+    this.skyChangedListeners.forEach(l => l());
   }
 
   /**
@@ -582,6 +594,16 @@ export class NinjaEditorManager {
   getThreeObjects = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "three");
     return data;
+  }
+  private threeChangedListeners: (() => void)[] = [];
+  onThreeChanged(listener: () => void) {
+    this.threeChangedListeners.push(listener);
+  }
+  offThreeChanged(listener: () => void) {
+    this.threeChangedListeners = this.threeChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyThreeChanged() {
+    this.threeChangedListeners.forEach(l => l());
   }
 
   /**
@@ -612,6 +634,16 @@ export class NinjaEditorManager {
     const data = this.oms.filter(om => om.type == "text");
     return data;
   }
+  private textChangedListeners: (() => void)[] = [];
+  onTextChanged(listener: () => void) {
+    this.textChangedListeners.push(listener);
+  }
+  offTextChanged(listener: () => void) {
+    this.textChangedListeners = this.textChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyTextChanged() {
+    this.textChangedListeners.forEach(l => l());
+  }
 
   /**
    * カメラ取得
@@ -619,6 +651,16 @@ export class NinjaEditorManager {
   getCameras = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "camera");
     return data;
+  }
+  private cameraChangedListeners: (() => void)[] = [];
+  onCameraChanged(listener: () => void) {
+    this.cameraChangedListeners.push(listener);
+  }
+  offCameraChanged(listener: () => void) {
+    this.cameraChangedListeners = this.cameraChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyCameraChanged() {
+    this.cameraChangedListeners.forEach(l => l());
   }
 
   /**
@@ -641,9 +683,9 @@ export class NinjaEditorManager {
   protected notifyEnvChanged() {
     this.envChangedListeners.forEach(l => l());
   }
-
   /**
    * LightFormerを取得
+   * ※リスナーはEnvironmentと共同
    */
   getLightformers = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "lightformer");
@@ -668,20 +710,20 @@ export class NinjaEditorManager {
   getOMs = () => {
     return this.oms;
   }
-    /**
+  /**
    * OMの変更リスナー
    */
-    private objectManagementsChangedListeners: (() => void)[] = [];
-    onOMsChanged(listener: () => void) {
-      this.objectManagementsChangedListeners.push(listener);
-    }
-    offOMsChanged(listener: () => void) {
-      this.objectManagementsChangedListeners = this.objectManagementsChangedListeners.filter( l => l !== listener );
-    }
-    // OMの変更を通知する
-    protected notifyOMsChanged() {
-      this.objectManagementsChangedListeners.forEach(l => l());
-    }
+  private objectManagementsChangedListeners: (() => void)[] = [];
+  onOMsChanged(listener: () => void) {
+    this.objectManagementsChangedListeners.push(listener);
+  }
+  offOMsChanged(listener: () => void) {
+    this.objectManagementsChangedListeners = this.objectManagementsChangedListeners.filter( l => l !== listener );
+  }
+  // OMの変更を通知する
+  protected notifyOMsChanged() {
+    this.objectManagementsChangedListeners.forEach(l => l());
+  }
   
 
   /**
