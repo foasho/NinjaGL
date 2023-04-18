@@ -1,11 +1,11 @@
-import { NinjaEngine, NinjaEngineContext } from "ninja-core";
+import { NinjaEngine, NinjaEngineContext, NinjaGL } from "ninja-core";
 import { NinjaCanvas } from "ninja-core";
 import { useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
 import { NJCFile } from "ninja-core";
-import { IConfigParams } from "ninja-core";
+import { IConfigParams, InitMobileConfipParams } from "ninja-core";
 
 /**
 * OMとUIから一時的なJSONデータを生成し、
@@ -32,6 +32,7 @@ export const DebugPlay = () => {
     const tms = [...editor.getTMs()];
     const sms = [...editor.getSMs()];
     const config = editor.config;
+    console.log(config);
     // Configパラメータを設定する
     const _config: IConfigParams = {
       ...config,
@@ -40,14 +41,15 @@ export const DebugPlay = () => {
     const _engine = new NinjaEngine();
     const njcFile = new NJCFile();
     njcFile.setConfig(_config);
+    njcFile.setConfig(InitMobileConfipParams);
     njcFile.setOMs(oms);
     njcFile.setUMs(ums);
     njcFile.setTMs(tms);
     njcFile.setSMs(sms);
-    _engine.setNJCFile(njcFile);
-
-    // エンジンにセット
-    setEngine(_engine);
+    _engine.setNJCFile(njcFile).then(() => {
+      // エンジンにセット
+      setEngine(_engine);
+    });
 
     return () => {
       setEngine(undefined);
@@ -62,6 +64,7 @@ export const DebugPlay = () => {
             <NinjaCanvas />
           </NinjaEngineContext.Provider>
         }
+        {/* <NinjaGL/> */}
       </div>
     </>
   )

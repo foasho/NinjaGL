@@ -28,7 +28,7 @@ export const NinjaGL = (props: INinjaGLProps) => {
     return () => {
       setEngine(undefined);
     }
-  }, []);
+  }, [props.njcPath]);
 
   return (
     <>

@@ -27,6 +27,7 @@ import { useSnapshot } from "valtio";
 import { globalContentStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
+import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 
 export const MainViewer = () => {
   const contentsState = useSnapshot(globalContentStore);
@@ -58,8 +59,6 @@ export const MainViewer = () => {
    */
   const handleDrop = async (e) => {
     e.preventDefault();
-    const DRACO_LOADER = new DRACOLoader();
-    const KTX2_LOADER = new KTX2Loader();
     const loader = new GLTFLoader()
           .setCrossOrigin('anonymous')
           .setDRACOLoader( DRACO_LOADER )

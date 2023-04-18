@@ -14,15 +14,25 @@ import { globalStore } from "@/editor/Store";
 export const MainViewInspector = () => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
+  const oms = editor.getOMs();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
-  const [color, setColor] = useState<string>();
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [castShadow, setCastShadow] = useState<boolean>(true);
   const [receiveShadow, setreceiveShadow] = useState<boolean>(true);
   const [helper, setHelper] = useState<boolean>(false);
   const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
   const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"tone"|"shader"; label: string;}>();
+  const [color, setColor] = useState<string>();
+  // Environmentの設定
+  const [background, setBackground] = useState<boolean>(true);
+  const [blur, setBlur] = useState<number>(0.5);
+  const [environmentPreset, setEnvironmentPreset] = useState<{ value: "forest"|"sunset"|"dawn"|"night"; label: string; }>();
+  // Lightformerの設定
+  const [form, setForm] = useState<"circle"|"ring"|"rect">("rect");
+  const [targetName, setTargetName] = useState<string>();
+  const [intensity, setIntensity] = useState<number>();
+
   const id = state.currentId;
   const selectOM = editor.getOMById(id);
   const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
@@ -30,10 +40,68 @@ export const MainViewInspector = () => {
   const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
   const { t } = useTranslation();
 
+  
+  // 物理判定選択肢
+  const physicsOptions = [
+    { value: "aabb", label: t("aabb") },
+    { value: "along", label: t("along") }
+  ];
 
+  // 描画種別の選択肢
+  const visibleTypeOptions: {value: "auto"|"force"|"none", label: string}[] = [
+    { value: "auto", label: t("autoScaling") },
+    { value: "force", label: t("visibleForce") },
+    { value: "none", label: t("visibleNone") }
+  ];
+
+  // マテリアル種別の選択肢
+  const materialOptions: {value: "standard"|"phong"|"tone"|"shader", label: string}[] = [
+    { value: "standard", label: t("StandardMaterial") },
+    { value: "phong", label: t("PhongMaterial") },
+    { value: "tone", label: t("ToneMaterial") },
+    { value: "shader", label: t("ShaderMaterial") }
+  ];
+
+  // Environmentの選択肢
+  const environmentOptions: {value: "sunset"|"dawn"|"night"|"forest", label: string}[] = [
+    { value: "sunset", label: t("sunset") },
+    { value: "dawn", label: t("dawn") },
+    { value: "night", label: t("night") },
+    { value: "forest", label: t("forest") }
+  ];
+
+  // Targetの選択肢 OMから選択肢を取得
+  const targetOptions = oms.map((om) => {
+    return { value: om.id, label: om.name };
+  });
+
+  /**
+   * 選択中Objectをdeleteする
+   * @param id 
+   */
   const deleteObject = (id: string) => {
     editor.deleteOM(id);
   }
+
+  useEffect(() => {
+    if (selectOM){
+      if (selectOM.args.position) setPosition(selectOM.args.position);
+      if (selectOM.args.rotation) setRotation(selectOM.args.rotation);
+      if (selectOM.args.scale) setScale(selectOM.args.scale);
+      if (selectOM.args.backgroud !== undefined) setBackground(selectOM.args.backgroud);
+      if (selectOM.args.helper !== undefined) setHelper(selectOM.args.helper);
+      if (selectOM.args.visibleType !== undefined) setVisibleType(visibleTypeOptions.find((option) => option.value == selectOM.args.visibleType));
+      if (selectOM.args.materialData !== undefined) setMaterialType(materialOptions.find((option) => option.value == selectOM.args.materialType));
+      if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setColor(selectOM.args.materialData.value);
+      if (selectOM.args.blur) setBlur(selectOM.args.blur);
+      if (selectOM.args.preset) setEnvironmentPreset(environmentOptions.find((option) => option.value == selectOM.args.preset));
+      if (selectOM.args.form) setForm(selectOM.args.form);
+      if (selectOM.args.target && selectOM.args.targe.name !== undefined){
+        setTargetName(selectOM.args.target.name);
+      }
+      if (selectOM.args.intensity) setIntensity(selectOM.args.intensity);
+    };
+  }, [selectOM]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -85,6 +153,7 @@ export const MainViewInspector = () => {
       }
     }
   }
+
   /**
    * 位置変更　Inspector -> Object
    * @param e 
@@ -165,26 +234,6 @@ export const MainViewInspector = () => {
   }
 
 
-  // 物理判定選択肢
-  const physicsOptions = [
-    { value: "aabb", label: t("aabb") },
-    { value: "along", label: t("along") }
-  ];
-
-  // 描画種別の選択肢
-  const visibleTypeOptions: {value: "auto"|"force"|"none", label: string}[] = [
-    { value: "auto", label: t("autoScaling") },
-    { value: "force", label: t("visibleForce") },
-    { value: "none", label: t("visibleNone") }
-  ];
-
-  // マテリアル種別の選択肢
-  const materialOptions: {value: "standard"|"phong"|"tone"|"shader", label: string}[] = [
-    { value: "standard", label: t("StandardMaterial") },
-    { value: "phong", label: t("PhongMaterial") },
-    { value: "tone", label: t("ToneMaterial") },
-    { value: "shader", label: t("ShaderMaterial") }
-  ];
 
   /**
    * 色の変更
@@ -261,6 +310,61 @@ export const MainViewInspector = () => {
   const changeVisibleType = (selectVisibleType) => {
     editor.setVisibleType(id, selectVisibleType.value);
     setVisibleType(selectVisibleType);
+  }
+
+  /**
+   * EnvironmentのPresetを変更
+   */
+  const changeEnvironmentPreset = (selectEnvironmentPreset) => {
+    editor.setEnvironmentPreset(id, selectEnvironmentPreset.value);
+    setEnvironmentPreset(selectEnvironmentPreset);
+  }
+
+  /**
+   * EnvironmentのBlurの変更
+   */
+  const changeEnvironmentBlur = (e) => {
+    const targetValue = e.target.value;
+    if (isNumber(targetValue)){
+      editor.setEnvironmentBlur(id, Number(targetValue));
+      setBlur(Number(targetValue));
+    }
+  }
+
+  /**
+   * Helper表示切り替え
+   */
+  const onCheckEnvironmentBackGround = () => {
+    editor.setEnvironmentBackground(id, !background);
+    setBackground(!background);
+  }
+
+  /**
+   * Formの変更
+   */
+  const changeForm = (selectForm) => {
+    editor.setForm(id, selectForm.value);
+    setForm(selectForm);
+  }
+
+  /**
+   * Targetの変更
+   */
+  const changeTarget = (selectTarget) => {
+    const pos = editor.getPosition(id);
+    setTargetName(selectTarget.label);
+    editor.setTarget(id, selectTarget.label, pos);
+  }
+
+  /**
+   * Intensityの変更
+   */
+  const changeIntensity = (e) => {
+    const targetValue = e.target.value;
+    if (isNumber(targetValue)){
+      editor.setIntensity(id, Number(targetValue));
+      setIntensity(Number(targetValue));
+    }
   }
 
   return (
@@ -628,6 +732,98 @@ export const MainViewInspector = () => {
         </>
       }
 
+      {selectOM && selectOM.type == "environment" &&
+      <>
+        <div className={styles.preset}>
+          <div className={styles.title}>
+            {t("preset")}
+          </div>
+          <div className={styles.input}>
+            <Select
+              options={environmentOptions}
+              value={environmentPreset}
+              onChange={(select) => changeEnvironmentPreset(select)}
+              styles={normalStyles}
+              />
+          </div>
+        </div>
+        <div className={styles.backgroud}>
+          <div className={styles.title}>
+              {t("background")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={background} 
+              onInput={() => onCheckEnvironmentBackGround()}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+        </div>
+        <div className={styles.blur}>
+          <div className={styles.title}>
+            {t("blur")}: {blur}
+          </div>
+          <div className={styles.input}>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={blur}
+              onChange={(e) => changeEnvironmentBlur(e)}
+            />
+          </div>
+        </div>
+      </>
+      }
+
+      {selectOM && selectOM.type == "lightformer" &&
+      <>
+        <div className={styles.form}>
+          <div className={styles.title}>
+            {t("form")}
+          </div>
+          <div className={styles.input}>
+            <Select
+              options={[]}
+              value={form}
+              onChange={(select) => changeForm(select)}
+              styles={normalStyles}
+            />
+          </div>
+        </div>
+        <div className={styles.target}>
+          <div className={styles.title}>
+            {t("target")}
+          </div>
+          <div className={styles.input}>
+            <Select
+              options={targetOptions}
+              value={targetOptions.find((option) => option.label === targetName)}
+              onChange={(select) => changeTarget(select)}
+              styles={normalStyles}
+            />
+          </div>
+        </div>
+        <div className={styles.intensity}>
+          <div className={styles.name}>
+            {t("intensity")}: {intensity}
+          </div>
+          <div className={styles.range}>
+            <input
+              type={"range"}
+              min={0}
+              max={1}
+              step={0.01}
+              value={intensity}
+              onChange={(e) => changeIntensity(e.target.value)}
+            />
+          </div>
+        </div>
+      </>
+      }
       </div>
     </>
   )

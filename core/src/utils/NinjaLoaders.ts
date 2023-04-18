@@ -175,8 +175,6 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
     loader.load(
       props.filePath,
       async (gltf: GLTF) => {
-        console.log("GLTFモデルの初期値確認");
-        console.log(gltf);
         // ジオメトリの取得処理
         let geometry: BufferGeometry | undefined;
         let mat: Material[] = [];
@@ -230,20 +228,16 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
           // 高さが入力されていれば、その高さに合うようにリサイズする
           const nh = baseHeight;
           const ns = props.height / nh;
-          console.log("デフォルトサイズ: ", nh, "スケールサイズ: ", ns);
           gltf.scene.scale.multiplyScalar(ns);
           bbox = new Box3(bbox.min.multiplyScalar(ns), bbox.max.multiplyScalar(ns));
           baseHeight = bbox.max.y - bbox.min.y;
-          console.log("リサイズ後の高さサイズ: ", baseHeight)
         }
         else if (props.mapSize) {
           const nw = baseWidth;
           const ns = props.mapSize / nw;
-          console.log("デフォルトサイズ: ", nw, "スケールサイズ: ", ns);
           gltf.scene.scale.multiplyScalar(ns);
           bbox = new Box3(bbox.min.multiplyScalar(ns), bbox.max.multiplyScalar(ns));
           baseWidth = bbox.max.x - bbox.min.x;
-          console.log("リサイズ後の幅サイズ: ", baseWidth)
         }
 
         if (props.isCenter) {
@@ -298,7 +292,6 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
         console.log('変換後:三角数:', ((newGeometory.attributes.position.count * 6) - 12) / 3);
 
         const conbox = new Box3().setFromObject(myMesh);
-        console.log("conbox", conbox);
         const conHeight = conbox.max.y - conbox.min.y;
         console.log("[高さ差分確認] ポリゴン削減前モデルの高さ: ", baseHeight, " ポリゴン削減後モデルの高さ：", conHeight);
 
@@ -355,8 +348,6 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
     loader.load(
       props.filePath,
       async (gltf: GLTF) => {
-        console.log("Avatar:GLTFモデルの初期値確認");
-        console.log(gltf);
         if (props.isVRM) {
           gltf = gltf.userData.vrm;
         }

@@ -90,21 +90,26 @@ const ThreeObject = (props: IThreeObject) => {
     globalStore.pivotControl = true;
   }
   
-    useEffect(() => {
-      if (ref.current) {
-        ref.current.position.copy(editor.getPosition(id));
-        ref.current.rotation.copy(editor.getRotation(id));
-        ref.current.scale.copy(editor.getScale(id));
-        const materialData = editor.getMaterialData(id);
-        if (materialData){
-          if (materialType !== "shader"){
-            if (matRef.current){
-              matRef.current.color.set(materialData.value);
-            }
+  useEffect(() => {
+    if (ref.current) {
+      if (om.args.position) {
+        ref.current.position.copy(om.args.position);
+      }
+      if (om.args.rotation) {
+        ref.current.rotation.copy(om.args.rotation);
+      }
+      if (om.args.scale) {
+        ref.current.scale.copy(om.args.scale);
+      }
+      if (om.args.materialData){
+        if (materialType !== "shader"){
+          if (matRef.current){
+            matRef.current.color.set(om.args.materialData.value);
           }
         }
       }
-    }, []);
+    }
+  }, []);
 
   useFrame((_, delta) => {
     if (state.currentId == id && state.editorFocus && ref.current) {

@@ -25,3 +25,4 @@ export {
   NinjaEngineContext 
 } from "./utils/NinjaEngineManager";
 
+console.log('index.tsx loaded');
