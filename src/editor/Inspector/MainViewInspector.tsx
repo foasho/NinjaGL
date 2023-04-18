@@ -80,7 +80,10 @@ export const MainViewInspector = () => {
    * @param id 
    */
   const deleteObject = (id: string) => {
-    editor.deleteOM(id);
+    const did = id;
+    const dtype = selectOM.type;
+    // state.init();
+    editor.deleteOM(did, dtype);
   }
 
   useEffect(() => {

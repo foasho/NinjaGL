@@ -241,6 +241,7 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.name = value;
+      this.notifyOMsChanged();
     }
   }
 
@@ -449,31 +450,6 @@ export class NinjaEditorManager {
       (target as any).object = obj;
     }
   }
-
-  /**
-   * OMの追加
-   * @param props 
-   */
-  setOM = (props: IObjectManagement) => {
-    this.oms.push(props);
-    this.notifyOMsChanged();
-  }
-
-  /**
-   * SMの追加
-   */
-  setSM = (props: IScriptManagement): boolean => {
-    if (this.sms.find(sm => sm.id == props.id)) {
-      return false;
-    }
-    if (this.sms.find(sm => sm.name == props.name)) {
-      return false;
-    }
-    this.sms.push(props);
-    this.notifySMsChanged();
-    return true;
-  }
-
   /**
    * 現在選択中のIDを取得
    * @returns 
@@ -695,9 +671,30 @@ export class NinjaEditorManager {
   /**
    * 削除処理
    */
-  deleteOM = (id: string) => {
+  deleteOM = (id: string, type: string=undefined) => {
     this.oms = this.oms.filter(om => om.id !== id);
     this.notifyOMsChanged();
+    if (type == "avatar") {
+      this.notifyAvatarChanged();
+    }
+    if (type == "sky") {
+      this.notifySkyChanged();
+    }
+    if (type == "three") {
+      this.notifyThreeChanged();
+    }
+    if (type == "fog") {
+      this.notifyFogChanged();
+    }
+    if (type == "text") {
+      this.notifyTextChanged();
+    }
+    if (type == "camera") {
+      this.notifyCameraChanged();
+    }
+    if (type == "environment") {
+      this.notifyEnvChanged();
+    }
   }
 
   /**
@@ -724,6 +721,29 @@ export class NinjaEditorManager {
   protected notifyOMsChanged() {
     this.objectManagementsChangedListeners.forEach(l => l());
   }
+  /**
+  * OMの追加
+  */
+  setOM(om: IObjectManagement){
+    this.oms.push(om);
+    this.notifyOMsChanged();
+  }
+
+  /**
+   * SMの追加
+   */
+  setSM = (props: IScriptManagement): boolean => {
+    if (this.sms.find(sm => sm.id == props.id)) {
+      return false;
+    }
+    if (this.sms.find(sm => sm.name == props.name)) {
+      return false;
+    }
+    this.sms.push(props);
+    this.notifySMsChanged();
+    return true;
+  }
+  
   
 
   /**

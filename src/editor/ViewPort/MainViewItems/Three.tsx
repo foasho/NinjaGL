@@ -60,14 +60,16 @@ const ThreeObject = (props: IThreeObject) => {
 
   let material;
   let color;
-  if (materialType == "standard") {
-    material = (<meshStandardMaterial ref={matRef} />);
-  }
-  else if (materialType == "phong") {
-    material = (<meshPhongMaterial ref={matRef} />);
-  }
-  else if (materialType == "toon") {
-    material = (<meshToonMaterial ref={matRef} />);
+  if (om.args.materialData){
+    if (om.args.materialData.type == "standard") {
+      material = (<meshStandardMaterial ref={matRef} />);
+    }
+    else if (om.args.materialData.type == "phong") {
+      material = (<meshPhongMaterial ref={matRef} />);
+    }
+    else if (om.args.materialData.type == "toon") {
+      material = (<meshToonMaterial ref={matRef} />);
+    }
   }
 
 

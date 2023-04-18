@@ -19,7 +19,8 @@ export const MyEnviroment = () => {
     setEnvironment(editor.getEnvironment());
     setLightformers(editor.getLightformers());
     const handleEnvChanged = () => {
-      setEnvironment({...editor.getEnvironment()});
+      setEnvironment(editor.getEnvironment()?{...editor.getEnvironment()}: undefined);
+      setLightformers([...editor.getLightformers()]);
     }
     editor.onEnvChanged(handleEnvChanged);
     return () => {
