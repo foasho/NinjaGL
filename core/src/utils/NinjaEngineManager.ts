@@ -1,5 +1,5 @@
 import { World } from "./World";
-import { Octree } from "./Octree";
+import { IOctree, Octree } from "./Octree";
 import { RootState } from "@react-three/fiber";
 import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
@@ -74,7 +74,7 @@ export class NinjaEngine {
         this.config.mapsize / 2
       ),
       maxDepth: this.config.octreeDepth
-    });
+    } as IOctree);
     this.world.addOctree(this.octree);
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
     this.initializeLoadOMs();

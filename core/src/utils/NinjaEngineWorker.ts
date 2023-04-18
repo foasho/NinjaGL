@@ -3,14 +3,6 @@ import { NinjaEngine } from "./NinjaEngineManager";
 import { IInputMovement, IScriptManagement } from "./NinjaProps";
 import { RootState } from "@react-three/fiber";
 
-declare var self: any;
-declare var window: any;
-declare global {
-  interface Window {
-    // EngineInstance: EngineInstance;
-  }
-}
-
 /**
  * NinjaEngineから呼び出されるWorker
  */

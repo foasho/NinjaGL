@@ -50,8 +50,6 @@ const ThreeObject = (om: IObjectManagement) => {
       engine.setOMObjectById(om.id, ref.current as Object3D);
       // posistion, rotation, scale
       if (om.args.position) {
-        console.log("setting position");
-        console.log(om.args.position);
         ref.current.position.copy(om.args.position);
       }
       if (om.args.rotation) {

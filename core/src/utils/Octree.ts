@@ -26,7 +26,7 @@ export interface IOctree {
 /**
  * 理論：http://marupeke296.com/COL_3D_No15_Octree.html
  */
-export class Octree extends Box3 {
+export class Octree {
   // 作成時変数
   min: Vector3;
   max: Vector3;
@@ -37,6 +37,7 @@ export class Octree extends Box3 {
   nodeBoxSize = new Vector3();
   nodeBoxMin = new Vector3();
   nodeBoxMax = new Vector3();
+  box3 = new Box3();
 
   /**
    * ---------------------------------------
@@ -46,7 +47,8 @@ export class Octree extends Box3 {
   name: string = "OctreeInit";
 
   constructor(props: IOctree) {
-    super(); // Box3として拡張
+    this.box3 = new Box3(props.min, props.max);
+    // super(props.min, props.max); // Box3として拡張
 
     this.min = props.min;
     this.max = props.max;
@@ -131,8 +133,8 @@ export class Octree extends Box3 {
         }
       }
       else {
-        console.log("Geometryエラー");
-        console.log(geometry);
+        console.error("Geometryエラー");
+        console.error(geometry);
       }
     });
   }
@@ -252,7 +254,12 @@ export class Octree extends Box3 {
     for (var i = 0, l = this.maxDepth; i < l; i++) {
       for (var ii = 0, ll = targetNodes.length; ii < ll; ii++) {
         var node = targetNodes[ii];
-        var isIntersected = isIntersectTriAABB(face.a, face.b, face.c, node);
+        var isIntersected = isIntersectTriAABB(
+          face.a, 
+          face.b, 
+          face.c, 
+          node.box3// node
+        );
         if (isIntersected) {
           node.trianglePool.push(face);
           if (i + 1 !== this.maxDepth) {
@@ -296,8 +303,6 @@ export class Octree extends Box3 {
    */
   translateFaceByName(name: string, translation: Vector3) {
     const faces = this.getFacesByName(name);
-    // console.log("Facesの移動確認");// 調査中
-    // console.log(faces);
     faces.forEach((face) => {
       face.a.add(translation);
       face.b.add(translation);
@@ -353,13 +358,19 @@ export class Octree extends Box3 {
   getIntersectedNodes(sphere: Sphere, depth: number): OctreeNode[] {
     var tmp: OctreeNode[] = [];
     var intersectedNodes = [];
-    var isIntersected = isInstersectSphereBox(sphere, this);
+    var isIntersected = isInstersectSphereBox(
+      sphere, 
+      this.box3// this
+    );
     if (!isIntersected) return [];
     var targetNodes = this.nodes[0].slice(0);
     for (var i = 0, l = depth; i < l; i++) {
       for (var ii = 0, ll = targetNodes.length; ii < ll; ii++) {
         var node = targetNodes[ii];
-        var _isIntersected = isInstersectSphereBox(sphere, node);
+        var _isIntersected = isInstersectSphereBox(
+          sphere, 
+          node.box3// node
+        );
         if (_isIntersected) {
           var isAtMaxDepth = i + 1 === depth;
           if (isAtMaxDepth) {
@@ -456,7 +467,7 @@ export interface IOctreeNodeProps {
   min: Vector3;
   max: Vector3;
 }
-export class OctreeNode extends Box3 {
+export class OctreeNode {
   /**
    * 型指定(初期値)
    */
@@ -466,15 +477,16 @@ export class OctreeNode extends Box3 {
   min: Vector3;
   max: Vector3;
   trianglePool: Face[] = [];
+  box3: Box3;// 追記
 
   constructor(props: IOctreeNodeProps) {
-    super();
     this.tree = props.tree;
     this.depth = props.depth;
     this.mortonNumber = props.mortonNumber;
     this.min = new Vector3(props.min.x, props.min.y, props.min.z);
     this.max = new Vector3(props.max.x, props.max.y, props.max.z);
     this.trianglePool = [];
+    this.box3 = new Box3(this.min, this.max);
   }
 
   getParentNode() {
