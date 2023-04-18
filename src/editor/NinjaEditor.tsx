@@ -172,7 +172,9 @@ export const NinjaEditor = () => {
           name: `*${data.value}`,
           type: "lightformer",
           args: {
-            type: data.value,
+            form: data.value,
+            color: "#ffffff",
+            intensity: 1,
           },
           physics: "none",
           visibleType: "force",

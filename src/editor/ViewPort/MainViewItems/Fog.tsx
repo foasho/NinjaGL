@@ -16,24 +16,15 @@ export const FogComponent = () => {
     const editor = useContext(NinjaEditorContext);
     const [fog, setFog] = useState<IObjectManagement>();
     useEffect(() => {
-        setFog(editor.getFog());
-    }, [])
-    useFrame((_, delta) => {
-        if (fog !== editor.getFog()){
-            setFog(editor.getFog());
-        }
-        if (ref.current && fog.args){
-            if (fog.args.color && fog.args.color !== ref.current.color){
-                ref.current.color = fog.args.color;
-            }
-            if (fog.args.near && fog.args.near !== ref.current.near){
-                ref.current.near = fog.args.near;
-            }
-            if (fog.args.far && fog.args.far !== ref.current.far){
-                ref.current.far = fog.args.far;
-            }
-        }
-    })
+      setFog(editor.getFog());
+      const handleEnvChanged = () => {
+        setFog({...editor.getFog()});
+      }
+      editor.onEnvChanged(handleEnvChanged);
+      return () => {
+        editor.offEnvChanged(handleEnvChanged);
+      }
+    }, [editor]);
     return (
         <>
             {fog &&
