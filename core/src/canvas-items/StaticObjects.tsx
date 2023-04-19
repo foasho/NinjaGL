@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Euler, Vector3 } from "three";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
@@ -7,8 +7,17 @@ export interface IStaticObjectsProps { }
 
 export const StaticObjects = () => {
   const engine = useContext(NinjaEngineContext);
-  const staticObjects = engine ? engine.getStaticObjects() : [];
-
+  const [staticObjects, setStaticObjects] = useState<IObjectManagement[]>([]);
+  useEffect(() => {
+    setStaticObjects(engine.getStaticObjects());
+    const handleObjectChanged = () => {
+      setStaticObjects(engine.getLights());
+    }
+    engine.onObjectChanged(handleObjectChanged);
+    return () => {
+      engine.onObjectChanged(handleObjectChanged);
+    }
+  }, [engine]);
   return (
     <>
       {staticObjects.map((om, index) => {
@@ -22,18 +31,32 @@ interface IStaticObject {
   om: IObjectManagement;
 }
 const StaticObject = (props: IStaticObject) => {
-  let position = new Vector3(0, 0, 0);
-  let rotation = new Euler(0, 0, 0);
-  if (props.om.args.position){
-    position.copy(props.om.args.position as Vector3);
-  }
-  if (props.om.args.rotation){
-    rotation.copy(props.om.args.rotation as Euler);
-  }
-  
+  useEffect(() => {
+    if (props.om.object) {
+      // posistion, rotation, scale
+      if (props.om.args.position) {
+        props.om.object.position.copy(props.om.args.position);
+      }
+      if (props.om.args.rotation) {
+        props.om.object.rotation.copy(props.om.args.rotation);
+      }
+      if (props.om.args.scale) {
+        props.om.object.scale.copy(props.om.args.scale);
+      }
+    }
+    // layerNum
+    if (props.om.layerNum) {
+      props.om.object.layers.set(props.om.layerNum);
+    }
+  }, [props.om.object]);
+
   return (
-    <mesh position={position} rotation={rotation} layers={props.om.layerNum}>
-      {props.om.object && <primitive object={props.om.object} />}
-    </mesh>
+    <>
+      {props.om.object &&
+        <primitive 
+          object={props.om.object}
+        />
+      }
+    </>
   )
 }

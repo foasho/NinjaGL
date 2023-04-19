@@ -1,6 +1,6 @@
 import { IObjectManagement } from "ninja-core";
 import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
-import { useContext, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { PerspectiveCamera, useGLTF, useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
@@ -53,8 +53,13 @@ const Camera = (props: ICamera) => {
     globalStore.pivotControl = true;
   }
 
-  useFrame((_, delta) => {
-  })
+  useEffect(() => {
+    if (ref.current) {
+      if (props.om.args.position) ref.current.position.copy(props.om.args.position.clone());
+      if (props.om.args.rotation) ref.current.rotation.copy(props.om.args.rotation.clone());
+      if (props.om.args.scale) ref.current.scale.copy(props.om.args.scale.clone());
+    }
+  }, [props.om]);
 
   return (
     <>

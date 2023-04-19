@@ -17,18 +17,20 @@ export const StaticObjects = () => {
   const editor = useContext(NinjaEditorContext);
   const [staticOMs, setStaticOMs] = useState<IObjectManagement[]>([]);
   useEffect(() => {
-    setStaticOMs(editor.getObjects())
-  }, [])
-  useFrame(() => {
-    if (staticOMs.length !== editor.getObjects().length){
-      setStaticOMs(editor.getObjects())
+    setStaticOMs(editor.getObjects());
+    const handleObjectChanged = () => {
+      setStaticOMs([...editor.getObjects()]);
     }
-  });
+    editor.onObjectChanged(handleObjectChanged);
+    return () => {
+      editor.offObjectChanged(handleObjectChanged);
+    }
+  }, []);
   return (
     <>
-      {staticOMs.map((om, index) => {
+      {staticOMs.map((om) => {
         if (om.type == "object") {
-          return <StaticObject om={om} isHelper={true} key={index} />
+          return <StaticObject om={om} isHelper={true} key={om.id} />
         }
       })}
     </>

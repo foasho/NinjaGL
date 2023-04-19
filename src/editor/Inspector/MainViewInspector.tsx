@@ -14,7 +14,6 @@ import { globalStore } from "@/editor/Store";
 export const MainViewInspector = () => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const oms = editor.getOMs();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
@@ -22,15 +21,14 @@ export const MainViewInspector = () => {
   const [receiveShadow, setreceiveShadow] = useState<boolean>(true);
   const [helper, setHelper] = useState<boolean>(false);
   const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
-  const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"tone"|"shader"; label: string;}>();
+  const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"toon"|"shader"|"reflection"; label: string;}>();
   const [color, setColor] = useState<string>();
   // Environmentの設定
   const [background, setBackground] = useState<boolean>(true);
   const [blur, setBlur] = useState<number>(0.5);
   const [environmentPreset, setEnvironmentPreset] = useState<{ value: "forest"|"sunset"|"dawn"|"night"; label: string; }>();
   // Lightformerの設定
-  const [form, setForm] = useState<"circle"|"ring"|"rect">("rect");
-  const [targetName, setTargetName] = useState<string>();
+  const [form, setForm] = useState<{ value: "circle"|"ring"|"rect", label: string}>();
   const [intensity, setIntensity] = useState<number>();
 
   const id = state.currentId;
@@ -55,11 +53,12 @@ export const MainViewInspector = () => {
   ];
 
   // マテリアル種別の選択肢
-  const materialOptions: {value: "standard"|"phong"|"tone"|"shader", label: string}[] = [
+  const materialOptions: {value: "standard"|"phong"|"toon"|"shader"|"reflection", label: string}[] = [
     { value: "standard", label: t("StandardMaterial") },
     { value: "phong", label: t("PhongMaterial") },
-    { value: "tone", label: t("ToneMaterial") },
-    { value: "shader", label: t("ShaderMaterial") }
+    { value: "toon", label: t("ToneMaterial") },
+    { value: "shader", label: t("ShaderMaterial") },
+    { value: "reflection", label: t("reflection") }
   ];
 
   // Environmentの選択肢
@@ -70,10 +69,12 @@ export const MainViewInspector = () => {
     { value: "forest", label: t("forest") }
   ];
 
-  // Targetの選択肢 OMから選択肢を取得
-  const targetOptions = oms.map((om) => {
-    return { value: om.id, label: om.name };
-  });
+  // Formの選択肢
+  const formOptions: {value: "circle"|"ring"|"rect", label: string}[] = [
+    { value: "circle", label: t("circle") },
+    { value: "ring", label: t("ring") },
+    { value: "rect", label: t("rect") }
+  ];
 
   /**
    * 選択中Objectをdeleteする
@@ -82,80 +83,43 @@ export const MainViewInspector = () => {
   const deleteObject = (id: string) => {
     const did = id;
     const dtype = selectOM.type;
-    // state.init();
+    globalStore.currentId = null;
     editor.deleteOM(did, dtype);
   }
 
   useEffect(() => {
-    if (selectOM){
-      if (selectOM.args.position) setPosition(selectOM.args.position);
-      if (selectOM.args.rotation) setRotation(selectOM.args.rotation);
-      if (selectOM.args.scale) setScale(selectOM.args.scale);
-      if (selectOM.args.backgroud !== undefined) setBackground(selectOM.args.backgroud);
-      if (selectOM.args.helper !== undefined) setHelper(selectOM.args.helper);
-      if (selectOM.args.visibleType !== undefined) setVisibleType(visibleTypeOptions.find((option) => option.value == selectOM.args.visibleType));
-      if (selectOM.args.materialData !== undefined) setMaterialType(materialOptions.find((option) => option.value == selectOM.args.materialType));
-      if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setColor(selectOM.args.materialData.value);
-      if (selectOM.args.blur) setBlur(selectOM.args.blur);
-      if (selectOM.args.preset) setEnvironmentPreset(environmentOptions.find((option) => option.value == selectOM.args.preset));
-      if (selectOM.args.form) setForm(selectOM.args.form);
-      if (selectOM.args.target && selectOM.args.targe.name !== undefined){
-        setTargetName(selectOM.args.target.name);
-      }
-      if (selectOM.args.intensity) setIntensity(selectOM.args.intensity);
-    };
-  }, [selectOM]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      myFrame();
-    }, 1000 / 5);
-    // DelKeyを押したときに選択中のオブジェクトを削除する
     const onKeyDown = (e) => {
       if (e.key == "Delete"){
         deleteObject(id);
       }
     }
+    const init = async () => {
+      // DelKeyを押したときに選択中のオブジェクトを削除する
+      if (selectOM){
+        if (selectOM.args.position) setPosition(selectOM.args.position);
+        if (selectOM.args.rotation) setRotation(selectOM.args.rotation);
+        if (selectOM.args.scale) setScale(selectOM.args.scale);
+        if (selectOM.args.backgroud !== undefined) setBackground(selectOM.args.backgroud);
+        if (selectOM.args.helper !== undefined) setHelper(selectOM.args.helper);
+        if (selectOM.args.visibleType !== undefined) setVisibleType(visibleTypeOptions.find((option) => option.value == selectOM.args.visibleType));
+        if (selectOM.args.materialData !== undefined){
+          setMaterialType(materialOptions.find((option) => option.value == selectOM.args.materialData.type))
+        };
+        if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setColor(selectOM.args.materialData.value);
+        if (selectOM.args.blur) setBlur(selectOM.args.blur);
+        if (selectOM.args.preset) setEnvironmentPreset(environmentOptions.find((option) => option.value == selectOM.args.preset));
+        if (selectOM.args.form) setForm(selectOM.args.form);
+        if (selectOM.args.intensity) setIntensity(selectOM.args.intensity);
+      };
+    }
+    init();
+    editor.onOMIdChanged(id, init);
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      editor.offOMIdChanged(id, init);
       document.removeEventListener("keydown", onKeyDown);
-      clearInterval(interval);
-    };
-  }, [id, globalStore.editorFocus, globalStore.pivotControl, position, rotation, scale, color]);
-
-  const myFrame = () => {
-    if (id && !globalStore.editorFocus){
-      if (state.pivotControl){
-        const position = editor.getPosition(id);
-        position.x = parseFloat(position.x.toFixed(2));
-        position.y = parseFloat(position.y.toFixed(2));
-        position.z = parseFloat(position.z.toFixed(2));
-        setPosition(position);
-    
-        const rotation = editor.getRotation(id);
-        rotation.x = parseFloat(rotation.x.toFixed(2));
-        rotation.y = parseFloat(rotation.y.toFixed(2));
-        rotation.z = parseFloat(rotation.z.toFixed(2));
-        setRotation(rotation);
-    
-        const scale = editor.getScale(id);
-        scale.x = parseFloat(scale.x.toFixed(2));
-        scale.y = parseFloat(scale.y.toFixed(2));
-        scale.z = parseFloat(scale.z.toFixed(2));
-        setScale(scale);
-      }
-
-      const materialData = editor.getMaterialData(id);
-      if (materialData && materialData.type != "shader"){
-        if (materialType?.value != materialData.type){
-          setMaterialType(materialOptions.find((option) => option.value == materialData.type));
-        }
-        if (color != materialData.value){
-          setColor(materialData.value);
-        }
-      }
     }
-  }
+  }, [id, globalStore.editorFocus, globalStore.pivotControl]);
 
   /**
    * 位置変更　Inspector -> Object
@@ -239,12 +203,13 @@ export const MainViewInspector = () => {
 
 
   /**
-   * 色の変更
+   * マテリアル(種別/色)の変更
    */
-  const changeMaterial = (value: any) => {
+  const changeMaterial = (type: "shader"|"standard"|"phong"|"toon"|"reflection", value: any) => {
     if (materialType.value !== "shader" && value){
-      editor.setMaterialData(id, materialType.value, value);
+      editor.setMaterialData(id, type, value);
       setColor(value);
+      setMaterialType(materialOptions.find((option) => option.value == type));
     }
   }
 
@@ -348,15 +313,6 @@ export const MainViewInspector = () => {
   const changeForm = (selectForm) => {
     editor.setForm(id, selectForm.value);
     setForm(selectForm);
-  }
-
-  /**
-   * Targetの変更
-   */
-  const changeTarget = (selectTarget) => {
-    const pos = editor.getPosition(id);
-    setTargetName(selectTarget.label);
-    editor.setTarget(id, selectTarget.label, pos);
   }
 
   /**
@@ -602,8 +558,8 @@ export const MainViewInspector = () => {
               <div className={styles.input}>
                 <Select
                   options={materialOptions}
-                  // value={materialType}
-                  onChange={(select) => setMaterialType(select)}
+                  value={materialType}
+                  onChange={(select) => changeMaterial(select.value, color)}
                   styles={normalStyles}
                   />
               </div>
@@ -617,7 +573,7 @@ export const MainViewInspector = () => {
                   <input 
                     type={"color"} 
                     value={color} 
-                    onChange={(e) => changeMaterial(e.target.value)}
+                    onChange={(e) => changeMaterial(materialType.value, e.target.value)}
                     onFocus={() => globalStore.editorFocus = true}
                     onBlur={() => globalStore.editorFocus = false}
                   />
@@ -790,26 +746,21 @@ export const MainViewInspector = () => {
           </div>
           <div className={styles.input}>
             <Select
-              options={[]}
+              options={formOptions}
               value={form}
               onChange={(select) => changeForm(select)}
               styles={normalStyles}
             />
           </div>
         </div>
-        <div className={styles.target}>
-          <div className={styles.title}>
-            {t("target")}
-          </div>
-          <div className={styles.input}>
-            <Select
-              options={targetOptions}
-              value={targetOptions.find((option) => option.label === targetName)}
-              onChange={(select) => changeTarget(select)}
-              styles={normalStyles}
-            />
-          </div>
-        </div>
+      </>
+      }
+
+      {selectOM && (
+        selectOM.type == "lightformer" ||
+        selectOM.type == "light"
+        ) &&
+      <>
         <div className={styles.intensity}>
           <div className={styles.name}>
             {t("intensity")}: {intensity}
@@ -818,10 +769,10 @@ export const MainViewInspector = () => {
             <input
               type={"range"}
               min={0}
-              max={1}
+              max={10}
               step={0.01}
               value={intensity}
-              onChange={(e) => changeIntensity(e.target.value)}
+              onChange={(e) => changeIntensity(e)}
             />
           </div>
         </div>

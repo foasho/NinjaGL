@@ -21,8 +21,8 @@ export const MyTexts = () => {
 
   return (
     <>
-      {texts.map((om, idx) => {
-        return <TextComponent om={om} key={idx} />
+      {texts.map((om) => {
+        return <TextComponent om={om} key={om.id} />
       })}
     </>
   )

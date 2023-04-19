@@ -30,6 +30,7 @@ import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 
 export const MainViewer = () => {
+  const loadingRef = useRef<HTMLDivElement>();
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const cameraSpeedRef = useRef<HTMLInputElement>();
@@ -93,6 +94,9 @@ export const MainViewer = () => {
         type == "ter" ||
         type == "avt"
       ) {
+        if (loadingRef.current) {
+          loadingRef.current.style.display = "block";
+        }
         const filePath = contentsState.currentUrl;
         loader.load(
           filePath,
@@ -120,6 +124,7 @@ export const MainViewer = () => {
                 }
                 editor.setOM({
                   id: MathUtils.generateUUID(),
+                  name: "*Avatar",
                   filePath: filePath,
                   type: "avatar",
                   physics: "aabb",
@@ -139,6 +144,7 @@ export const MainViewer = () => {
                 editor.setOM({
                   id: MathUtils.generateUUID(),
                   filePath: filePath,
+                  name: "*Object",
                   type: "object",
                   physics: "aabb",
                   visibleType: "auto",
@@ -156,6 +162,7 @@ export const MainViewer = () => {
               editor.setOM({
                 id: MathUtils.generateUUID(),
                 filePath: filePath,
+                name: "*Terrain",
                 type: "terrain",
                 physics: "along",
                 visibleType: "force",
@@ -163,14 +170,20 @@ export const MainViewer = () => {
                 object: scene
               });
             }
+            if (loadingRef.current) {
+              loadingRef.current.style.display = "none";
+            }
           },
           (xhr) => { },
           async (err) => {
             console.log("モデル読み込みエラ―");
             console.log(err);
+            if (loadingRef.current) {
+              loadingRef.current.style.display = "none";
+            }
           },
           
-        )
+        );
       }
     }
   }
@@ -350,7 +363,12 @@ export const MainViewer = () => {
           </a>
           </>
         }
+      </div>
+      <div ref={loadingRef} style={{ display: "none", background: "#12121266", height: "100%", width: "100%", top: 0, left: 0, position: "absolute", zIndex: 1000000 }}>
+        <div style={{ color: "#fff", fontWeight: "bold", position: "absolute", width: "100%", textAlign: "center", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+          Loading...
         </div>
+      </div>
     </div>
   )
 }
@@ -400,8 +418,8 @@ const SystemHelper = (props: ISysytemHelper) => {
     for (let i = 0; i < divisions; i++) {
       for (let j = 0; j < divisions; j++) {
         const number = i * divisions + j + 1;
-        const textPosition = getCenterPosFromLayer(number, 0, props.worldSize, divisions);
-        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.001, 0));
+        const textPosition = getCenterPosFromLayer(number, -0.01, props.worldSize, divisions);
+        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.01, 0));
         const isEven = (i + j) % 2 === 0;
         const color1 = (isEven)? new Color(0x808080): new Color(0xd3d3d3);
         const color2 = (isEven)? new Color(0xd3d3d3): new Color(0x808080);
@@ -423,7 +441,11 @@ const SystemHelper = (props: ISysytemHelper) => {
             rotation={[-Math.PI/2, 0, 0]}
           >
             <planeBufferGeometry args={[cellSize, cellSize]} />
-            <meshBasicMaterial color={color2} />
+            <meshBasicMaterial 
+              color={color2}
+              transparent={true}
+              opacity={0.3}
+            />
           </mesh>
         );
       }

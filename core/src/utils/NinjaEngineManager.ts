@@ -377,6 +377,18 @@ export class NinjaEngine {
   getAvatarObject(): IObjectManagement {
     return this.oms.find(om => om.type == "avatar");
   }
+  private avatarChangedListeners: (() => void)[] = [];
+  onAvatarChanged(listener: () => void) {
+    this.avatarChangedListeners.push(listener);
+  }
+  offAvatarChanged(listener: () => void) {
+    this.avatarChangedListeners = this.avatarChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  protected notifyAvatarChanged() {
+    this.avatarChangedListeners.forEach(l => l());
+  }
 
   /**
    * アバターをセットする
@@ -453,6 +465,21 @@ export class NinjaEngine {
   getSky(): IObjectManagement {
     return this.oms.find(om => om.type == "sky");
   }
+  /**
+   * Skyの変更リスナー
+   */
+  private skyChangedListeners: (() => void)[] = [];
+  onSkyChanged(listener: () => void) {
+    this.skyChangedListeners.push(listener);
+  }
+  offSkyChanged(listener: () => void) {
+    this.skyChangedListeners = this.skyChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  protected notifySkyChanged() {
+    this.skyChangedListeners.forEach(l => l());
+  }
 
   /**
    * 雲データを取得する
@@ -473,6 +500,19 @@ export class NinjaEngine {
    */
   getStaticObjects(): IObjectManagement[] {
     return this.oms.filter(om => om.type == "object");
+  }
+  /**
+  * StaticObjectの変更リスナー
+  */
+  private objectChangedListeners: (() => void)[] = [];
+  onObjectChanged(listener: () => void) {
+    this.objectChangedListeners.push(listener);
+  }
+  offObjectChanged(listener: () => void) {
+    this.objectChangedListeners = this.objectChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyObjectChanged() {
+    this.objectChangedListeners.forEach(l => l());
   }
 
   /**
@@ -499,11 +539,59 @@ export class NinjaEngine {
   }
 
   /**
-   * 光源データを取得する
+   * Threeデータを取得する
   */
   getThreeObjects(): IObjectManagement[] {
     return this.oms.filter(om => om.type == "three");
   }
+
+  
+  /**
+   * LFデータを取得する
+   */
+  getLightFormers(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "light");
+  }
+  /**
+   * LFの変更リスナー
+   */
+  private LightFormersChangedListeners: (() => void)[] = [];
+  onLightFormers(listener: () => void) {
+    this.LightFormersChangedListeners.push(listener);
+  }
+  offLightFormers(listener: () => void) {
+    this.LightFormersChangedListeners = this.LightFormersChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  protected notifyLightFormersChanged() {
+    this.LightFormersChangedListeners.forEach(l => l());
+  }
+
+
+  /**
+   * エフェクトデータを取得する
+   */
+  getEffects(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "effect");
+  }
+  /**
+   * エフェクトの変更リスナー
+   */
+  private EffectsChangedListeners: (() => void)[] = [];
+  onEffectsChanged(listener: () => void) {
+    this.EffectsChangedListeners.push(listener);
+  }
+  offEffectsChanged(listener: () => void) {
+    this.EffectsChangedListeners = this.EffectsChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  protected notifyEffectsChanged() {
+    this.EffectsChangedListeners.forEach(l => l());
+  }
+
+
 
   /**
  * サウンドをセットする

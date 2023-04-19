@@ -1,3 +1,4 @@
+import { MeshReflectorMaterial } from "@react-three/drei";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 import React, { useContext, useEffect, useRef } from "react"
@@ -39,10 +40,17 @@ const ThreeObject = (om: IObjectManagement) => {
     else if (om.args.materialData.type == "shader") {
       material = (<shaderMaterial />);
     }
+    else if (om.args.materialData.type == "reflection") {
+      material = (<MeshReflectorMaterial mirror={0} color={color}/>);
+    }
   }
   let castShadow = true;
   if (om.args.castShadow != undefined) {
     castShadow = om.args.castShadow;
+  }
+  let receiveShadow = true;
+  if (om.args.receiveShadow != undefined) {
+    receiveShadow = om.args.receiveShadow;
   }
   
   useEffect(() => {
@@ -67,6 +75,7 @@ const ThreeObject = (om: IObjectManagement) => {
       <mesh 
         ref={ref}
         castShadow={castShadow}
+        receiveShadow={receiveShadow}
         position={om.args.position ? om.args.position : [0, 0, 0]}
       >
         {geometry}

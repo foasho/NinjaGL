@@ -13,10 +13,6 @@ const Light = (om: IObjectManagement) => {
     light = (
       <>
         <SpotLight
-          position={om.args.position ? om.args.position : [0, 0, 0]}
-          angle={MathUtils.degToRad(45)}
-          distance={om.args.distance ? om.args.distance : 25}
-          intensity={om.args.intensity ? om.args.intensity : 25}
           castShadow
           color={color}
           volumetric={false}
@@ -30,9 +26,6 @@ const Light = (om: IObjectManagement) => {
     light = (
       <>
         <pointLight
-          position={om.args.position ? om.args.position : [0, 0, 0]}
-          intensity={om.args.intensity ? om.args.intensity : 0.5}
-          distance={om.args.distance ? om.args.distance : 25}
           castShadow
           color={color}
           layers={om.layerNum}
@@ -45,7 +38,6 @@ const Light = (om: IObjectManagement) => {
     light = (
       <>
         <ambientLight
-          intensity={om.args.intensity ? om.args.intensity : 0.5}
           color={color}
           layers={om.layerNum}
           ref={ref}
@@ -58,7 +50,6 @@ const Light = (om: IObjectManagement) => {
       <>
         <directionalLight
           castShadow
-          position={om.args.position? om.args.position: [5, 5, 5]}
           color={color}
           layers={om.layerNum}
           ref={ref}

@@ -42,7 +42,7 @@ export interface IObjectManagement {
   id: string;
   name?: string;
   type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "text"
-    | "sky" | "light" | "fog" | "camera" | "cloud" | "environment" | "lightformer";
+    | "sky" | "light" | "fog" | "camera" | "effect" | "cloud" | "environment" | "lightformer";
   filePath?: string;
   visibleType: "auto" | "force" | "none";
   layerNum?: number;
