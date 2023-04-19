@@ -42,7 +42,6 @@ const ThreeObject = (props: IThreeObject) => {
   const ref = useRef<Mesh>();
   const editor = useContext(NinjaEditorContext);
   const [helper, setHelper] = useState<boolean>(false);
-  const [materialType, setMaterialType] = useState<"standard"|"phong"|"toon"|"shader">("standard");
   const id = props.om.id;
   const matRef = useRef<any>();
   let geometry;
@@ -112,7 +111,7 @@ const ThreeObject = (props: IThreeObject) => {
           ref.current.scale.copy(om.args.scale);
         }
         if (om.args.materialData){
-          if (materialType !== "shader"){
+          if (om.args.materialData.type !== "shader"){
             if (matRef.current){
               matRef.current.color.set(om.args.materialData.value);
             }

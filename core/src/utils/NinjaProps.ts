@@ -33,6 +33,7 @@ export interface IInputMovement {
   currDrag?: Vector2 | null; // カメラ向きに利用（あとで実装）
   deviceType: "mobile" | "tablet" | "desktop";
   [key: string]: any;
+  pressedKeys: string[]; // 現在入力中キー
 }
 
 /**

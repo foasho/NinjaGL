@@ -494,6 +494,19 @@ export class NinjaEngine {
   getEnvironment(): IObjectManagement {
     return this.oms.find(om => om.type == "environment");
   }
+  /**
+  * Environmentの変更リスナー
+  */
+  private envChangedListeners: (() => void)[] = [];
+  onEnvChanged(listener: () => void) {
+    this.envChangedListeners.push(listener);
+  }
+  offEnvChanged(listener: () => void) {
+    this.envChangedListeners = this.envChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyEnvChanged() {
+    this.envChangedListeners.forEach(l => l());
+  }
 
   /**
    * 通常オブジェクトを取得する
@@ -550,7 +563,7 @@ export class NinjaEngine {
    * LFデータを取得する
    */
   getLightFormers(): IObjectManagement[] {
-    return this.oms.filter(om => om.type == "light");
+    return this.oms.filter(om => om.type == "lightformer");
   }
   /**
    * LFの変更リスナー
@@ -567,6 +580,7 @@ export class NinjaEngine {
   protected notifyLightFormersChanged() {
     this.LightFormersChangedListeners.forEach(l => l());
   }
+
 
 
   /**

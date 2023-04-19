@@ -8,6 +8,7 @@ import { ShaderMaterial } from "three";
 const ThreeObject = (om: IObjectManagement) => {
   const ref = useRef<any>();
   const engine = useContext(NinjaEngineContext);
+  // const matRef = useRef<any>();
   let geometry;
   let material;
   if (om.args.type == "plane") {
@@ -56,18 +57,24 @@ const ThreeObject = (om: IObjectManagement) => {
   useEffect(() => {
     if (ref.current) {
       engine.setOMObjectById(om.id, ref.current as Object3D);
-      // posistion, rotation, scale
-      if (om.args.position) {
-        ref.current.position.copy(om.args.position);
-      }
-      if (om.args.rotation) {
-        ref.current.rotation.copy(om.args.rotation);
-      }
-      if (om.args.scale) {
-        ref.current.scale.copy(om.args.scale);
+      if (ref.current) {
+        if (om.args.position) {
+          ref.current.position.copy(om.args.position);
+        }
+        if (om.args.rotation) {
+          ref.current.rotation.copy(om.args.rotation);
+        }
+        if (om.args.scale) {
+          ref.current.scale.copy(om.args.scale);
+        }
+        if (om.args.materialData){
+          if (om.args.materialData.type !== "shader"){
+            // @ts-ignore
+          }
+        }
       }
     }
-  }, [ref.current]);
+  }, []);
 
   return (
     <>
@@ -76,7 +83,6 @@ const ThreeObject = (om: IObjectManagement) => {
         ref={ref}
         castShadow={castShadow}
         receiveShadow={receiveShadow}
-        position={om.args.position ? om.args.position : [0, 0, 0]}
       >
         {geometry}
         {material}

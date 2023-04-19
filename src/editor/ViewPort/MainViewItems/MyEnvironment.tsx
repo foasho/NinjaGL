@@ -28,6 +28,11 @@ export const MyEnviroment = () => {
       editor.offEnvChanged(handleEnvChanged);
     }
   }, [editor]);
+
+  let enabled = false;
+  if (environment) {
+    if (environment.args.visible !== "") enabled = true;
+  }
   
   return (
     <>
@@ -39,8 +44,8 @@ export const MyEnviroment = () => {
             background={environment.args.background}
             blur={environment.args.blur}
           >
-            {lightformers.map((om, idx) => {
-              return <LightFormer om={om} key={idx}/>
+            {lightformers.map((om) => {
+              return <LightFormer om={om} key={om.id}/>
             })}
           </Environment>
         </>

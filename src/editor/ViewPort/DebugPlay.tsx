@@ -41,7 +41,6 @@ export const DebugPlay = () => {
     const _engine = new NinjaEngine();
     const njcFile = new NJCFile();
     njcFile.setConfig(_config);
-    njcFile.setConfig(InitMobileConfipParams);
     njcFile.setOMs(oms);
     njcFile.setUMs(ums);
     njcFile.setTMs(tms);

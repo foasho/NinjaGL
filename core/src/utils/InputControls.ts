@@ -37,7 +37,8 @@ const initialKeyState: IInputMovement = {
   action: false,
   prevDrag: null,
   currDrag: null,
-  deviceType: "desktop"
+  deviceType: "desktop",
+  pressedKeys: [],
 };
 
 export let manualKeyState: IInputMovement = {
@@ -50,7 +51,8 @@ export let manualKeyState: IInputMovement = {
   action: false,
   prevDrag: null,
   currDrag: null,
-  deviceType: "desktop"
+  deviceType: "desktop",
+  pressedKeys: [],
 };
 
 /**
@@ -109,7 +111,8 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
     action: false,
     prevDrag: null,
     currDrag: null,
-    deviceType: "desktop"
+    deviceType: "desktop",
+    pressedKeys: [],
   });
 
   useEffect(() => {
@@ -118,9 +121,16 @@ export const useInputControl = (deviceType: "mobile" | "tablet" | "desktop") => 
      */
     const handleKeyDown = (e: KeyboardEvent) => {
       movement.current[moveKeyFromCode(e.code)] = true;
+      if (!movement.current.pressedKeys.includes(e.code)) {
+        movement.current.pressedKeys.push(e.code);
+      }
     }
     const handleKeyUp = (e: KeyboardEvent) => {
       movement.current[moveKeyFromCode(e.code)] = false;
+      const index = movement.current.pressedKeys.indexOf(e.code);
+      if (index > -1) {
+        movement.current.pressedKeys.splice(index, 1);
+      }
     };
     const handleClickDown = () => {
       movement.current.action = true;

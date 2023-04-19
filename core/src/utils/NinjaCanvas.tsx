@@ -15,7 +15,6 @@ import { Cameras } from "../canvas-items/Camera";
 import { proxy } from "valtio";
 import { JSONTree } from 'react-json-tree';
 import { MyEnvirments } from "../canvas-items/MyEnvirments";
-import { LightFormers } from "../canvas-items/LightFormers";
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
@@ -54,7 +53,6 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
             <ThreeObjects/>
             <Cameras/>
             <MyEnvirments/>
-            <LightFormers />
           </>
         }
         {props.children && props.children}

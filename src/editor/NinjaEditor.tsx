@@ -131,7 +131,8 @@ export const NinjaEditor = () => {
           name: `*${data.value}`,
           type: "camera",
           args: {
-            type: data.value
+            type: data.value,
+            position: new Vector3(-3, 3, -6),
           },
           physics: "none",
           visibleType: "auto",

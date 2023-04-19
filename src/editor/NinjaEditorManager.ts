@@ -30,6 +30,8 @@ interface IPlayerManager {
   
 }
 
+export const HomeCameraPosition = new Vector3(0, 1.7, 0);
+
 /**
  * Ninjaエディタクラス
  */
