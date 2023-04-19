@@ -334,6 +334,35 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           </>
         }
 
+        {selectType == "lightformer" &&
+          <>
+            <div className={styles.card} onClick={() => {selectLightFormer("circle")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/circle.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("circle")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectLightFormer("ring")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/ring.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("ring")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectLightFormer("rect")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/rect.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("rect")}
+              </div>
+            </div>
+          </>
+        }
+
         </div>
       </div>
     </div>

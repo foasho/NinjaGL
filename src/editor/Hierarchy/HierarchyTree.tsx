@@ -1,6 +1,6 @@
 import styles from "@/App.module.scss";
 import { IObjectManagement } from "ninja-core"
-import { useContext, useEffect, useReducer, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
@@ -19,8 +19,9 @@ export const HierarchyTree = () => {
   const { t } = useTranslation();
   
   useEffect(() => {
+    setOMs(editor.getOMs());
     const handleOMsChanged = () => {
-      setOMs(editor.getOMs());
+      setOMs([...editor.getOMs()]);
     }
     editor.onOMsChanged(handleOMsChanged);
     return () => {
@@ -59,7 +60,6 @@ const TreeItem = (prop: ITreeItem) => {
   const state = useSnapshot(globalStore);
   const ref = useRef<HTMLDivElement>();
   const editor = useContext(NinjaEditorContext);
-  const [isSelect, setIsSelect] = useState<boolean>(true);
   const [visible, setVisible] = useState<boolean>(true);
   const { t } = useTranslation();
   const { om } = prop;
@@ -68,7 +68,6 @@ const TreeItem = (prop: ITreeItem) => {
   if (prop.index % 2 !== 0) {
     lineStyle = styles.darkLine;
   }
-  const [name, setName] = useState<string>(`${t("nonNameObject")}`);
   let typeIcon = (<BsBox />); // デフォルトObject型
   if (prop.om.type == "terrain") {
     typeIcon = (<MdTerrain />);
@@ -84,12 +83,6 @@ const TreeItem = (prop: ITreeItem) => {
   if (!visible) {
     visibleIcon = (<AiFillEyeInvisible />);
   }
-
-  useEffect(() => {
-    if (prop.om.name) {
-      setName(prop.om.name);
-    }
-  }, []);
 
   /**
    * 名前を変更
@@ -114,7 +107,6 @@ const TreeItem = (prop: ITreeItem) => {
     }).then((result) => {
       if (result.value) {
         editor.setName(id, result.value);
-        setName(result.value);
       }
     });
   }
@@ -161,7 +153,7 @@ const TreeItem = (prop: ITreeItem) => {
           {typeIcon}
         </div>
         <div className={styles.name} onClick={onSelectObject} onDoubleClick={changeName}>
-          {name}
+          {prop.om.name}
         </div>
         <div className={styles.visible} onClick={() => changeVisible()}>
           {visibleIcon}

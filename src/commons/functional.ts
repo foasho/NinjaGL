@@ -1,4 +1,5 @@
 import { Buffer } from "buffer";
+import { Object3D, Vector3 } from "three";
 
 export const convertToGB = (number: number): number => {
   var gb = number / 1073741824; // 1 GB = 1,073,741,824 bytes
@@ -44,4 +45,18 @@ export const b64EncodeUnicode = (str: string): string  => {
     return String.fromCharCode(parseInt(p1, 16));
   });
   return Buffer.from(encodedStr).toString("base64");
+}
+
+/**
+ * カメラと任意の位置の距離を取得し、閾値より小さければクリックを有効にする
+ * @param cameraPosition 
+ * @param targetPosition 
+ */
+export const EnableClickTrigger = (cameraPosition: Vector3, target: Object3D, ratio: number=1.5) => {
+  if (!target) return false;
+  const distance = cameraPosition.distanceTo(target.position);
+  const scale = target.scale;
+  const averageScale = (scale.x + scale.y + scale.z) / 3;
+  const maxDistance = ratio * averageScale; // Ratioは任意の係数で、適切な値に調整
+  return distance > maxDistance;
 }

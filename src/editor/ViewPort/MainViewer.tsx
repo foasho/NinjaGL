@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef, useLayoutEffect } from "react";
 import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { NinjaEditorContext } from "../NinjaEditorManager";
+import { HomeCameraPosition, NinjaEditorContext } from "../NinjaEditorManager";
 import { MyLight, MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
@@ -24,12 +24,13 @@ import Swal from "sweetalert2";
 import { Cameras } from "./MainViewItems/Cameras";
 import { FogComponent } from "./MainViewItems/Fog";
 import { useSnapshot } from "valtio";
-import { globalContentStore } from "../Store";
+import { globalContentStore, globalStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 
 export const MainViewer = () => {
+  const loadingRef = useRef<HTMLDivElement>();
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const cameraSpeedRef = useRef<HTMLInputElement>();
@@ -93,6 +94,9 @@ export const MainViewer = () => {
         type == "ter" ||
         type == "avt"
       ) {
+        if (loadingRef.current) {
+          loadingRef.current.style.display = "block";
+        }
         const filePath = contentsState.currentUrl;
         loader.load(
           filePath,
@@ -120,6 +124,7 @@ export const MainViewer = () => {
                 }
                 editor.setOM({
                   id: MathUtils.generateUUID(),
+                  name: "*Avatar",
                   filePath: filePath,
                   type: "avatar",
                   physics: "aabb",
@@ -139,6 +144,7 @@ export const MainViewer = () => {
                 editor.setOM({
                   id: MathUtils.generateUUID(),
                   filePath: filePath,
+                  name: "*Object",
                   type: "object",
                   physics: "aabb",
                   visibleType: "auto",
@@ -156,6 +162,7 @@ export const MainViewer = () => {
               editor.setOM({
                 id: MathUtils.generateUUID(),
                 filePath: filePath,
+                name: "*Terrain",
                 type: "terrain",
                 physics: "along",
                 visibleType: "force",
@@ -163,14 +170,20 @@ export const MainViewer = () => {
                 object: scene
               });
             }
+            if (loadingRef.current) {
+              loadingRef.current.style.display = "none";
+            }
           },
           (xhr) => { },
           async (err) => {
             console.log("モデル読み込みエラ―");
             console.log(err);
+            if (loadingRef.current) {
+              loadingRef.current.style.display = "none";
+            }
           },
           
-        )
+        );
       }
     }
   }
@@ -184,7 +197,7 @@ export const MainViewer = () => {
       <Canvas
         style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
-        camera={{ position: [-3, 3, -6] }}
+        camera={{ position: HomeCameraPosition }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         shadows
@@ -350,7 +363,12 @@ export const MainViewer = () => {
           </a>
           </>
         }
+      </div>
+      <div ref={loadingRef} style={{ display: "none", background: "#12121266", height: "100%", width: "100%", top: 0, left: 0, position: "absolute", zIndex: 1000000 }}>
+        <div style={{ color: "#fff", fontWeight: "bold", position: "absolute", width: "100%", textAlign: "center", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+          Loading...
         </div>
+      </div>
     </div>
   )
 }
@@ -400,8 +418,8 @@ const SystemHelper = (props: ISysytemHelper) => {
     for (let i = 0; i < divisions; i++) {
       for (let j = 0; j < divisions; j++) {
         const number = i * divisions + j + 1;
-        const textPosition = getCenterPosFromLayer(number, 0, props.worldSize, divisions);
-        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.001, 0));
+        const textPosition = getCenterPosFromLayer(number, -0.01, props.worldSize, divisions);
+        const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.01, 0));
         const isEven = (i + j) % 2 === 0;
         const color1 = (isEven)? new Color(0x808080): new Color(0xd3d3d3);
         const color2 = (isEven)? new Color(0xd3d3d3): new Color(0x808080);
@@ -423,7 +441,11 @@ const SystemHelper = (props: ISysytemHelper) => {
             rotation={[-Math.PI/2, 0, 0]}
           >
             <planeBufferGeometry args={[cellSize, cellSize]} />
-            <meshBasicMaterial color={color2} />
+            <meshBasicMaterial 
+              color={color2}
+              transparent={true}
+              opacity={0.3}
+            />
           </mesh>
         );
       }
@@ -452,6 +474,7 @@ const SystemHelper = (props: ISysytemHelper) => {
 
 /**
  * WASDカメラ視点移動
+ * ※Fキーで任意のオブジェクトにフォーカスする
  * 補助操作
  */
 interface ICameraControl {
@@ -460,10 +483,14 @@ interface ICameraControl {
   enable?: boolean;
 }
 export const CameraControl = (props: ICameraControl) => {
+  const state = useSnapshot(globalStore);
+  const editor = useContext(NinjaEditorContext);
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
   const input = useInputControl("desktop");
+   // Fキーが押された瞬間にカメラをフォーカスするためのフラグ
+   const [focusOnObject, setFocusOnObject] = useState(false);
 
   useLayoutEffect(() => {
     if (cameraRef && cameraRef.current) {
@@ -482,7 +509,57 @@ export const CameraControl = (props: ICameraControl) => {
     }
   }, [props.cameraFar]);
 
+  /**
+   * 選択中のオブジェクトにカメラをフォーカスする
+   * @param id 
+   */
+  const targetFocusCamera = (id: string) => {
+    const position = editor.getPosition(id);
+    if (position) {
+      const target = new Vector3().copy(position.clone());
+  
+      // ターゲットからカメラまでの距離を設定
+      const distance = 5;
+  
+      // ターゲットの前方向ベクトルをカメラの現在の位置から計算
+      const forwardDirection = new Vector3().subVectors(target, cameraRef.current.position).normalize();
+      forwardDirection.negate(); // ターゲットの背後方向を取得
+  
+      // ターゲットの上方向ベクトルを取得
+      const upDirection = new Vector3(0, 1, 0);
+  
+      // ターゲットの右方向ベクトルを取得
+      const rightDirection = new Vector3();
+      rightDirection.crossVectors(upDirection, forwardDirection).normalize();
+  
+      // カメラの上方向ベクトル、右方向ベクトル、背後方向ベクトルに距離をかける
+      upDirection.multiplyScalar(distance);
+      rightDirection.multiplyScalar(distance);
+      forwardDirection.multiplyScalar(distance);
+  
+      // ターゲットに上方向ベクトル、右方向ベクトル、背後方向ベクトルを加算して、フォーカス位置を計算
+      const focusPosition = new Vector3().addVectors(target, upDirection).add(rightDirection).add(forwardDirection);
+  
+      cameraRef.current.position.copy(focusPosition);
+      cameraRef.current.lookAt(target);
+      if (ref && ref.current) {
+        ref.current.target.copy(target);
+      }
+    }
+  };
+
   useFrame((_, delta) => {
+    // Fキーが押された瞬間の検出
+    if (input.pressedKeys.includes("KeyF") && !focusOnObject) {
+      setFocusOnObject(true);
+    } else if (!input.pressedKeys.includes("KeyF") && focusOnObject) {
+      setFocusOnObject(false);
+    }
+
+    // Fキーが押された瞬間にstate.currentIdにフォーカスする
+    if (focusOnObject && state.currentId) {
+      targetFocusCamera(state.currentId);
+    }
     if (input.dash && (input.forward || input.backward || input.right || input.left)) {
       const st = props.cameraSpeed * delta;
       const cameraDirection = new Vector3();
@@ -509,12 +586,11 @@ export const CameraControl = (props: ICameraControl) => {
       cameraRef.current.position.copy(cameraPosition);
       ref.current.target.copy(cameraPosition.add(cameraDirection));
 
-    } else {
-      if (ref.current && cameraRef.current) {
-        cameraRef.current.position.copy(ref.current.object.position);
-        cameraRef.current.rotation.copy(ref.current.object.rotation);
-        cameraRef.current.lookAt(ref.current.target);
-      }
+    }
+    else if (ref.current && cameraRef.current) {
+      cameraRef.current.position.copy(ref.current.object.position);
+      cameraRef.current.rotation.copy(ref.current.object.rotation);
+      cameraRef.current.lookAt(ref.current.target);
     }
   });
 

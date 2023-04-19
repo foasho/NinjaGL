@@ -4,6 +4,7 @@ export { NinjaUI } from "./utils/NinjaUI";
 export {
   NJCFile,
   saveNJCFile,
+  saveNJCBlob,
   loadNJCFile,
   convertObjectToBlob,
   convertObjectToFile,
@@ -24,5 +25,3 @@ export {
   NinjaEngine, 
   NinjaEngineContext 
 } from "./utils/NinjaEngineManager";
-
-console.log('index.tsx loaded');

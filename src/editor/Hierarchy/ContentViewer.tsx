@@ -36,7 +36,7 @@ export interface IFileProps {
   isDirectory: boolean;
   name: string;
   changeScriptEditor: () => void;
-  onDoubleClick?: (type: string, value: string) => void;
+  onDoubleClick?: (type: string, value: string, name: string) => void;
   imageUrl?: string;
 }
 
@@ -76,6 +76,12 @@ const isJS = (filename: string) => {
   return ['js'].includes(ext);
 }
 
+const njc_icon = "fileicons/njc.png";
+const isNJC = (filename: string) => {
+  const ext = getExtension(filename);
+  return ['njc'].includes(ext);
+}
+
 const terrain_icon = "fileicons/terrain.png";
 const isTerrain = (filename: string) => {
   const ext = getExtension(filename);
@@ -96,6 +102,7 @@ const formatBytes = (bytes: number, decimals = 2): string => {
 
 interface IContentsBrowser {
   changeScriptEditor: () => void;
+  changeProject: (url: string, name: string) => void;
 } 
 
 /**
@@ -183,9 +190,12 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     return () => {}
   }, [path, offset, isPersonalDir]);
 
-  const onDoubleClick = (type: "directory" | "gltf" | "js", path: string) => {
+  const onDoubleClick = (type: "directory" | "gltf" | "js" | "njc", path: string, name: string = undefined) => {
     if (type == "directory" && path) {
       setPath(path.replaceAll("//", "/"));
+    }
+    else if (type == "njc" && path) {
+      props.changeProject(path, name);
     }
   }
 
@@ -419,7 +429,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     setShowMenu(false);
   };
 
-  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" = null;
+  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "njc" = null;
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
@@ -438,6 +448,14 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         </>
       )
       contentsSelectType = "gltf";
+    }
+    else if (isNJC(props.name)) {
+      icon = (
+        <>
+          <img src={njc_icon} className={styles.iconImg} data-path={props.name} />
+        </>
+      )
+      contentsSelectType = "njc";
     }
     else if (isMP3(props.name)) {
       icon = (
@@ -520,10 +538,10 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     tooltip.current.style.display = "none";
   }
 
-  const onDoubleClick = async (type: string) => {
+  const onDoubleClick = async (type: string, name: string) => {
     if (props.isDirectory) {
       if (props.onDoubleClick) {
-        props.onDoubleClick("directory", props.url);
+        props.onDoubleClick("directory", props.url, name);
       }
     }
     else if (props.isFile && type == "js"){
@@ -574,6 +592,9 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         });
       }
     }
+    else if (props.isFile && type == "njc"){
+      props.onDoubleClick("njc", props.url, name);
+    }
   }
 
   /**
@@ -593,7 +614,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       <div
         onContextMenu={handleContextMenu} 
         onClick={handleClick}
-        onDoubleClick={(e) => onDoubleClick(contentsSelectType)}
+        onDoubleClick={(e) => onDoubleClick(contentsSelectType, props.name)}
         className={styles.itemCard}
         onDragStart={(e) => onDragStart()}
         onDragEnd={(e) => onDragEnd()}

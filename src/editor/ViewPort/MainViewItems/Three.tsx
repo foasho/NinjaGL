@@ -1,29 +1,32 @@
 import { IObjectManagement } from "ninja-core";
-import { useHelper } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
 import { BoxHelper, Euler, Group, Material, Matrix4, Mesh, MeshPhongMaterial, MeshStandardMaterial, MeshToonMaterial, Object3D, ShaderMaterial, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager"
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
+import { EnableClickTrigger } from "@/commons/functional";
 
 
 export const ThreeObjects = () => {
   const editor = useContext(NinjaEditorContext);
   const [threeOMs, setThreeOMs] = useState<IObjectManagement[]>([]);
   useEffect(() => {
-    setThreeOMs(editor.getThreeObjects())
-  }, [])
-  useFrame(() => {
-    if (threeOMs.length !== editor.getThreeObjects().length){
-      setThreeOMs(editor.getThreeObjects())
+    setThreeOMs(editor.getThreeObjects());
+    const handleThreesChanged = () => {
+      setThreeOMs([...editor.getThreeObjects()]);
     }
-  });
+    editor.onThreeChanged(handleThreesChanged);
+    return () => {
+      editor.offOMsChanged(handleThreesChanged);
+    }
+  }, []);
   return (
     <>
-      {threeOMs.map((om, index: number) => {
-        return <ThreeObject om={om} key={index} />
+      {threeOMs.map((om) => {
+        return <ThreeObject om={om} key={om.id} />
       })}
     </>
   )
@@ -34,11 +37,11 @@ interface IThreeObject {
 }
 const ThreeObject = (props: IThreeObject) => {
   const { om } = props;
+  const { camera } = useThree();
   const state = useSnapshot(globalStore);
   const ref = useRef<Mesh>();
   const editor = useContext(NinjaEditorContext);
   const [helper, setHelper] = useState<boolean>(false);
-  const [materialType, setMaterialType] = useState<"standard"|"phong"|"toon"|"shader">("standard");
   const id = props.om.id;
   const matRef = useRef<any>();
   let geometry;
@@ -60,14 +63,19 @@ const ThreeObject = (props: IThreeObject) => {
 
   let material;
   let color;
-  if (materialType == "standard") {
-    material = (<meshStandardMaterial ref={matRef} />);
-  }
-  else if (materialType == "phong") {
-    material = (<meshPhongMaterial ref={matRef} />);
-  }
-  else if (materialType == "toon") {
-    material = (<meshToonMaterial ref={matRef} />);
+  if (om.args.materialData){
+    if (om.args.materialData.type == "standard") {
+      material = (<meshStandardMaterial ref={matRef} />);
+    }
+    else if (om.args.materialData.type == "phong") {
+      material = (<meshPhongMaterial ref={matRef} />);
+    }
+    else if (om.args.materialData.type == "toon") {
+      material = (<meshToonMaterial ref={matRef} />);
+    }
+    else if (om.args.materialData.type == "reflection"){
+      material = (<MeshReflectorMaterial mirror={0} ref={matRef}/>);
+    }
   }
 
 
@@ -91,54 +99,32 @@ const ThreeObject = (props: IThreeObject) => {
   }
   
   useEffect(() => {
-    if (ref.current) {
-      if (om.args.position) {
-        ref.current.position.copy(om.args.position);
-      }
-      if (om.args.rotation) {
-        ref.current.rotation.copy(om.args.rotation);
-      }
-      if (om.args.scale) {
-        ref.current.scale.copy(om.args.scale);
-      }
-      if (om.args.materialData){
-        if (materialType !== "shader"){
-          if (matRef.current){
-            matRef.current.color.set(om.args.materialData.value);
+    const init = () => {
+      if (ref.current) {
+        if (om.args.position) {
+          ref.current.position.copy(om.args.position);
+        }
+        if (om.args.rotation) {
+          ref.current.rotation.copy(om.args.rotation);
+        }
+        if (om.args.scale) {
+          ref.current.scale.copy(om.args.scale);
+        }
+        if (om.args.materialData){
+          if (om.args.materialData.type !== "shader"){
+            if (matRef.current){
+              matRef.current.color.set(om.args.materialData.value);
+            }
           }
         }
       }
+    }
+    init();
+    editor.onOMIdChanged(id, init);
+    return () => {
+      editor.offOMIdChanged(id, init);
     }
   }, []);
-
-  useFrame((_, delta) => {
-    if (state.currentId == id && state.editorFocus && ref.current) {
-      const pos = editor.getPosition(id);
-      ref.current.position.copy(pos);
-      const rot = editor.getRotation(id);
-      ref.current.rotation.copy(rot);
-      const scale = editor.getScale(id);
-      ref.current.scale.copy(scale);
-      const materialData = editor.getMaterialData(id);
-      if (materialData){
-        if (materialType !== "shader"){
-          if (matRef.current){
-            matRef.current.color.set(materialData.value);
-          }
-        }
-      }
-    }
-    if (ref.current){
-      const castShadow = editor.getCastShadow(id);
-      const receiveShadow = editor.getreceiveShadow(id);
-      ref.current.castShadow = castShadow;
-      ref.current.receiveShadow = receiveShadow;
-      ref.current.visible = editor.getVisible(id);
-    }
-    if (helper !== editor.getHelper(id)){
-      setHelper(editor.getHelper(id));
-    }
-  });
 
   useHelper(((state.currentId == id) && helper) && ref, BoxHelper);
 
@@ -160,7 +146,15 @@ const ThreeObject = (props: IThreeObject) => {
           }
           <mesh 
             ref={ref}
-            onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (EnableClickTrigger(
+                camera.position.clone(), 
+                ref.current
+              )){
+                globalStore.currentId = id
+              }
+            }}
             onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
             castShadow={true}
             receiveShadow={true}

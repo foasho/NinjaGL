@@ -33,6 +33,7 @@ export interface IInputMovement {
   currDrag?: Vector2 | null; // カメラ向きに利用（あとで実装）
   deviceType: "mobile" | "tablet" | "desktop";
   [key: string]: any;
+  pressedKeys: string[]; // 現在入力中キー
 }
 
 /**
@@ -42,7 +43,7 @@ export interface IObjectManagement {
   id: string;
   name?: string;
   type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "text"
-    | "sky" | "light" | "fog" | "camera" | "cloud" | "environment" | "lightformer";
+    | "sky" | "light" | "fog" | "camera" | "effect" | "cloud" | "environment" | "lightformer";
   filePath?: string;
   visibleType: "auto" | "force" | "none";
   layerNum?: number;

@@ -104,7 +104,7 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
 
   const onPointerUp = React.useCallback(
     (e: ThreeEvent<PointerEvent>) => {
-      if (displayValues) divRef.current.style.display = 'none'
+      if (displayValues && divRef.current) divRef.current.style.display = 'none'
       e.stopPropagation()
       clickInfo.current = null
       onDragEnd()

@@ -1,6 +1,5 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
-import { Environment, Sky, SpotLight, SpotLightShadow, Detailed } from "@react-three/drei"
 import React, { useContext, useEffect, useState, useRef } from "react"
 import { MathUtils } from "three";
 import { ShaderMaterial } from "three";
@@ -8,20 +7,15 @@ import { ShaderMaterial } from "three";
 const Light = (om: IObjectManagement) => {
   const ref = useRef<any>();
   let light = undefined;
-  let color: string = (om.args.materialData && om.args.materialData.value) ? om.args.materialData.value : '#fadcb9';
+  let color: string = (om.args.materialData && om.args.materialData.value) 
+    ? om.args.materialData.value : '#fadcb9';
   if (om.args.type == "spot") {
     light = (
       <>
-        <SpotLight
-          position={om.args.position ? om.args.position : [0, 0, 0]}
-          angle={MathUtils.degToRad(45)}
-          distance={om.args.distance ? om.args.distance : 25}
-          intensity={om.args.intensity ? om.args.intensity : 25}
+        <spotLight 
+          ref={ref}
           castShadow
           color={color}
-          volumetric={false}
-          layers={om.layerNum}
-          ref={ref}
         />
       </>
     )
@@ -30,9 +24,6 @@ const Light = (om: IObjectManagement) => {
     light = (
       <>
         <pointLight
-          position={om.args.position ? om.args.position : [0, 0, 0]}
-          intensity={om.args.intensity ? om.args.intensity : 0.5}
-          distance={om.args.distance ? om.args.distance : 25}
           castShadow
           color={color}
           layers={om.layerNum}
@@ -45,7 +36,6 @@ const Light = (om: IObjectManagement) => {
     light = (
       <>
         <ambientLight
-          intensity={om.args.intensity ? om.args.intensity : 0.5}
           color={color}
           layers={om.layerNum}
           ref={ref}
@@ -58,7 +48,6 @@ const Light = (om: IObjectManagement) => {
       <>
         <directionalLight
           castShadow
-          position={om.args.position? om.args.position: [5, 5, 5]}
           color={color}
           layers={om.layerNum}
           ref={ref}
@@ -108,8 +97,8 @@ export const Lights = () => {
   
   return (
     <>
-      {lights.map((light, index) => {
-        return <Light {...light} key={index} />
+      {lights.map((light) => {
+        return <Light {...light} key={light.id} />
       })}
     </>
   )

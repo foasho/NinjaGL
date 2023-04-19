@@ -30,6 +30,8 @@ interface IPlayerManager {
   
 }
 
+export const HomeCameraPosition = new Vector3(0, 1.7, 0);
+
 /**
  * Ninjaエディタクラス
  */
@@ -140,18 +142,6 @@ export class NinjaEditorManager {
   }
 
   /**
-   * 特定のObjectのMatrinx4を変更
-   * @param id 
-   * @param position 
-   */
-  setMatrix4(id: string, matrix: Matrix4) {
-    const target = this.oms.find(om => om.id == id);
-    if (target) {
-      target.args.matrix = matrix;
-    }
-  }
-
-  /**
    * 特定のObjectのPositionを変更
    * @param id 
    * @param position 
@@ -160,6 +150,20 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (target) {
       target.args.position = new Vector3().copy(position);
+      this.notifyOMIdChanged(id);
+    }
+  }
+  
+  /**
+   * 特定のObjectのRotationを変更
+   * @param id 
+   * @param rotation
+   */
+  setRotation(id: string, rotation: Euler) {
+    const target = this.oms.find(om => om.id == id);
+    if (target) {
+      target.args.rotation = new Euler().copy(rotation);
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -172,18 +176,7 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (target) {
       target.args.scale = new Vector3().copy(scale);
-    }
-  }
-
-  /**
-   * 特定のObjectのRotationを変更
-   * @param id 
-   * @param rotation
-   */
-  setRotation(id: string, rotation: Euler) {
-    const target = this.oms.find(om => om.id == id);
-    if (target) {
-      target.args.rotation = new Euler().copy(rotation);
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -192,13 +185,14 @@ export class NinjaEditorManager {
    * @param id 
    * @param material Material
    */
-  setMaterialData(id: string, type: "standard"|"phong"|"tone"|"shader", value: any){
+  setMaterialData(id: string, mtype: "standard"|"phong"|"toon"|"shader"|"reflection", value: any){
     const target = this.oms.find(om => om.id == id);
     if (target){
       target.args.materialData = {
-        type: type,
+        type: mtype,
         value: value
       };
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -209,6 +203,7 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.castShadow = value;
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -219,6 +214,7 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.receiveShadow = value;
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -229,6 +225,7 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.helper = value;
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -241,6 +238,7 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.name = value;
+      this.notifyOMsChanged();
     }
   }
 
@@ -317,8 +315,10 @@ export class NinjaEditorManager {
   setTarget(id: string, name: string, target: Vector3){
     const _target = this.oms.find(om => om.id == id);
     if (id && target) {
-      _target.args.target.name = name;
-      _target.args.target.data = target;
+      _target.args.target = {
+        name: name,
+        data: target
+      };
       this.notifyEnvChanged();
     }
   }
@@ -449,31 +449,6 @@ export class NinjaEditorManager {
       (target as any).object = obj;
     }
   }
-
-  /**
-   * OMの追加
-   * @param props 
-   */
-  setOM = (props: IObjectManagement) => {
-    this.oms.push(props);
-    this.notifyOMsChanged();
-  }
-
-  /**
-   * SMの追加
-   */
-  setSM = (props: IScriptManagement): boolean => {
-    if (this.sms.find(sm => sm.id == props.id)) {
-      return false;
-    }
-    if (this.sms.find(sm => sm.name == props.name)) {
-      return false;
-    }
-    this.sms.push(props);
-    this.notifySMsChanged();
-    return true;
-  }
-
   /**
    * 現在選択中のIDを取得
    * @returns 
@@ -520,6 +495,18 @@ export class NinjaEditorManager {
   getLights = (): IObjectManagement[] => {
     const data = this.oms.filter(om => om.type == "light");
     return data;
+  }
+  private lightChangedListeners: (() => void)[] = [];
+  onLightChanged(listener: () => void) {
+    this.lightChangedListeners.push(listener);
+  }
+  offLightChanged(listener: () => void) {
+    this.lightChangedListeners = this.lightChangedListeners.filter(
+      l => l !== listener
+    );
+  }
+  protected notifyLightChanged() {
+    this.lightChangedListeners.forEach(l => l());
   }
 
   /**
@@ -695,10 +682,51 @@ export class NinjaEditorManager {
   /**
    * 削除処理
    */
-  deleteOM = (id: string) => {
+  deleteOM = (id: string, type: string=undefined) => {
     this.oms = this.oms.filter(om => om.id !== id);
     this.notifyOMsChanged();
+    if (type) {
+      this.notifyChanged(type);
+    }
+    this.notifyOMIdChanged(id);
   }
+
+  /**
+   * タイプ別notify
+   */
+  notifyChanged = (type: string) => {
+    if (type == "avatar") {
+      this.notifyAvatarChanged();
+    }
+    if (type == "sky") {
+      this.notifySkyChanged();
+    }
+    if (type == "three") {
+      this.notifyThreeChanged();
+    }
+    if (type == "fog") {
+      this.notifyFogChanged();
+    }
+    if (type == "text") {
+      this.notifyTextChanged();
+    }
+    if (type == "camera") {
+      this.notifyCameraChanged();
+    }
+    if (type == "environment") {
+      this.notifyEnvChanged();
+    }
+    if (type == "lightformer") {
+      this.notifyEnvChanged();
+    }
+    if (type == "light"){
+      this.notifyLightChanged();
+    }
+    if (type == "object"){
+      this.notifyObjectChanged();
+    }
+  }
+
 
   /**
    * 全取得系処理
@@ -709,6 +737,29 @@ export class NinjaEditorManager {
    */
   getOMs = () => {
     return this.oms;
+  }
+  /**
+   * 個別のOM変更リスナー
+   */
+  private objectManagementIdChangedListeners: { [id: string]: (() => void)[] } = {};
+  onOMIdChanged(id: string, listener: () => void) {
+    if (!this.objectManagementIdChangedListeners[id]) {
+      this.objectManagementIdChangedListeners[id] = [];
+    }
+    this.objectManagementIdChangedListeners[id].push(listener);
+  }
+  offOMIdChanged(id: string, listener: () => void) {
+    if (!this.objectManagementIdChangedListeners[id]) {
+      return;
+    }
+    this.objectManagementIdChangedListeners[id] = this.objectManagementIdChangedListeners[id].filter(l => l !== listener);
+  }
+  // 特定のOM変更を通知する
+  protected notifyOMIdChanged(id: string) {
+    if (!this.objectManagementIdChangedListeners[id]) {
+      return;
+    }
+    this.objectManagementIdChangedListeners[id].forEach(l => l());
   }
   /**
    * OMの変更リスナー
@@ -724,6 +775,30 @@ export class NinjaEditorManager {
   protected notifyOMsChanged() {
     this.objectManagementsChangedListeners.forEach(l => l());
   }
+  /**
+  * OMの追加
+  */
+  setOM(om: IObjectManagement){
+    this.oms.push(om);
+    this.notifyOMsChanged();
+    this.notifyChanged(om.type);
+  }
+
+  /**
+   * SMの追加
+   */
+  setSM = (props: IScriptManagement): boolean => {
+    if (this.sms.find(sm => sm.id == props.id)) {
+      return false;
+    }
+    if (this.sms.find(sm => sm.name == props.name)) {
+      return false;
+    }
+    this.sms.push(props);
+    this.notifySMsChanged();
+    return true;
+  }
+  
   
 
   /**
@@ -781,7 +856,6 @@ export class NinjaEditorManager {
     console.log("<< Complete NJC File >>");
     this.notifyOMsChanged();
   }
-
 }
 
 export const NinjaEditorContext = createContext<NinjaEditorManager>(new NinjaEditorManager());

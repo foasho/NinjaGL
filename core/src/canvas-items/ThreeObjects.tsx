@@ -1,3 +1,4 @@
+import { MeshReflectorMaterial } from "@react-three/drei";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 import React, { useContext, useEffect, useRef } from "react"
@@ -7,6 +8,7 @@ import { ShaderMaterial } from "three";
 const ThreeObject = (om: IObjectManagement) => {
   const ref = useRef<any>();
   const engine = useContext(NinjaEngineContext);
+  // const matRef = useRef<any>();
   let geometry;
   let material;
   if (om.args.type == "plane") {
@@ -39,27 +41,40 @@ const ThreeObject = (om: IObjectManagement) => {
     else if (om.args.materialData.type == "shader") {
       material = (<shaderMaterial />);
     }
+    else if (om.args.materialData.type == "reflection") {
+      material = (<MeshReflectorMaterial mirror={0} color={color}/>);
+    }
   }
   let castShadow = true;
   if (om.args.castShadow != undefined) {
     castShadow = om.args.castShadow;
   }
+  let receiveShadow = true;
+  if (om.args.receiveShadow != undefined) {
+    receiveShadow = om.args.receiveShadow;
+  }
   
   useEffect(() => {
     if (ref.current) {
       engine.setOMObjectById(om.id, ref.current as Object3D);
-      // posistion, rotation, scale
-      if (om.args.position) {
-        ref.current.position.copy(om.args.position);
-      }
-      if (om.args.rotation) {
-        ref.current.rotation.copy(om.args.rotation);
-      }
-      if (om.args.scale) {
-        ref.current.scale.copy(om.args.scale);
+      if (ref.current) {
+        if (om.args.position) {
+          ref.current.position.copy(om.args.position);
+        }
+        if (om.args.rotation) {
+          ref.current.rotation.copy(om.args.rotation);
+        }
+        if (om.args.scale) {
+          ref.current.scale.copy(om.args.scale);
+        }
+        if (om.args.materialData){
+          if (om.args.materialData.type !== "shader"){
+            // @ts-ignore
+          }
+        }
       }
     }
-  }, [ref.current]);
+  }, []);
 
   return (
     <>
@@ -67,7 +82,7 @@ const ThreeObject = (om: IObjectManagement) => {
       <mesh 
         ref={ref}
         castShadow={castShadow}
-        position={om.args.position ? om.args.position : [0, 0, 0]}
+        receiveShadow={receiveShadow}
       >
         {geometry}
         {material}
