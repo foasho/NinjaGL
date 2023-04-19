@@ -9,10 +9,10 @@ import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { AiFillHome, AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMakerCanvas } from "./ViewPort/TerrainMaker";
-import { TerrainInspector } from "./Inspector/TerrainInspector";
+import { saveAs } from "file-saver";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
-import { BsPerson, BsPlay, BsStop } from "react-icons/bs";
+import { BsCheck, BsPerson, BsPlay, BsStop } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { PlayerInspector } from "./Inspector/PlayerInspector";
@@ -20,7 +20,7 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { NJCFile, saveNJCFile } from "ninja-core";
+import { loadNJCFileFromURL, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
 import { loadNJCFile } from "ninja-core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
@@ -31,6 +31,7 @@ import { TextureNavigation } from "./Hierarchy/TextureNavigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { showHelperDialog } from "./Dialogs/HelperDialog";
+import { b64EncodeUnicode } from "@/commons/functional";
 
 /**
  * NinjaEngineメインコンポネント
@@ -39,15 +40,18 @@ export const NinjaEditor = () => {
   const { data: session } = useSession();
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const [projectName, setProjectName] = useState<string>();
+  const [project, setProject] = useState<{name: string; path: string}>();
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
   const [selectSubNav, setSelectSubNav] = useState<"ui" | "shader" | "script" | "texture">("ui");
   const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
   const [showSubMenu, setShowSubMenu] = useState(false);
-  const [projectFiles, setProjectFiles] = useState<{name: string; path: string}[]>([]);
-  const [scriptPath, setScriptPath] = useState<string>();
+  const [recentProgects, setRecentProjects] = useState<{name: string; path: string}[]>([]);
+  const [autoSave, setAutoSave] = useState<boolean>(false);
   const { t, i18n } = useTranslation();
 
+  /**
+   * ビューポートの切り替え
+   */
   const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
       globalStore.init();
@@ -229,6 +233,28 @@ export const NinjaEditor = () => {
   }
 
   /**
+   * プロジェクトの変更
+   */
+  const changeProject = async (njcUrl: string, name: string) => {
+    Swal.fire({
+      title: 'Change Project?',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      denyButtonText: `Close`,
+    }).then(async (result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        const njcFile = await loadNJCFileFromURL(njcUrl);
+        console.log("### ロードしたnjcFileを確認 ###");
+        console.log(njcFile);
+        editor.setNJCFile(njcFile);
+        setProject({...project, name: name});
+      }
+    })
+  }
+
+  /**
    * プロジェクト名を保存
    */
   const changeProjectName = () => {
@@ -249,17 +275,16 @@ export const NinjaEditor = () => {
       }
     }).then((result) => {
       if (result.value) {
-        setProjectName(result.value);
+        setProject({...project, name: result.value});
       }
     });
   };
-  
 
   /**
    * プロジェクト全体を保存
    * ビルド処理
    */
-  const onSave = () => {
+  const onSave = async(completeAlert: boolean=true) => {
     const njcFile = new NJCFile();
     editor.getOMs().map((om) => {
       njcFile.addOM({...om});
@@ -270,7 +295,8 @@ export const NinjaEditor = () => {
     editor.getSMs().map((sm) => {
       njcFile.addSM({...sm});
     });
-    if (!projectName){
+    const blob = await saveNJCBlob(njcFile);
+    if (!project){
       Swal.fire({
         title: t("inputProjectName").toString(),
         input: 'text',
@@ -287,15 +313,55 @@ export const NinjaEditor = () => {
         allowOutsideClick: function () {
           return !Swal.isLoading();
         }
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.value) {
-          setProjectName(result.value);
-          saveNJCFile(njcFile, `${result.value}.njc`);
+          // もしログインしているのならクラウドに保存する
+          if (session){
+            const formData = new FormData();
+            formData.append("file", blob);
+            const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+            const keyPath = (uploadPath + `/${result.value}.njc`).replaceAll("//", "/");
+            formData.append("filePath", keyPath);
+            try {
+              const response = await fetch("/api/storage/upload", {
+                method: "POST",
+                body: formData,
+              });
+              if (!response.ok) {
+                throw new Error("Error uploading file");
+              }
+              const res = await response.json();
+              // 成功したら、ローカルストレージの追加しておく
+              localStorage.setItem(
+                "recentprojects", 
+                JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: result.value, path: keyPath}])
+              );
+              setProject({name: result.value, path: keyPath});
+              // Success message
+              if (completeAlert){
+                Swal.fire({
+                  icon: 'success',
+                  title: t("success"),
+                  text: t("saveSuccess") + `\npersonal/savedata/${result.value}.njc`,
+                });
+              }
+            } catch (error) {
+              console.error("Error:", error.message);
+              // 失敗したらをローカルに保存
+              saveAs(blob, `${result.value}.njc`);
+              setProject({name: result.value, path: undefined});
+            }
+          }
+          else {
+            // ZIPファイルをローカルに保存
+            saveAs(blob, `${result.value}.njc`);
+            setProject({name: result.value, path: undefined});
+          }
         }
       });
     }
     else {
-      saveNJCFile(njcFile, `${projectName}.njc`);
+      saveAs(blob, `${project.name}.njc`);
     }
   }
 
@@ -315,6 +381,9 @@ export const NinjaEditor = () => {
     setShowSubMenu(false);
   };
 
+  /**
+   * プロジェクトを開く
+   */
   const openProject = async () => {
     const input: HTMLInputElement = document.createElement('input');
     input.type = 'file';
@@ -328,7 +397,6 @@ export const NinjaEditor = () => {
         console.log("### ロードしたnjcFileを確認 ###");
         console.log(njcFile);
         editor.setNJCFile(njcFile);
-        
       }
     };
     input.click();
@@ -474,9 +542,32 @@ export const NinjaEditor = () => {
         }
       );
     }
+    // 最近開いたプロジェクトを取得
+    const recentProjects = localStorage.getItem("recentProjects");
+    if (recentProjects){
+      setRecentProjects(JSON.parse(recentProjects));
+    }
+    // AutoSaveが有効かどうかを取得
+    const autoSave = localStorage.getItem("autoSave");
+    if (autoSave){
+      setAutoSave(autoSave == "true");
+    }
   }
   , []);
-  
+
+  useEffect(() => {
+    // AutoSaveが有効なら、AutoSaveを開始
+    let autoSaveInterval;
+    if (autoSave && session){
+      autoSaveInterval = setInterval(() => {
+        onSave();
+      }, 900 * 1000);
+    }
+    return () => {
+      clearInterval(autoSaveInterval);
+    }
+  }, [autoSave]);
+
 
   return (
     <>
@@ -502,7 +593,7 @@ export const NinjaEditor = () => {
                 NinjaGL
               </a>
               <a className={styles.projectName} onClick={() => {changeProjectName()}}>
-                {projectName? projectName: <><BiEditAlt/>{t("nontitle")}</>}
+                {project? project.name: <><BiEditAlt/>{t("nontitle")}</>}
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
@@ -533,13 +624,13 @@ export const NinjaEditor = () => {
           {showFileMenu &&
           <div className={styles.filemenu}>
             <ul onMouseLeave={() => handleFileMenuLeave()}>
-              <li><a>{t("newProject")}</a></li>
+              {/* <li><a>{t("newProject")}</a></li> ##WEBなので不要?  */}
               <li><a onClick={() => openProject()}>{t("open")}</a></li>
               <li onMouseEnter={() => handleRecentProjectsHover()} onMouseLeave={() => handleSubMenuMouseLeave()}>
                 <a>{t("recentProjects")}</a>
                 {showSubMenu &&
                 <ul className={styles.subMenu} onMouseLeave={() => handleSubMenuMouseLeave()}>
-                  {projectFiles.map(((pf, idx) => {
+                  {recentProgects.map(((pf, idx) => {
                     return (
                       <li key={idx}>
                         <a>{pf.name}</a>
@@ -547,13 +638,23 @@ export const NinjaEditor = () => {
                       </li>
                     )
                   }))}
-                  {projectFiles.length == 0 && 
+                  {recentProgects.length == 0 && 
                     <li>
                       <a>{t("noRecentData")}</a>
                     </li>
                   }
                 </ul>
                 }
+              </li>
+              <li>
+                <a onClick={() => setAutoSave(!autoSave)} >
+                  {autoSave?
+                    <BsCheck/>
+                    :
+                    <> </>
+                  }
+                  {t("autoSave")}
+                </a>
               </li>
               <li><a onClick={() => showHelperDialog()}>{t("help")}</a></li>
             </ul>
@@ -606,7 +707,10 @@ export const NinjaEditor = () => {
               </div>
             </div>
             <div className={styles.contentsbrowser}>
-              <ContentsBrowser changeScriptEditor={changeScriptEditor} />
+              <ContentsBrowser 
+                changeScriptEditor={changeScriptEditor}
+                changeProject={changeProject}
+              />
             </div>
             <div className={styles.createObj} onClick={() => onClickNewObject()}>
               <div className={styles.title}>

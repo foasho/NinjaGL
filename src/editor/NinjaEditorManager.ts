@@ -722,6 +722,9 @@ export class NinjaEditorManager {
     if (type == "light"){
       this.notifyLightChanged();
     }
+    if (type == "object"){
+      this.notifyObjectChanged();
+    }
   }
 
 
@@ -778,6 +781,7 @@ export class NinjaEditorManager {
   setOM(om: IObjectManagement){
     this.oms.push(om);
     this.notifyOMsChanged();
+    this.notifyChanged(om.type);
   }
 
   /**
@@ -852,7 +856,6 @@ export class NinjaEditorManager {
     console.log("<< Complete NJC File >>");
     this.notifyOMsChanged();
   }
-
 }
 
 export const NinjaEditorContext = createContext<NinjaEditorManager>(new NinjaEditorManager());

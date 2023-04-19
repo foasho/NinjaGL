@@ -63,9 +63,20 @@ export class NJCFile {
 }
 
 /**
- * NJC出力ファイルを生成
+ * NJC出力ファイルを生成してダウンロード保存
  */
 export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
+  // ZIPファイルを生成
+  const zipData = await saveNJCBlob(njcFile);
+  // ZIPファイルを保存
+  saveAs(zipData, fileName);
+  return zipData;
+}
+
+/**
+ * NJC出力ファイルをBlob変換
+ */
+export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
   const zip = new JSZip();
 
   // objectsディレクトリを作成
@@ -103,9 +114,7 @@ export const saveNJCFile = async (njcFile: NJCFile, fileName: string) => {
 
   // ZIPファイルを生成
   const zipData = await zip.generateAsync({ type: 'blob' });
-
-  // ZIPファイルを保存
-  saveAs(zipData, fileName);
+  return zipData;
 }
 
 /**

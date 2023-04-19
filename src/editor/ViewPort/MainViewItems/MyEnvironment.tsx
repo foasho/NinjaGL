@@ -97,7 +97,7 @@ const LightFormerControl = ({ om }) => {
     if (om.args.rotation)catchRef.current.rotation.copy(om.args.rotation.clone());
     if (om.args.scale)catchRef.current.scale.copy(om.args.scale.clone());
     if (om.args.lookAt) {
-      catchRef.current.lookAt(om.args.lookAt.clone());
+      catchRef.current.lookAt(om.args.lookAt);
     }
   }, [om]);
 

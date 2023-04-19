@@ -4,6 +4,7 @@ export { NinjaUI } from "./utils/NinjaUI";
 export {
   NJCFile,
   saveNJCFile,
+  saveNJCBlob,
   loadNJCFile,
   convertObjectToBlob,
   convertObjectToFile,

@@ -52,7 +52,7 @@ export const b64EncodeUnicode = (str: string): string  => {
  * @param cameraPosition 
  * @param targetPosition 
  */
-export const EnableClickTrigger = (cameraPosition: Vector3, target: Object3D, ratio: number=2) => {
+export const EnableClickTrigger = (cameraPosition: Vector3, target: Object3D, ratio: number=1.5) => {
   if (!target) return false;
   const distance = cameraPosition.distanceTo(target.position);
   const scale = target.scale;
