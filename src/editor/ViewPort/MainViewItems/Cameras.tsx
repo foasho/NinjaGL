@@ -120,7 +120,6 @@ const Camera = (props: ICamera) => {
         />
         <PerspectiveCamera
           makeDefault={false}
-          children={null}
           ref={ref}
         />
       </>
