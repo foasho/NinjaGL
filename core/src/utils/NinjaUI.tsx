@@ -29,7 +29,7 @@ export const NinjaUI = () => {
   )
 }
 
-`
+const example = `
 .Ninjaui {
     z-index: 9999;
     div {

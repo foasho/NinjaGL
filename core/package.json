@@ -1,6 +1,6 @@
 {
   "name": "ninja-core",
-  "version": "0.1.34",
+  "version": "0.1.48",
   "private": false,
   "author": "ShoOsaka",
   "license": "MIT",
@@ -12,6 +12,7 @@
   "engines": {
     "node": ">=18"
   },
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -34,7 +35,7 @@
     "react-json-tree": "^0.18.0",
     "styled-components": "^5.3.8",
     "three": ">=0.149.0",
-    "three-stdlib": "^2.21.6",
+    "three-stdlib": "^2.21.8",
     "valtio": "^1.10.4",
     "web3": "^1.9.0"
   },

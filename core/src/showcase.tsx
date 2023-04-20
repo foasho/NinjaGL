@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { NinjaGL, loadNJCFile, InitMobileConfipParams, NinjaEngine, NinjaEngineContext, loadNJCFileFromURL, IConfigParams, NJCFile, NinjaCanvas } from "./index";
+import { NinjaGL, 
+  loadNJCFile, 
+  InitMobileConfipParams, 
+  NinjaEngine, 
+  NinjaEngineContext, 
+  loadNJCFileFromURL, 
+  IConfigParams, 
+  NJCFile, 
+  NinjaCanvas 
+} from "./index";
 import { SkeletonUtils } from 'three-stdlib';
 
 function Showcase () {
@@ -13,7 +22,7 @@ function Showcase () {
   };
   return (
     <div style={{ height: "100%" }}>
-     <NinjaGL njcPath='default-scene.njc'>
+     <NinjaGL njcPath='simple-thirdperson.njc'>
       <mesh>
         <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
         <meshStandardMaterial attach="material" color="hotpink" />
@@ -40,7 +49,7 @@ const DebugPlay = () => {
  const [engine, setEngine] = useState<NinjaEngine>();
   useEffect(() => {
     const load = async () => {
-      const _njcFile = await loadNJCFileFromURL("default-scene.njc");
+      const _njcFile = await loadNJCFileFromURL("simple-thirdperson.njc");
       // EditorからOMを取得してJSON化する
       const oms = [..._njcFile.oms];
       oms.map((om) => {

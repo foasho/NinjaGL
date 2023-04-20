@@ -2,7 +2,7 @@ import { reqApi } from "@/services/ServciceApi";
 import { Environment, OrbitControls, useHelper } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { DragEventHandler, MutableRefObject, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils, BoxHelper } from "three";
+import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils, BoxHelper, Scene } from "three";
 import { GLTFLoader } from "three-stdlib";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,7 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
-import { convertObjectToFile } from "ninja-core";
+import { convertObjectToFile, exportGLTF } from "ninja-core";
 
 
 export const PlayerEditor = () => {
@@ -149,6 +149,15 @@ export const PlayerEditor = () => {
             type: playerState.type,
           }
         );
+        // const arrayBufferToBlob = (arrayBuffer, mimeType) => {
+        //   return new Blob([arrayBuffer], { type: mimeType });
+        // }
+        // const tscene = new Scene();
+        // tscene.add(target);
+        // const ab = await exportGLTF(tscene);
+        // const mimeType = 'application/octet-stream';
+        // const blob = arrayBufferToBlob(ab, mimeType);
+
         Swal.fire({
           title: t("inputFileName"),
           input: 'text',
@@ -164,6 +173,7 @@ export const PlayerEditor = () => {
               // ログインしていればストレージに保存
               const formData = new FormData();
               formData.append("file", file);
+              // formData.append("file", blob);
               const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/players`;
               const keyPath = (uploadPath + `/${inputStr}.glb`).replaceAll("//", "/");
               formData.append("filePath", keyPath);
@@ -190,6 +200,7 @@ export const PlayerEditor = () => {
               // ログインしていなければダウンロード
               const link = document.createElement("a");
               link.href = URL.createObjectURL(file);
+              // link.href = URL.createObjectURL(blob);
               link.download = `${inputStr}.glb`;
               link.click();
               link.remove();
