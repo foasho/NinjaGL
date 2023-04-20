@@ -71,7 +71,7 @@ const CreateIcon = (prop: INinjaIconProps) => {
             if (prop.script && prop.script.length > 0 && prop.id && prop.id.length > 0){
                 try {
                     const Icon = document.getElementById(prop.id);
-                    eval(prop.script);
+                    // eval(prop.script);
                 } catch (error) {
                     console.error("Icon表示エラー");
                 }
