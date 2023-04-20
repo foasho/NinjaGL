@@ -10,6 +10,7 @@ export {
   convertObjectToFile,
   convertObjectToArrayBuffer,
   loadNJCFileFromURL,
+  exportGLTF
 } from "./utils/NinjaFileControl";
 export * from "./utils/NinjaProps";
 export {

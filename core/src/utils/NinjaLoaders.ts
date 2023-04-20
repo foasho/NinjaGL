@@ -373,7 +373,6 @@ export const AvatarLoader = async (props: IAvatarLoaderProps): Promise<IAvatarDa
               const boundingBox = new Box3().setFromObject(node, true);
             }
           });
-          gltf.scene.traverseAncestors
 
           const nh = totalSize.y;
           const ns = props.height / nh;
@@ -442,7 +441,6 @@ export const AvatarDataSetter = (props: IAvatarDataSetterProps) => {
         const boundingBox = new Box3().setFromObject(node, true);
       }
     });
-    props.object.traverseAncestors
 
     const nh = totalSize.y;
     const ns = props.height / nh;

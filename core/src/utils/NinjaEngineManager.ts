@@ -162,6 +162,12 @@ export class NinjaEngine {
             height: om.args.height
           });
         }
+        const animations = om.object.animations;
+        console.log("Animations Length: ", animations.length);
+        if (animations && animations.length > 0){
+          const mixer = new AnimationMixer(om.object);
+          om.mixer = mixer;
+        }
       }
       else if (om.type == "terrain" && om.object){
         om.object.traverse((node: any) => {
@@ -374,7 +380,7 @@ export class NinjaEngine {
   /**
    * アバターのオブジェクトマネジメントを取得
    */
-  getAvatarObject(): IObjectManagement {
+  getAvatar(): IObjectManagement {
     return this.oms.find(om => om.type == "avatar");
   }
   private avatarChangedListeners: (() => void)[] = [];
@@ -394,7 +400,7 @@ export class NinjaEngine {
    * アバターをセットする
    */
   setAvatar(threeMesh: Mesh|Object3D) {
-    const avatarObject = this.getAvatarObject();
+    const avatarObject = this.getAvatar();
     if (avatarObject) {
       if (avatarObject.args.position) {
         threeMesh.position.set(
@@ -774,7 +780,7 @@ export class NinjaEngine {
    * アバターのレイヤー番号を更新する
    */
   updateAvatarLayerNumber() {
-    const avatar = this.getAvatarObject();
+    const avatar = this.getAvatar();
     if (avatar && this.avatar) {
       const id = avatar.id;
       const nowposition = this.avatar.object.position.clone();

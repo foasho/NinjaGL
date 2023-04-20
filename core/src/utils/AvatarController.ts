@@ -652,7 +652,7 @@ export class AvatarController {
       const objectPosition = this.object.position.clone();
       const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
       const distance = cameraPosition.distanceTo(objectPosition);
-      const om = this.parent.getAvatarObject();
+      const om = this.parent.getAvatar();
       const targetAvatarObject = om?.object? om.object : null;
       if (targetAvatarObject) {
         this.raycaster.set(newPosition, direction);
@@ -739,10 +739,13 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const idleAction = this.mixer!.clipAction(animation);
+        if (!this.mixer) {
+          throw `mixerが見つかりません`;
+        }
+        const idleAction = this.mixer.clipAction(animation);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer!.clipAction(prevAnimation!);
+          const prevAction = this.mixer.clipAction(prevAnimation!);
           idleAction.time = 0.0;
           idleAction.enabled = true;
           idleAction.setEffectiveTimeScale(1.0);
@@ -781,10 +784,13 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const curAction = this.mixer!.clipAction(animation);
+        if (!this.mixer) {
+          throw `mixerが見つかりません`;
+        }
+        const curAction = this.mixer.clipAction(animation);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer!.clipAction(prevAnimation!);
+          const prevAction = this.mixer.clipAction(prevAnimation!);
           curAction.enabled = true;
           if (prevState.Name == this.animMapper.run) {
             const ratio = curAction.getClip().duration / prevAction.getClip().duration;
@@ -827,10 +833,13 @@ export class AvatarController {
         if (!animation) {
           throw `${this.animMapper.idle}というアニメーションが見つかりません`;
         }
-        const curAction = this.mixer!.clipAction(animation);
+        if (!this.mixer) {
+          throw `mixerが見つかりません`;
+        }
+        const curAction = this.mixer.clipAction(animation);
         if (prevState) {
           const prevAnimation = this.animations.find(a => a.name == prevState.Name);
-          const prevAction = this.mixer!.clipAction(prevAnimation!);
+          const prevAction = this.mixer.clipAction(prevAnimation!);
           curAction.enabled = true;
           if (prevState.Name == this.animMapper.walk) {
             const ratio = curAction.getClip().duration / prevAction.getClip().duration;

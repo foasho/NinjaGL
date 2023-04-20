@@ -134,11 +134,8 @@ export const MyLight = (prop: ILightProps) => {
   if (om.args.type == "spot"){
     _helperObject = SpotLightHelper;
   }
-  if (om.args.type == "point"){
+  else if (om.args.type == "point"){
     _helperObject = PointLightHelper;
-  }
-  else if (om.args.type == "directional"){
-    _helperObject = DirectionalLightHelper;
   }
   useHelper((ref), _helperObject);
   

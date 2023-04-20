@@ -22,6 +22,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
     experimental: {
       reactRoot: 'concurrent',
       appDir: true,
+      esmExternals: true,
     },
     images: {},
     webpack(config, { isServer }) {
