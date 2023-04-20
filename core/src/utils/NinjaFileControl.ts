@@ -373,11 +373,8 @@ export const convertObjectToFile = (
       object.userData = userData;
     }
 
-    const scene = new Scene();
-    scene.add(object);
-
     exporter.parse(
-      scene,
+      object,
       (result) => {
         let blob: Blob;
         let mimeType: string;

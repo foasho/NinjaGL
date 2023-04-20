@@ -30,25 +30,37 @@ export const Avatar = () => {
     scale: new Vector3() 
   });
 
-  useFrame((_, delta) => {
-    if (avatar != editor.getAvatar()){
+  useEffect(() => {
+    setAvatar(editor.getAvatar());
+    const init = () => {
       setAvatar(editor.getAvatar());
     }
-    if (ref.current){
-      ref.current.visible = editor.getVisible(id);
+    editor.onOMIdChanged(id, init);
+    return () => {
+      editor.offOMIdChanged(id, init);
     }
-    if (helper !== editor.getHelper(id)){
-      setHelper(editor.getHelper(id));
-    }
-    if (state.editorFocus){
-      const pos = editor.getPosition(id);
-      editorData.current.position = new Vector3().copy(pos);
-      const rot = editor.getRotation(id);
-      editorData.current.rotation = new Euler().copy(rot);
-      const sca = editor.getScale(id);
-      editorData.current.scale = new Vector3().copy(sca);
-    }
-  });
+  }, []);
+
+  // 美しくないので廃止
+  // useFrame((_, delta) => {
+  //   if (avatar != editor.getAvatar()){
+  //     setAvatar(editor.getAvatar());
+  //   }
+  //   if (ref.current){
+  //     ref.current.visible = editor.getVisible(id);
+  //   }
+  //   if (helper !== editor.getHelper(id)){
+  //     setHelper(editor.getHelper(id));
+  //   }
+  //   if (state.editorFocus){
+  //     const pos = editor.getPosition(id);
+  //     editorData.current.position = new Vector3().copy(pos);
+  //     const rot = editor.getRotation(id);
+  //     editorData.current.rotation = new Euler().copy(rot);
+  //     const sca = editor.getScale(id);
+  //     editorData.current.scale = new Vector3().copy(sca);
+  //   }
+  // });
 
   const onDragStart = () => {
     globalStore.pivotControl = true;

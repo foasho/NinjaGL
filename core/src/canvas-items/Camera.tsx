@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";
@@ -56,13 +56,23 @@ const CameraComponent = (om: IObjectManagement) => {
 export const Cameras = () => {
   const engine = useContext(NinjaEngineContext);
   const cameras = engine ? engine.getCameras() : [];
+  const [nonCamera, setNonCamera] = useState(false);
   if (cameras.length == 0){
     console.info("No camera found. Add a Default Moveble Camera.");
   }
+  useEffect(() => {
+    const cameras = engine.getCameras();
+    if (cameras.length == 0 && !engine.getAvatar()){
+      setNonCamera(true);
+    }
+    else {
+      setNonCamera(false);
+    }
+  }, [engine]);
 
   return (
     <>
-      {cameras.length > 0 ?
+      {cameras.length > 0 &&
         <>
           {cameras.map((om, index) => {
             return (
@@ -70,10 +80,11 @@ export const Cameras = () => {
             )
           })}
         </>
-        :
+      }
+      {/* カメラもアバターもなければ、デフォルトのカメラを追加する */}
+      {nonCamera &&
         <>
           <MoveableCamera/>
-          {/* <OrbitControls/> */}
         </>
       }
     </>
