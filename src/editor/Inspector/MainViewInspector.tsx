@@ -354,11 +354,10 @@ export const MainViewInspector = () => {
               <input 
                 // value={position?(position.x).toFixed(2): ""}
                 type="text" 
-                placeholder={position?(position.x).toFixed(2): ""}
+                placeholder={position?(position.x).toFixed(2): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(2);
-                    changePosition({ target: { value: inputValue } }, "x");
+                    changePosition(e, "x");
                   }
                 }}
                 onInput={(e: any) => {
@@ -374,11 +373,10 @@ export const MainViewInspector = () => {
               <input 
                 // value={position?position.y.toFixed(2): ""}
                 type="text" 
-                placeholder={position?position.y.toFixed(2): ""}
+                placeholder={position?position.y.toFixed(2): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(2);
-                    changePosition({ target: { value: inputValue } }, "y");
+                    changePosition(e, "y");
                   }
                 }}
                 onInput={(e: any) => {
@@ -394,11 +392,10 @@ export const MainViewInspector = () => {
               <input 
                 // value={position?position.z.toFixed(2): ""}
                 type="text" 
-                placeholder={position?position.y.toFixed(2): ""}
+                placeholder={position?position.y.toFixed(2): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(2);
-                    changePosition({ target: { value: inputValue } }, "z");
+                    changePosition(e, "z");
                   }
                 }}
                 onInput={(e: any) => {
@@ -426,56 +423,59 @@ export const MainViewInspector = () => {
               <input 
                 // value={MathUtils.radToDeg(rotation?.x).toFixed(1)}
                 type="text" 
-                placeholder={rotation?MathUtils.radToDeg(rotation.x).toFixed(1): ""}
+                placeholder={rotation?MathUtils.radToDeg(rotation.x).toFixed(1): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(1);
-                    changeRotation({ target: { value: inputValue } }, "x");
+                    changeRotation(e, "x");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newRotation = rotation.clone();
-                    newRotation.set(e.target.value, rotation.y, rotation.z);
+                    const newRotation = rotation?rotation.clone(): new Euler(0, 0, 0);
+                    newRotation.set(e.target.value, newRotation.y, newRotation.z);
                     setRotation(newRotation);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
                 // value={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): ""}
                 type="text" 
-                placeholder={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): ""}
+                placeholder={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(1);
-                    changeRotation({ target: { value: inputValue } }, "y");
+                    changeRotation(e, "y");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newRotation = rotation.clone();
-                    newRotation.set(rotation.x, e.target.value, rotation.z);
+                    const newRotation = rotation?rotation.clone(): new Euler(0, 0, 0);
+                    newRotation.set(newRotation.x, e.target.value, newRotation.z);
                     setRotation(newRotation);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
                 // value={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): ""}
                 type="text" 
-                placeholder={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): ""}
+                placeholder={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(1);
-                    changeRotation({ target: { value: inputValue } }, "z");
+                    changeRotation(e, "z");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newRotation = rotation.clone();
-                    newRotation.set(rotation.x, rotation.y, e.target.value);
+                    const newRotation = rotation?rotation.clone(): new Euler(0, 0, 0);
+                    newRotation.set(newRotation.x, rotation.y, e.target.value);
                     setRotation(newRotation);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
             </div>
           </div>
@@ -492,10 +492,10 @@ export const MainViewInspector = () => {
               <input 
                 // value={scale?(scale.x).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.x).toFixed(1): ""}
+                placeholder={scale?(scale.x).toFixed(2): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    const inputValue = parseFloat(e.target.value);
                     changeScale({ target: { value: inputValue } }, "x");
                   }
                 }}
@@ -510,10 +510,10 @@ export const MainViewInspector = () => {
               <input 
                 // value={scale?(scale.y).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.y).toFixed(1): ""}
+                placeholder={scale?(scale.y).toFixed(2): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    const inputValue = parseFloat(e.target.value);
                     changeScale({ target: { value: inputValue } }, "y");
                   }
                 }}
@@ -528,10 +528,10 @@ export const MainViewInspector = () => {
               <input 
                 // value={scale?(scale.z).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.z).toFixed(1): ""}
+                placeholder={scale?(scale.z).toFixed(2): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value).toFixed(2);
+                    const inputValue = parseFloat(e.target.value);
                     changeScale({ target: { value: inputValue } }, "z");
                   }
                 }}
