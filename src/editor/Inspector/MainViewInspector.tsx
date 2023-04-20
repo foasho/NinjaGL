@@ -56,7 +56,7 @@ export const MainViewInspector = () => {
   const materialOptions: {value: "standard"|"phong"|"toon"|"shader"|"reflection", label: string}[] = [
     { value: "standard", label: t("StandardMaterial") },
     { value: "phong", label: t("PhongMaterial") },
-    { value: "toon", label: t("ToneMaterial") },
+    { value: "toon", label: t("ToonMaterial") },
     { value: "shader", label: t("ShaderMaterial") },
     { value: "reflection", label: t("reflection") }
   ];

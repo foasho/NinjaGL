@@ -132,7 +132,7 @@ export const MyLight = (prop: ILightProps) => {
         }
 
         {/* ヘルパーはやはり一緒にいれる */}
-        {state.pivotControl &&
+        {!state.editorFocus &&
           <PivotControls
             object={(state.currentId == id) ? catchRef : undefined}
             visible={(state.currentId == id)}
