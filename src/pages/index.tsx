@@ -19,7 +19,7 @@ function Home() {
   return (
     <>
       <Head>
-        <title></title>
+        <title>NinjaGL</title>
         <meta name="ReactGameEngine" content="NinjaGL" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

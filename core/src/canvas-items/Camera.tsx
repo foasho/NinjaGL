@@ -8,6 +8,7 @@ import { Vector3 } from "three";
 
 
 const CameraComponent = (om: IObjectManagement) => {
+  const engine = useContext(NinjaEngineContext);
   let _camera;
   const { camera } = useThree();
   if (om.args.type == "orbit"){
@@ -45,6 +46,13 @@ const CameraComponent = (om: IObjectManagement) => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (om.args.type == "fixed" && om.args.default == true) {
+      engine.setOMObjectById(om.id, camera);
+    }
+  }, []);
+
   return (
     <>
       {_camera}
