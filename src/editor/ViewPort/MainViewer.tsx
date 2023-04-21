@@ -30,6 +30,7 @@ import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 
 export const MainViewer = () => {
+  const [renderCount, setRenderCount] = useState(0);
   const loadingRef = useRef<HTMLDivElement>();
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
@@ -192,9 +193,23 @@ export const MainViewer = () => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
 
+  /**
+   * NJCの変更を検知して、再レンダリングする
+   */
+  useEffect(() => {
+    const init = ( ) => {
+      setRenderCount(renderCount + 1);
+    }
+    editor.onNJCChanged(init);
+    return () => {
+      editor.offNJCChanged(init);
+    }
+  }, []);
+
   return (
     <div className={styles.mainView}>
       <Canvas
+        key={renderCount}
         style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
         camera={{ position: HomeCameraPosition }}

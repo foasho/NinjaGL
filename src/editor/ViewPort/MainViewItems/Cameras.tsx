@@ -14,8 +14,8 @@ export const Cameras = () => {
 
   return (
     <>
-      {cameras.map((om, idx) => {
-        return <Camera om={om} key={idx} />
+      {cameras.map((om) => {
+        return <Camera om={om} key={om.id} />
       })}
     </>
   )
@@ -109,7 +109,7 @@ const Camera = (props: ICamera) => {
               onDrag={(e) => onDrag(e)}
               onDragStart={() => onDragStart()}
               onDragEnd={() => onDragEnd()}
-              object={(id==state.currentId) ? ref : undefined}
+              object={(id==state.currentId) ? catchRef : undefined}
           />
         }
         <primitive 

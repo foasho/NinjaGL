@@ -854,7 +854,20 @@ export class NinjaEditorManager {
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
     console.log("<< Complete NJC File >>");
-    this.notifyOMsChanged();
+    this.notifyNJCChanged();
+  }
+  private njcChangedListeners: (() => void)[] = [];
+  onNJCChanged(listener: () => void) {
+    this.njcChangedListeners.push(listener);
+  }
+  offNJCChanged(listener: () => void) {
+    this.njcChangedListeners = this.njcChangedListeners.filter(
+      l =>  l !== listener
+    );
+  }
+  // NJCの変更を通知する
+  protected notifyNJCChanged() {
+    this.njcChangedListeners.forEach(l => l());
   }
 }
 

@@ -100,11 +100,6 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
     }
     delete om.object;
     delete om.mixer;
-    if (om.args){
-      if (om.args.position){
-        // om.args.position = 
-      }
-    }
     exportOMs.push(om);
   }
 
