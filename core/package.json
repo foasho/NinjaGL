@@ -1,6 +1,6 @@
 {
   "name": "ninja-core",
-  "version": "0.1.62",
+  "version": "0.1.67",
   "private": false,
   "author": "ShoOsaka",
   "license": "MIT",
@@ -34,7 +34,6 @@
     "meshoptimizer": "^0.18.1",
     "react-icons": "^4.7.1",
     "react-json-tree": "^0.18.0",
-    "rollup-plugin-polyfill-node": "^0.12.0",
     "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.8",
     "three": ">=0.149.0",
@@ -44,7 +43,7 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "prepublishOnly": "npm version patch && npm run build",
+    "prepublishOnly": "npm run build && npm version patch",
     "build": "rollup -c",
     "showcase": "react-app-rewired start"
   },
@@ -66,6 +65,7 @@
     "rollup": "^2.79.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.34.1",
+    "rollup-plugin-polyfill-node": "^0.12.0",
     "typescript": "4.9.5"
   },
   "peerDependencies": {
