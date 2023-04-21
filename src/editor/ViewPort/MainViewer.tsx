@@ -71,11 +71,11 @@ export const MainViewer = () => {
        */
       if (session){
         // Upload
-        Swal.fire({
-          title: "Now Developing...",
-          icon: "info",
-          confirmButtonText: "OK",
-        });
+        // Swal.fire({
+        //   title: "Now Developing...",
+        //   icon: "info",
+        //   confirmButtonText: "OK",
+        // });
         return;
       }
       else {

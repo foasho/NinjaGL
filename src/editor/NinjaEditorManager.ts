@@ -230,6 +230,17 @@ export class NinjaEditorManager {
   }
 
   /**
+   * カメラの向きを設定値に変更
+   */
+  setCameraDirection(id: string, cameraDirection: Vector3){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.cameraDirection = cameraDirection;
+      // this.notifyOMIdChanged(id); // 無限ループになるのでコメントアウト
+    }
+  }
+
+  /**
    * 名前を変更
    * @param id 
    * @param value 

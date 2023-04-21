@@ -22,7 +22,7 @@ function Showcase () {
   };
   return (
     <div style={{ height: "100%" }}>
-     <NinjaGL njcPath='simple-thirdperson.njc'>
+     <NinjaGL njcPath='simplecamera.njc'>
       <mesh>
         <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
         <meshStandardMaterial attach="material" color="hotpink" />
@@ -49,7 +49,7 @@ const DebugPlay = () => {
  const [engine, setEngine] = useState<NinjaEngine>();
   useEffect(() => {
     const load = async () => {
-      const _njcFile = await loadNJCFileFromURL("simple-thirdperson.njc");
+      const _njcFile = await loadNJCFileFromURL("samplecamera.njc");
       // EditorからOMを取得してJSON化する
       const oms = [..._njcFile.oms];
       oms.map((om) => {
@@ -72,8 +72,7 @@ const DebugPlay = () => {
       }
       const _engine = new NinjaEngine();
       const njcFile = new NJCFile();
-      // njcFile.setConfig(_config);
-      njcFile.setConfig(InitMobileConfipParams);
+      njcFile.setConfig(_config);
       njcFile.setOMs(oms);
       njcFile.setUMs(ums);
       njcFile.setTMs(tms);

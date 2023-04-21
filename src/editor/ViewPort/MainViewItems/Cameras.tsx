@@ -31,7 +31,7 @@ const Camera = (props: ICamera) => {
   const catchRef = useRef<any>();
   const state = useSnapshot(globalStore);
   const { scene } = useGLTF("/fileicons/camera.glb");
-  scene.scale.set(0.33, 0.33, 0.33);
+  // scene.scale.set(0.33, 0.33, 0.33);
 
   useHelper((ref), CameraHelper);
 
@@ -50,6 +50,9 @@ const Camera = (props: ICamera) => {
     editor.setScale(id, scale);
     editor.setRotation(id, rotation);
     globalStore.pivotControl = true;
+    const cameraDirection = new Vector3();
+    ref.current.getWorldDirection(cameraDirection);
+    editor.setCameraDirection(id, cameraDirection);
   }
 
   useEffect(() => {
@@ -82,6 +85,10 @@ const Camera = (props: ICamera) => {
         if (props.om.args.aspect) {
           ref.current.aspect = props.om.args.aspect;
         }
+        // const cameraDirection = new Vector3();
+        // ref.current.getWorldDirection(cameraDirection);
+        // // パラメータに追加
+        // editor.setCameraDirection(id, cameraDirection);
       }
     }
     init();
@@ -93,7 +100,7 @@ const Camera = (props: ICamera) => {
       editor.onOMIdChanged(id, handleOMIdChanged);
     }
 
-  }, [props.om]);
+  }, [props.om, scene]);
 
   return (
     <>
@@ -101,15 +108,15 @@ const Camera = (props: ICamera) => {
       <>
         {!state.editorFocus &&
           <PivotControls
-              scale={5}
-              visible={(id==state.currentId)}
-              disableAxes={!(id==state.currentId)}
-              disableSliders={!(id==state.currentId)}
-              disableRotations={!(id==state.currentId)}
-              onDrag={(e) => onDrag(e)}
-              onDragStart={() => onDragStart()}
-              onDragEnd={() => onDragEnd()}
-              object={(id==state.currentId) ? catchRef : undefined}
+            // scale={5}
+            object={(state.currentId == id) ? catchRef : undefined}
+            visible={(state.currentId == id)}
+            depthTest={false}
+            lineWidth={2}
+            anchor={[0, 0, 0]}
+            onDrag={(e) => onDrag(e)}
+            onDragStart={() => onDragStart()}
+            onDragEnd={() => onDragEnd()}
           />
         }
         <primitive 

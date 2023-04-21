@@ -133,7 +133,7 @@ export class AvatarController {
     let wasGrounded: boolean;
 
     // Animationがあればセットする
-    if (animations && animMapper && animations.length > 0) {
+    if (animations && animMapper && animations.length > 0 && this.mixer) {
       this.animations = animations;
       this.animMapper = animMapper;
       this.mixer = mixer;
