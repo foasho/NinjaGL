@@ -1,6 +1,6 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { Canvas } from "@react-three/fiber";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { Suspense, useContext, useEffect, useRef, useState } from "react";
 import { Avatar } from "../canvas-items/Avatar";
 import { SkyComponents } from "../canvas-items/Sky";
 import { StaticObjects } from "../canvas-items/StaticObjects";
@@ -15,6 +15,7 @@ import { Cameras } from "../canvas-items/Camera";
 import { proxy } from "valtio";
 import { JSONTree } from 'react-json-tree';
 import { MyEnvirments } from "../canvas-items/MyEnvirments";
+import { Preload } from "@react-three/drei";
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
@@ -42,20 +43,23 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         dpr={window.devicePixelRatio}
         {...props.canvasProps}
       >
-        {(engineState.loadCompleted && engine) &&
-          <>
-            <System />
-            <Terrain />
-            <Avatar />
-            <StaticObjects/>
-            <Lights/>
-            <SkyComponents />
-            <ThreeObjects/>
-            <Cameras/>
-            <MyEnvirments/>
-          </>
-        }
-        {props.children && props.children}
+        <Suspense fallback={null}>
+          {(engineState.loadCompleted && engine) &&
+            <>
+              <System />
+              <Terrain />
+              <Avatar />
+              <StaticObjects/>
+              <Lights/>
+              <SkyComponents />
+              <ThreeObjects/>
+              <Cameras/>
+              <MyEnvirments/>
+            </>
+          }
+          {props.children && props.children}
+          <Preload all />
+        </Suspense>
       </Canvas>
       {(engineState.loadCompleted) &&
         <NinjaUI />

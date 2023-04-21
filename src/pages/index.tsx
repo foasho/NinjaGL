@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import styles from '../App.module.scss';
 import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NinjaEditor } from "@/editor/NinjaEditor";
 import { ToastContainer } from "react-toastify";
 
@@ -9,13 +9,12 @@ function Home() {
   const [editor, setEditor] = useState<NinjaEditorManager>();
 
   useEffect(() => {
-    setEditor(new NinjaEditorManager());
+    const editor = new NinjaEditorManager();
+    setEditor(editor);
     return () => {
       setEditor(undefined);
     }
-  }, [false]);
-
-  const mode = process.env.MODE;
+  }, []);
 
   return (
     <>

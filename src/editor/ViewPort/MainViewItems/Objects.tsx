@@ -95,18 +95,25 @@ const StaticObject = (props: IStaticObject) => {
   }
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.position.copy(editor.getPosition(id));
-      ref.current.rotation.copy(editor.getRotation(id));
-      ref.current.scale.copy(editor.getScale(id));
-      const materialData = editor.getMaterialData(id);
-      if (materialData) {
-        ref.current.traverse((node: any) => {
-          if (node.isMesh && node instanceof Mesh) {
-            node.material = materialData.material;
-          }
-        })
+    const init = () => {
+      if (ref.current) {
+        ref.current.position.copy(editor.getPosition(id));
+        ref.current.rotation.copy(editor.getRotation(id));
+        ref.current.scale.copy(editor.getScale(id));
+        const materialData = editor.getMaterialData(id);
+        if (materialData) {
+          ref.current.traverse((node: any) => {
+            if (node.isMesh && node instanceof Mesh) {
+              node.material = materialData.material;
+            }
+          })
+        }
       }
+    }
+    init();
+    editor.onOMIdChanged(id, init);
+    return () => {
+      editor.offOMIdChanged(id, init);
     }
   }, []);
 

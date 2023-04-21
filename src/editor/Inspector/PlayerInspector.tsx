@@ -49,14 +49,22 @@ export const PlayerInspector = (props:IPlayerInspectorProps) => {
     setPlayerType(opt);
   }, [playerState.type]);
 
-  const onHandleChange = (selected: { value: "avatar"|"other"|"npc", label: string }) => {
+  /**
+   * アニメーションを変更
+   * @param selected 
+   */
+  const onHandleChange = (selected: { value: string, label: string }) => {
     setSelectedOption(selected);
     editor.setSelectPlayerAnimation(selected.label);
-    globalPlayerStore.type = selected.value;
   }
 
-  const onHandleChangeType = (selected: { value: string, label: string }) => {
+  /**
+   * 種別の変更1
+   * @param selected 
+   */
+  const onHandleChangeType = (selected: { value: "avatar"|"other"|"npc", label: string }) => {
     setPlayerType(selected);
+    globalPlayerStore.type = selected.value;
   }
 
   const onHandleChangeIdle = (selected: { value: string, label: string }) => {

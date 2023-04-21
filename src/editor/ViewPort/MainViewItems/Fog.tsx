@@ -15,16 +15,14 @@ export const FogComponent = () => {
     const ref = useRef<Fog>();
     const editor = useContext(NinjaEditorContext);
     const [fog, setFog] = useState<IObjectManagement>();
+
     useEffect(() => {
       setFog(editor.getFog());
       const handleEnvChanged = () => {
         setFog({...editor.getFog()});
       }
-      editor.onEnvChanged(handleEnvChanged);
-      return () => {
-        editor.offEnvChanged(handleEnvChanged);
-      }
     }, [editor]);
+
     return (
         <>
             {fog &&

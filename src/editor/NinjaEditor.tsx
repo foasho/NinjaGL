@@ -32,6 +32,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
+import 'setimmediate';
 
 /**
  * NinjaEngineメインコンポネント
@@ -552,6 +553,7 @@ export const NinjaEditor = () => {
     if (autoSave){
       setAutoSave(autoSave == "true");
     }
+
   }
   , []);
 

@@ -29,61 +29,6 @@ export const MyLights = () => {
       {lights.map((om) => {
         return <MyLight om={om} key={om.id}/>
       })}
-      {/* コントローラは別でもつ */}
-      {lights.map((om) => {
-        return <LightControl om={om} key={om.id}/>
-      })}
-    </>
-  )
-}
-
-const LightControl = (prop: {om: IObjectManagement}) => {
-  const { om } = prop;
-  const state = useSnapshot(globalStore);
-  const catchRef = useRef<Mesh>();
-  const editor = useContext(NinjaEditorContext);
-  const id = om.id;
-
-  const onDragStart = () => {
-    globalStore.pivotControl = true;
-  }
-  const onDragEnd = () => {
-  }
-  
-  const onDrag = (e) => {
-    // 位置/回転率の確認
-    const position = new Vector3().setFromMatrixPosition(e);
-    const rotation = new Euler().setFromRotationMatrix(e);
-    const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
-    globalStore.pivotControl = true;
-  };
-  useEffect(() => {
-    if (om.args.position)catchRef.current.position.copy(om.args.position.clone());
-    if (om.args.rotation)catchRef.current.rotation.copy(om.args.rotation.clone());
-    if (om.args.scale)catchRef.current.scale.copy(om.args.scale.clone());
-  }, [om]);
-
-  return (
-    <>
-      <PivotControls
-        object={(state.currentId == id) ? catchRef : undefined}
-        visible={(state.currentId == id)}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDrag={onDrag}
-      />
-      <mesh 
-        onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
-        onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
-        ref={catchRef}
-        onContextMenu={(e) => {e.stopPropagation()}}
-      >
-        <boxBufferGeometry  />
-        <meshStandardMaterial wireframe={true} visible={false} side={DoubleSide} />
-      </mesh>
     </>
   )
 }
@@ -95,21 +40,40 @@ interface ILightProps {
 export const MyLight = (prop: ILightProps) => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
+  const catchRef = useRef<Mesh>();
   const ref = useRef<any>();
-  const helperRef = useRef<any>();
   const { om } = prop;
   const id = om.id;
+
+  const onDragStart = () => {
+    globalStore.pivotControl = true;
+  }
+  const onDragEnd = () => {
+  }
+
+  const onDrag = (e) => {
+    // 位置/回転率の確認
+    const position = new Vector3().setFromMatrixPosition(e);
+    const rotation = new Euler().setFromRotationMatrix(e);
+    const scale = new Vector3().setFromMatrixScale(e);
+    editor.setPosition(id, position);
+    editor.setScale(id, scale);
+    editor.setRotation(id, rotation);
+  };
 
   useEffect(() => {
     const init = () => {
       if (om.args.position){
         ref.current.position.copy(om.args.position.clone());
+        catchRef.current.position.copy(om.args.position.clone());
       }
       if (om.args.rotation){
         ref.current.rotation.copy(om.args.rotation.clone());
+        catchRef.current.rotation.copy(om.args.rotation.clone());
       }
       if (om.args.scale){
         ref.current.scale.copy(om.args.scale.clone());
+        catchRef.current.scale.copy(om.args.scale.clone());
       }
       if (om.args.materialData){
         const materialData = om.args.materialData;
@@ -166,6 +130,35 @@ export const MyLight = (prop: ILightProps) => {
             />
           </>
         }
+
+        {/* ヘルパーはやはり一緒にいれる */}
+        {!state.editorFocus &&
+          <PivotControls
+            object={(state.currentId == id) ? catchRef : undefined}
+            visible={(state.currentId == id)}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            onDrag={onDrag}
+          />
+        }
+        <mesh 
+          onClick={(e) => {
+            e.stopPropagation();
+            globalStore.currentId = id;
+            globalStore.pivotControl = true;
+          }}
+          onPointerMissed={(e) => {
+            if (e.type === 'click'){
+              globalStore.currentId = null;
+              globalStore.pivotControl = false;
+            }
+          }}
+          ref={catchRef}
+          onContextMenu={(e) => {e.stopPropagation()}}
+        >
+          <boxBufferGeometry  />
+          <meshStandardMaterial wireframe={true} visible={false} side={DoubleSide} />
+        </mesh>
       </>
   )
 }

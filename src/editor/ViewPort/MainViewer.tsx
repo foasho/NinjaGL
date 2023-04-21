@@ -1,7 +1,7 @@
-import { GizmoHelper, GizmoViewport, OrbitControls, PerspectiveCamera as DPerspectiveCamera, Text } from "@react-three/drei";
+import { GizmoHelper, GizmoViewport, OrbitControls, PerspectiveCamera as DPerspectiveCamera, Preload, Text } from "@react-three/drei";
 import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils, PerspectiveCamera, Color } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useState, useEffect, useContext, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useContext, useRef, useLayoutEffect, Suspense } from "react";
 import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { HomeCameraPosition, NinjaEditorContext } from "../NinjaEditorManager";
@@ -30,6 +30,7 @@ import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 
 export const MainViewer = () => {
+  const [renderCount, setRenderCount] = useState(0);
   const loadingRef = useRef<HTMLDivElement>();
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
@@ -192,9 +193,23 @@ export const MainViewer = () => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
 
+  /**
+   * NJCの変更を検知して、再レンダリングする
+   */
+  useEffect(() => {
+    const init = ( ) => {
+      setRenderCount(renderCount + 1);
+    }
+    editor.onNJCChanged(init);
+    return () => {
+      editor.offNJCChanged(init);
+    }
+  }, []);
+
   return (
     <div className={styles.mainView}>
       <Canvas
+        key={renderCount}
         style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
         camera={{ position: HomeCameraPosition }}
@@ -202,16 +217,19 @@ export const MainViewer = () => {
         onDragOver={handleDragOver}
         shadows
       >
-        <MyLights/>
-        <StaticObjects/>
-        <Terrain/>
-        <Avatar/>
-        <MySky/>
-        <ThreeObjects/>
-        <Cameras/>
-        <FogComponent/>
-        <MyEnviroment/>
-        <SystemHelper isGizmo={isGizmo} cameraFar={cameraFar} cameraSpeed={cameraSpeed} worldSize={worldSize} isGrid={isGrid} isWorldHelper={isWorldHelper} worldGridSize={worldGridSize} />
+        <Suspense fallback={null}>
+          <MyLights/>
+          <StaticObjects/>
+          <Terrain/>
+          <Avatar/>
+          <MySky/>
+          <ThreeObjects/>
+          <Cameras/>
+          <FogComponent/>
+          <MyEnviroment/>
+          <SystemHelper isGizmo={isGizmo} cameraFar={cameraFar} cameraSpeed={cameraSpeed} worldSize={worldSize} isGrid={isGrid} isWorldHelper={isWorldHelper} worldGridSize={worldGridSize} />
+          <Preload all />
+        </Suspense>
       </Canvas>
       <div className={styles.uiCanvas} style={{ display: showUI? "block": "none" }}>
         <UICanvas gridNum={uiGridNum}/>

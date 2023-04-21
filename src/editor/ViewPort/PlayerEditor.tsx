@@ -139,14 +139,19 @@ export const PlayerEditor = () => {
       // 最低限typeが選択されていればOK
       if (playerState.type && scene) {
         //ファイル名の確認
-        const objectClone = scene.clone();
-        const target = SkeletonUtils.clone(objectClone);
+        // const objectClone = scene.clone();
+        const target = SkeletonUtils.clone(scene);
         target.animations = animations;
+        console.log("animation checks");
+        console.log(target);
+        console.log("usedata check")
+        const type = playerState.type;
+        console.log(type);
         const file = await convertObjectToFile(
           target, 
           { 
             animMapper: animMapper,
-            type: playerState.type,
+            type: type,
           }
         );
         // const arrayBufferToBlob = (arrayBuffer, mimeType) => {
@@ -239,7 +244,7 @@ export const PlayerEditor = () => {
                 animations={animations} 
                 mixer={mixer?mixer:new AnimationMixer(new Object3D())} 
                 onCallback={changeSelectAnim}
-                />
+              />
             </Canvas>
             <PlayerInspector onSave={onSave}/>
           </>

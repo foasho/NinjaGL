@@ -100,11 +100,6 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
     }
     delete om.object;
     delete om.mixer;
-    if (om.args){
-      if (om.args.position){
-        // om.args.position = 
-      }
-    }
     exportOMs.push(om);
   }
 
@@ -373,11 +368,8 @@ export const convertObjectToFile = (
       object.userData = userData;
     }
 
-    const scene = new Scene();
-    scene.add(object);
-
     exporter.parse(
-      scene,
+      object,
       (result) => {
         let blob: Blob;
         let mimeType: string;
