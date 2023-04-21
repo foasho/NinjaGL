@@ -13,30 +13,26 @@ import { NinjaGL,
 import { SkeletonUtils } from 'three-stdlib';
 
 function Showcase () {
-  const [scene, setScene] = React.useState(1);
+  const [scene, setScene] = React.useState('samplecamera.njc');
   useEffect(() => {
     console.log('Showcase component mounted');
   }, []);
   const changeScene = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setScene(Number(e.target.value));
+    setScene(e.target.value);
   };
   return (
     <div style={{ height: "100%" }}>
-     <NinjaGL njcPath='simplecamera.njc'>
-      <mesh>
-        <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
-        <meshStandardMaterial attach="material" color="hotpink" />
-      </mesh>
+     <NinjaGL njcPath={scene}>
     </NinjaGL>
      <div style={{ position: "absolute", top: "10px", left: "10px", zIndex: 100 }}>
       <div style={{ color: "white" }}>
         <select
-          value={scene}
+          value={'samplecamera.njc'}
           onChange={changeScene}
         >
-          <option value="1">デフォルトシーン</option>
-          <option value="2">サードパーソン</option>
-          <option value="3">マルチプレイヤー</option>
+          <option value='samplecamera.njc'>デフォルトシーン</option>
+          {/* <option value='samplethirdperson.njc'>サードパーソン</option> */}
+          {/* <option value='samplemultiplayer.njc'>マルチプレイヤー</option> */}
         </select>
       </div>
      </div>
@@ -109,7 +105,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    {/* <Showcase /> */}
-    <DebugPlay />
+    <Showcase />
+    {/* <DebugPlay /> */}
   </React.StrictMode>
 );

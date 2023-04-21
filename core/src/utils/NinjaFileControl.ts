@@ -7,7 +7,7 @@ import { GLTFLoader, SkeletonUtils } from "three-stdlib";
 import JSZip from 'jszip';
 import { InitMobileConfipParams } from "./NinjaInit";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
-
+// import "setimmediate";
 
 /**
  * データ構成を定義

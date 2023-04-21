@@ -336,7 +336,8 @@ export const MainViewInspector = () => {
           selectOM.type == "avatar" ||
           selectOM.type == "light" || 
           selectOM.type == "three" ||
-          selectOM.type == "terrain"
+          selectOM.type == "terrain" ||
+          selectOM.type == "camera"
         )
       ) &&
         
@@ -492,56 +493,59 @@ export const MainViewInspector = () => {
               <input 
                 // value={scale?(scale.x).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.x).toFixed(2): "0"}
+                placeholder={scale?(scale.x).toString(): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value);
-                    changeScale({ target: { value: inputValue } }, "x");
+                    changeScale(e, "x");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newScale = scale.clone();
-                    newScale.set(e.target.value, scale.y, scale.z);
+                    const newScale = scale?scale.clone(): new Vector3(1, 1, 1);
+                    newScale.set(e.target.value, newScale.y, newScale.z);
                     setScale(newScale);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
                />
               <input 
                 // value={scale?(scale.y).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.y).toFixed(2): "0"}
+                placeholder={scale?scale.y.toString(): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value);
-                    changeScale({ target: { value: inputValue } }, "y");
+                    changeScale(e, "y");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newScale = scale.clone();
-                    newScale.set(scale.x, e.target.value, scale.z);
+                    const newScale = scale?scale.clone(): new Vector3(1, 1, 1);
+                    newScale.set(newScale.x, e.target.value, newScale.z);
                     setScale(newScale);
                   } 
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
                 // value={scale?(scale.z).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.z).toFixed(2): "0"}
+                placeholder={scale?(scale.z).toString(): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value);
-                    changeScale({ target: { value: inputValue } }, "z");
+                    changeScale(e, "z");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newScale = scale.clone();
-                    newScale.set(scale.x, scale.y, e.target.value);
+                    const newScale = scale?scale.clone(): new Vector3(1, 1, 1);
+                    newScale.set(newScale.x, newScale.y, e.target.value);
                     setScale(newScale);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
             </div>
           </div>

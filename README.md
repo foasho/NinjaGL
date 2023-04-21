@@ -3,6 +3,7 @@
 - React18
 - Three.js(r149)
 - ReactThreeFiber
+- ES6
 
 デモページ
 

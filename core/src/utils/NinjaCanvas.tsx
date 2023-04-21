@@ -71,7 +71,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
           loadCompleted={engineState.loadCompleted}
         />
       }
-      {engine && engine.config.isDebug &&
+      {engine && engine.config.isDebug && engineState.loadCompleted &&
         <>
           <DebugComponent />
         </>
