@@ -130,19 +130,30 @@ export const NinjaEditor = () => {
       );
     }
     else if (data.type == "camera"){
-      editor.setOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*${data.value}`,
-          type: "camera",
-          args: {
-            type: data.value,
-            position: new Vector3(-3, 3, -6),
-          },
-          physics: "none",
-          visibleType: "auto",
-        }
-      )
+      // すでにカメラがある場合は追加しない
+      if (editor.oms.find((om) => om.type == "camera")){
+        Swal.fire({
+          title: t("camera_already_exists"),
+          text: "現在はカメラを１つのみ追加可能です",
+          icon: "warning",
+        });
+      }
+      else {
+        editor.setOM(
+          {
+            id: MathUtils.generateUUID(),
+            name: `*${data.value}`,
+            type: "camera",
+            args: {
+              type: data.value,
+              position: new Vector3(-3, 3, -6),
+              default: true,
+            },
+            physics: "none",
+            visibleType: "auto",
+          }
+        )
+      }
     }
     else if (data.type == "fog"){
       editor.setOM(

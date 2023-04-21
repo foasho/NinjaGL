@@ -2,9 +2,8 @@ import { IObjectManagement } from "ninja-core";
 import { 
   // PivotControls, 
   useHelper } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useState, useRef } from "react";
-import { BoxHelper, Color, DirectionalLight, DirectionalLightHelper, DoubleSide, Euler, Material, MathUtils, Mesh, PerspectiveCamera, PointLight, PointLightHelper, SpotLight, SpotLightHelper, Vector2, Vector3 } from "three";
+import { Color, DirectionalLightHelper, DoubleSide, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
@@ -65,7 +64,7 @@ export const MyLight = (prop: ILightProps) => {
     const init = () => {
       if (om.args.position){
         ref.current.position.copy(om.args.position.clone());
-        catchRef.current.position.copy(om.args.position.clone());
+        catchRef.current.position.copy(ref.current.position.clone());
       }
       if (om.args.rotation){
         ref.current.rotation.copy(om.args.rotation.clone());
@@ -83,6 +82,7 @@ export const MyLight = (prop: ILightProps) => {
         ref.current.needsUpdate = true;
       }
       // I wanna remove helper
+      catchRef.current.updateMatrix();
     }
     init();
     const handleIdChanged = () => {
@@ -136,9 +136,12 @@ export const MyLight = (prop: ILightProps) => {
           <PivotControls
             object={(state.currentId == id) ? catchRef : undefined}
             visible={(state.currentId == id)}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onDrag={onDrag}
+            depthTest={false}
+            lineWidth={2}
+            anchor={[0, 0, 0]}
+            onDrag={(e) => onDrag(e)}
+            onDragStart={() => onDragStart()}
+            onDragEnd={() => onDragEnd()}
           />
         }
         <mesh 
@@ -154,10 +157,14 @@ export const MyLight = (prop: ILightProps) => {
             }
           }}
           ref={catchRef}
-          onContextMenu={(e) => {e.stopPropagation()}}
+          // onContextMenu={(e) => {e.stopPropagation()}}
         >
-          <boxBufferGeometry  />
-          <meshStandardMaterial wireframe={true} visible={false} side={DoubleSide} />
+          <boxBufferGeometry args={[1, 1, 1]}  />
+          <meshStandardMaterial 
+            wireframe={true} 
+            visible={false} 
+            color={0x00ff00}
+          />
         </mesh>
       </>
   )

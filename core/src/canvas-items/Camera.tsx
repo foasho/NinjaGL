@@ -3,46 +3,45 @@ import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { OrbitControls } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { MoveableCamera } from "./MoveableCamera";
+import { useThree } from "@react-three/fiber";
+import { Vector3 } from "three";
 
 
 const CameraComponent = (om: IObjectManagement) => {
   let _camera;
-  if (om.args.type == "fixed"){
-    _camera = (<perspectiveCamera/>);
-  }
-  else if (om.args.type == "orbit"){
+  const { camera } = useThree();
+  if (om.args.type == "orbit"){
     _camera = (<OrbitControls/>);
   }
   else if (om.args.type == "moveable"){
     _camera = (<MoveableCamera/>);
   }
-  const ref = useRef<any>();
   useEffect(() => {
-    if (ref.current) {
-      ref.current.layers.set(om.layerNum);
+    if (om.args.type == "fixed" && om.args.default == true) {
       if (om.args.position) {
-        ref.current.position.copy(om.args.position);
+        camera.position.copy(om.args.position);
       }
       if (om.args.rotation) {
-        ref.current.rotation.copy(om.args.rotation);
+        camera.rotation.copy(om.args.rotation);
       }
       if (om.args.scale) {
-        ref.current.scale.copy(om.args.scale);
+        camera.scale.copy(om.args.scale);
       }
       if (om.args.fov) {
-        ref.current.fov = om.args.fov;
+        // camera.fov = om.args.fov;
       }
       if (om.args.near) {
-        ref.current.near = om.args.near;
+        camera.near = om.args.near;
       }
       if (om.args.far) {
-        ref.current.far = om.args.far;
+        camera.far = om.args.far;
       }
       if (om.args.aspect) {
-        ref.current.aspect = om.args.aspect;
+        // camera.aspect = om.args.aspect;
       }
-      if (om.args.lookAt) {
-        ref.current.lookAt(om.args.lookAt);
+      if (om.args.cameraDirection) {// CameraDirectionがあれば、そちらを向く
+        const vec3 = new Vector3().copy(om.args.cameraDirection);
+        camera.lookAt(vec3);
       }
     }
   }, []);

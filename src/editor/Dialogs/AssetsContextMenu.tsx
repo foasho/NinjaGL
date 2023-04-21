@@ -7,13 +7,23 @@ export const AssetsContextMenu = ({ position, file=undefined }) => {
    * 特定のURLをダウンロードする
    * @param url 
    */
-  const onDownload = (url: string) => {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = url.split("/").pop();
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  const onDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+  
+      const a = document.createElement("a");
+      const objectUrl = URL.createObjectURL(blob);
+  
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
   }
   
   return (
@@ -29,7 +39,7 @@ export const AssetsContextMenu = ({ position, file=undefined }) => {
         <>
           {file.url &&
           <>
-            <div className={styles.menuItem} onClick={() => onDownload(file.url)}>
+            <div className={styles.menuItem} onClick={() => onDownload(file.url, file.name)}>
               ダウンロード
             </div>
             <div className={styles.menuItem}>
