@@ -136,6 +136,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("lightformer")}
               </div>
             </div>
+            <div className={styles.card} onClick={() => {setSelectType("effect")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/effect.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("effect")}
+              </div>
+            </div>
           </>
           }
 

@@ -345,6 +345,30 @@ export const MainViewInspector = () => {
     setAnimLoop(!animLoop);
   }
 
+  /**
+   * 
+   */
+  const changeOffset = (e, xyz: "x" | "y" | "z") => {
+    const targetValue = e.target.value;
+    const newOffset: Vector3 = selectOM.args.offset? selectOM.args.offset.clone(): new Vector3();
+    if (xyz == "x") {
+      if (isNumber(targetValue)){
+        newOffset.setX(Number(targetValue));
+      }
+    }
+    else if (xyz == "y") {
+      if (isNumber(targetValue)){
+        newOffset.setY(Number(targetValue));
+      }
+    }
+    else if (xyz == "z") {
+      if (isNumber(targetValue)){
+        newOffset.setZ(Number(targetValue));
+      }
+    }
+    editor.setOffset(id, newOffset);
+  }
+
   return (
     <>
     <div className={styles.mainInspector}>
@@ -714,6 +738,25 @@ export const MainViewInspector = () => {
           </>
 
         </>
+      }
+
+      {selectOM && selectOM.type == "avatar" &&
+      <>
+        <div className={styles.offset}>
+          <div className={styles.title}>
+            {t("offset")}
+          </div>
+          <div className={styles.input}>
+            <input
+              type="number"
+              // value={offset}
+              // onChange={(e) => changeOffset(e)}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+            />
+          </div>
+        </div>
+      </>
       }
 
       {(

@@ -360,6 +360,19 @@ export class NinjaEditorManager {
     }
   }
 
+  /**
+   * Offsetの設定
+   */
+  setOffset(id: string, offset: Vector3){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      if (target.args.offset == null) target.args.offset = new Vector3(0, 0, 0);
+      target.args.offset.copy(offset);
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+
 
   /**
    * 表示を非表示にする
@@ -798,6 +811,12 @@ export class NinjaEditorManager {
     }
     if (type == "object"){
       this.notifyObjectChanged();
+    }
+    if (type == "effect"){
+      this.notifyEffectChanged();
+    }
+    if (type == "text3d"){
+      this.notifyText3DChanged();
     }
   }
 
