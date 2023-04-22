@@ -60,9 +60,14 @@ export class NinjaEngine {
    * 初期化
    */
   async initialize() {
-    this.config = this.config?this.config: InitMobileConfipParams;
-    this.world = new World();
-    if (this.config.physics !== "none"){
+    this.config = this.config? this.config: InitMobileConfipParams;
+    this.detectDevice();// デバイスを検出
+    if (this.config.autoScale){
+      // AutoScaleが有効の場合デバイスに合わせて設定を変更する
+      this.setConfigFromDevice();
+    }
+    if (this.config.physics === "octree"){
+      this.world = new World();
       this.octree = new Octree({
         min: new Vector3(
           -this.config.mapsize / 2,
@@ -109,6 +114,33 @@ export class NinjaEngine {
   }
   getCanvasPos = (): Vector2 => {
     return this.canvasPos;
+  }
+
+  /**
+   * 接続デバイスを検出
+   */
+  detectDevice = () => {
+    const ua = navigator.userAgent;
+    if (ua.indexOf('iPhone') > 0 || ua.indexOf('iPod') > 0 || (ua.indexOf('Android') > 0 && ua.indexOf('Mobile') > 0)) {
+      this.deviceType = "mobile";
+    } else if (ua.indexOf('iPad') > 0 || ua.indexOf('Android') > 0) {
+      this.deviceType = "tablet";
+    } else {
+      this.deviceType = "desktop";
+    }
+  }
+
+  /**
+   * 接続デバイスから設定を変更する
+   */
+  setConfigFromDevice = () => {
+    if (this.deviceType === "mobile") {
+      this.config = InitMobileConfipParams;
+    } else if (this.deviceType === "tablet") {
+      this.config = InitTabletConfipParams;
+    } else {
+      this.config = InitDesktopConfipParams;
+    }
   }
 
   /**

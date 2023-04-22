@@ -111,6 +111,13 @@ const ThreeObject = (props: IThreeObject) => {
           }
         }
         if (_material) setMaterial(_material);
+        if (om.args.helper !== undefined) setHelper(om.args.helper);
+        if (om.args.castShadow !== undefined){
+          ref.current.castShadow = om.args.castShadow;
+        }
+        if (om.args.receiveShadow !== undefined){
+          ref.current.receiveShadow = om.args.receiveShadow;
+        }
       }
     }
     init();
@@ -149,9 +156,9 @@ const ThreeObject = (props: IThreeObject) => {
                 globalStore.currentId = id
               }
             }}
-            onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
             castShadow={true}
             receiveShadow={true}
+            onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
           >
             {geometry}
             {material}

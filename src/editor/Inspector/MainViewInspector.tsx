@@ -18,11 +18,11 @@ export const MainViewInspector = () => {
   const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [castShadow, setCastShadow] = useState<boolean>(true);
-  const [receiveShadow, setreceiveShadow] = useState<boolean>(true);
+  const [receiveShadow, setReceiveShadow] = useState<boolean>(true);
   const [helper, setHelper] = useState<boolean>(false);
   const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
   const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"toon"|"shader"|"reflection"; label: string;}>();
-  const [color, setColor] = useState<string>();
+  const [materialColor, setMaterialColor] = useState<string>();
   // Environmentの設定
   const [background, setBackground] = useState<boolean>(true);
   const [blur, setBlur] = useState<number>(0.5);
@@ -33,7 +33,8 @@ export const MainViewInspector = () => {
   // Animationsの設定
   const [defalutAnim, setDefalutAnim] = useState<{ value: string, label: string }>();
   const [animLoop, setAnimLoop] = useState<boolean>(true);
-
+  // Colorの設定
+  const [color, setColor] = useState<string>();
   const id = state.currentId;
   const selectOM = editor.getOMById(id);
   const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
@@ -108,11 +109,14 @@ export const MainViewInspector = () => {
         if (selectOM.args.materialData !== undefined){
           setMaterialType(materialOptions.find((option) => option.value == selectOM.args.materialData.type))
         };
-        if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setColor(selectOM.args.materialData.value);
+        if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setMaterialColor(selectOM.args.materialData.value);
         if (selectOM.args.blur) setBlur(selectOM.args.blur);
         if (selectOM.args.preset) setEnvironmentPreset(environmentOptions.find((option) => option.value == selectOM.args.preset));
         if (selectOM.args.form) setForm(selectOM.args.form);
         if (selectOM.args.intensity) setIntensity(selectOM.args.intensity);
+        if (selectOM.args.defaultAnim) setDefalutAnim(selectOM.args.defaultAnim);
+        if (selectOM.args.animLoop !== undefined) setAnimLoop(selectOM.args.animLoop);
+        if (selectOM.args.color) setColor(selectOM.args.color);
       };
     }
     init();
@@ -211,9 +215,17 @@ export const MainViewInspector = () => {
   const changeMaterial = (type: "shader"|"standard"|"phong"|"toon"|"reflection", value: any) => {
     if (type !== "shader" && value){
       editor.setMaterialData(id, type, value);
-      setColor(value);
+      setMaterialColor(value);
       setMaterialType(materialOptions.find((option) => option.value == type));
     }
+  }
+
+  /**
+   * 色属性の変更
+   */
+  const changeColor = (e) => {
+    editor.setColor(id, e.target.value);
+    setColor(e.target.value);
   }
 
   /**
@@ -262,9 +274,9 @@ export const MainViewInspector = () => {
   /**
    * receiveShadowを変更
    */
-  const onCheckreceiveShadow = () => {
-    editor.setreceiveShadow(id, !receiveShadow);
-    setreceiveShadow(!receiveShadow);
+  const onCheckReceiveShadow = () => {
+    editor.setReceiveShadow(id, !receiveShadow);
+    setReceiveShadow(!receiveShadow);
   }
 
   /**
@@ -589,156 +601,169 @@ export const MainViewInspector = () => {
               />
             </div>
           </div>
-          <div className={styles.material}>
+          <div className={styles.helper}>
             <div className={styles.title}>
-              {t("materialConfig")}
-            </div>
-            <div className={styles.type}>
-              <div className={styles.title}>
-                {t("type")}
-              </div>
-              <div className={styles.input}>
-                <Select
-                  options={materialOptions}
-                  value={materialType}
-                  onChange={(select) => changeMaterial(select.value, color)}
-                  styles={normalStyles}
-                  />
-              </div>
-            </div>
-            {(materialType && materialType.value !== "shader") &&
-              <div className={styles.color}>
-                <div className={styles.name}>
-                  {t("color")}
-                </div>
-                <div className={styles.pallet}>
-                  <input 
-                    type={"color"} 
-                    value={color} 
-                    onChange={(e) => changeMaterial(materialType.value, e.target.value)}
-                    onFocus={() => globalStore.editorFocus = true}
-                    onBlur={() => globalStore.editorFocus = false}
-                  />
-                  <input type={"text"} value={color} />
-                </div>
-              </div>
-            }
-            {/** シェーダ対応準備中 */}
-            {/* {(materialType && materialType.value === "shader") &&
-              <div className={styles.shader}>
-                <div className={styles.attachBox}>
-                  Here Attach Script
-                </div>
-              </div>
-            } */}
-          </div>
-
-          <div className={styles.physics}>
-            <div className={styles.title}>
-              {t("isPhysics")}
+              {t("helper")}
             </div>
             <div className={styles.input}>
               <input 
                 type="checkbox" 
                 className={styles.checkbox} 
-                checked={isPhysics} 
-                onInput={() => setIsPhysics(!isPhysics)}
+                checked={helper} 
+                onInput={() => onCheckHelper()}
               />
               <span className={styles.customCheckbox}></span>
             </div>
-            {isPhysics &&
-              <>
-                <Select
-                  options={physicsOptions}
-                  value={physics}
-                  onChange={onChangePhysics}
-                  styles={normalStyles}
-                />
-              </>
-            }
           </div>
-          {
-            (
-              selectOM.type == "object"
-            ) && 
-            <div className={styles.lod}>
-              <div className={styles.title}>
-              {t("isLoD")}
-              </div>
-              <div className={styles.input}>
-                <input 
-                  type="checkbox" 
-                  className={styles.checkbox} 
-                  checked={isLod} 
-                  onInput={() => onCheckLoD()}
-                />
-                <span className={styles.customCheckbox}></span>
-              </div>
-              {isLod &&
-                <a className={styles.lodbtn} onClick={() => onLoDView()}>
-                  {t("chakeLoD")}
-                </a>
-              }
-            </div>
-          }
-
-          {
-            (
-              selectOM.type == "light" || 
-              selectOM.type == "three" || 
-              selectOM.type == "object" || 
-              selectOM.type == "avatar"
-            ) && 
-            <>
-              <div className={styles.castShadow}>
-                  <div className={styles.title}>
-                    {t("castshadow")}
-                  </div>
-                  <div className={styles.input}>
-                    <input 
-                      type="checkbox" 
-                      className={styles.checkbox} 
-                      checked={castShadow} 
-                      onInput={() => onCheckCastShadow()}
-                    />
-                    <span className={styles.customCheckbox}></span>
-                  </div>
-              </div>
-              <div className={styles.visibleType}>
-                <div className={styles.title}>
-                  {t("visibleType")}
-                </div>
-                <div className={styles.input}>
-                  <Select
-                    options={visibleTypeOptions}
-                    value={visibleType}
-                    onChange={(select) => changeVisibleType(select)}
-                    styles={normalStyles}
-                    />
-                </div>
-              </div>
-            </>
-          }
-
-          <>
-            <div className={styles.helper}>
-              <div className={styles.title}>
-                {t("helper")}
-              </div>
-              <div className={styles.input}>
-                <input 
-                  type="checkbox" 
-                  className={styles.checkbox} 
-                  checked={helper} 
-                  onInput={() => onCheckHelper()}
-                />
-                <span className={styles.customCheckbox}></span>
-              </div>
-            </div>
-          </>
 
         </>
       }
+
+      {selectOM && (
+        selectOM.type == "object" ||
+        selectOM.type == "three"
+      ) && 
+      <>
+        <div className={styles.material}>
+          <div className={styles.title}>
+            {t("materialConfig")}
+          </div>
+          <div className={styles.type}>
+            <div className={styles.title}>
+              {t("type")}
+            </div>
+            <div className={styles.input}>
+              <Select
+                options={materialOptions}
+                value={materialType}
+                onChange={(select) => changeMaterial(select.value, materialColor)}
+                styles={normalStyles}
+                />
+            </div>
+          </div>
+          {(materialType && materialType.value !== "shader") &&
+            <div className={styles.color}>
+              <div className={styles.name}>
+                {t("color")}
+              </div>
+              <div className={styles.pallet}>
+                <input 
+                  type={"color"} 
+                  value={materialColor} 
+                  onChange={(e) => changeMaterial(materialType.value, e.target.value)}
+                  onFocus={() => globalStore.editorFocus = true}
+                  onBlur={() => globalStore.editorFocus = false}
+                />
+                <input type={"text"} value={materialColor} />
+              </div>
+            </div>
+          }
+          {/** シェーダ対応準備中 */}
+          {/* {(materialType && materialType.value === "shader") &&
+            <div className={styles.shader}>
+              <div className={styles.attachBox}>
+                Here Attach Script
+              </div>
+            </div>
+          } */}
+        </div>
+        <div className={styles.physics}>
+          <div className={styles.title}>
+            {t("isPhysics")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={isPhysics} 
+              onInput={() => setIsPhysics(!isPhysics)}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+          {isPhysics &&
+            <>
+              <Select
+                options={physicsOptions}
+                value={physics}
+                onChange={onChangePhysics}
+                styles={normalStyles}
+              />
+            </>
+          }
+        </div>
+        <div className={styles.lod}>
+          <div className={styles.title}>
+          {t("isLoD")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={isLod} 
+              onInput={() => onCheckLoD()}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+          {isLod &&
+            <a className={styles.lodbtn} onClick={() => onLoDView()}>
+              {t("chakeLoD")}
+            </a>
+          }
+        </div>
+      </>
+      }
+
+      {selectOM && (
+        selectOM.type == "light" || 
+        selectOM.type == "three" || 
+        selectOM.type == "object" || 
+        selectOM.type == "avatar"
+      ) && 
+        <>
+          <div className={styles.castShadow}>
+              <div className={styles.title}>
+                {t("castshadow")}
+              </div>
+              <div className={styles.input}>
+                <input 
+                  type="checkbox" 
+                  className={styles.checkbox} 
+                  checked={castShadow} 
+                  onInput={() => onCheckCastShadow()}
+                />
+                <span className={styles.customCheckbox}></span>
+              </div>
+          </div>
+          <div className={styles.castShadow}>
+              <div className={styles.title}>
+                {t("receiveshadow")}
+              </div>
+              <div className={styles.input}>
+                <input 
+                  type="checkbox" 
+                  className={styles.checkbox} 
+                  checked={receiveShadow} 
+                  onInput={() => onCheckReceiveShadow()}
+                />
+                <span className={styles.customCheckbox}></span>
+              </div>
+          </div>
+          <div className={styles.visibleType}>
+            <div className={styles.title}>
+              {t("visibleType")}
+            </div>
+            <div className={styles.input}>
+              <Select
+                options={visibleTypeOptions}
+                value={visibleType}
+                onChange={(select) => changeVisibleType(select)}
+                styles={normalStyles}
+                />
+            </div>
+          </div>
+        </>
+      }
+
 
       {selectOM && selectOM.type == "avatar" &&
       <>
@@ -777,7 +802,7 @@ export const MainViewInspector = () => {
                     })
                   }
                   value={defalutAnim}
-                  // onChange={(select) => changeDefaultAnimation(select)}
+                  onChange={(select) => changeDefaultAnimation(select)}
                   styles={normalStyles}
                 />
               </div>
@@ -871,6 +896,21 @@ export const MainViewInspector = () => {
         selectOM.type == "light"
         ) &&
       <>
+        <div className={styles.color}>
+          <div className={styles.name}>
+            {t("color")}
+          </div>
+          <div className={styles.pallet}>
+            <input 
+              type={"color"} 
+              value={color} 
+              onChange={(e) => changeColor(e)}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+            />
+            <input type={"text"} value={color} />
+          </div>
+        </div>
         <div className={styles.intensity}>
           <div className={styles.name}>
             {t("intensity")}: {intensity}

@@ -24,7 +24,7 @@ export const MyEnvirments = () => {
     <>
       {environment &&
         <Environment
-          resolution={512}
+          resolution={256}// default
           preset={environment.args.preset}
           background={environment.args.background}
           blur={environment.args.blur}

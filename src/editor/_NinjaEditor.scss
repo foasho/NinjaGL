@@ -112,6 +112,21 @@ $hoverBgColor: #201f1f;
       background-color: rgba($color: $darkColor, $alpha: 0.7);
       color: $white;
       text-align: left;
+      overflow-y: auto;
+      /* スクロールバーのスタイル */
+      &::-webkit-scrollbar {
+        width: 10px; /* スクロールバーの太さ */
+      }
+
+      /* スクロールバーのトラックのスタイル */
+      &::-webkit-scrollbar-track {
+        background-color: #000000; /* スクロールバーの背景色 */
+      }
+
+      /* スクロールバーのボタンのスタイル */
+      &::-webkit-scrollbar-thumb {
+        background-color: #4b0082; /* スクロールバーの色 */
+      }
     }
   }
 

@@ -214,7 +214,7 @@ export class NinjaEditorManager {
   /**
    * CastShadowを変更
    */
-  setreceiveShadow(id: string, value: boolean){
+  setReceiveShadow(id: string, value: boolean){
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.receiveShadow = value;
@@ -229,6 +229,17 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.helper = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+  /**
+   * Colorの変更
+   */
+  setColor(id: string, value: string){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.color = value;
       this.notifyOMIdChanged(id);
     }
   }

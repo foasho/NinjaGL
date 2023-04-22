@@ -16,6 +16,9 @@ import { proxy } from "valtio";
 import { JSONTree } from 'react-json-tree';
 import { MyEnvirments } from "../canvas-items/MyEnvirments";
 import { Preload } from "@react-three/drei";
+import { MyEffects } from "../canvas-items/MyEffects";
+import { MyTexts } from "../canvas-items/MyText";
+import { MyText3Ds } from "../canvas-items/MyText3D";
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
@@ -35,12 +38,22 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     });
   }, [engine]);
 
+  let dpr: number | [number, number] = window.devicePixelRatio || 1;
+  if (engine && engine.config.dpr) {
+    dpr = engine.config.dpr;
+  }
+
   return (
     <>
       <Canvas 
         id="ninjagl" 
         shadows 
-        dpr={window.devicePixelRatio}
+        dpr={dpr}
+        gl={{ 
+          antialias: engine? engine.config.antialias: false, 
+          alpha: engine? engine.config.alpha: false, 
+          logarithmicDepthBuffer: engine? engine.config.logarithmicDepthBuffer: false,
+        }}
         {...props.canvasProps}
       >
         <Suspense fallback={null}>
@@ -55,6 +68,9 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
               <ThreeObjects/>
               <Cameras/>
               <MyEnvirments/>
+              <MyEffects/>
+              <MyTexts/>
+              <MyText3Ds/>
             </>
           }
           {props.children && props.children}

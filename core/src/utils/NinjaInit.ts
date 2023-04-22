@@ -3,7 +3,9 @@ import { IConfigParams, IScriptManagement } from "./NinjaProps";
 
 export const InitMobileConfipParams: IConfigParams = {
   physics: "octree",
+  logarithmicDepthBuffer: false,
   shadowResolution: 256,
+  alpha: false,
   antialias: false,
   autoScale: true,
   mapsize: 64,
@@ -17,6 +19,8 @@ export const InitMobileConfipParams: IConfigParams = {
 export const InitTabletConfipParams: IConfigParams = {
   physics: "octree",
   shadowResolution: 512,
+  alpha: false,
+  logarithmicDepthBuffer: false,
   antialias: true,
   autoScale: true,
   mapsize: 256,
@@ -32,6 +36,8 @@ const dpr = isBrowser ? window.devicePixelRatio : 1;
 export const InitDesktopConfipParams: IConfigParams = {
   physics: "octree",
   shadowResolution: 1024,
+  alpha: false,
+  logarithmicDepthBuffer: true,
   antialias: true,
   autoScale: true,
   mapsize: 1024,

@@ -1,6 +1,5 @@
-import { useFrame } from "@react-three/fiber";
 import { Environment, Lightformer, useHelper } from "@react-three/drei";
-import { use, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "ninja-core";
 import { Euler, Vector3, BoxHelper, DoubleSide } from "three";

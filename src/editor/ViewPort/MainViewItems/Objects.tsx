@@ -30,16 +30,11 @@ export const StaticObjects = () => {
     <>
       {staticOMs.map((om) => {
         if (om.type == "object") {
-          return <StaticObject om={om} isHelper={true} key={om.id} />
+          return <StaticObject om={om} key={om.id} />
         }
       })}
     </>
   )
-}
-
-interface IStaticObject {
-  om: IObjectManagement;
-  isHelper: boolean;
 }
 
 const StandardMaterial = new MeshStandardMaterial();
@@ -49,20 +44,20 @@ const StandardMaterial = new MeshStandardMaterial();
  * @param props 
  * @returns 
  */
-const StaticObject = (props: IStaticObject) => {
+const StaticObject = ({ om }) => {
   const state = useSnapshot(globalStore);
   const itemsRef = useRef([]);
-  const object = props.om.object;
+  const object = om.object;
   object.traverse((node: any) => {
     if (node.isMesh && node instanceof Mesh) {
-      node.castShadow = true;
-      node.receiveShadow = true;
+      node.castShadow = (om.args.castShadow == undefined) ? true : om.args.castShadow;
+      node.receiveShadow = (om.args.recieveShadow == undefined) ? true : om.args.recieveShadow;
     }
   })
   const ref = useRef<Group|Object3D|Mesh>();
   const tempMaterialData = useRef<any>();
   const editor = useContext(NinjaEditorContext);
-  const id = props.om.id;
+  const id = om.id;
 
   // Get Size
   const size = new Box3().setFromObject(object);
@@ -108,6 +103,12 @@ const StaticObject = (props: IStaticObject) => {
             }
           })
         }
+        if (om.args.defaultAnimation){
+          const animation = om.animations.find((anim) => anim.name == om.args.defaultAnimation);
+          if (animation && om.mixer){
+            om.mixer.clipAction(animation).play();
+          }
+        }
       }
     }
     init();
@@ -116,48 +117,41 @@ const StaticObject = (props: IStaticObject) => {
       editor.offOMIdChanged(id, init);
     }
   }, []);
+  
+  // 美しくないので廃止
+  // useFrame((_, delta) => {
+  //   if (state.currentId == id && state.editorFocus && ref.current){
+  //     const pos = editor.getPosition(id);
+  //     ref.current.position.copy(pos);
+  //     const rot = editor.getRotation(id);
+  //     ref.current.rotation.copy(rot);
+  //     const sca = editor.getScale(id);
+  //     ref.current.scale.copy(sca);
+  //     const materialData = editor.getMaterialData(id);
+  //     if (materialData && tempMaterialData.current !== materialData) {
+  //       tempMaterialData.current = materialData;
+  //       ref.current.traverse((node: any) => {
+  //         if (node.isMesh && node instanceof Mesh) {
+  //           const material = StandardMaterial.clone();
+  //           material.color.set(new Color(materialData.value));
+  //           node.material = material;
+  //         }
+  //       })
+  //     }
 
-  const lineSegs = [];
-  if (props.om.physics == "along"){
-    object.traverse((node) => {
-      if (node instanceof Mesh) {
-        // nodeの回転率を戻す
-        node.updateMatrix();
-        node.geometry.applyMatrix4(node.matrix);
-        const wire = new WireframeGeometry(node.geometry);
-        const colorMat = new LineBasicMaterial({ color: editor.wireFrameColor });
-        const lineSeg = new LineSegments(wire, colorMat);
-        lineSeg.rotation.copy(editor.getRotation(id));
-        lineSeg.position.copy(editor.getPosition(id));
-        lineSegs.push(lineSeg);
-      }
-    });
-  }
+  //   }
+  // });
+
+  useHelper(((state.currentId == id) && om.physics == "aabb") && ref, BoxHelper);
   
   useFrame((_, delta) => {
-    if (state.currentId == id && state.editorFocus && ref.current){
-      const pos = editor.getPosition(id);
-      ref.current.position.copy(pos);
-      const rot = editor.getRotation(id);
-      ref.current.rotation.copy(rot);
-      const sca = editor.getScale(id);
-      ref.current.scale.copy(sca);
-      const materialData = editor.getMaterialData(id);
-      if (materialData && tempMaterialData.current !== materialData) {
-        tempMaterialData.current = materialData;
-        ref.current.traverse((node: any) => {
-          if (node.isMesh && node instanceof Mesh) {
-            const material = StandardMaterial.clone();
-            material.color.set(new Color(materialData.value));
-            node.material = material;
-          }
-        })
+    if (om.args.defaultAnimation && om.mixer){
+      if (om.args.animationLoop){
+        om.mixer.update(delta);
       }
     }
   });
 
-  useHelper(((state.currentId == id) && props.om.physics == "aabb") && ref, BoxHelper);
-  
   return (
     <>
       {!state.editorFocus &&
@@ -179,13 +173,6 @@ const StaticObject = (props: IStaticObject) => {
           onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
           object={object}
         />
-      {props.om.physics == "along" &&
-        <>
-          {lineSegs.map((lineSeg, index) => {
-            return <primitive ref={el => (itemsRef.current[index] = el)} object={lineSeg} key={index} />
-          })}
-        </>
-      }
     </>
   )
 }

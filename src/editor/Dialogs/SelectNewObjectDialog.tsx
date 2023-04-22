@@ -384,14 +384,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("bloom")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
+            {/* SSRはバグ中 */}
+            {/* <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
               <div className={styles.icon}>
                 <img className={styles.img} src={"fileicons/ssr.png"} />
               </div>
               <div className={styles.name}>
                 {t("ssr")}
               </div>
-            </div>
+            </div> */}
             <div className={styles.card} onClick={() => {selectEffect("lut")}}>
               <div className={styles.icon}>
                 <img className={styles.img} src={"fileicons/lut.png"} />

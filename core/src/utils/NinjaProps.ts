@@ -6,12 +6,14 @@ import { Object3D, Mesh, Group, Vector2, AnimationClip, AnimationMixer, Audio, V
 export interface IConfigParams {
   physics: "none" | "octree" | "bvh";
   autoScale: boolean; // 自動スケールさせるか
+  alpha: boolean; // 透過を有効にするか
+  logarithmicDepthBuffer: boolean; // ログデプスバッファを有効にするか
   antialias: boolean; // アンチエイリアスを有効にするか
   shadowResolution: 128 | 256 | 512 | 1024; // 影の解像度レベル(128 | 256 | 512 | 1024)
   mapsize: number; // マップサイズ
   layerGridNum: number; // レイヤーグリッド数
   lodDistance: number; // LODの切り替えStep距離
-  dpr: undefined | number| number[]; // デバイスピクセル比※undefinedの場合は(window.devicePixelRatio || 1)を利用
+  dpr: undefined | number| [number, number]; // デバイスピクセル比※undefinedの場合は(window.devicePixelRatio || 1)を利用
   viewGridLength: number; // ビューグリッドの長さ
   initCameraPosition?: Vector3; // カメラの初期位置
   octreeDepth: number; // オクトリーツリーの深さ

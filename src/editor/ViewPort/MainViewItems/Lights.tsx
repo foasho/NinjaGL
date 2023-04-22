@@ -74,11 +74,8 @@ export const MyLight = (prop: ILightProps) => {
         ref.current.scale.copy(om.args.scale.clone());
         catchRef.current.scale.copy(om.args.scale.clone());
       }
-      if (om.args.materialData){
-        const materialData = om.args.materialData;
-        if (materialData.value){
-          ref.current.color.copy(new Color(materialData.value));
-        }
+      if (om.args.color){
+        ref.current.color.copy(new Color(om.args.color));
         ref.current.needsUpdate = true;
       }
       // I wanna remove helper

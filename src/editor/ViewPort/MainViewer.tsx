@@ -29,6 +29,8 @@ import { globalConfigStore, globalContentStore, globalStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
+import { MyTexts } from "./MainViewItems/MyTexts";
+import { MyEffects } from "./MainViewItems/MyEffects";
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -213,6 +215,7 @@ export const MainViewer = () => {
     <div className={styles.mainView}>
       <Canvas
         key={renderCount}
+        gl={{ logarithmicDepthBuffer: true, antialias: false }}
         style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
         camera={{ position: HomeCameraPosition }}
@@ -230,6 +233,8 @@ export const MainViewer = () => {
           <Cameras/>
           <FogComponent/>
           <MyEnviroment/>
+          <MyTexts/>
+          <MyEffects/>
           <SystemHelper 
             isGizmo={isGizmo} 
             cameraFar={cameraFar} 

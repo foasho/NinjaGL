@@ -182,9 +182,11 @@ export const globalPlayerStore = proxy<IGlobalPlayerStore>({
  */
 export const globalConfigStore = proxy<IConfigParams>({
   physics: "octree", // 物理エンジンの種類("octree" | "bvh" | "none")
+  logarithmicDepthBuffer: false, // ログ深度バッファを有効にするか
+  alpha: false, // アルファチャンネルを有効にするか
   autoScale: true, // デバイスによって自動スケールさせるか
   antialias: false, // アンチエイリアスを有効にするか
-  shadowResolution: 256, // 影の解像度レベル(128 | 256 | 512 | 1024)
+  shadowResolution: 256, // Shadow解像度レベル(128 | 256 | 512 | 1024)
   mapsize: 64, // マップサイズ
   layerGridNum: 8, // レイヤーグリッド数
   lodDistance: 25, // LODの切り替え距離
