@@ -366,6 +366,35 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           </>
         }
 
+        {selectType == "effect" &&
+          <>
+            <div className={styles.card} onClick={() => {selectEffect("bloom")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/bloom.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("bloom")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/ssr.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("ssr")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectEffect("lut")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/lut.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("lut")}
+              </div>
+            </div>
+          </>
+        }
+
         </div>
       </div>
     </div>

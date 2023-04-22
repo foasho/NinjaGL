@@ -42,7 +42,7 @@ export interface IInputMovement {
 export interface IObjectManagement {
   id: string;
   name?: string;
-  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "text"
+  type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "text" | "text3d"
     | "sky" | "light" | "fog" | "camera" | "effect" | "cloud" | "environment" | "lightformer";
   filePath?: string;
   visibleType: "auto" | "force" | "none";

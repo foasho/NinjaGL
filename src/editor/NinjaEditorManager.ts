@@ -670,6 +670,43 @@ export class NinjaEditorManager {
   }
 
   /**
+   * Text3D取得
+   */
+  getText3Ds = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "text3d");
+    return data;
+  }
+  private text3DChangedListeners: (() => void)[] = [];
+  onText3DChanged(listener: () => void) {
+    this.text3DChangedListeners.push(listener);
+  }
+  offText3DChanged(listener: () => void) {
+    this.text3DChangedListeners = this.text3DChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyText3DChanged() {
+    this.text3DChangedListeners.forEach(l => l());
+  }
+
+
+  /**
+   * Effect取得
+   */
+  getEffects = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "effect");
+    return data;
+  }
+  private effectChangedListeners: (() => void)[] = [];
+  onEffectChanged(listener: () => void) {
+    this.effectChangedListeners.push(listener);
+  }
+  offEffectChanged(listener: () => void) {
+    this.effectChangedListeners = this.effectChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyEffectChanged() {
+    this.effectChangedListeners.forEach(l => l());
+  }
+
+  /**
    * カメラ取得
    */
   getCameras = (): IObjectManagement[] => {

@@ -420,19 +420,33 @@ export const MainViewer = () => {
                 </label>
                 <label>
                   <span className={styles.name}>
-                    影の解像度(2の乗数)
+                    ShadowMap
                   </span>
-                  <input 
-                    type="text"
-                    value={configState.shadowResolution}
-                    onKeyDown={(e: any) => {
-                      if (e.key == "Enter") {
-                        if (isNumber(e.target.value)) {
-                          globalConfigStore.shadowResolution = Number(e.target.value);
-                        }
+                  <select
+                   value={configState.shadowResolution.toString()}
+                   onChange={(e) => {
+                    if (isNumber(e.target.value)){
+                      const val = Number(e.target.value);
+                      if (val == 128){
+                        globalConfigStore.shadowResolution = val;
                       }
-                    }}
-                  />
+                      else if (val == 256){
+                        globalConfigStore.shadowResolution = val;
+                      }
+                      else if (val == 512){
+                        globalConfigStore.shadowResolution = val;
+                      }
+                      else if (val == 1024){
+                        globalConfigStore.shadowResolution = val;
+                      }
+                    }
+                   }}
+                  >
+                    <option value={"128"}>128</option>
+                    <option value={"256"}>256</option>
+                    <option value={"512"}>512</option>
+                    <option value={"1024"}>1024</option>
+                  </select>
                 </label>
                 <label>
                   <span className={styles.name}>

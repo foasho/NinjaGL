@@ -560,6 +560,20 @@ export class NinjaEngine {
   }
 
   /**
+   * テキストデータを取得する
+   */
+  getTexts(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "text");
+  }
+
+  /**
+   * テキスト3Dデータを取得する
+   */
+  getTexts3D(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "text3d");
+  }
+
+  /**
    * Threeデータを取得する
   */
   getThreeObjects(): IObjectManagement[] {
