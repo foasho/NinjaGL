@@ -81,6 +81,10 @@ export class NinjaEditorManager {
     this.ums = [];
     this.camera = undefined;
     this.tms = [];
+    this.sms = [];
+    this.notifyOMsChanged();
+    this.notifySMsChanged();
+    this.notifyCameraChanged();
   }
 
   /**
@@ -331,6 +335,28 @@ export class NinjaEditorManager {
         data: target
       };
       this.notifyEnvChanged();
+    }
+  }
+
+  /**
+   * デフォルトアニメーションの設定
+   */
+  setDefaultAnimation(id: string, value: string){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.defaultAnimation = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+  /**
+   * AnimationLoopの設定
+   */
+  setAnimationLoop(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.animationLoop = value;
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -866,6 +892,8 @@ export class NinjaEditorManager {
     this.ums = njcFile.ums;
     console.log("<< Complete NJC File >>");
     this.notifyNJCChanged();
+    this.notifyOMsChanged();
+    this.notifySMsChanged();
   }
   private njcChangedListeners: (() => void)[] = [];
   onNJCChanged(listener: () => void) {

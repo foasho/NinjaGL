@@ -15,9 +15,7 @@ export const LoadProcessing = (props: ILoadProcessingProps) => {
   const engine = useContext(NinjaEngineContext);
 
   useEffect(() => {
-    console.log("ロード中だよん");
     if (props.nowLoading) {
-      console.log("ロード中だよん2", props.loadingPercentages);
       setPer(props.loadingPercentages);
     }
     if (!props.loadCompleted){

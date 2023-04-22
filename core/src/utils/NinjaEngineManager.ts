@@ -62,20 +62,22 @@ export class NinjaEngine {
   async initialize() {
     this.config = this.config?this.config: InitMobileConfipParams;
     this.world = new World();
-    this.octree = new Octree({
-      min: new Vector3(
-        -this.config.mapsize / 2,
-        -this.config.mapsize / 2,
-        -this.config.mapsize / 2
-      ),
-      max: new Vector3(
-        this.config.mapsize / 2,
-        this.config.mapsize / 2,
-        this.config.mapsize / 2
-      ),
-      maxDepth: this.config.octreeDepth
-    } as IOctree);
-    this.world.addOctree(this.octree);
+    if (this.config.physics !== "none"){
+      this.octree = new Octree({
+        min: new Vector3(
+          -this.config.mapsize / 2,
+          -this.config.mapsize / 2,
+          -this.config.mapsize / 2
+        ),
+        max: new Vector3(
+          this.config.mapsize / 2,
+          this.config.mapsize / 2,
+          this.config.mapsize / 2
+        ),
+        maxDepth: this.config.octreeDepth
+      } as IOctree);
+      this.world.addOctree(this.octree);
+    }
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
     this.initializeLoadOMs();
     this.runScriptsInitialize();

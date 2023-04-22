@@ -1,13 +1,20 @@
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
-import THREE from "three";
-import { Euler, Vector3, Object3D, Mesh, Scene } from "three";
-import { GLTFLoader, SkeletonUtils } from "three-stdlib";
-// import { GLTFExporter, GLTFExporterOptions } from "three-stdlib";
+import { Euler, Vector3, Object3D, Mesh, Scene, LoadingManager } from "three";
+import { GLTFLoader, SkeletonUtils, DRACOLoader, KTX2Loader } from "three-stdlib";
 import JSZip from 'jszip';
+import { MeshoptDecoder } from "meshoptimizer";
 import { InitMobileConfipParams } from "./NinjaInit";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
-// import "setimmediate";
+
+const MANAGER = new LoadingManager();
+const THREE_PATH = `https://unpkg.com/three@0.149.0`;
+export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
+export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
+const gltfLoader = new GLTFLoader()
+  .setCrossOrigin('anonymous')
+  .setDRACOLoader( DRACO_LOADER )
+  .setMeshoptDecoder( MeshoptDecoder );
 
 /**
  * データ構成を定義
@@ -93,6 +100,13 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
       const exportScene = new Scene();
       const clone = SkeletonUtils.clone(om.object);
       clone.animations = om.object.animations?om.object.animations: [];
+      // (重要):argsにpositionなどがすでにあるので、ここで原点にもどす
+      if (om.type === "object"){
+        if (om.args.position) clone.position.set(0, 0, 0);
+        if (om.args.rotation) clone.rotation.set(0, 0, 0);
+        if (om.args.scale) clone.scale.set(1, 1, 1);
+      }
+      // --------------------------------------------------
       exportScene.add(clone);
       const glbData = await exportGLTF(exportScene);
       objectsDir!.file(`${om.id}.glb`, glbData);
@@ -167,19 +181,19 @@ export const loadNJCFile = async (
         om.object = object;
       }
       // Position,Rotation,Scale同期
+      if (om.args && om.args.position){
+        om.args.position = new Vector3(
+          om.args.position.x, 
+          om.args.position.y, 
+          om.args.position.z
+        );
+      }
       if (om.args && om.args.rotation) {
         om.args.rotation = new Euler(
           om.args.rotation._x, 
           om.args.rotation._y, 
           om.args.rotation._z, 
           om.args.rotation._order
-        );
-      }
-      if (om.args && om.args.position){
-        om.args.position = new Vector3(
-          om.args.position.x, 
-          om.args.position.y, 
-          om.args.position.z
         );
       }
       if (om.args && om.args.scale){
@@ -221,11 +235,10 @@ async function loadGLTFFromData(
   totalSize?: number
 ): Promise<Object3D> {
   return new Promise<Object3D>((resolve, reject) => {
-    const loader = new GLTFLoader();
     const blob = new Blob([data], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
 
-    loader.load(
+    gltfLoader.load(
       url,
       (gltf) => {
         resolve(gltf.scene);

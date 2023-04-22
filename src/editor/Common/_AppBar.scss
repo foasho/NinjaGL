@@ -73,6 +73,18 @@
                     cursor: pointer;
                 }
             }
+            .multi {
+                background-color: #43D9D9;
+                color: #000000;
+                .icon {
+                    padding-right: 5px;
+                }
+                &:hover {
+                    color: #ffffff;
+                    background-color: $hoverBgColor;
+                    cursor: pointer;
+                }
+            }
         }
         .left {
             float: left;

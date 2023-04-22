@@ -16,7 +16,6 @@ export const Terrain = () => {
       setTerrainObject(undefined);
     }
   }, []);
-  console.log("layrNum: " + terrainObject?.layerNum);
   return (
     <>
       {terrainObject &&

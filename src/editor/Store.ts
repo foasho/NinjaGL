@@ -1,4 +1,4 @@
-import { IScriptManagement } from 'ninja-core';
+import { IConfigParams, IScriptManagement } from 'ninja-core';
 import { AnimationClip, Group, Mesh, Object3D } from 'three';
 import { proxy } from 'valtio';
 
@@ -175,4 +175,20 @@ export const globalPlayerStore = proxy<IGlobalPlayerStore>({
     globalPlayerStore.animMapper = {};
     globalPlayerStore.animations = [];
   }
+});
+
+/**
+ * Engine内設定
+ */
+export const globalConfigStore = proxy<IConfigParams>({
+  physics: "octree", // 物理エンジンの種類("octree" | "bvh" | "none")
+  autoScale: true, // デバイスによって自動スケールさせるか
+  antialias: false, // アンチエイリアスを有効にするか
+  shadowResolution: 256, // 影の解像度レベル(128 | 256 | 512 | 1024)
+  mapsize: 64, // マップサイズ
+  layerGridNum: 8, // レイヤーグリッド数
+  lodDistance: 25, // LODの切り替え距離
+  dpr: undefined, // デバイスピクセル比
+  viewGridLength: 3, // ビューグリッドの長さ
+  octreeDepth: 5, // オクトリーツリーの深さ
 });

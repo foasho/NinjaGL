@@ -5,17 +5,17 @@ import { MainViewer } from "@/editor/ViewPort/MainViewer";
 import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
 import { useState, useEffect, useContext, useRef, createContext } from "react";
 import { Euler, MathUtils, Vector3 } from "three";
-import { ContentsBrowser, ContentViewer } from "./Hierarchy/ContentViewer";
+import { ContentsBrowser } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
-import { AiFillHome, AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
+import { AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
 import { TerrainMakerCanvas } from "./ViewPort/TerrainMaker";
 import { saveAs } from "file-saver";
 import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
 import { BsCheck, BsPerson, BsPlay, BsStop } from "react-icons/bs";
+import { FaPeopleArrows } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
-import { PlayerInspector } from "./Inspector/PlayerInspector";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
@@ -33,6 +33,7 @@ import Link from "next/link";
 import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
 import 'setimmediate';
+import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
 
 /**
  * NinjaEngineメインコンポネント
@@ -414,6 +415,15 @@ export const NinjaEditor = () => {
     input.click();
   }
 
+  
+  /**
+   * マルチプレイヤーの起動
+   */
+  const onMultiPlayer = async () => {
+    await showMultiPlayerDialog();
+  }
+
+
   /**
    * プロジェクトが何もないときは、
    * BoxとPlane, DirectionalLight, SpotLightを追加
@@ -564,7 +574,6 @@ export const NinjaEditor = () => {
     if (autoSave){
       setAutoSave(autoSave == "true");
     }
-
   }
   , []);
 
@@ -580,6 +589,7 @@ export const NinjaEditor = () => {
       clearInterval(autoSaveInterval);
     }
   }, [autoSave]);
+
 
 
   return (
@@ -632,6 +642,13 @@ export const NinjaEditor = () => {
                   {(session)? <><BsPerson /></>: <>LogIn</>}
                 </span>
               </Link>
+            </li>
+            <li className={`${styles.navItem} ${styles.right}`}>
+              <a className={styles.multi} onClick={() => onMultiPlayer()}>
+                <span className={styles.icon}>
+                  <FaPeopleArrows/>
+                </span>
+              </a>
             </li>
           </ul>
           {showFileMenu &&

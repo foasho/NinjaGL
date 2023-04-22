@@ -11,11 +11,12 @@ import { Terrain } from "./MainViewItems/Terrain";
 import { Avatar } from "./MainViewItems/Avatar";
 import { MySky } from "./MainViewItems/Sky";
 import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
-import { MdOutlineGridOff, MdOutlineGridOn } from "react-icons/md";
+import { TiSpanner } from "react-icons/ti";
+import { ImEarth } from "react-icons/im";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
 import { useInputControl } from "ninja-core";
-import { AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
+import { AiFillCamera, AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";
 import { MeshoptDecoder } from "meshoptimizer";
@@ -24,18 +25,20 @@ import Swal from "sweetalert2";
 import { Cameras } from "./MainViewItems/Cameras";
 import { FogComponent } from "./MainViewItems/Fog";
 import { useSnapshot } from "valtio";
-import { globalContentStore, globalStore } from "../Store";
+import { globalConfigStore, globalContentStore, globalStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 
 export const MainViewer = () => {
+  const configState = useSnapshot(globalConfigStore);
   const [renderCount, setRenderCount] = useState(0);
   const loadingRef = useRef<HTMLDivElement>();
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
+  const [isConfHovered, setIsConfHovered] = useState(false);
   const cameraSpeedRef = useRef<HTMLInputElement>();
-  const [cameraSpeed, setCameraSpeed] = useState<number>(10);
+  const [cameraSpeed, setCameraSpeed] = useState<number>(1);
   const cameraFarRef = useRef<HTMLInputElement>();
   const [cameraFar, setCameraFar] = useState<number>(1000);
   const worldSizeRef = useRef<HTMLInputElement>();
@@ -227,7 +230,15 @@ export const MainViewer = () => {
           <Cameras/>
           <FogComponent/>
           <MyEnviroment/>
-          <SystemHelper isGizmo={isGizmo} cameraFar={cameraFar} cameraSpeed={cameraSpeed} worldSize={worldSize} isGrid={isGrid} isWorldHelper={isWorldHelper} worldGridSize={worldGridSize} />
+          <SystemHelper 
+            isGizmo={isGizmo} 
+            cameraFar={cameraFar} 
+            cameraSpeed={cameraSpeed} 
+            worldSize={worldSize} 
+            isGrid={isGrid} 
+            isWorldHelper={isWorldHelper} 
+            worldGridSize={worldGridSize} 
+          />
           <Preload all />
         </Suspense>
       </Canvas>
@@ -237,10 +248,10 @@ export const MainViewer = () => {
       <div className={styles.control}>
         <a 
           className={styles.helperBtn}
-          >
-          <AiFillSetting
-            onClick={() => setIsHovered(!isHovered)}
-          />
+          onMouseLeave={() => setIsHovered(false)}
+          onMouseOver={() => setIsHovered(true)}
+        >
+          <ImEarth />
           {isHovered && (
               <div 
                 className={styles.tooltipContent}
@@ -260,22 +271,6 @@ export const MainViewer = () => {
                   </label>
                 </div>
                 <div className={styles.numberInputs}>
-                  <label>
-                    カメラスピード
-                    <input 
-                      type="text"
-                      ref={cameraSpeedRef}
-                      placeholder={cameraSpeed.toString()}
-                      onKeyDown={(e: any) => {
-                        if (e.key == "Enter" && cameraSpeedRef.current) {
-                          if (isNumber(cameraSpeedRef.current.value)) {
-                            const val = Number(cameraSpeedRef.current.value);
-                            setCameraSpeed(val);
-                          }
-                        }
-                      }}
-                    />
-                  </label>
                   <label>
                     視野(far)
                     <input 
@@ -301,50 +296,198 @@ export const MainViewer = () => {
                       }}
                     />
                   </label>
-                  <label>
-                    ワールドの広さ
-                    <input 
-                      type="text"
-                      ref={worldSizeRef}
-                      placeholder={worldSize.toString()}
-                      onKeyDown={(e: any) => {
-                        if (e.key == "Enter" && worldSizeRef.current) {
-                          if (isNumber(worldSizeRef.current.value)) {
-                            const val = Number(worldSizeRef.current.value);
-                            if (val <= 4096){
-                              setWorldSize(val);
-                            }
-                            else {
-                              Swal.fire({
-                                title: "エラー",
-                                text: "4096以下の値を入力してください",
-                                icon: "error"
-                              });
-                            }
-                          }
-                        }
-                      }}
-                    />
-                  </label>
-                  <label>
-                    グリッド数
-                    <input 
-                      type="text"
-                      ref={worldGridSizeRef}
-                      placeholder={worldGridSize.toString()}
-                      onKeyDown={(e: any) => {
-                        if (e.key == "Enter" && worldGridSizeRef.current) {
-                          if (isNumber(worldGridSizeRef.current.value)) {
-                            const val = Number(worldGridSizeRef.current.value);
-                            setWorldGridSize(val);
-                          }
-                        }
-                      }}
-                    />
-                  </label>
                 </div>
               </div>
           )}
+        </a>
+        <a 
+          className={styles.config}
+          onMouseLeave={() => setIsConfHovered(false)}
+          onMouseOver={() => setIsConfHovered(true)}
+        >
+          <TiSpanner/>
+          {isConfHovered && (
+            <div 
+              className={styles.tooltipContent}
+            >
+              <div className={styles.select}>
+                <div className={styles.title}>
+                  {"物理エンジン"}
+                </div>
+                <select
+                  value={configState.physics}
+                  onChange={(e) => {
+                    if (
+                      e.target.value == "none" ||
+                      e.target.value == "octree" ||
+                      e.target.value == "bvh"
+                    ) {
+                      globalConfigStore.physics = e.target.value;
+                    }
+                  }}
+                >
+                  <option value="none">None</option>
+                  <option value="octree">Octree</option>
+                  <option value="bvh">BVH</option>
+                </select>
+              </div>
+              <label>
+                <input 
+                  type="checkbox" 
+                  checked={configState.autoScale} 
+                  onChange={(e) => {
+                    globalConfigStore.autoScale = e.target.checked;
+                  }} 
+                />
+                AutoScaleの有効化
+              </label>
+              {configState.physics != "none" &&
+                <label>
+                  ワールドの広さ
+                  <input 
+                    type="text"
+                    ref={worldSizeRef}
+                    placeholder={worldSize.toString()}
+                    onKeyDown={(e: any) => {
+                      if (e.key == "Enter" && worldSizeRef.current) {
+                        if (isNumber(worldSizeRef.current.value)) {
+                          const val = Number(worldSizeRef.current.value);
+                          if (val <= 4096){
+                            setWorldSize(val);
+                          }
+                          else {
+                            Swal.fire({
+                              title: "エラー",
+                              text: "4096以下の値を入力してください",
+                              icon: "error"
+                            });
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </label>
+              }
+              {!configState.autoScale &&
+              <>
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={configState.antialias} 
+                    onChange={(e) => {
+                      globalConfigStore.antialias = e.target.checked;
+                    }} 
+                  />
+                  <span className={styles.name}>
+                    アンチエイリアスの有効化
+                  </span>
+                </label>
+                <label>
+                  <span className={styles.name}>
+                    Device Pixel Ratio
+                  </span>
+                  <select
+                    value={configState.dpr? configState.dpr.toString(): "undefined"}
+                    onChange={(e) => {
+                      if (e.target.value == "undefined") {
+                        globalConfigStore.dpr = undefined;
+                      }
+                      else if (isNumber(e.target.value)) {
+                        globalConfigStore.dpr = Number(e.target.value);
+                      }
+                    }}
+                  >
+                    <option value="undefined">Auto</option>
+                    <option value="1">Normal</option>
+                    <option value="1.5">High</option>
+                  </select>
+                </label>
+                <label>
+                  <span className={styles.name}>
+                    LoD有効距離
+                  </span>
+                  <input 
+                    type="text"
+                    value={configState.lodDistance}
+                    onKeyDown={(e: any) => {
+                      if (e.key == "Enter") {
+                        if (isNumber(e.target.value)) {
+                          globalConfigStore.lodDistance = Number(e.target.value);
+                        }
+                      }
+                    }}
+                  />
+                </label>
+                <label>
+                  <span className={styles.name}>
+                    影の解像度(2の乗数)
+                  </span>
+                  <input 
+                    type="text"
+                    value={configState.shadowResolution}
+                    onKeyDown={(e: any) => {
+                      if (e.key == "Enter") {
+                        if (isNumber(e.target.value)) {
+                          globalConfigStore.shadowResolution = Number(e.target.value);
+                        }
+                      }
+                    }}
+                  />
+                </label>
+                <label>
+                  <span className={styles.name}>
+                    グリッド数
+                  </span>
+                  <input 
+                    type="text"
+                    ref={worldGridSizeRef}
+                    placeholder={worldGridSize.toString()}
+                    onKeyDown={(e: any) => {
+                      if (e.key == "Enter" && worldGridSizeRef.current) {
+                        if (isNumber(worldGridSizeRef.current.value)) {
+                          const val = Number(worldGridSizeRef.current.value);
+                          setWorldGridSize(val);
+                        }
+                      }
+                    }}
+                  />
+                </label>
+                <label>
+                  <span className={styles.name}>
+                    監視グリッド数
+                  </span>
+                  <input 
+                    type="text"
+                    value={configState.viewGridLength}
+                    onKeyDown={(e: any) => {
+                      if (e.key == "Enter") {
+                        if (isNumber(e.target.value)) {
+                          globalConfigStore.viewGridLength = Number(e.target.value);
+                        }
+                      }
+                    }}
+                  />
+                </label>
+              </>
+              }
+            </div>
+          )}
+        </a>
+        <a 
+          onClick={() => {
+            if (cameraSpeed > 7){
+              setCameraSpeed(1);
+            }
+            else {
+              setCameraSpeed(cameraSpeed + 1);
+            }
+          }}
+          className={styles.cameraSpeed}
+        >
+          <AiFillCamera/> 
+          <span>
+            {cameraSpeed}
+          </span>
         </a>
         <a 
           onClick={() => setShowCanvas(!showCanvas)}
@@ -566,6 +709,13 @@ export const CameraControl = (props: ICameraControl) => {
     }
   };
 
+  const calculateNewTarget = (camera, currentTarget, distance) => {
+    const direction = new Vector3();
+    camera.getWorldDirection(direction);
+    const newPosition = new Vector3().addVectors(camera.position, direction.multiplyScalar(distance));
+    return newPosition;
+  }
+
   useFrame((_, delta) => {
     // Fキーが押された瞬間の検出
     if (input.pressedKeys.includes("KeyF") && !focusOnObject) {
@@ -579,7 +729,7 @@ export const CameraControl = (props: ICameraControl) => {
       targetFocusCamera(state.currentId);
     }
     if (input.dash && (input.forward || input.backward || input.right || input.left)) {
-      const st = props.cameraSpeed * delta;
+      const st = props.cameraSpeed * delta * 10;
       const cameraDirection = new Vector3();
       cameraRef.current.getWorldDirection(cameraDirection);
       const cameraPosition = cameraRef.current.position.clone();
@@ -609,6 +759,13 @@ export const CameraControl = (props: ICameraControl) => {
       cameraRef.current.position.copy(ref.current.object.position);
       cameraRef.current.rotation.copy(ref.current.object.rotation);
       cameraRef.current.lookAt(ref.current.target);
+    }
+
+    if (ref.current && cameraRef.current) {
+      // 新しいターゲット位置を計算して更新します
+      const distance = props.cameraSpeed * 10; // カメラとターゲットの一定距離を指定
+      const newTarget = calculateNewTarget(cameraRef.current, ref.current.target, distance);
+      ref.current.target.copy(newTarget);
     }
   });
 

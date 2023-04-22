@@ -124,11 +124,11 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   /**
    * GLTFの画像を取得する
    * @param url 
-   * @param key 
+   * @param name 
    * @returns 
    */
-  const getGLTFImage = async (url: string, key: string): Promise<string> => {
-    if (isGLTF(key)){
+  const getGLTFImage = async (url: string, name: string): Promise<string> => {
+    if (isGLTF(name)){
       return await CreateGLTFImage(url);
     }
     return null

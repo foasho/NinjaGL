@@ -5,7 +5,7 @@ import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';
 import { reqApi } from "@/services/ServciceApi";
 import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
-import { Euler, Vector3, MathUtils, MeshStandardMaterial } from "three";
+import { Euler, Vector3, MathUtils, MeshStandardMaterial, AnimationClip } from "three";
 import { isNumber } from "@/commons/functional";
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
@@ -30,6 +30,9 @@ export const MainViewInspector = () => {
   // Lightformerの設定
   const [form, setForm] = useState<{ value: "circle"|"ring"|"rect", label: string}>();
   const [intensity, setIntensity] = useState<number>();
+  // Animationsの設定
+  const [defalutAnim, setDefalutAnim] = useState<{ value: string, label: string }>();
+  const [animLoop, setAnimLoop] = useState<boolean>(true);
 
   const id = state.currentId;
   const selectOM = editor.getOMById(id);
@@ -206,7 +209,7 @@ export const MainViewInspector = () => {
    * マテリアル(種別/色)の変更
    */
   const changeMaterial = (type: "shader"|"standard"|"phong"|"toon"|"reflection", value: any) => {
-    if (materialType.value !== "shader" && value){
+    if (type !== "shader" && value){
       editor.setMaterialData(id, type, value);
       setColor(value);
       setMaterialType(materialOptions.find((option) => option.value == type));
@@ -326,6 +329,22 @@ export const MainViewInspector = () => {
     }
   }
 
+  /**
+   * デフォルトアニメーションの変更
+   */
+  const changeDefaultAnimation = (selectDefaultAnimation) => {
+    editor.setDefaultAnimation(id, selectDefaultAnimation.value);
+    setDefalutAnim(selectDefaultAnimation);
+  }
+
+  /**
+   * アニメーションループの切り替え
+   */
+  const onCheckAnimationLoop = () => {
+    editor.setAnimationLoop(id, !animLoop);
+    setAnimLoop(!animLoop);
+  }
+
   return (
     <>
     <div className={styles.mainInspector}>
@@ -337,7 +356,8 @@ export const MainViewInspector = () => {
           selectOM.type == "light" || 
           selectOM.type == "three" ||
           selectOM.type == "terrain" ||
-          selectOM.type == "camera"
+          selectOM.type == "camera" ||
+          selectOM.type == "lightformer"
         )
       ) &&
         
@@ -353,7 +373,6 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                // value={position?(position.x).toFixed(2): ""}
                 type="text" 
                 placeholder={position?(position.x).toFixed(2): "0"}
                 onKeyDown={(e: any) => {
@@ -372,7 +391,6 @@ export const MainViewInspector = () => {
                 onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                // value={position?position.y.toFixed(2): ""}
                 type="text" 
                 placeholder={position?position.y.toFixed(2): "0"}
                 onKeyDown={(e: any) => {
@@ -391,7 +409,6 @@ export const MainViewInspector = () => {
                 onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                // value={position?position.z.toFixed(2): ""}
                 type="text" 
                 placeholder={position?position.y.toFixed(2): "0"}
                 onKeyDown={(e: any) => {
@@ -422,7 +439,6 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                // value={MathUtils.radToDeg(rotation?.x).toFixed(1)}
                 type="text" 
                 placeholder={rotation?MathUtils.radToDeg(rotation.x).toFixed(1): "0"}
                 onKeyDown={(e: any) => {
@@ -583,14 +599,16 @@ export const MainViewInspector = () => {
                 </div>
               </div>
             }
-            {(materialType && materialType.value === "shader") &&
+            {/** シェーダ対応準備中 */}
+            {/* {(materialType && materialType.value === "shader") &&
               <div className={styles.shader}>
                 <div className={styles.attachBox}>
                   Here Attach Script
                 </div>
               </div>
-            }
+            } */}
           </div>
+
           <div className={styles.physics}>
             <div className={styles.title}>
               {t("isPhysics")}
@@ -607,10 +625,10 @@ export const MainViewInspector = () => {
             {isPhysics &&
               <>
                 <Select
-                    options={physicsOptions}
-                    value={physics}
-                    onChange={onChangePhysics}
-                    styles={normalStyles}
+                  options={physicsOptions}
+                  value={physics}
+                  onChange={onChangePhysics}
+                  styles={normalStyles}
                 />
               </>
             }
@@ -641,7 +659,12 @@ export const MainViewInspector = () => {
           }
 
           {
-            (selectOM.type == "light" || selectOM.type == "three" || selectOM.type == "object" || selectOM.type == "avatar") && 
+            (
+              selectOM.type == "light" || 
+              selectOM.type == "three" || 
+              selectOM.type == "object" || 
+              selectOM.type == "avatar"
+            ) && 
             <>
               <div className={styles.castShadow}>
                   <div className={styles.title}>
@@ -691,6 +714,48 @@ export const MainViewInspector = () => {
           </>
 
         </>
+      }
+
+      {(
+        selectOM && selectOM.type == "object"
+      ) && 
+      <>
+        <div className={styles.animations}>
+          {selectOM.animations && selectOM.animations.length > 0 &&
+            <>
+              <div className={styles.title}>
+                {t("animations")}
+                </div>
+              <div className={styles.input}>
+                <Select
+                  options={
+                    selectOM.animations.map((anim: AnimationClip) => {
+                      return {value: anim.name, label: anim.name}
+                    })
+                  }
+                  value={defalutAnim}
+                  // onChange={(select) => changeDefaultAnimation(select)}
+                  styles={normalStyles}
+                />
+              </div>
+            </>
+        }
+        </div>
+        <div className={styles.animLoop}>
+          <div className={styles.title}>
+              {t("animationLoop")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={background} 
+              onInput={() => onCheckAnimationLoop()}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+        </div>
+      </>
       }
 
       {selectOM && selectOM.type == "environment" &&

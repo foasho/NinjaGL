@@ -45,6 +45,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectEnvironment = (value: string) => {
     prop.response({ type: "environment", value: value });
   }
+  const selectEffect = (value: string) => {
+    prop.response({ type: "effect", value: value });
+  }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
     console.log(e);
@@ -373,7 +376,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 
 interface ISelectNewObjectDialog {
   type: "light" | "sky" | "sound" | "object" | "three" 
-    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer";
+    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer" | "effect";
   value: string;
 }
 /**
