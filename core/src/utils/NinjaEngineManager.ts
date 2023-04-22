@@ -865,6 +865,17 @@ export class NinjaEngine {
   }
 
   /**
+   * LoopAnimationを実行する
+   */
+  loopAnimation(timeDelta: number) {
+    this.oms.map(om => {
+      if (om.args.defaultAnimation && om.animations.length > 0 && om.mixer) {
+        om.mixer.update(timeDelta);
+      }
+    });
+  }
+
+  /**
    * ユーザースクリプトの初期関数を実行する
    */
   runScriptsInitialize() {
@@ -903,6 +914,8 @@ export class NinjaEngine {
       // this.updateViewableObject();
       // 物理ワールドを更新する
       if (this.world) this.world.step(timeDelta, input);
+      // ループアニメーションがあれば更新する
+      this.loopAnimation(timeDelta);
       // 動態管理をリフレッシュする
       this.moveOrderKeys = [];
       // スクリプトを実行する

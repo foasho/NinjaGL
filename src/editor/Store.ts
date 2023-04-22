@@ -185,7 +185,7 @@ export const globalConfigStore = proxy<IConfigParams>({
   logarithmicDepthBuffer: false, // ログ深度バッファを有効にするか
   alpha: false, // アルファチャンネルを有効にするか
   autoScale: true, // デバイスによって自動スケールさせるか
-  antialias: false, // アンチエイリアスを有効にするか
+  antialias: true, // アンチエイリアスを有効にするか
   shadowResolution: 256, // Shadow解像度レベル(128 | 256 | 512 | 1024)
   mapsize: 64, // マップサイズ
   layerGridNum: 8, // レイヤーグリッド数

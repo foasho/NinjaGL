@@ -18,7 +18,7 @@ export const MainViewInspector = () => {
   const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [castShadow, setCastShadow] = useState<boolean>(true);
-  const [receiveShadow, setReceiveShadow] = useState<boolean>(true);
+  const [receiveShadow, setReceiveShadow] = useState<boolean>(false);
   const [helper, setHelper] = useState<boolean>(false);
   const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
   const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"toon"|"shader"|"reflection"; label: string;}>();

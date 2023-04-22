@@ -1,4 +1,4 @@
-import { GizmoHelper, GizmoViewport, OrbitControls, PerspectiveCamera as DPerspectiveCamera, Preload, Text } from "@react-three/drei";
+import { GizmoHelper, GizmoViewport, Html, OrbitControls, PerspectiveCamera as DPerspectiveCamera, Preload, Text } from "@react-three/drei";
 import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils, PerspectiveCamera, Color } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef, useLayoutEffect, Suspense } from "react";
@@ -215,7 +215,11 @@ export const MainViewer = () => {
     <div className={styles.mainView}>
       <Canvas
         key={renderCount}
-        gl={{ logarithmicDepthBuffer: true, antialias: false }}
+        gl={{ 
+          alpha: configState.alpha,
+          logarithmicDepthBuffer: configState.logarithmicDepthBuffer, 
+          antialias: configState.antialias,
+        }}
         style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
         camera={{ position: HomeCameraPosition }}
@@ -566,6 +570,7 @@ interface ISysytemHelper {
   isGizmo: boolean;
 }
 const SystemHelper = (props: ISysytemHelper) => {
+  const [minimal, setMinimal] = useState(false);
   const gridHelperSize = 4096;
   const divisions = props.worldGridSize;
   const cellSize = props.worldSize / divisions;
@@ -643,7 +648,12 @@ const SystemHelper = (props: ISysytemHelper) => {
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
       }
-      <Perf position={"bottom-right"} style={{ position: "absolute" }} minimal={true}/>
+      <Perf 
+        position={"bottom-right"} 
+        style={{ position: "absolute" }} 
+        minimal={minimal}
+        onClick={() => setMinimal(!minimal)}
+      />
       <>
       {numberElements}
       {numberPlanes}

@@ -147,7 +147,6 @@ export const NinjaEditor = () => {
             type: "camera",
             args: {
               type: data.value,
-              position: new Vector3(-3, 3, -6),
               default: true,
             },
             physics: "none",

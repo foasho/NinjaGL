@@ -51,7 +51,7 @@ const StaticObject = ({ om }) => {
   object.traverse((node: any) => {
     if (node.isMesh && node instanceof Mesh) {
       node.castShadow = (om.args.castShadow == undefined) ? true : om.args.castShadow;
-      node.receiveShadow = (om.args.recieveShadow == undefined) ? true : om.args.recieveShadow;
+      node.receiveShadow = (om.args.recieveShadow == undefined) ? false : om.args.recieveShadow;
     }
   })
   const ref = useRef<Group|Object3D|Mesh>();
