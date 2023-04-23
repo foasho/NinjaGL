@@ -1,1 +1,1 @@
-export { useSFURoom } from "./utils/SFURoom";
+export { useSkyway } from "./hooks/useSkyway";

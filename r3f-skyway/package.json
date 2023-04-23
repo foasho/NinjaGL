@@ -1,18 +1,23 @@
 {
   "name": "r3f-skyway",
-  "version": "1.0.0",
-  "description": "R3F-Skyway-MultiPlayerPlugin",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "ReactThreeFiber and Skyway library for real-time 3D object sharing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "tsc -w"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/foasho/NinjaGL.git"
+    "url": "https://github.com/yourusername/r3f-skyway.git"
   },
   "keywords": [
-    "r3f",
-    "ninjagl"
+    "react",
+    "three",
+    "react-three-fiber",
+    "skyway",
+    "3d"
   ],
   "author": "ShoOsaka",
   "license": "MIT",
@@ -20,9 +25,26 @@
     "url": "https://github.com/foasho/NinjaGL/issues"
   },
   "homepage": "https://github.com/foasho/NinjaGL#readme",
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@react-three/fiber": ">=8.11.0",
+    "@skyway-sdk/core": "^1.2.2",
+    "@skyway-sdk/room": "^1.2.2",
+    "@skyway-sdk/sfu-bot": "^1.2.2",
+    "@skyway-sdk/token": "^1.2.2"
+  },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@types/three": "^0.149.0",
+    "@react-three/drei": "^9.65.3",
+    "@react-three/fiber": ">=8.11.0",
+    "@skyway-sdk/core": "^1.2.2",
+    "@skyway-sdk/room": "^1.2.2",
+    "@skyway-sdk/sfu-bot": "^1.2.2",
+    "@skyway-sdk/token": "^1.2.2",
+    "three": ">=0.149.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",

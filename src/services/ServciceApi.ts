@@ -16,13 +16,19 @@ export const sapi = axios.create({
 });
 
 export interface IApiProps {
-  route: "storage/list" | "storage/download" | "storage/upload" | "control/savescript";
+  route: "storage/list" | "storage/download" | "storage/upload" | "control/savescript" | "storage/delete";
   queryObject?: { [key: string]: string | number };
   data?: any;
 }
 
-const ConvertToMethod = (route: "storage/list" | "storage/download" | "storage/upload" | "control/savescript"): "GET"|"POST" => {
+const ConvertToMethod = (
+  route: "storage/list" | "storage/download" 
+  | "storage/upload" | "control/savescript" | "storage/delete"
+): "GET"|"POST"|"DELETE" => {
   switch (route) {
+    case "storage/delete":
+      return "DELETE";
+    case "control/savescript":
     case "storage/upload":
       return "POST";
     default:
@@ -55,11 +61,16 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
       BASE_URL + baseAPIUrl + props.route + query
     )
   }
-  else {
+  else if (method == "POST") {
     sapi.options(BASE_URL, { headers: { 'Content-Type': 'application/json;charset=utf-8' } });
     return await sapi.post(
       "/api/" + props.route + query,
       props.data
+    )
+  }
+  else if (method == "DELETE") {
+    return await sapi.delete(
+      "/api/" + props.route + query
     )
   }
 }

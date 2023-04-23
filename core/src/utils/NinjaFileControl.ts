@@ -97,30 +97,18 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
   const exportOMs: IObjectManagement[] = [];
   for (const om of njcFile.oms) {
     if (om.object) {
-      // const exportScene = new Scene();
       let clone;
-      if (om.animations.length > 0) {
+      if (om.animations && om.animations.length > 0) {
         clone = SkeletonUtils.clone(om.object);
-        clone.animations = om.animations?om.animations: [];
+        clone.animations = om.animations? om.animations: [];
       }
       else {
         clone = om.object.clone();
       }
-      // (重要):argsにpositionなどがすでにあるので、ここで原点にもどす
-      if (om.type === "object"){
-        // if (om.args.position) clone.position.set(0, 0, 0);
-        // if (om.args.rotation) clone.rotation.set(0, 0, 0);
-        // if (om.args.scale) clone.scale.set(1, 1, 1);
-      }
-      // --------------------------------------------------
-      // exportScene.add(clone);
-      // const glbData = await exportGLTF(exportScene);
       const glbData = await exportGLTF(clone);
       objectsDir!.file(`${om.id}.glb`, glbData);
       om.filePath = `objects/${om.id}.glb`;
     }
-    // delete om.object; // Dont Delete
-    // delete om.mixer; // Dont Delete
     exportOMs.push(om);
   }
 
