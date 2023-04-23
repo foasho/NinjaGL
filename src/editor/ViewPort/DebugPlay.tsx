@@ -21,7 +21,7 @@ export const ExportNjcFile = (editor: NinjaEditorManager): NJCFile => {
     else if (om.type == "object" || om.type == "terrain") {
       if (!om.object) return _om;
       // Animationがある場合のみSckeletonUtilsでクローンする
-      if (om.animations.length > 0) {
+      if (om.animations && om.animations.length > 0) {
         const target = SkeletonUtils.clone(_om.object);
         target.animations = om.animations;
         _om.object = target;

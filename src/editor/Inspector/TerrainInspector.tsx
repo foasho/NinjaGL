@@ -68,6 +68,10 @@ export const TerrainInspector = ({ onSave }) => {
     }
   }
 
+  const changeMode = (mode: "view" | "edit") => {
+    globalTerrainStore.mode = mode;
+  }
+
   const changeColor = (e) => {
     globalTerrainStore.color = e.target.value;
   }
@@ -81,10 +85,10 @@ export const TerrainInspector = ({ onSave }) => {
       <div className={styles.mode}>
         <div className={styles.title}>{t("mode")}</div>
         <div className={styles.select}>
-          <span className={terrainState.mode == "view" ? styles.active : styles.disable}>
+          <span className={terrainState.mode == "view" ? styles.active : styles.disable} onClick={() => changeMode("view")} >
             {t("view")}
           </span>
-          <span className={terrainState.mode == "edit" ? styles.active : styles.disable}>
+          <span className={terrainState.mode == "edit" ? styles.active : styles.disable} onClick={() => changeMode("edit")}>
             {t("edit")}
           </span>
         </div>

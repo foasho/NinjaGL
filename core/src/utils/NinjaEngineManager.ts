@@ -191,7 +191,6 @@ export class NinjaEngine {
       if (om.type === "avatar" && om.object) {
         const animations = om.animations;
         if (animations && animations.length > 0){
-          console.log(om.object);
           const mixer = new AnimationMixer(om.object);
           om.mixer = mixer;
         }
@@ -218,17 +217,13 @@ export class NinjaEngine {
           this.octree.importThreeObj3D(om.id, om.object, om.type);
         }
         if (om.args.position && om.object){
-          const pos = om.args.position;
-          const posVec = new Vector3(pos.x, pos.y, pos.z);
-          om.object.position.copy(posVec.clone());
-          if (this.octree){
-            this.octree.translateFaceByName(om.id, posVec.clone());
-          }
-          om.layerNum = this.getLayerNumber(pos);
-        }
-        if (om.args.rotation && om.object){
-          const rot = om.args.rotation;
-          om.object.rotation.copy(rot.clone());
+          // 物理エンジンへのImportは後で実装
+          // const pos = om.args.position;
+          // const posVec = new Vector3(pos.x, pos.y, pos.z);
+          // if (this.octree){
+          //   this.octree.translateFaceByName(om.id, posVec.clone());
+          // }
+          // om.layerNum = this.getLayerNumber(pos);
         }
       }
       else if (om.type == "three"){

@@ -28,23 +28,8 @@ export const StaticObjects = () => {
 }
 
 const StaticObject = ({ om }) => {
+  // const ref = React.useRef();
   useEffect(() => {
-    if (om.object) {
-      // posistion, rotation, scale
-      if (om.args.position) {
-        om.object.position.copy(om.args.position);
-      }
-      if (om.args.rotation) {
-        om.object.rotation.copy(om.args.rotation);
-      }
-      if (om.args.scale) {
-        om.object.scale.copy(om.args.scale);
-      }
-    }
-    // layerNum
-    if (om.layerNum) {
-      om.object.layers.set(om.layerNum);
-    }
     // Animationがあればmiserにセット
     if (om.args.defaultAnimation){
       const animation = om.animations.find((anim) => anim.name == om.args.defaultAnimation);
@@ -52,14 +37,21 @@ const StaticObject = ({ om }) => {
         om.mixer.clipAction(animation).play();
       }
     }
-  }, [om.object]);
+  }, [om]);
 
   return (
     <>
       {om.object &&
-        <primitive 
-          object={om.object}
-        />
+        <mesh
+          position={om.args.position ? om.args.position : new Vector3()}
+          rotation={om.args.rotation ? om.args.rotation : new Euler()}
+          scale={om.args.scale ? om.args.scale : new Vector3(1, 1, 1)}
+          layers={om.layerNum ? om.layerNum : 0}
+        >
+          <primitive 
+            object={om.object}
+          />
+        </mesh>
       }
     </>
   )

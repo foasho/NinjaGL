@@ -891,7 +891,7 @@ export const MainViewInspector = () => {
             <input 
               type="checkbox" 
               className={styles.checkbox} 
-              checked={background} 
+              checked={animLoop} 
               onInput={() => onCheckAnimationLoop()}
             />
             <span className={styles.customCheckbox}></span>

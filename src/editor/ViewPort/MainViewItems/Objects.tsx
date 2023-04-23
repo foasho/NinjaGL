@@ -55,7 +55,7 @@ const StaticObject = ({ om }) => {
       }
     });
   }
-  const ref = useRef<Group|Object3D|Mesh>();
+  const ref = useRef<any>();
   const editor = useContext(NinjaEditorContext);
   const id = om.id;
 
@@ -169,13 +169,16 @@ const StaticObject = ({ om }) => {
         />
       }
       {object &&
+      <mesh
+        ref={ref}
+      >
         <primitive
           visible={state.hiddenList.indexOf(id) == -1}
-          ref={ref}
           onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
           onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
           object={object}
         />
+      </mesh>
       }
     </>
   )

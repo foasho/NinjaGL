@@ -108,9 +108,9 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
       }
       // (重要):argsにpositionなどがすでにあるので、ここで原点にもどす
       if (om.type === "object"){
-        if (om.args.position) clone.position.set(0, 0, 0);
-        if (om.args.rotation) clone.rotation.set(0, 0, 0);
-        if (om.args.scale) clone.scale.set(1, 1, 1);
+        // if (om.args.position) clone.position.set(0, 0, 0);
+        // if (om.args.rotation) clone.rotation.set(0, 0, 0);
+        // if (om.args.scale) clone.scale.set(1, 1, 1);
       }
       // --------------------------------------------------
       // exportScene.add(clone);
