@@ -80,6 +80,7 @@ export const PlayerEditor = () => {
             setAnimations(gltf.animations);
             globalPlayerStore.animations = gltf.animations;
             setScene(scene);
+            calculateCameraOffsetAndLookAt(scene);
           },
           (xhr) => { },
           async (err) => {
@@ -153,10 +154,10 @@ export const PlayerEditor = () => {
   const calculateCameraOffsetAndLookAt = (
     avatar: Object3D, 
     offsetFactor = 1.0, 
-    heightFactor = 1.0
+    heightFactor = 1.2
   ) =>{
     // アバターのバウンディングボックスを計算
-    const avatarBox3 = new Box3().setFromObject(avatar);
+    const avatarBox3 = new Box3().setFromObject(avatar.clone());
 
     // アバターのバウンディングボックスのサイズを取得
     const avatarSize = new Vector3();
@@ -164,9 +165,9 @@ export const PlayerEditor = () => {
 
     // サイズに基づいてサードパーソンのカメラオフセットと LookAt 座標を計算
     const tpCameraOffset = new Vector3(
-      -avatarSize.x * offsetFactor,
+      -avatarSize.x * offsetFactor * 0.25,
       avatarSize.y * heightFactor,
-      -avatarSize.z * offsetFactor
+      (-avatarSize.z * offsetFactor * 0.5) + (-0.5 * avatarSize.y * heightFactor)
     );
 
     const tpCameraLookAtOffset = new Vector3(
@@ -178,6 +179,8 @@ export const PlayerEditor = () => {
     // ファーストパーソンのカメラオフセットと LookAt 座標を計算
     const fpCameraOffset = new Vector3(0, tpCameraLookAtOffset.y, 0);
     const fpCameraLookAtOffset = new Vector3(0, tpCameraLookAtOffset.y, 1); // 人間の標準の LookAt に近い形で設定
+    console.log("tpCameraOffset", tpCameraOffset);
+    console.log("tpCameraLookAtOffset", tpCameraLookAtOffset);
 
     setOffsetParams({
       tp: {
@@ -189,16 +192,6 @@ export const PlayerEditor = () => {
         lookAt: fpCameraLookAtOffset,
       },
     });
-    // return {
-    //   tp: {
-    //     offset: tpCameraOffset,
-    //     lookAt: tpCameraLookAtOffset,
-    //   },
-    //   fp: {
-    //     offset: fpCameraOffset,
-    //     lookAt: fpCameraLookAtOffset,
-    //   },
-    // };
   }
 
   /**
@@ -210,33 +203,14 @@ export const PlayerEditor = () => {
       //ファイル名の確認
       const target = SkeletonUtils.clone(scene);
       target.animations = animations;
-      console.log("animation checks");
-      console.log(target);
-      console.log("usedata check")
       const type = playerState.type;
-      console.log(type);
       target.userData = {
         type: type,
         animMapper: animMapper,
         offsetParams: offsetParams,
         defaultMode: "tp"
       };
-      const file = await convertObjectToFile(
-        target, 
-        { 
-          animMapper: animMapper,
-          type: type,
-        }
-      );
-      // const arrayBufferToBlob = (arrayBuffer, mimeType) => {
-      //   return new Blob([arrayBuffer], { type: mimeType });
-      // }
-      // const tscene = new Scene();
-      // tscene.add(target);
-      // const ab = await exportGLTF(tscene);
-      // const mimeType = 'application/octet-stream';
-      // const blob = arrayBufferToBlob(ab, mimeType);
-
+      const file = await convertObjectToFile(target);
       Swal.fire({
         title: t("inputFileName"),
         input: 'text',

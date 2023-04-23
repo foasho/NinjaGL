@@ -82,9 +82,10 @@ export class NinjaEngine {
         maxDepth: this.config.octreeDepth
       } as IOctree);
       this.world.addOctree(this.octree);
+      console.log("物理世界のセットだよん");
     }
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
-    this.initializeLoadOMs();
+    await this.initializeLoadOMs();
     this.runScriptsInitialize();
   }
 
@@ -189,16 +190,9 @@ export class NinjaEngine {
   initializeLoadOMs = async () => {
     await Promise.all(this.oms.map(async (om) => {
       if (om.type === "avatar" && om.object) {
-        if (om.args.isCenter && om.args.height){
-          AvatarDataSetter({
-            object: om.object,
-            isCenter: true,
-            height: om.args.height
-          });
-        }
-        const animations = om.object.animations;
-        console.log("Animations Length: ", animations.length);
+        const animations = om.animations;
         if (animations && animations.length > 0){
+          console.log(om.object);
           const mixer = new AnimationMixer(om.object);
           om.mixer = mixer;
         }
@@ -217,6 +211,7 @@ export class NinjaEngine {
           }
         })
         if (this.octree){
+          console.log("OctreeにTerrainをセットするよん");
           this.octree.importThreeObj3D(om.id, om.object, om.type);
         }
       }
@@ -452,15 +447,31 @@ export class NinjaEngine {
           ))
         );
       }
+      const aabb = new Box3().setFromObject(threeMesh.clone());
+      const raduis = aabb.getSize(new Vector3());
+      // 円は中心でできるので、Meshの位置を調整する
+      threeMesh.position.add(new Vector3(0, raduis.y/2, 0));
       this.avatar = new AvatarController(
         this,
         threeMesh,
-        avatarObject.args.height / 2,
+        raduis.y / 2,
         avatarObject.animations,
         avatarObject.mixer,
         avatarObject.args.animMapper,
         avatarObject.args.sounds
       );
+      // Offsetをセットする
+      if (avatarObject.args.offsetParams) {
+        this.avatar.setOffsetParams(
+          avatarObject.args.offsetParams
+        );
+      }
+      // CameraModeをセットする
+      if (avatarObject.args.defaultMode) {
+        this.avatar.changeCameraMode(
+          avatarObject.args.defaultMode
+        )
+      }
       // 物理世界に対応させる
       if (this.world){
         this.world.addAvatar(this.avatar);
@@ -481,7 +492,7 @@ export class NinjaEngine {
       this.avatar.setCamera(this.camera);
     }
     // Listenerをセットする
-    this.camera.add(this.listener);
+    // this.camera.add(this.listener);
   }
 
   /**

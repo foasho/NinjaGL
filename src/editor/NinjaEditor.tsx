@@ -24,7 +24,7 @@ import { loadNJCFileFromURL, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-cor
 import { loadNJCFile } from "ninja-core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
-import { globalStore } from "./Store";
+import { globalConfigStore, globalStore } from "./Store";
 import { ScriptNavigation } from "./Hierarchy/ScriptNavigation";
 import { ShaderNavigation } from "./Hierarchy/ShaderNavigation";
 import { TextureNavigation } from "./Hierarchy/TextureNavigation";
@@ -34,6 +34,7 @@ import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
 import 'setimmediate';
 import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
+import { SkeletonUtils } from "three-stdlib";
 
 /**
  * NinjaEngineメインコンポネント
@@ -359,14 +360,29 @@ export const NinjaEditor = () => {
    */
   const onSave = async(completeAlert: boolean=true) => {
     const njcFile = new NJCFile();
-    editor.getOMs().map((om) => {
-      njcFile.addOM({...om});
+    njcFile.setConfig({...globalConfigStore});
+    const oms = [...editor.getOMs()];
+    oms.map((om) => {
+      const _om = { ...om };
+      if (om.type == "avatar" && om.object) {
+        const target = SkeletonUtils.clone(_om.object.clone());
+        target.animations = om.animations;
+        _om.object = target;
+      }
+      else if (om.type == "avatar" && om.object) {
+        window.alert("");
+      }
+      return _om;
     });
+    njcFile.setOMs(oms);
     editor.getUMs().map((um) => {
       njcFile.addUM({...um});
     });
     editor.getSMs().map((sm) => {
       njcFile.addSM({...sm});
+    });
+    editor.getTMs().map((tm) => {
+      njcFile.addTM({...tm});
     });
     const blob = await saveNJCBlob(njcFile);
     if (!project){

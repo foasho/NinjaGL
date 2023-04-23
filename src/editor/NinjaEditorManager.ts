@@ -30,13 +30,16 @@ interface IPlayerManager {
   
 }
 
-export const HomeCameraPosition = new Vector3(0, 1.7, 0);
+/**
+ * 最初のカメラ位置
+ */
+export const HomeCameraPosition = new Vector3(-3, 5, -10);
 
 /**
  * Ninjaエディタクラス
  */
 export class NinjaEditorManager {
-  config: IConfigParams = InitMobileConfipParams;
+  // config: IConfigParams = InitMobileConfipParams;
   oms: IObjectManagement[] = []; //Canvas表示系
   ums: IUIManagement[] = [];// 操作UI系
   tms: ITextureManagement[] = []; // テクスチャ
@@ -87,21 +90,21 @@ export class NinjaEditorManager {
     this.notifyCameraChanged();
   }
 
-  /**
-   * レンダラー設定をセット
-   * @param config 
-   */
-  setConfig = (config: IConfigParams) => {
-    this.config = config;
-  }
+  // /**
+  //  * レンダラー設定をセット
+  //  * @param config 
+  //  */
+  // setConfig = (config: IConfigParams) => {
+  //   this.config = config;
+  // }
 
-  /**
-   * マップサイズを設定
-   * @param mapSize 
-   */
-  setConfigMapsize(mapSize: number){
-    this.config.mapsize = mapSize;
-  }
+  // /**
+  //  * マップサイズを設定
+  //  * @param mapSize 
+  //  */
+  // setConfigMapsize(mapSize: number){
+  //   this.config.mapsize = mapSize;
+  // }
 
   /**
    * カメラをセット

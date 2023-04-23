@@ -1,6 +1,7 @@
 import { IConfigParams, IScriptManagement } from 'ninja-core';
-import { AnimationClip, Group, Mesh, Object3D } from 'three';
+import { AnimationClip, Group, Mesh, Object3D, Vector3 } from 'three';
 import { proxy } from 'valtio';
+import { HomeCameraPosition } from './NinjaEditorManager';
 
 /**
  * オブジェクト操作状態管理
@@ -33,12 +34,14 @@ interface IGlobalContentStore {
   currentUrl: string|null;
   currentType: string|null;
   catchFocus: boolean;
+  cameraPosition: Vector3;
 }
 export const globalContentStore = proxy<IGlobalContentStore>(
   {
     currentUrl: null,
     currentType: null,
-    catchFocus: false
+    catchFocus: false,
+    cameraPosition: HomeCameraPosition,
   }
 );
 

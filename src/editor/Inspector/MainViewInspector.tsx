@@ -360,7 +360,7 @@ export const MainViewInspector = () => {
   }
 
   /**
-   * アバター間の距離を変更
+   * Offsetを変更
    */
   const changeOffset = (e, xyz: "x" | "y" | "z") => {
     const targetValue = e.target.value;

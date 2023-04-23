@@ -2,10 +2,10 @@ import { GizmoHelper, GizmoViewport, Html, OrbitControls, PerspectiveCamera as D
 import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry, MathUtils, PerspectiveCamera, Color } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef, useLayoutEffect, Suspense } from "react";
-import { DRACOLoader, GLTFLoader, KTX2Loader, OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { HomeCameraPosition, NinjaEditorContext } from "../NinjaEditorManager";
-import { MyLight, MyLights } from "./MainViewItems/Lights";
+import { NinjaEditorContext } from "../NinjaEditorManager";
+import { MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
 import { Avatar } from "./MainViewItems/Avatar";
@@ -19,7 +19,6 @@ import { gltfLoader, useInputControl } from "ninja-core";
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";
-import { MeshoptDecoder } from "meshoptimizer";
 import { isNumber } from "@/commons/functional";
 import Swal from "sweetalert2";
 import { Cameras } from "./MainViewItems/Cameras";
@@ -28,7 +27,6 @@ import { useSnapshot } from "valtio";
 import { globalConfigStore, globalContentStore, globalStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
-// import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 import { MyTexts } from "./MainViewItems/MyTexts";
 import { MyEffects } from "./MainViewItems/MyEffects";
 
@@ -49,7 +47,8 @@ export const MainViewer = () => {
   const [worldGridSize, setWorldGridSize] = useState<number>(8);
   const [uiGridNum, setUIGridNum] = useState<8|16|24|32>(8);
   const editor = useContext(NinjaEditorContext);
-  const [isGrid, setIsGrid] = useState<boolean>(true);
+  // 水平グリッド
+  const [isGrid, setIsGrid] = useState<boolean>(false);
   const [isWorldHelper, setIsWorldHelper] = useState<boolean>(true);
   const [isGizmo, setIsGizmo] = useState<boolean>(true);
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
@@ -128,6 +127,24 @@ export const MainViewer = () => {
                 if (editor.getAvatar()){
                   editor.removeAvatar();
                 }
+                let animations = scene.animations;
+                if (animations.length === 0){
+                  animations = gltf.animations;
+                }
+                console.log(animations);
+                let offsetParams;
+                if (userData.offsetParams){
+                  if (userData.offsetParams.tp){
+                    userData.offsetParams.tp.offset = new Vector3().copy(userData.offsetParams.tp.offset);
+                    userData.offsetParams.tp.lookAt = new Vector3().copy(userData.offsetParams.tp.lookAt);
+                  }
+                  if (userData.offsetParams.fp){
+                    userData.offsetParams.fp.offset = new Vector3().copy(userData.offsetParams.fp.offset);
+                    userData.offsetParams.fp.lookAt = new Vector3().copy(userData.offsetParams.fp.lookAt);
+                  }
+                  offsetParams = userData.offsetParams;
+                }
+                // Animationがあればセットする
                 editor.setOM({
                   id: MathUtils.generateUUID(),
                   name: "*Avatar",
@@ -136,14 +153,15 @@ export const MainViewer = () => {
                   physics: "aabb",
                   visibleType: "force",
                   args: {
-                    height: 1.7,
-                    isCenter: true,
                     animMapper: userData.animMapper? userData.animMapper: null,
+                    offsetParams: offsetParams,
+                    defaultMode: userData.defaultMode? userData.defaultMode: "tp",
                   },
                   object: scene,
-                  animations: gltf.animations,
-                  mixer: gltf.animations.length > 0? new AnimationMixer(scene): null
+                  animations: animations,
+                  mixer: animations.length > 0? new AnimationMixer(scene): null
                 });
+                
               }
               else {
                 // Animationがあればセットする
@@ -222,7 +240,6 @@ export const MainViewer = () => {
         }}
         style={{ display: showCanvas? "block": "none" }}
         id="mainviewcanvas"
-        camera={{ position: HomeCameraPosition }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         shadows
@@ -674,6 +691,7 @@ interface ICameraControl {
 }
 export const CameraControl = (props: ICameraControl) => {
   const state = useSnapshot(globalStore);
+  const contentState = useSnapshot(globalContentStore);
   const editor = useContext(NinjaEditorContext);
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
@@ -684,7 +702,7 @@ export const CameraControl = (props: ICameraControl) => {
 
   useLayoutEffect(() => {
     if (cameraRef && cameraRef.current) {
-      const initCameraPosition = new Vector3(-3, 5, -10);
+      const initCameraPosition = new Vector3().copy(contentState.cameraPosition);
       cameraRef.current.position.copy(initCameraPosition.clone());
       cameraRef.current.lookAt(0, 0, 0);
       camera.position.copy(initCameraPosition.clone());
@@ -779,7 +797,7 @@ export const CameraControl = (props: ICameraControl) => {
         cameraLeft.crossVectors(cameraDirection, cameraRef.current.up).normalize();
         cameraPosition.sub(cameraLeft.multiplyScalar(st));
       }
-
+      globalContentStore.cameraPosition.copy(cameraPosition.clone());
       cameraRef.current.position.copy(cameraPosition);
       ref.current.target.copy(cameraPosition.add(cameraDirection));
 

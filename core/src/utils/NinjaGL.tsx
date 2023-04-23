@@ -24,9 +24,15 @@ export const NinjaGL = (props: INinjaGLProps) => {
         const data = await loadNJCFileFromURL(props.njcPath);
         const endTime = new Date().getTime();
         console.info(`LoadNJCFileFromURL LoadTime: ${endTime - startTime}ms`);
-        _engine.setNJCFile(data);
+        console.log(data);
+        _engine.setNJCFile(data).then(() => {
+          // エンジンにセット
+          setEngine(_engine);
+        });
       }
-      setEngine(_engine);
+      else {
+        setEngine(_engine);
+      }
     }
     fetchEngine();
     return () => {

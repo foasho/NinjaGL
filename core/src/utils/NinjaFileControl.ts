@@ -179,6 +179,7 @@ export const loadNJCFile = async (
           totalSize
         );
         om.object = object;
+        om.animations = object.animations || [];
       }
       // Position,Rotation,Scale同期
       if (om.args && om.args.position){
@@ -225,6 +226,16 @@ export const loadNJCFile = async (
           om.args.offset.z
         );
       }
+      if (om.args && om.args.offsetParams){
+        if (om.args.offsetParams.tp){
+          om.args.offsetParams.tp.offset = new Vector3().copy( om.args.offsetParams.tp.offset);
+          om.args.offsetParams.tp.lookAt = new Vector3().copy( om.args.offsetParams.tp.lookAt);
+        }
+        if (om.args.offsetParams.fp){
+          om.args.offsetParams.fp.offset = new Vector3().copy( om.args.offsetParams.fp.offset);
+          om.args.offsetParams.fp.lookAt = new Vector3().copy( om.args.offsetParams.fp.lookAt);
+        }
+      }
       njcFile.addOM(om);
     }
   }
@@ -263,7 +274,9 @@ async function loadGLTFFromData(
     gltfLoader.load(
       url,
       (gltf) => {
-        resolve(gltf.scene);
+        const scene = gltf.scene || gltf.scenes[0] as Object3D;
+        scene.animations = gltf.animations; // アニメーションをセット
+        resolve(scene);
         URL.revokeObjectURL(url);
       },
       (progress) => {
@@ -341,7 +354,7 @@ export const convertObjectToArrayBuffer = async (scene: Scene): Promise<ArrayBuf
 /**
  * 特定のObjectをBlobに変換する
  */
-export const convertObjectToBlob = async (object: Object3D, userData?: any): Promise<Blob> => {
+export const convertObjectToBlob = async (object: Object3D): Promise<Blob> => {
   return new Promise((resolve) => {
     var exporter = new GLTFExporter();
     const options: GLTFExporterOptions = {
@@ -351,9 +364,10 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
       maxTextureSize: 4096
     };
 
-    if (userData){
-      object.userData = userData;
-    }
+    // ユーザーデータは事前につけるため削除
+    // if (userData){
+    //   object.userData = userData;
+    // }
     
     exporter.parse(
       object,
@@ -370,7 +384,7 @@ export const convertObjectToBlob = async (object: Object3D, userData?: any): Pro
         console.log("error");
         console.log(error);
       },
-      // options
+      options
       );
   });
 }
@@ -387,7 +401,6 @@ const saveArrayBuffer = (buffer: ArrayBuffer): Blob => {
  */
 export const convertObjectToFile = (
   object: Object3D, 
-  userData?: any, 
   fileName = "model.glb"
 ): Promise<File> => {
   return new Promise((resolve) => {
@@ -399,9 +412,9 @@ export const convertObjectToFile = (
       maxTextureSize: 4096
     };
 
-    if (userData) {
-      object.userData = userData;
-    }
+    // if (userData) {
+    //   object.userData = userData;
+    // }
 
     exporter.parse(
       object,

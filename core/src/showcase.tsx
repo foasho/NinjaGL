@@ -13,7 +13,7 @@ import { NinjaGL,
 import { SkeletonUtils } from 'three-stdlib';
 
 function Showcase () {
-  const [scene, setScene] = React.useState('samplecamera.njc');
+  const [scene, setScene] = React.useState('thirdperson.njc');
   useEffect(() => {
     console.log('Showcase component mounted');
   }, []);
@@ -31,7 +31,7 @@ function Showcase () {
           onChange={changeScene}
         >
           <option value='samplecamera.njc'>デフォルトシーン</option>
-          {/* <option value='samplethirdperson.njc'>サードパーソン</option> */}
+          <option value='thirdperson.njc'>サードパーソン</option>
           {/* <option value='samplemultiplayer.njc'>マルチプレイヤー</option> */}
         </select>
       </div>

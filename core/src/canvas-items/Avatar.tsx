@@ -16,7 +16,6 @@ export const Avatar = () => {
   const engine = useContext(NinjaEngineContext);
   const [avatar, setAvatar] = useState<IObjectManagement>();
   const { camera } = useThree();
-
   // 初回ロード時にAvatarObjectをセットする 
   useEffect(() => {
     setAvatar(engine.getAvatar());
