@@ -307,6 +307,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
                 {...file} 
                 onDoubleClick={onDoubleClick}
                 changeScriptEditor={props.changeScriptEditor}
+                onDeleteCallback={MoveDirectory}
                 key={index}
               />
             </>
@@ -402,6 +403,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
 }
 
 interface IContenetViewerProps extends IFileProps {
+  onDeleteCallback?: () => void;
 }
 
 export const ContentViewer = (props: IContenetViewerProps) => {
@@ -619,7 +621,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         onDragEnd={(e) => onDragEnd()}
         onMouseLeave={() => setShowMenu(false)}
       >
-        {showMenu && <AssetsContextMenu position={menuPosition} file={props} />}
+        {showMenu && <AssetsContextMenu position={menuPosition} file={props} onDeleteCallback={props.onDeleteCallback} />}
         <div
           className={styles.tooltip}
           ref={tooltip}

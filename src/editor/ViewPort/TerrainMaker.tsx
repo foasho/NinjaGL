@@ -345,6 +345,13 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
     isMouseDown.current = false;
   }
 
+  const calculateNewTarget = (camera, currentTarget, distance) => {
+    const direction = new Vector3();
+    camera.getWorldDirection(direction);
+    const newPosition = new Vector3().addVectors(camera.position, direction.multiplyScalar(distance));
+    return newPosition;
+  }
+
   useFrame((_, delta) => {
     if (meshRef.current && matRef.current && lightRef.current) {
       lightRef.current.position.set(
@@ -402,8 +409,16 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
         cameraRef.current.position.copy(ref.current.object.position);
         cameraRef.current.rotation.copy(ref.current.object.rotation);
         cameraRef.current.lookAt(ref.current.target);
+
+        // 新しいターゲット位置を計算して更新します
+        const cameraSpeed = 5
+        const distance = cameraSpeed * 10; // カメラとターゲットの一定距離を指定
+        const newTarget = calculateNewTarget(cameraRef.current, ref.current.target, distance);
+        ref.current.target.copy(newTarget);
       }
     }
+
+    
   });
 
   return (

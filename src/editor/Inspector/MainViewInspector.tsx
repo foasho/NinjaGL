@@ -40,7 +40,9 @@ export const MainViewInspector = () => {
   const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
   const [rotation, setRotation] = useState<Euler>(selectOM?.object?.rotation);
   const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
-  // const [offset, setOffset] = useState<Vector3>();
+  const [luminanceThreshold, setLuminanceThreshold] = useState<number>(0.2);
+  const [mipmapBlur, setMipmapBlur] = useState<boolean>(true);
+  const [luminanceSmoothing, setLuminanceSmoothing] = useState<number>(0);
   const { t } = useTranslation();
 
   
@@ -122,7 +124,10 @@ export const MainViewInspector = () => {
         if (selectOM.args.defaultAnim) setDefalutAnim(selectOM.args.defaultAnim);
         if (selectOM.args.animLoop !== undefined) setAnimLoop(selectOM.args.animLoop);
         if (selectOM.args.color) setColor(selectOM.args.color);
-        // if (selectOM.args.offset) setOffset(selectOM.args.offset);
+        if (selectOM.args.luminanceThreshold) setLuminanceThreshold(selectOM.args.luminanceThreshold);
+        if (selectOM.args.mipmapBlur !== undefined) setMipmapBlur(selectOM.args.mipmapBlur);
+        if (selectOM.args.luminanceSmoothing) setLuminanceSmoothing(selectOM.args.luminanceSmoothing);
+        
       };
     }
     init();
@@ -364,28 +369,35 @@ export const MainViewInspector = () => {
   }
 
   /**
-   * Offsetを変更
+   * changeLuminanceThreshold
    */
-  const changeOffset = (e, xyz: "x" | "y" | "z") => {
+  const changeLuminanceThreshold = (e) => {
     const targetValue = e.target.value;
-    const newOffset: Vector3 = selectOM.args.offset? selectOM.args.offset.clone(): new Vector3();
-    if (xyz == "x") {
-      if (isNumber(targetValue)){
-        newOffset.setX(Number(targetValue));
-      }
+    if (isNumber(targetValue)){
+      editor.setLuminanceThreshold(id, Number(targetValue));
+      setLuminanceThreshold(Number(targetValue));
     }
-    else if (xyz == "y") {
-      if (isNumber(targetValue)){
-        newOffset.setY(Number(targetValue));
-      }
-    }
-    else if (xyz == "z") {
-      if (isNumber(targetValue)){
-        newOffset.setZ(Number(targetValue));
-      }
-    }
-    // editor.setOffset(id, newOffset); // 表示がないので特になし
   }
+
+  /**
+   * mipmapBlurの切り替え
+   */
+  const onCheckMipmapBlur = () => {
+    editor.setMipmapBlur(id, !mipmapBlur);
+    setMipmapBlur(!mipmapBlur);
+  }
+
+  /**
+   * changeLuminanceSmoothing
+   */
+  const changeLuminanceSmoothing = (e) => {
+    const targetValue = e.target.value;
+    if (isNumber(targetValue)){
+      editor.setLuminanceSmoothing(id, Number(targetValue));
+      setLuminanceSmoothing(Number(targetValue));
+    }
+  }
+  
 
   return (
     <>
@@ -879,7 +891,7 @@ export const MainViewInspector = () => {
             <input 
               type="checkbox" 
               className={styles.checkbox} 
-              checked={background} 
+              checked={animLoop} 
               onInput={() => onCheckAnimationLoop()}
             />
             <span className={styles.customCheckbox}></span>
@@ -981,6 +993,74 @@ export const MainViewInspector = () => {
             <input
               type={"range"}
               min={0}
+              max={5}
+              step={0.01}
+              value={intensity}
+              onChange={(e) => changeIntensity(e)}
+            />
+          </div>
+        </div>
+      </>
+      }
+
+      {selectOM && (
+        selectOM.type == "effect"
+        &&
+        selectOM.args.type == "bloom"
+      ) &&
+      <>
+        <div className={styles.luminanceThreshold}>
+          <div className={styles.name}>
+            {t("luminanceThreshold")}: {luminanceThreshold}
+          </div>
+          <div className={styles.range}>
+            <input
+              type={"range"}
+              min={0}
+              max={1}
+              step={0.01}
+              value={luminanceThreshold}
+              onChange={(e) => changeLuminanceThreshold(e)}
+            />
+          </div>
+        </div>
+        <div className={styles.mipmapBlur}>
+          <div className={styles.name}>
+            {t("mipmapBlur")}: {mipmapBlur}
+          </div>
+          <div className={styles.input}>
+            <input
+              type="checkbox"
+              className={styles.checkbox}
+              checked={mipmapBlur}
+              onInput={() => onCheckMipmapBlur()}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+        </div>
+        <div className={styles.luminanceSmoothing}>
+          <div className={styles.name}>
+            {t("luminanceSmoothing")}: {luminanceSmoothing}
+          </div>
+          <div className={styles.range}>
+            <input
+              type={"range"}
+              min={0}
+              max={1}
+              step={0.01}
+              value={luminanceSmoothing}
+              onChange={(e) => changeLuminanceSmoothing(e)}
+            />
+          </div>
+        </div>
+        <div className={styles.intensity}>
+          <div className={styles.name}>
+            {t("intensity")}: {intensity}
+          </div>
+          <div className={styles.range}>
+            <input
+              type={"range"}
+              min={0}
               max={10}
               step={0.01}
               value={intensity}
@@ -990,6 +1070,7 @@ export const MainViewInspector = () => {
         </div>
       </>
       }
+
       </div>
     </>
   )

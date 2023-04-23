@@ -1,7 +1,20 @@
 import React from "react";
 import styles from "@/App.module.scss";
+import { useSession } from "next-auth/react";
+import { reqApi } from "@/services/ServciceApi";
+import { IFileProps } from "@/editor/Hierarchy/ContentViewer";
 
-export const AssetsContextMenu = ({ position, file=undefined }) => {
+interface IAssetsContextMenuProps {
+  position: {
+    x: number;
+    y: number;
+  };
+  file?: IFileProps;
+  onDeleteCallback?: () => void;
+}
+export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
+  const { position, file } = props;
+  const { data: session } = useSession();
   
   /**
    * 特定のURLをダウンロードする
@@ -25,6 +38,14 @@ export const AssetsContextMenu = ({ position, file=undefined }) => {
       console.error("Error downloading file:", error);
     }
   }
+
+  /**
+   * 特定のURLを削除する
+   */
+  const deleteFile = async (url: string, filename: string) => {
+    await reqApi({ route: "storage/delete", queryObject: { signedUrl: url } });
+    props.onDeleteCallback();
+  }
   
   return (
     <>
@@ -45,6 +66,11 @@ export const AssetsContextMenu = ({ position, file=undefined }) => {
             <div className={styles.menuItem}>
               URLをコピー
             </div>
+            {session &&
+            <div className={styles.menuItem} onClick={() => deleteFile(file.url, file.name)}>
+              ファイルを削除
+            </div>
+            }
           </>
           }
         </>

@@ -9,23 +9,21 @@ import { Texture } from 'three';
 export const MyEffects = () => {
   const engine = useContext(NinjaEngineContext);
   const [effects, setEffects] = useState<IObjectManagement[]>([]);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setEffects(engine.getEffects());
     const handleEffectsChanged = () => {
       setEffects([...engine.getEffects()]);
     };
-    // engine.onEffectChanged(handleEffectsChanged);
-    setReady(true);
+    handleEffectsChanged();
+    engine.onEffectsChanged(handleEffectsChanged);
     return () => {
-      // engine.offEffectChanged(handleEffectsChanged);
+      engine.offEffectsChanged(handleEffectsChanged);
     };
   }, [engine]);
 
   return (
     <>
-      {ready && effects.length > 0 && 
+      {effects.length > 0 && 
       <>
         <EffectComposer disableNormalPass>
           {effects.map((om) => {
@@ -37,6 +35,7 @@ export const MyEffects = () => {
     </>
   )
 }
+
 
 const MyEffect = ({ om }) => {
   const [texture, setTexture] = useState(null);

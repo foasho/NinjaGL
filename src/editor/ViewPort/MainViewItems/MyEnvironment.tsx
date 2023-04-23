@@ -1,4 +1,4 @@
-import { Environment, Lightformer, useHelper } from "@react-three/drei";
+import { Environment, Float, Lightformer, useHelper } from "@react-three/drei";
 import { useContext, useEffect, useRef, useState } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "ninja-core";
@@ -12,6 +12,7 @@ import { PivotControls } from "./PivoitControl";
  * @returns 
  */
 export const MyEnviroment = () => {
+  const [degraded, degrade] = useState(false)
   const editor = useContext(NinjaEditorContext);
   const [environment, setEnvironment] = useState<IObjectManagement>();
   const [lightformers, setLightformers] = useState<IObjectManagement[]>([]);
@@ -42,6 +43,7 @@ export const MyEnviroment = () => {
             preset={environment.args.preset}
             background={environment.args.background}
             blur={environment.args.blur}
+            frames={(degraded && lightformers.length > 0) ? 1 : Infinity}
           >
             {lightformers.map((om) => {
               return <LightFormer om={om} key={om.id}/>
@@ -52,6 +54,7 @@ export const MyEnviroment = () => {
       {!environment && lightformers.length > 0 &&
         <>
           <Environment 
+            frames={(degraded && lightformers.length > 0) ? 1 : Infinity}
             resolution={512}
           >
             {lightformers.map((om, idx) => {
@@ -128,20 +131,63 @@ const LightFormerControl = ({ om }) => {
 }
 
 const LightFormer = ({ om }) => {
+  const ref = useRef<any>();
+  const editor = useContext(NinjaEditorContext);
+  const id = om.id;
+  useEffect(() => {
+    // const init = () => {
+    //   if (ref.current) {
+    //     if (om.args.position) ref.current.position.copy(om.args.position.clone());
+    //     if (om.args.rotation) ref.current.rotation.copy(om.args.rotation.clone());
+    //     if (om.args.scale) ref.current.scale.copy(om.args.scale.clone());
+    //     // ref.current.update();
+    //   }
+    // }
+    // init();
+    // editor.onOMIdChanged(id, init);
+    // return () => {
+    //   editor.offOMIdChanged(id, init);
+    // }
+  }, [om]);
   return (
-    <Lightformer
-      form={om.args.form}
-      intensity={om.args.intensity}
-      color={om.args.color}
-      position={om.args.position}
-      rotation={om.args.rotation}
-      scale={om.args.scale}
-      onUpdate={(self) => {
-        if (om.args.lookAt){
-          const newVector = new Vector3().copy(om.args.lookAt);
-          self.lookAt(newVector);
-        }
-      }}
-     />
+    <>
+    {om.args.isFloat?
+      <Float speed={5} floatIntensity={2} rotationIntensity={2}>
+        <Lightformer
+          ref={ref}
+          form={om.args.form}
+          intensity={om.args.intensity}
+          color={om.args.color}
+          position={om.args.position}
+          rotation={om.args.rotation}
+          scale={om.args.scale}
+          onUpdate={(self) => {
+            if (om.args.lookAt){
+              const newVector = new Vector3().copy(om.args.lookAt);
+              self.lookAt(newVector);
+            }
+          }}
+        />
+      </Float>
+      :
+      <>
+        <Lightformer
+          ref={ref}
+          form={om.args.form}
+          intensity={om.args.intensity}
+          color={om.args.color}
+          position={om.args.position}
+          rotation={om.args.rotation}
+          scale={om.args.scale}
+          onUpdate={(self) => {
+            if (om.args.lookAt){
+              const newVector = new Vector3().copy(om.args.lookAt);
+              self.lookAt(newVector);
+            }
+          }}
+        />
+      </>
+    }
+    </>
   )
 }

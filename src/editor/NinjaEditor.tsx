@@ -244,7 +244,7 @@ export const NinjaEditor = () => {
           luminanceThreshold:0.2,
           mipmapBlur: true,
           luminanceSmoothing: 0,
-          intensity: 1.75,
+          intensity: 1.25,
         }
       }
       else if (data.value == "lut"){
@@ -635,6 +635,7 @@ export const NinjaEditor = () => {
             position: new Vector3(-5, 5, -5),
             scale: new Vector3(3, 3, 3),
             lookAt: new Vector3(0, 0, 0),
+            isFloat: true,
           },
           physics: "none",
           visibleType: "force",
@@ -652,6 +653,7 @@ export const NinjaEditor = () => {
             position: new Vector3(10, 5, 10),
             scale: new Vector3(3, 3, 3),
             lookAt: new Vector3(0, 0, 0),
+            isFloat: true,
           },
           physics: "none",
           visibleType: "force",

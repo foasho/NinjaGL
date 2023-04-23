@@ -30,14 +30,17 @@ export const Avatar = () => {
   // AvatarObjectが変更された場合にカメラをセットする
   useEffect(() => {
     if (avatar && ref.current) {
+      if (avatar.args.position){
+        ref.current.position.copy(avatar.args.position.clone());
+      }
+      if (avatar.args.rotation){
+        ref.current.rotation.copy(avatar.args.rotation.clone());
+      }
+      if (avatar.args.scale){
+        ref.current.scale.copy(avatar.args.scale.clone());
+      }
       engine.setAvatar(ref.current);
       engine.setAvatarCamera(camera);
-      // 最後にポジションのずれをセット(調査中)
-      // if (avatar.args.position && objRef.current) {
-      //   objRef.current.position.copy(
-      //     avatar.args.position
-      //   );
-      // }
     }
   }, [avatar]);
 
@@ -46,12 +49,10 @@ export const Avatar = () => {
     <>
       {avatar &&
         <mesh ref={ref} layers={0}>
-          {/* <mesh> */}
-            <primitive
-              ref={objRef}
-              object={avatar.object}
-            />
-          {/* </mesh> */}
+          <primitive
+            ref={objRef}
+            object={avatar.object}
+          />
         </mesh>
       }
     </>

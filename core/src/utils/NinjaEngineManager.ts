@@ -191,10 +191,10 @@ export class NinjaEngine {
       if (om.type === "avatar" && om.object) {
         const animations = om.animations;
         if (animations && animations.length > 0){
-          console.log(om.object);
           const mixer = new AnimationMixer(om.object);
           om.mixer = mixer;
         }
+        om.object.name = "avatar";// Avatarは”avatar”と必ず命名※RTCで使用
       }
       else if (om.type == "terrain" && om.object){
         om.object.traverse((node: any) => {
@@ -215,20 +215,16 @@ export class NinjaEngine {
       }
       else if (om.type == "object"){
         if (this.octree && om.object){
-          this.octree.importThreeObj3D(om.id, om.object, om.type);
+          // this.octree.importThreeObj3D(om.id, om.object, om.type);
         }
         if (om.args.position && om.object){
-          const pos = om.args.position;
-          const posVec = new Vector3(pos.x, pos.y, pos.z);
-          om.object.position.copy(posVec.clone());
-          if (this.octree){
-            this.octree.translateFaceByName(om.id, posVec.clone());
-          }
-          om.layerNum = this.getLayerNumber(pos);
-        }
-        if (om.args.rotation && om.object){
-          const rot = om.args.rotation;
-          om.object.rotation.copy(rot.clone());
+          // 物理エンジンへのImportは後で実装
+          // const pos = om.args.position;
+          // const posVec = new Vector3(pos.x, pos.y, pos.z);
+          // if (this.octree){
+          //   this.octree.translateFaceByName(om.id, posVec.clone());
+          // }
+          // om.layerNum = this.getLayerNumber(pos);
         }
       }
       else if (om.type == "three"){
@@ -257,7 +253,8 @@ export class NinjaEngine {
             const pos = om.args.position;
             const posVec = new Vector3(pos.x, pos.y, pos.z);
             if (this.octree){
-              this.octree.translateFaceByName(om.id, posVec.clone());
+              // 現在対応中
+              // this.octree.translateFaceByName(om.id, posVec.clone());
             }
             om.layerNum = this.getLayerNumber(pos);
           }
@@ -428,22 +425,23 @@ export class NinjaEngine {
   setAvatar(threeMesh: Mesh|Object3D) {
     const avatarOM = this.getAvatar();
     if (avatarOM) {
-      if (avatarOM.args.position) {
-        threeMesh.position.set(
-          avatarOM.args.position.x,
-          avatarOM.args.position.y,
-          avatarOM.args.position.z
-        );   
-      }
-      if (avatarOM.args.rotation) {
-        threeMesh.quaternion.copy(
-          new Quaternion().setFromEuler(new Euler(
-            0,
-            MathUtils.degToRad(avatarOM.args.rotation.y),
-            0
-          ))
-        );
-      }
+      // Avatarコンポネント側で対応する
+      // if (avatarOM.args.position) {
+      //   threeMesh.position.set(
+      //     avatarOM.args.position.x,
+      //     avatarOM.args.position.y,
+      //     avatarOM.args.position.z
+      //   );   
+      // }
+      // if (avatarOM.args.rotation) {
+      //   threeMesh.quaternion.copy(
+      //     new Quaternion().setFromEuler(new Euler(
+      //       0,
+      //       MathUtils.degToRad(avatarOM.args.rotation.y),
+      //       0
+      //     ))
+      //   );
+      // }
       const aabb = new Box3().setFromObject(threeMesh.clone());
       const raduis = aabb.getSize(new Vector3());
       console.log("raduis", raduis);
