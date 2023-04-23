@@ -17,7 +17,7 @@ import { FaPeopleArrows } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
-import { DebugPlay } from "./ViewPort/DebugPlay";
+import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
 import { loadNJCFileFromURL, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
@@ -359,31 +359,7 @@ export const NinjaEditor = () => {
    * ビルド処理
    */
   const onSave = async(completeAlert: boolean=true) => {
-    const njcFile = new NJCFile();
-    njcFile.setConfig({...globalConfigStore});
-    const oms = [...editor.getOMs()];
-    oms.map((om) => {
-      const _om = { ...om };
-      if (om.type == "avatar" && om.object) {
-        const target = SkeletonUtils.clone(_om.object.clone());
-        target.animations = om.animations;
-        _om.object = target;
-      }
-      else if (om.type == "avatar" && om.object) {
-        window.alert("");
-      }
-      return _om;
-    });
-    njcFile.setOMs(oms);
-    editor.getUMs().map((um) => {
-      njcFile.addUM({...um});
-    });
-    editor.getSMs().map((sm) => {
-      njcFile.addSM({...sm});
-    });
-    editor.getTMs().map((tm) => {
-      njcFile.addTM({...tm});
-    });
+    const njcFile = ExportNjcFile(editor.getEditor());
     const blob = await saveNJCBlob(njcFile);
     if (!project){
       Swal.fire({

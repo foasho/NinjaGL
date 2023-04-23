@@ -97,9 +97,9 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
   const exportOMs: IObjectManagement[] = [];
   for (const om of njcFile.oms) {
     if (om.object) {
-      const exportScene = new Scene();
+      // const exportScene = new Scene();
       const clone = SkeletonUtils.clone(om.object);
-      clone.animations = om.object.animations?om.object.animations: [];
+      clone.animations = om.animations?om.animations: [];
       // (重要):argsにpositionなどがすでにあるので、ここで原点にもどす
       if (om.type === "object"){
         if (om.args.position) clone.position.set(0, 0, 0);
@@ -107,8 +107,9 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
         if (om.args.scale) clone.scale.set(1, 1, 1);
       }
       // --------------------------------------------------
-      exportScene.add(clone);
-      const glbData = await exportGLTF(exportScene);
+      // exportScene.add(clone);
+      // const glbData = await exportGLTF(exportScene);
+      const glbData = await exportGLTF(clone);
       objectsDir!.file(`${om.id}.glb`, glbData);
       om.filePath = `objects/${om.id}.glb`;
     }
@@ -292,7 +293,7 @@ async function loadGLTFFromData(
   });
 }
 
-export const exportGLTF = async (scene: Scene): Promise<ArrayBuffer> => {
+export const exportGLTF = async (scene: Scene|Object3D): Promise<ArrayBuffer> => {
   return new Promise<ArrayBuffer>((resolve, reject) => {
     const exporter = new GLTFExporter();
 

@@ -24,7 +24,6 @@ export const ExportNjcFile = (editor: NinjaEditorManager): NJCFile => {
   const ums = [...editor.getUMs()];
   const tms = [...editor.getTMs()];
   const sms = [...editor.getSMs()];
-  // const config = editor.config;
   const config = globalConfigStore;
   // Configパラメータを設定する
   const _config: IConfigParams = {
@@ -51,7 +50,7 @@ export const DebugPlay = () => {
   const { t } = useTranslation();
   useEffect(() => {
     const _engine = new NinjaEngine();
-    const njcFile = ExportNjcFile(editor);
+    const njcFile = ExportNjcFile(editor.getEditor());
     _engine.setNJCFile(njcFile).then(() => {
       // エンジンにセット
       setEngine(_engine);

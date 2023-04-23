@@ -165,9 +165,9 @@ export const PlayerEditor = () => {
 
     // サイズに基づいてサードパーソンのカメラオフセットと LookAt 座標を計算
     const tpCameraOffset = new Vector3(
-      -avatarSize.x * offsetFactor * 0.25,
+      -avatarSize.x * offsetFactor * 0.1,
       avatarSize.y * heightFactor,
-      (-avatarSize.z * offsetFactor * 0.5) + (-0.5 * avatarSize.y * heightFactor)
+      (-avatarSize.z * offsetFactor * 0.5) + (-2 * avatarSize.y * heightFactor)
     );
 
     const tpCameraLookAtOffset = new Vector3(

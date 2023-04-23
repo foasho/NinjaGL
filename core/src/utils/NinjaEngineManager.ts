@@ -82,7 +82,6 @@ export class NinjaEngine {
         maxDepth: this.config.octreeDepth
       } as IOctree);
       this.world.addOctree(this.octree);
-      console.log("物理世界のセットだよん");
     }
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
     await this.initializeLoadOMs();
@@ -257,7 +256,6 @@ export class NinjaEngine {
           // args.positionがあれば追加したFaceを移動させる
           if (om.args.position){
             const pos = om.args.position;
-            console.log(pos);
             const posVec = new Vector3(pos.x, pos.y, pos.z);
             if (this.octree){
               this.octree.translateFaceByName(om.id, posVec.clone());
@@ -429,47 +427,49 @@ export class NinjaEngine {
    * アバターをセットする
    */
   setAvatar(threeMesh: Mesh|Object3D) {
-    const avatarObject = this.getAvatar();
-    if (avatarObject) {
-      if (avatarObject.args.position) {
+    const avatarOM = this.getAvatar();
+    if (avatarOM) {
+      if (avatarOM.args.position) {
         threeMesh.position.set(
-          avatarObject.args.position.x,
-          avatarObject.args.position.y,
-          avatarObject.args.position.z
+          avatarOM.args.position.x,
+          avatarOM.args.position.y,
+          avatarOM.args.position.z
         );   
       }
-      if (avatarObject.args.rotation) {
+      if (avatarOM.args.rotation) {
         threeMesh.quaternion.copy(
           new Quaternion().setFromEuler(new Euler(
             0,
-            MathUtils.degToRad(avatarObject.args.rotation.y),
+            MathUtils.degToRad(avatarOM.args.rotation.y),
             0
           ))
         );
       }
       const aabb = new Box3().setFromObject(threeMesh.clone());
       const raduis = aabb.getSize(new Vector3());
+      console.log("raduis", raduis);
       // 円は中心でできるので、Meshの位置を調整する
-      threeMesh.position.add(new Vector3(0, raduis.y/2, 0));
+      threeMesh.position.add(new Vector3(0, -raduis.y/2, 0));
+      
       this.avatar = new AvatarController(
         this,
         threeMesh,
         raduis.y / 2,
-        avatarObject.animations,
-        avatarObject.mixer,
-        avatarObject.args.animMapper,
-        avatarObject.args.sounds
+        avatarOM.animations,
+        avatarOM.mixer,
+        avatarOM.args.animMapper,
+        avatarOM.args.sounds
       );
       // Offsetをセットする
-      if (avatarObject.args.offsetParams) {
+      if (avatarOM.args.offsetParams) {
         this.avatar.setOffsetParams(
-          avatarObject.args.offsetParams
+          avatarOM.args.offsetParams
         );
       }
       // CameraModeをセットする
-      if (avatarObject.args.defaultMode) {
+      if (avatarOM.args.defaultMode) {
         this.avatar.changeCameraMode(
-          avatarObject.args.defaultMode
+          avatarOM.args.defaultMode
         )
       }
       // 物理世界に対応させる

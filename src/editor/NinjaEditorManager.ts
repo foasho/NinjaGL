@@ -76,6 +76,10 @@ export class NinjaEditorManager {
     this.initialize();
   }
 
+  getEditor = () => {
+    return this;
+  }
+
   /**
    * 初期化
    */

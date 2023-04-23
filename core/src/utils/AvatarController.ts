@@ -59,7 +59,7 @@ export class AvatarController {
   // direction  = 0;     // ラジアン値(0~2π) => Degree * Math.PI/180
   moveDirection: Vector3 = new Vector3(0, 0, 0);
   moveScaler = 0;     // 移動値(0 ~ 1)
-  movementSpeed = 5; // 秒あたりの最大移動値
+  movementSpeed = 10; // 秒あたりの最大移動値
   velocity = new Vector3(0, -10, 0);
   jumpPower = 0.5;
   currentJumpPower = 0;
@@ -231,7 +231,6 @@ export class AvatarController {
    */
   setOffsetParams(params: IOffsetParams) {
     this.offsetParams = params;
-    this.offsetParams.tp.offset.setZ(-15);
   }
 
   /**
@@ -699,13 +698,13 @@ export class AvatarController {
       const objectPosition = this.object.position.clone();
       const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
       const distance = cameraPosition.distanceTo(objectPosition);
-      const om = this.parent.getAvatar();
-      const targetAvatarObject = om?.object? om.object : null;
-      if (targetAvatarObject) {
+      // 現状はTerrainのみ判定する
+      const targetAvatarObject = this.parent.getTerrain();
+      if (targetAvatarObject && targetAvatarObject.object) {
         this.raycaster.set(newPosition, direction);
-        this.raycaster.far = distance - (this.radius * 1.2);// ある程度バッファを持たせる
-        this.raycaster.near = 0.1;
-        const intersects = this.raycaster.intersectObject(targetAvatarObject, true);
+        this.raycaster.far = distance - (this.radius * 1.2);
+        this.raycaster.near = 0.01;
+        const intersects = this.raycaster.intersectObject(targetAvatarObject.object, true);
         if (intersects.length > 0) {
           const intersect = intersects[0];
           this.camera.position.copy(intersect.point);
