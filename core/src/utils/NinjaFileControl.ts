@@ -98,8 +98,14 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
   for (const om of njcFile.oms) {
     if (om.object) {
       // const exportScene = new Scene();
-      const clone = SkeletonUtils.clone(om.object);
-      clone.animations = om.animations?om.animations: [];
+      let clone;
+      if (om.animations.length > 0) {
+        clone = SkeletonUtils.clone(om.object);
+        clone.animations = om.animations?om.animations: [];
+      }
+      else {
+        clone = om.object.clone();
+      }
       // (重要):argsにpositionなどがすでにあるので、ここで原点にもどす
       if (om.type === "object"){
         if (om.args.position) clone.position.set(0, 0, 0);
@@ -113,8 +119,8 @@ export const saveNJCBlob = async (njcFile: NJCFile): Promise<Blob> => {
       objectsDir!.file(`${om.id}.glb`, glbData);
       om.filePath = `objects/${om.id}.glb`;
     }
-    delete om.object;
-    delete om.mixer;
+    // delete om.object; // Dont Delete
+    // delete om.mixer; // Dont Delete
     exportOMs.push(om);
   }
 

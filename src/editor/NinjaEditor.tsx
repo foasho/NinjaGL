@@ -244,7 +244,7 @@ export const NinjaEditor = () => {
           luminanceThreshold:0.2,
           mipmapBlur: true,
           luminanceSmoothing: 0,
-          intensity: 1.75,
+          intensity: 1.25,
         }
       }
       else if (data.value == "lut"){

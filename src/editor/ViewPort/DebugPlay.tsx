@@ -32,7 +32,6 @@ export const ExportNjcFile = (editor: NinjaEditorManager): NJCFile => {
     }
     return _om;
   });
-  console.log("oms length: ", oms.length);
   const ums = [...editor.getUMs()];
   const tms = [...editor.getTMs()];
   const sms = [...editor.getSMs()];

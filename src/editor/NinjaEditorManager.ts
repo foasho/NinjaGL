@@ -338,7 +338,8 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.intensity = intensity;
-      this.notifyEnvChanged();
+      // this.notifyEnvChanged();
+      this.notifyOMIdChanged(id);
     }
   }
 
@@ -379,17 +380,37 @@ export class NinjaEditorManager {
   }
 
   /**
-   * Offsetの設定
+   * luminanceThresholdの設定
    */
-  setOffset(id: string, offset: Vector3){
+  setLuminanceThreshold(id: string, value: number){
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
-      if (target.args.offset == null) target.args.offset = new Vector3(0, 0, 0);
-      target.args.offset.copy(offset);
+      target.args.luminanceThreshold = value;
       this.notifyOMIdChanged(id);
     }
   }
 
+  /**
+   * mipmapBlurの設定
+   */
+  setMipmapBlur(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.mipmapBlur = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+  /**
+   * luminanceSmoothingの設定
+   */
+  setLuminanceSmoothing(id: string, value: number){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.luminanceSmoothing = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
 
 
   /**
@@ -964,6 +985,8 @@ export class NinjaEditorManager {
     this.initialize();
     this.oms = njcFile.oms;
     this.ums = njcFile.ums;
+    this.tms = njcFile.tms;
+    this.sms = njcFile.sms;
     console.log("<< Complete NJC File >>");
     this.notifyNJCChanged();
     this.notifyOMsChanged();

@@ -46,38 +46,40 @@ const StandardMaterial = new MeshStandardMaterial();
  */
 const StaticObject = ({ om }) => {
   const state = useSnapshot(globalStore);
-  const itemsRef = useRef([]);
-  const object = om.object;
-  object.traverse((node: any) => {
-    if (node.isMesh && node instanceof Mesh) {
-      node.castShadow = (om.args.castShadow == undefined) ? true : om.args.castShadow;
-      node.receiveShadow = (om.args.recieveShadow == undefined) ? false : om.args.recieveShadow;
-    }
-  })
+  const object = om?.object;
+  if (object){
+    object.traverse((node: any) => {
+      if (node.isMesh && node instanceof Mesh) {
+        node.castShadow = (om.args.castShadow == undefined) ? true : om.args.castShadow;
+        node.receiveShadow = (om.args.recieveShadow == undefined) ? false : om.args.recieveShadow;
+      }
+    });
+  }
   const ref = useRef<Group|Object3D|Mesh>();
-  const tempMaterialData = useRef<any>();
   const editor = useContext(NinjaEditorContext);
   const id = om.id;
 
   // Get Size
-  const size = new Box3().setFromObject(object);
   let len = 1;
-  if ((size.max.x - size.min.x) > len) {
-    len = (size.max.x - size.min.x);
+  if (object){
+    const size = new Box3().setFromObject(object);
+    if ((size.max.x - size.min.x) > len) {
+      len = (size.max.x - size.min.x);
+    }
+    if ((size.max.y - size.min.y) > len) {
+      len = (size.max.y - size.min.y);
+    }
+    if ((size.max.z - size.min.z) > len) {
+      len = (size.max.z - size.min.z);
+    }
+  
   }
-  if ((size.max.y - size.min.y) > len) {
-    len = (size.max.y - size.min.y);
-  }
-  if ((size.max.z - size.min.z) > len) {
-    len = (size.max.z - size.min.z);
-  }
-
+  
   const onDragStart = () => {
     globalStore.pivotControl = true;
   }
   const onDragEnd = () => {
   }
-
   const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
@@ -166,7 +168,7 @@ const StaticObject = ({ om }) => {
           onDragEnd={() => onDragEnd()}
         />
       }
-      
+      {object &&
         <primitive
           visible={state.hiddenList.indexOf(id) == -1}
           ref={ref}
@@ -174,6 +176,7 @@ const StaticObject = ({ om }) => {
           onPointerMissed={(e) => e.type === 'click' && (globalStore.init())}
           object={object}
         />
+      }
     </>
   )
 }

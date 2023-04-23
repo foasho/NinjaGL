@@ -4,8 +4,9 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
 import alias from '@rollup/plugin-alias';
-import nodePolyfills from 'rollup-plugin-node-polyfills'; // この行を追加
+import nodePolyfills from 'rollup-plugin-node-polyfills';
 import path from 'path';
+import copy from 'rollup-plugin-copy';
 
 export default [
   {
@@ -39,7 +40,12 @@ export default [
       commonjs(),
       json(),
       terser(),
-      nodePolyfills(), // この行を変更
+      nodePolyfills(),
+      copy({
+        targets: [
+          { src: 'public/*', dest: 'dist' }
+        ]
+      }),
     ],
   },
   {

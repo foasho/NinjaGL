@@ -5,7 +5,6 @@ import { Bloom, SSR, LUT, EffectComposer } from "@react-three/postprocessing";
 import { NinjaEditorContext } from '@/editor/NinjaEditorManager';
 import { IObjectManagement } from 'ninja-core';
 import { LUTCubeLoader } from 'postprocessing';
-import { useLoader } from '@react-three/fiber';
 import { CubeTextureLoader, Texture } from 'three';
 
 export const MyEffects = () => {
@@ -40,7 +39,10 @@ export const MyEffects = () => {
 
 
 const MyEffect = ({ om }) => {
+  const [renderCount, setRenderCount] = useState(0);
+  const editor = useContext(NinjaEditorContext);
   const [texture, setTexture] = useState(null);
+  const id = om.id;
 
   useEffect(() => {
     if (om.args.type === "lut" && om.args.texture) {
@@ -51,7 +53,14 @@ const MyEffect = ({ om }) => {
     } else {
       setTexture(null);
     }
-  }, [om]);
+    const handleIdChanged = () => {
+      setRenderCount(renderCount + 1);
+    }
+    editor.onOMIdChanged(id, handleIdChanged);
+    return () => {
+      editor.offOMIdChanged(id, handleIdChanged);
+    }
+  }, [om, renderCount]);
 
   const effect = useMemo(() => {
     if (om.args.type === "bloom") {
@@ -66,13 +75,13 @@ const MyEffect = ({ om }) => {
     } else if (om.args.type === "ssr") {
       return (
         <SSR
-          // ... All SSR props
+          {...om.args}
         />
       );
     } else if (om.args.type === "lut" && texture) {
       return <LUT lut={texture as Texture} />;
     }
-  }, [om, texture]);
+  }, [om, texture, renderCount]);
 
   return <>{effect}</>;
 };

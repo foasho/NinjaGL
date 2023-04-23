@@ -5,13 +5,10 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { reqApi } from '@/services/ServciceApi';
 import { useTranslation } from 'react-i18next';
-// import { Web3Instance } from '@/src/workers/Web3Instance';
 import { IScriptManagement } from 'ninja-core';
-import { InitScriptManagement } from 'ninja-core';
 import { useSnapshot } from 'valtio';
 import { globalScriptStore } from '../Store';
 import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';
-import { editor } from 'monaco-editor';
 import { NinjaEditorContext } from '../NinjaEditorManager';
 import { useSession } from 'next-auth/react';
 import { b64EncodeUnicode } from '@/commons/functional';
@@ -320,7 +317,7 @@ async function initialize() {
  * @param delta: 1フレーム時間(秒)
  * @param input: { forward, backward, left, right, jump, dash, action }
  */
-async function frameLoop(state, delta) {
+async function frameLoop(state, delta, input) {
   // your code
 }
 `;
