@@ -23,6 +23,17 @@ let direction = new Vector3();
 let translateScoped = new Vector3();
 let translate = new Vector3();
 
+interface IOffsetParams {
+  tp: {
+    offset: Vector3,
+    lookAt: Vector3,
+  },
+  fp: {
+    offset: Vector3,
+    lookAt: Vector3,
+  },
+}
+
 interface IAnimStateProps {
   Name: string;
   Enter: any;
@@ -48,7 +59,7 @@ export class AvatarController {
   // direction  = 0;     // ラジアン値(0~2π) => Degree * Math.PI/180
   moveDirection: Vector3 = new Vector3(0, 0, 0);
   moveScaler = 0;     // 移動値(0 ~ 1)
-  movementSpeed = 5; // 秒あたりの最大移動値
+  movementSpeed = 10; // 秒あたりの最大移動値
   velocity = new Vector3(0, -10, 0);
   jumpPower = 0.5;
   currentJumpPower = 0;
@@ -83,13 +94,22 @@ export class AvatarController {
   wasJumping: boolean = false;; // ジャンプしていたか
 
   // カメラ情報
+  cameraMode: "tp" | "fp" = "tp";// tp: third person, fp: first person
   camera: PerspectiveCamera | OrthographicCamera | undefined;
-  cameraOffset: Vector3 = new Vector3(-1, 1, -4.5);
-  cameraLookAtOffset: Vector3 = new Vector3(0, 1.5, 4);
+  offsetParams: IOffsetParams = {
+    tp: {
+      offset: new Vector3(-1, 1, -4.5),
+      lookAt: new Vector3(0, 1.5, 4),
+    },
+    fp: {
+      offset: new Vector3(0, 1.7, 0),
+      lookAt: new Vector3(0, 1.7, 1),
+    },
+  }
   raycaster: Raycaster = new Raycaster();
 
   // アニメーション情報
-  isAnimation: boolean = false;;
+  isAnimation: boolean = false;
   animations: AnimationClip[] = [];
   animMapper: { [key: string]: string } = {};
   mixer: AnimationMixer | undefined;
@@ -128,12 +148,12 @@ export class AvatarController {
     this.groundHeight = 0;
     this.groundNormal = new Vector3();
     this.contactInfo = [];
-
     let isFirstUpdate = true;
     let wasGrounded: boolean;
 
     // Animationがあればセットする
-    if (animations && animMapper && animations.length > 0 && this.mixer) {
+    if (animations && animMapper && animations.length > 0) {
+      console.log("animationsをセットしようとしてる")
       this.animations = animations;
       this.animMapper = animMapper;
       this.mixer = mixer;
@@ -145,6 +165,9 @@ export class AvatarController {
       // 初期はIdleに設定
       this.SetState(this.animMapper.idle);
       this.isAnimation = true;
+    }
+    else {
+      console.info("animationsデータがありません");
     }
 
     // Soundsをセットする
@@ -199,10 +222,23 @@ export class AvatarController {
    */
   setCamera(camera: PerspectiveCamera | OrthographicCamera, offset?: Vector3, lookAtOffset?: Vector3) {
     this.camera = camera;
-    if (offset) this.cameraOffset.copy(offset);
-    if (lookAtOffset) this.cameraLookAtOffset.copy(lookAtOffset);
+    if (offset) this.offsetParams[this.cameraMode].offset.copy(offset);
+    if (lookAtOffset) this.offsetParams[this.cameraMode].lookAt.copy(lookAtOffset);
   }
 
+  /**
+   * カメラOffsetパラメータをセットする
+   */
+  setOffsetParams(params: IOffsetParams) {
+    this.offsetParams = params;
+  }
+
+  /**
+   * カメラモードを変更
+   */
+  changeCameraMode(mode: 'tp' | 'fp') {
+    this.cameraMode = mode;
+  }
   
 
   /**
@@ -662,13 +698,13 @@ export class AvatarController {
       const objectPosition = this.object.position.clone();
       const direction = objectPosition.clone().sub(cameraPosition.clone()).normalize();
       const distance = cameraPosition.distanceTo(objectPosition);
-      const om = this.parent.getAvatar();
-      const targetAvatarObject = om?.object? om.object : null;
-      if (targetAvatarObject) {
+      // 現状はTerrainのみ判定する
+      const targetAvatarObject = this.parent.getTerrain();
+      if (targetAvatarObject && targetAvatarObject.object) {
         this.raycaster.set(newPosition, direction);
-        this.raycaster.far = distance - this.radius;
-        this.raycaster.near = 0.1;
-        const intersects = this.raycaster.intersectObject(targetAvatarObject, true);
+        this.raycaster.far = distance - (this.radius * 1.2);
+        this.raycaster.near = 0.01;
+        const intersects = this.raycaster.intersectObject(targetAvatarObject.object, true);
         if (intersects.length > 0) {
           const intersect = intersects[0];
           this.camera.position.copy(intersect.point);
@@ -699,13 +735,13 @@ export class AvatarController {
    * ベース:https://github.com/simondevyoutube/ThreeJS_Tutorial_ThirdPersonCamera
    */
   _CalculateIdealOffset() {
-    const idealOffset = new Vector3().copy(this.cameraOffset);
+    const idealOffset = new Vector3().copy(this.offsetParams[this.cameraMode].offset);
     idealOffset.applyQuaternion(this.object.quaternion.clone());
     idealOffset.add(this.object.position.clone());
     return idealOffset;
   }
   _CalculateIdealLookat() {
-    const idealLookat = new Vector3().copy(this.cameraLookAtOffset);
+    const idealLookat = new Vector3().copy(this.offsetParams[this.cameraMode].lookAt);
     idealLookat.applyQuaternion(this.object.quaternion.clone());
     idealLookat.add(this.object.position.clone());
     return idealLookat;

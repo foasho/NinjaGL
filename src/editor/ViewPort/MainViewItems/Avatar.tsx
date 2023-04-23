@@ -1,6 +1,5 @@
-import { Environment, OrbitControls, Sky, useHelper } from "@react-three/drei";
-import { Box3, BoxHelper, Euler, LineBasicMaterial, LineSegments, Matrix4, Mesh, Object3D, Quaternion, Raycaster, Vector2, Vector3, WireframeGeometry } from "three";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useHelper } from "@react-three/drei";
+import { BoxHelper, Euler, Matrix4, Object3D, Vector3 } from "three";
 import { useState, useEffect, useContext, useRef } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "ninja-core";
@@ -16,7 +15,7 @@ export const Avatar = () => {
   const editor = useContext(NinjaEditorContext);
   const [avatar, setAvatar] = useState<IObjectManagement>(null);
   const id = avatar? avatar.id: null;
-  const ref = useRef<Object3D>();
+  const ref = useRef<any>();
   const [helper, setHelper] = useState<boolean>(true)
   const editorData = useRef<{ 
     focus: boolean; 
@@ -36,8 +35,10 @@ export const Avatar = () => {
       setAvatar(editor.getAvatar());
     }
     editor.onOMIdChanged(id, init);
+    editor.onAvatarChanged(init);
     return () => {
       editor.offOMIdChanged(id, init);
+      editor.offAvatarChanged(init);
     }
   }, []);
 
@@ -102,12 +103,15 @@ export const Avatar = () => {
               userData={editorData.current}
             />
           }
-          <primitive
+          <mesh
             ref={ref}
-            object={avatar.object}
-            onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
-            onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
-          />
+          >
+            <primitive
+              object={avatar.object}
+              onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
+              onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
+            />
+          </mesh>
       </>
       }
     </>

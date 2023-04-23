@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { useContext, useEffect, useRef } from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
 
-export interface IAvatarProps { }
-
 /**
  * アバター表示
  * アバターが場合は通常のカメラを表示する
@@ -16,7 +14,7 @@ export const Avatar = () => {
   const engine = useContext(NinjaEngineContext);
   const [avatar, setAvatar] = useState<IObjectManagement>();
   const { camera } = useThree();
-
+  const objRef = useRef<any>();
   // 初回ロード時にAvatarObjectをセットする 
   useEffect(() => {
     setAvatar(engine.getAvatar());
@@ -34,14 +32,26 @@ export const Avatar = () => {
     if (avatar && ref.current) {
       engine.setAvatar(ref.current);
       engine.setAvatarCamera(camera);
+      // 最後にポジションのずれをセット(調査中)
+      // if (avatar.args.position && objRef.current) {
+      //   objRef.current.position.copy(
+      //     avatar.args.position
+      //   );
+      // }
     }
   }, [avatar]);
+
 
   return (
     <>
       {avatar &&
         <mesh ref={ref} layers={0}>
-          <primitive object={avatar.object} />
+          {/* <mesh> */}
+            <primitive
+              ref={objRef}
+              object={avatar.object}
+            />
+          {/* </mesh> */}
         </mesh>
       }
     </>

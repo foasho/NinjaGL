@@ -17,14 +17,14 @@ import { FaPeopleArrows } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
-import { DebugPlay } from "./ViewPort/DebugPlay";
+import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
 import { loadNJCFileFromURL, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
 import { loadNJCFile } from "ninja-core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
-import { globalStore } from "./Store";
+import { globalConfigStore, globalStore } from "./Store";
 import { ScriptNavigation } from "./Hierarchy/ScriptNavigation";
 import { ShaderNavigation } from "./Hierarchy/ShaderNavigation";
 import { TextureNavigation } from "./Hierarchy/TextureNavigation";
@@ -34,6 +34,7 @@ import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
 import 'setimmediate';
 import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
+import { SkeletonUtils } from "three-stdlib";
 
 /**
  * NinjaEngineメインコンポネント
@@ -358,16 +359,7 @@ export const NinjaEditor = () => {
    * ビルド処理
    */
   const onSave = async(completeAlert: boolean=true) => {
-    const njcFile = new NJCFile();
-    editor.getOMs().map((om) => {
-      njcFile.addOM({...om});
-    });
-    editor.getUMs().map((um) => {
-      njcFile.addUM({...um});
-    });
-    editor.getSMs().map((sm) => {
-      njcFile.addSM({...sm});
-    });
+    const njcFile = ExportNjcFile(editor.getEditor());
     const blob = await saveNJCBlob(njcFile);
     if (!project){
       Swal.fire({
@@ -434,7 +426,49 @@ export const NinjaEditor = () => {
       });
     }
     else {
-      saveAs(blob, `${project.name}.njc`);
+      // saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+      // もしログインしているのならクラウドに保存する
+      if (session){
+        const formData = new FormData();
+        formData.append("file", blob);
+        const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+        const keyPath = (uploadPath + `/${project.name.replace(".njc", "")}.njc`).replaceAll("//", "/");
+        formData.append("filePath", keyPath);
+        try {
+          const response = await fetch("/api/storage/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) {
+            throw new Error("Error uploading file");
+          }
+          const res = await response.json();
+          // 成功したら、ローカルストレージの追加しておく
+          localStorage.setItem(
+            "recentprojects", 
+            JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: project.name, path: keyPath}])
+          );
+          setProject({name: project.name, path: keyPath});
+          // Success message
+          if (completeAlert){
+            Swal.fire({
+              icon: 'success',
+              title: t("success"),
+              text: t("saveSuccess") + `\npersonal/savedata/${project.name.replace(".njc", "")}.njc`,
+            });
+          }
+        } catch (error) {
+          console.error("Error:", error.message);
+          // 失敗したらをローカルに保存
+          saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+          setProject({name: project.name, path: undefined});
+        }
+      }
+      else {
+        // ZIPファイルをローカルに保存
+        saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+        setProject({name: project.name.replace(".njc", ""), path: undefined});
+      }
     }
   }
 
@@ -638,16 +672,17 @@ export const NinjaEditor = () => {
   , []);
 
   useEffect(() => {
+    // ※AutoSave調整中
     // AutoSaveが有効なら、AutoSaveを開始
-    let autoSaveInterval;
-    if (autoSave && session){
-      autoSaveInterval = setInterval(() => {
-        onSave();
-      }, 900 * 1000);
-    }
-    return () => {
-      clearInterval(autoSaveInterval);
-    }
+    // let autoSaveInterval;
+    // if (autoSave && session){
+    //   autoSaveInterval = setInterval(() => {
+    //     onSave();
+    //   }, 900 * 1000);
+    // }
+    // return () => {
+    //   clearInterval(autoSaveInterval);
+    // }
   }, [autoSave]);
 
 

@@ -166,6 +166,7 @@ const StaticObject = ({ om }) => {
           onDragEnd={() => onDragEnd()}
         />
       }
+      
         <primitive
           visible={state.hiddenList.indexOf(id) == -1}
           ref={ref}

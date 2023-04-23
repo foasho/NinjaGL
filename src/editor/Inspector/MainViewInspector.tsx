@@ -109,6 +109,10 @@ export const MainViewInspector = () => {
         if (selectOM.args.visibleType !== undefined) setVisibleType(visibleTypeOptions.find((option) => option.value == selectOM.args.visibleType));
         if (selectOM.args.materialData !== undefined){
           setMaterialType(materialOptions.find((option) => option.value == selectOM.args.materialData.type))
+        }
+        else {
+          setMaterialType(materialOptions.find((option) => option.value == "standard"))
+          setMaterialColor("#ffffff");
         };
         if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setMaterialColor(selectOM.args.materialData.value);
         if (selectOM.args.blur) setBlur(selectOM.args.blur);
@@ -360,7 +364,7 @@ export const MainViewInspector = () => {
   }
 
   /**
-   * アバター間の距離を変更
+   * Offsetを変更
    */
   const changeOffset = (e, xyz: "x" | "y" | "z") => {
     const targetValue = e.target.value;
@@ -643,23 +647,24 @@ export const MainViewInspector = () => {
                 />
             </div>
           </div>
-          {(materialType && materialType.value !== "shader") &&
-            <div className={styles.color}>
-              <div className={styles.name}>
-                {t("color")}
-              </div>
-              <div className={styles.pallet}>
-                <input 
-                  type={"color"} 
-                  value={materialColor} 
-                  onChange={(e) => changeMaterial(materialType.value, e.target.value)}
-                  onFocus={() => globalStore.editorFocus = true}
-                  onBlur={() => globalStore.editorFocus = false}
-                />
-                <input type={"text"} value={materialColor} />
-              </div>
+          {materialType && materialType.value !== "shader" &&
+          <div className={styles.color}>
+            <div className={styles.name}>
+              {t("color")}
             </div>
+            <div className={styles.pallet}>
+              <input 
+                type={"color"} 
+                value={materialColor} 
+                onChange={(e) => changeMaterial(materialType.value, e.target.value)}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
+              />
+              <input type={"text"} value={materialColor} />
+            </div>
+          </div>
           }
+
           {/** シェーダ対応準備中 */}
           {/* {(materialType && materialType.value === "shader") &&
             <div className={styles.shader}>
