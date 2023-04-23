@@ -15,7 +15,7 @@ import {
   SkyWayStreamFactory, 
   uuidV4
 } from '@skyway-sdk/room';
-import { ListChangedEvent, LocalDataStream, Publication, SkyWayConfigOptions } from '@skyway-sdk/core';
+import {  LocalDataStream, SkyWayConfigOptions } from '@skyway-sdk/core';
 import { Euler, Vector3 } from 'three';
 import { IInputMovement, useInputControl } from './InputControl';
 
@@ -30,6 +30,15 @@ export interface IPublishData {
   input: IInputMovement;
   username?: string;
   message?: string;
+}
+
+export interface ISubscribers {
+  input: IInputMovement;
+  position: Vector3;
+  rotation: Euler;
+  username?: string;
+  message?: string;
+  stream?: LocalVideoStream|LocalAudioStream;
 }
 
 export interface IUseSkywayProps {
@@ -49,7 +58,8 @@ export const useSkyway = (props: IUseSkywayProps) => {
   const me = useRef<LocalSFURoomMember|null>(null);
   const roomRef = useRef<SfuRoom>(null);
   let localVideo = useRef<HTMLVideoElement|HTMLAudioElement>(null);
-  let suscribeVideos = useRef<HTMLVideoElement[]|HTMLAudioElement[]>([]);
+  let subscribers = useRef<ISubscribers[]>([]);
+  let data: LocalDataStream;
 
   const join = useCallback( async () => {
     try {
@@ -126,8 +136,8 @@ export const useSkyway = (props: IUseSkywayProps) => {
       });
       video.attach(localVideo.current);
       await localVideo.current.play();
-      // Data
-      const data = await SkyWayStreamFactory.createDataStream();
+      // DataStream
+      data = await SkyWayStreamFactory.createDataStream();
       
       // 3.SkywayContextを作成する
       const context = await SkyWayContext.Create(token);
@@ -186,12 +196,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
         maxSubscribers: 50,
       });
     }
-    /**
-     * データを送信する
-     */
-    const publishData = (pdata: IPublishData) => {
-      data.write(JSON.stringify({...pdata}));
-    }
+
     // ルーム内に新しいメンバーが入室したときに呼ばれる
     roomRef.current.onMemberJoined.add((e) => {addMember(e.member)});
 
@@ -209,20 +214,31 @@ export const useSkyway = (props: IUseSkywayProps) => {
           preferredEncodingId: 'low',
         });
       } 
-      else {
+      else if (publication.contentType === 'audio') {
         // 音声とデータは、デフォルトでSubscribeする
         await me.current.subscribe(publication);
       }
+      else if (publication.contentType === 'data') {
+        // const { stream } = await me.current.subscribe(publication.id);
+        // stream.
+        const a = await me.current.subscribe(publication);
+        // if (a.subscription.stream.)
+      }
     }
-
-    // // 
-    // const { stream } =  me.current.subscribe();
-
+    
     // ルーム内に新しいメンバーがStreamをPublishしたときに呼ばれる
     roomRef.current.onStreamPublished.add(async (e) => {subscribe(e.publication)});
     await Promise.all(roomRef.current.publications.map(subscribe));
-  }
 
+    // roomRef.current.onData
+  }
+  
+  /**
+   * データを送信する
+   */
+  const publishData = (pdata: IPublishData) => {
+    if (data) data.write(JSON.stringify({...pdata}));
+  }
   /**
    * SkywayでRoomを退出する
    */
@@ -239,22 +255,9 @@ export const useSkyway = (props: IUseSkywayProps) => {
     // if (){ }
   }
 
-  /**
-   * Dataを送信する
-   * @position
-   * @rotation
-   * @input
-   * @message
-   */
-  const publishData = async () => {
-    if (me.current === undefined) return;
-    // me.current.pu
+  return { 
+    publishData: publishData, 
+    leaveRoom: leaveRoom,
+    subscribers: subscribers,
   }
-
-
-
-  return (
-      <>
-      </>
-  )
 }
