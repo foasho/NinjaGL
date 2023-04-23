@@ -116,6 +116,89 @@
     }
   }
 
+  .config{
+    color: #fff;
+    cursor: pointer;
+    padding: 4px 6px;
+    margin-right: 5px;
+    background: #222;
+    border-radius: 3px;
+    position: relative;
+    .tooltipContent {
+      display: block;
+      position: absolute;
+      z-index: 1;
+      top: 100%;
+      left: 0;
+      background-color: $bgColor;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      min-width: 200px;
+      .checkboxes,
+      .numberInputs {
+        margin-bottom: 8px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        padding: 4px 6px;
+        .name{
+          padding-right: 8px;
+        }
+        input[type="text"] {
+          width: 60px;
+          max-width: 60px;
+        }
+        input[type="number"] {
+          width: 60px;
+          max-width: 60px;
+        }
+      }
+
+      .numberInputs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 4px;
+      }
+
+      .select {
+        padding-bottom: 16px;
+        .title {
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+        select {
+          width: 100%;
+          padding: 4px;
+          border: 1px solid #ccc;
+          border-radius: 3px;
+          background: #fff;
+          option {
+            padding: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  .cameraSpeed {
+    color: #fff;
+    cursor: pointer;
+    padding: 4px 6px;
+    margin-right: 5px;
+    background: #222;
+    border-radius: 3px;
+    position: relative;
+    user-select: none;
+    span {
+      font-size: 14px;
+      vertical-align: top;
+    }
+  }
+
   .showCanvas{
     color: #fff;
     cursor: pointer;

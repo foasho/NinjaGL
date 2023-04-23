@@ -5,7 +5,7 @@ import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';
 import { reqApi } from "@/services/ServciceApi";
 import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
-import { Euler, Vector3, MathUtils, MeshStandardMaterial } from "three";
+import { Euler, Vector3, MathUtils, MeshStandardMaterial, AnimationClip } from "three";
 import { isNumber } from "@/commons/functional";
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
@@ -18,11 +18,11 @@ export const MainViewInspector = () => {
   const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
   const [castShadow, setCastShadow] = useState<boolean>(true);
-  const [receiveShadow, setreceiveShadow] = useState<boolean>(true);
+  const [receiveShadow, setReceiveShadow] = useState<boolean>(false);
   const [helper, setHelper] = useState<boolean>(false);
   const [visibleType, setVisibleType] = useState<{ value: "none"|"auto"|"force"; label: string; }>();
   const [materialType, setMaterialType] = useState<{ value: "standard"|"phong"|"toon"|"shader"|"reflection"; label: string;}>();
-  const [color, setColor] = useState<string>();
+  const [materialColor, setMaterialColor] = useState<string>();
   // Environmentの設定
   const [background, setBackground] = useState<boolean>(true);
   const [blur, setBlur] = useState<number>(0.5);
@@ -30,12 +30,17 @@ export const MainViewInspector = () => {
   // Lightformerの設定
   const [form, setForm] = useState<{ value: "circle"|"ring"|"rect", label: string}>();
   const [intensity, setIntensity] = useState<number>();
-
+  // Animationsの設定
+  const [defalutAnim, setDefalutAnim] = useState<{ value: string, label: string }>();
+  const [animLoop, setAnimLoop] = useState<boolean>(true);
+  // Colorの設定
+  const [color, setColor] = useState<string>();
   const id = state.currentId;
   const selectOM = editor.getOMById(id);
   const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
   const [rotation, setRotation] = useState<Euler>(selectOM?.object?.rotation);
   const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
+  // const [offset, setOffset] = useState<Vector3>();
   const { t } = useTranslation();
 
   
@@ -105,11 +110,15 @@ export const MainViewInspector = () => {
         if (selectOM.args.materialData !== undefined){
           setMaterialType(materialOptions.find((option) => option.value == selectOM.args.materialData.type))
         };
-        if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setColor(selectOM.args.materialData.value);
+        if (selectOM.args.materialData !== undefined && selectOM.args.materialData.value) setMaterialColor(selectOM.args.materialData.value);
         if (selectOM.args.blur) setBlur(selectOM.args.blur);
         if (selectOM.args.preset) setEnvironmentPreset(environmentOptions.find((option) => option.value == selectOM.args.preset));
         if (selectOM.args.form) setForm(selectOM.args.form);
         if (selectOM.args.intensity) setIntensity(selectOM.args.intensity);
+        if (selectOM.args.defaultAnim) setDefalutAnim(selectOM.args.defaultAnim);
+        if (selectOM.args.animLoop !== undefined) setAnimLoop(selectOM.args.animLoop);
+        if (selectOM.args.color) setColor(selectOM.args.color);
+        // if (selectOM.args.offset) setOffset(selectOM.args.offset);
       };
     }
     init();
@@ -206,11 +215,19 @@ export const MainViewInspector = () => {
    * マテリアル(種別/色)の変更
    */
   const changeMaterial = (type: "shader"|"standard"|"phong"|"toon"|"reflection", value: any) => {
-    if (materialType.value !== "shader" && value){
+    if (type !== "shader" && value){
       editor.setMaterialData(id, type, value);
-      setColor(value);
+      setMaterialColor(value);
       setMaterialType(materialOptions.find((option) => option.value == type));
     }
+  }
+
+  /**
+   * 色属性の変更
+   */
+  const changeColor = (e) => {
+    editor.setColor(id, e.target.value);
+    setColor(e.target.value);
   }
 
   /**
@@ -259,9 +276,9 @@ export const MainViewInspector = () => {
   /**
    * receiveShadowを変更
    */
-  const onCheckreceiveShadow = () => {
-    editor.setreceiveShadow(id, !receiveShadow);
-    setreceiveShadow(!receiveShadow);
+  const onCheckReceiveShadow = () => {
+    editor.setReceiveShadow(id, !receiveShadow);
+    setReceiveShadow(!receiveShadow);
   }
 
   /**
@@ -326,6 +343,46 @@ export const MainViewInspector = () => {
     }
   }
 
+  /**
+   * デフォルトアニメーションの変更
+   */
+  const changeDefaultAnimation = (selectDefaultAnimation) => {
+    editor.setDefaultAnimation(id, selectDefaultAnimation.value);
+    setDefalutAnim(selectDefaultAnimation);
+  }
+
+  /**
+   * アニメーションループの切り替え
+   */
+  const onCheckAnimationLoop = () => {
+    editor.setAnimationLoop(id, !animLoop);
+    setAnimLoop(!animLoop);
+  }
+
+  /**
+   * アバター間の距離を変更
+   */
+  const changeOffset = (e, xyz: "x" | "y" | "z") => {
+    const targetValue = e.target.value;
+    const newOffset: Vector3 = selectOM.args.offset? selectOM.args.offset.clone(): new Vector3();
+    if (xyz == "x") {
+      if (isNumber(targetValue)){
+        newOffset.setX(Number(targetValue));
+      }
+    }
+    else if (xyz == "y") {
+      if (isNumber(targetValue)){
+        newOffset.setY(Number(targetValue));
+      }
+    }
+    else if (xyz == "z") {
+      if (isNumber(targetValue)){
+        newOffset.setZ(Number(targetValue));
+      }
+    }
+    // editor.setOffset(id, newOffset); // 表示がないので特になし
+  }
+
   return (
     <>
     <div className={styles.mainInspector}>
@@ -336,7 +393,9 @@ export const MainViewInspector = () => {
           selectOM.type == "avatar" ||
           selectOM.type == "light" || 
           selectOM.type == "three" ||
-          selectOM.type == "terrain"
+          selectOM.type == "terrain" ||
+          selectOM.type == "camera" ||
+          selectOM.type == "lightformer"
         )
       ) &&
         
@@ -352,7 +411,6 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                // value={position?(position.x).toFixed(2): ""}
                 type="text" 
                 placeholder={position?(position.x).toFixed(2): "0"}
                 onKeyDown={(e: any) => {
@@ -371,7 +429,6 @@ export const MainViewInspector = () => {
                 onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                // value={position?position.y.toFixed(2): ""}
                 type="text" 
                 placeholder={position?position.y.toFixed(2): "0"}
                 onKeyDown={(e: any) => {
@@ -390,7 +447,6 @@ export const MainViewInspector = () => {
                 onBlur={() => globalStore.editorFocus = false}
               />
               <input 
-                // value={position?position.z.toFixed(2): ""}
                 type="text" 
                 placeholder={position?position.y.toFixed(2): "0"}
                 onKeyDown={(e: any) => {
@@ -421,7 +477,6 @@ export const MainViewInspector = () => {
             </div>
             <div className={styles.inputContainer}>
               <input 
-                // value={MathUtils.radToDeg(rotation?.x).toFixed(1)}
                 type="text" 
                 placeholder={rotation?MathUtils.radToDeg(rotation.x).toFixed(1): "0"}
                 onKeyDown={(e: any) => {
@@ -492,201 +547,340 @@ export const MainViewInspector = () => {
               <input 
                 // value={scale?(scale.x).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.x).toFixed(2): "0"}
+                placeholder={scale?(scale.x).toString(): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value);
-                    changeScale({ target: { value: inputValue } }, "x");
+                    changeScale(e, "x");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newScale = scale.clone();
-                    newScale.set(e.target.value, scale.y, scale.z);
+                    const newScale = scale?scale.clone(): new Vector3(1, 1, 1);
+                    newScale.set(e.target.value, newScale.y, newScale.z);
                     setScale(newScale);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
                />
               <input 
                 // value={scale?(scale.y).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.y).toFixed(2): "0"}
+                placeholder={scale?scale.y.toString(): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value);
-                    changeScale({ target: { value: inputValue } }, "y");
+                    changeScale(e, "y");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newScale = scale.clone();
-                    newScale.set(scale.x, e.target.value, scale.z);
+                    const newScale = scale?scale.clone(): new Vector3(1, 1, 1);
+                    newScale.set(newScale.x, e.target.value, newScale.z);
                     setScale(newScale);
                   } 
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
               <input 
                 // value={scale?(scale.z).toFixed(1): ""}
                 type="text" 
-                placeholder={scale?(scale.z).toFixed(2): "0"}
+                placeholder={scale?(scale.z).toString(): "0"}
                 onKeyDown={(e: any) => {
                   if (e.key === 'Enter') {
-                    const inputValue = parseFloat(e.target.value);
-                    changeScale({ target: { value: inputValue } }, "z");
+                    changeScale(e, "z");
                   }
                 }}
                 onInput={(e: any) => {
                   if (isNumber(e.target.value)){
-                    const newScale = scale.clone();
-                    newScale.set(scale.x, scale.y, e.target.value);
+                    const newScale = scale?scale.clone(): new Vector3(1, 1, 1);
+                    newScale.set(newScale.x, newScale.y, e.target.value);
                     setScale(newScale);
                   }
                 }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
             </div>
           </div>
-          <div className={styles.material}>
+          <div className={styles.helper}>
             <div className={styles.title}>
-              {t("materialConfig")}
-            </div>
-            <div className={styles.type}>
-              <div className={styles.title}>
-                {t("type")}
-              </div>
-              <div className={styles.input}>
-                <Select
-                  options={materialOptions}
-                  value={materialType}
-                  onChange={(select) => changeMaterial(select.value, color)}
-                  styles={normalStyles}
-                  />
-              </div>
-            </div>
-            {(materialType && materialType.value !== "shader") &&
-              <div className={styles.color}>
-                <div className={styles.name}>
-                  {t("color")}
-                </div>
-                <div className={styles.pallet}>
-                  <input 
-                    type={"color"} 
-                    value={color} 
-                    onChange={(e) => changeMaterial(materialType.value, e.target.value)}
-                    onFocus={() => globalStore.editorFocus = true}
-                    onBlur={() => globalStore.editorFocus = false}
-                  />
-                  <input type={"text"} value={color} />
-                </div>
-              </div>
-            }
-            {(materialType && materialType.value === "shader") &&
-              <div className={styles.shader}>
-                <div className={styles.attachBox}>
-                  Here Attach Script
-                </div>
-              </div>
-            }
-          </div>
-          <div className={styles.physics}>
-            <div className={styles.title}>
-              {t("isPhysics")}
+              {t("helper")}
             </div>
             <div className={styles.input}>
               <input 
                 type="checkbox" 
                 className={styles.checkbox} 
-                checked={isPhysics} 
-                onInput={() => setIsPhysics(!isPhysics)}
+                checked={helper} 
+                onInput={() => onCheckHelper()}
               />
               <span className={styles.customCheckbox}></span>
             </div>
-            {isPhysics &&
-              <>
-                <Select
-                    options={physicsOptions}
-                    value={physics}
-                    onChange={onChangePhysics}
-                    styles={normalStyles}
-                />
-              </>
-            }
           </div>
-          {
-            (
-              selectOM.type == "object"
-            ) && 
-            <div className={styles.lod}>
-              <div className={styles.title}>
-              {t("isLoD")}
-              </div>
-              <div className={styles.input}>
-                <input 
-                  type="checkbox" 
-                  className={styles.checkbox} 
-                  checked={isLod} 
-                  onInput={() => onCheckLoD()}
-                />
-                <span className={styles.customCheckbox}></span>
-              </div>
-              {isLod &&
-                <a className={styles.lodbtn} onClick={() => onLoDView()}>
-                  {t("chakeLoD")}
-                </a>
-              }
-            </div>
-          }
-
-          {
-            (selectOM.type == "light" || selectOM.type == "three" || selectOM.type == "object" || selectOM.type == "avatar") && 
-            <>
-              <div className={styles.castShadow}>
-                  <div className={styles.title}>
-                    {t("castshadow")}
-                  </div>
-                  <div className={styles.input}>
-                    <input 
-                      type="checkbox" 
-                      className={styles.checkbox} 
-                      checked={castShadow} 
-                      onInput={() => onCheckCastShadow()}
-                    />
-                    <span className={styles.customCheckbox}></span>
-                  </div>
-              </div>
-              <div className={styles.visibleType}>
-                <div className={styles.title}>
-                  {t("visibleType")}
-                </div>
-                <div className={styles.input}>
-                  <Select
-                    options={visibleTypeOptions}
-                    value={visibleType}
-                    onChange={(select) => changeVisibleType(select)}
-                    styles={normalStyles}
-                    />
-                </div>
-              </div>
-            </>
-          }
-
-          <>
-            <div className={styles.helper}>
-              <div className={styles.title}>
-                {t("helper")}
-              </div>
-              <div className={styles.input}>
-                <input 
-                  type="checkbox" 
-                  className={styles.checkbox} 
-                  checked={helper} 
-                  onInput={() => onCheckHelper()}
-                />
-                <span className={styles.customCheckbox}></span>
-              </div>
-            </div>
-          </>
 
         </>
+      }
+
+      {selectOM && (
+        selectOM.type == "object" ||
+        selectOM.type == "three"
+      ) && 
+      <>
+        <div className={styles.material}>
+          <div className={styles.title}>
+            {t("materialConfig")}
+          </div>
+          <div className={styles.type}>
+            <div className={styles.title}>
+              {t("type")}
+            </div>
+            <div className={styles.input}>
+              <Select
+                options={materialOptions}
+                value={materialType}
+                onChange={(select) => changeMaterial(select.value, materialColor)}
+                styles={normalStyles}
+                />
+            </div>
+          </div>
+          {(materialType && materialType.value !== "shader") &&
+            <div className={styles.color}>
+              <div className={styles.name}>
+                {t("color")}
+              </div>
+              <div className={styles.pallet}>
+                <input 
+                  type={"color"} 
+                  value={materialColor} 
+                  onChange={(e) => changeMaterial(materialType.value, e.target.value)}
+                  onFocus={() => globalStore.editorFocus = true}
+                  onBlur={() => globalStore.editorFocus = false}
+                />
+                <input type={"text"} value={materialColor} />
+              </div>
+            </div>
+          }
+          {/** シェーダ対応準備中 */}
+          {/* {(materialType && materialType.value === "shader") &&
+            <div className={styles.shader}>
+              <div className={styles.attachBox}>
+                Here Attach Script
+              </div>
+            </div>
+          } */}
+        </div>
+        <div className={styles.physics}>
+          <div className={styles.title}>
+            {t("isPhysics")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={isPhysics} 
+              onInput={() => setIsPhysics(!isPhysics)}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+          {isPhysics &&
+            <>
+              <Select
+                options={physicsOptions}
+                value={physics}
+                onChange={onChangePhysics}
+                styles={normalStyles}
+              />
+            </>
+          }
+        </div>
+        <div className={styles.lod}>
+          <div className={styles.title}>
+          {t("isLoD")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={isLod} 
+              onInput={() => onCheckLoD()}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+          {isLod &&
+            <a className={styles.lodbtn} onClick={() => onLoDView()}>
+              {t("chakeLoD")}
+            </a>
+          }
+        </div>
+      </>
+      }
+
+      {selectOM && (
+        selectOM.type == "light" || 
+        selectOM.type == "three" || 
+        selectOM.type == "object" || 
+        selectOM.type == "avatar"
+      ) && 
+        <>
+          <div className={styles.castShadow}>
+              <div className={styles.title}>
+                {t("castshadow")}
+              </div>
+              <div className={styles.input}>
+                <input 
+                  type="checkbox" 
+                  className={styles.checkbox} 
+                  checked={castShadow} 
+                  onInput={() => onCheckCastShadow()}
+                />
+                <span className={styles.customCheckbox}></span>
+              </div>
+          </div>
+          <div className={styles.castShadow}>
+              <div className={styles.title}>
+                {t("receiveshadow")}
+              </div>
+              <div className={styles.input}>
+                <input 
+                  type="checkbox" 
+                  className={styles.checkbox} 
+                  checked={receiveShadow} 
+                  onInput={() => onCheckReceiveShadow()}
+                />
+                <span className={styles.customCheckbox}></span>
+              </div>
+          </div>
+          <div className={styles.visibleType}>
+            <div className={styles.title}>
+              {t("visibleType")}
+            </div>
+            <div className={styles.input}>
+              <Select
+                options={visibleTypeOptions}
+                value={visibleType}
+                onChange={(select) => changeVisibleType(select)}
+                styles={normalStyles}
+                />
+            </div>
+          </div>
+        </>
+      }
+
+
+      {selectOM && selectOM.type == "avatar" &&
+      <>
+        {/* オフセットは現在自動で設定されます。 */}
+        {/* <div className={styles.offset}>
+          <div className={styles.title}>
+            {t("offset")}
+          </div>
+          <div className={styles.name}>
+            <div>X</div>
+            <div>Y</div>
+            <div>Z</div>
+          </div>
+          <div className={styles.inputContainer}>
+            <input 
+              type="text" 
+              placeholder={offset?offset.x.toString(): "0"}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  changeOffset(e, "x");
+                }
+              }}
+              onInput={(e: any) => {
+                if (isNumber(e.target.value)){
+                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                  newOffset.set(e.target.value, newOffset.y, newOffset.z);
+                  setOffset(newOffset);
+                }
+              }}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+              />
+            <input 
+              // value={scale?(scale.y).toFixed(1): ""}
+              type="text" 
+              placeholder={offset?offset.y.toString(): "0"}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  changeOffset(e, "y");
+                }
+              }}
+              onInput={(e: any) => {
+                if (isNumber(e.target.value)){
+                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                  newOffset.set(newOffset.x, e.target.value, newOffset.z);
+                  setOffset(newOffset);
+                } 
+              }}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+            />
+            <input 
+              // value={scale?(scale.z).toFixed(1): ""}
+              type="text" 
+              placeholder={offset?offset.z.toString(): "0"}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  changeOffset(e, "z");
+                }
+              }}
+              onInput={(e: any) => {
+                if (isNumber(e.target.value)){
+                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                  newOffset.set(newOffset.x, newOffset.y, e.target.value);
+                  setOffset(newOffset);
+                }
+              }}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+            />
+          </div>
+        </div> */}
+      </>
+      }
+
+      {(
+        selectOM && selectOM.type == "object"
+      ) && 
+      <>
+        <div className={styles.animations}>
+          {selectOM.animations && selectOM.animations.length > 0 &&
+            <>
+              <div className={styles.title}>
+                {t("animations")}
+                </div>
+              <div className={styles.input}>
+                <Select
+                  options={
+                    selectOM.animations.map((anim: AnimationClip) => {
+                      return {value: anim.name, label: anim.name}
+                    })
+                  }
+                  value={defalutAnim}
+                  onChange={(select) => changeDefaultAnimation(select)}
+                  styles={normalStyles}
+                />
+              </div>
+            </>
+        }
+        </div>
+        <div className={styles.animLoop}>
+          <div className={styles.title}>
+              {t("animationLoop")}
+          </div>
+          <div className={styles.input}>
+            <input 
+              type="checkbox" 
+              className={styles.checkbox} 
+              checked={background} 
+              onInput={() => onCheckAnimationLoop()}
+            />
+            <span className={styles.customCheckbox}></span>
+          </div>
+        </div>
+      </>
       }
 
       {selectOM && selectOM.type == "environment" &&
@@ -759,6 +953,21 @@ export const MainViewInspector = () => {
         selectOM.type == "light"
         ) &&
       <>
+        <div className={styles.color}>
+          <div className={styles.name}>
+            {t("color")}
+          </div>
+          <div className={styles.pallet}>
+            <input 
+              type={"color"} 
+              value={color} 
+              onChange={(e) => changeColor(e)}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+            />
+            <input type={"text"} value={color} />
+          </div>
+        </div>
         <div className={styles.intensity}>
           <div className={styles.name}>
             {t("intensity")}: {intensity}

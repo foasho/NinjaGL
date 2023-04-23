@@ -1,6 +1,6 @@
 {
   "name": "ninja-core",
-  "version": "0.1.70",
+  "version": "0.1.94",
   "private": false,
   "author": "ShoOsaka",
   "license": "MIT",
@@ -28,6 +28,7 @@
     "@react-three/drei": "^9.65.3",
     "@react-three/fiber": ">=8.11.0",
     "@react-three/postprocessing": "^2.7.0",
+    "@react-three/xr": "^5.4.1",
     "axios": "^1.3.3",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
@@ -63,9 +64,9 @@
     "react-scripts": "5.0.1",
     "rimraf": "^5.0.0",
     "rollup": "^2.79.1",
+    "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.34.1",
-    "rollup-plugin-polyfill-node": "^0.12.0",
     "typescript": "4.9.5"
   },
   "peerDependencies": {

@@ -139,50 +139,52 @@
                 font-weight: bolder;
             }
         }
-        .color {
-            margin-top: 10px;
-            .name {
-                font-size: 12px;
-                font-weight: bolder;
+    }
+
+    .color {
+        margin-top: 10px;
+        .name {
+            font-size: 12px;
+            font-weight: bolder;
+        }
+        .pallet {
+            padding-top: 2px;
+            line-height: 30px;
+            display: flex;
+            vertical-align: middle;
+            input[type="color"] {
+                cursor: pointer;
+                background-color: transparent;
+                width: 30px; /* 幅を指定する */
+                height: 30px; /* 高さを指定する */
+                padding: 0; /* パディングを0にする */
+                border: none; /* ボーダーを消す */
+                border-radius: 50%; /* 角丸にする */
+                outline: none; /* アウトラインを消す */
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* 影をつける */
             }
-            .pallet {
-                padding-top: 2px;
-                line-height: 30px;
-                display: flex;
-                vertical-align: middle;
-                input[type="color"] {
-                    cursor: pointer;
-                    background-color: transparent;
-                    width: 30px; /* 幅を指定する */
-                    height: 30px; /* 高さを指定する */
-                    padding: 0; /* パディングを0にする */
-                    border: none; /* ボーダーを消す */
-                    border-radius: 50%; /* 角丸にする */
-                    outline: none; /* アウトラインを消す */
-                    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* 影をつける */
-                }
-                input[type="text"] {
-                    font-size: 12px;
-                    background-color: #3a3939;
-                    color: #f2f2f2;
-                    border: none;
-                    padding: 7px 10px;
-                    border-radius: 5px;
-                    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
-                    outline: none;
-                    width: 70%; /* 幅を計算して指定する */
-                    text-align: right;
-                    margin: auto;
-                }
-                input[type="text"]:focus {
-                    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-                  }
-                input[type="text"]:last-child {
-                    margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
-                }
+            input[type="text"] {
+                font-size: 12px;
+                background-color: #3a3939;
+                color: #f2f2f2;
+                border: none;
+                padding: 7px 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+                outline: none;
+                width: 70%; /* 幅を計算して指定する */
+                text-align: right;
+                margin: auto;
+            }
+            input[type="text"]:focus {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+              }
+            input[type="text"]:last-child {
+                margin-right: 0; /* 最後のinput要素にはマージンを追加しない */
             }
         }
     }
+    
 
     .physics {
         margin: 15px 0px;

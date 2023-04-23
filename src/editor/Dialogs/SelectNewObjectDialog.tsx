@@ -45,6 +45,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectEnvironment = (value: string) => {
     prop.response({ type: "environment", value: value });
   }
+  const selectEffect = (value: string) => {
+    prop.response({ type: "effect", value: value });
+  }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
     console.log(e);
@@ -131,6 +134,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
               <div className={styles.name}>
                 {t("lightformer")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("effect")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/effect.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("effect")}
               </div>
             </div>
           </>
@@ -363,6 +374,36 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           </>
         }
 
+        {selectType == "effect" &&
+          <>
+            <div className={styles.card} onClick={() => {selectEffect("bloom")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/bloom.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("bloom")}
+              </div>
+            </div>
+            {/* SSRはバグ中 */}
+            {/* <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/ssr.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("ssr")}
+              </div>
+            </div> */}
+            <div className={styles.card} onClick={() => {selectEffect("lut")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/lut.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("lut")}
+              </div>
+            </div>
+          </>
+        }
+
         </div>
       </div>
     </div>
@@ -373,7 +414,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 
 interface ISelectNewObjectDialog {
   type: "light" | "sky" | "sound" | "object" | "three" 
-    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer";
+    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer" | "effect";
   value: string;
 }
 /**

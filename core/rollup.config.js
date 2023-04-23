@@ -3,9 +3,8 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
-// import resolve from '@rollup/plugin-node-resolve';
 import alias from '@rollup/plugin-alias';
-// import polyfillNode from 'rollup-plugin-polyfill-node';
+import nodePolyfills from 'rollup-plugin-node-polyfills'; // この行を追加
 import path from 'path';
 
 export default [
@@ -35,13 +34,12 @@ export default [
           },
         ],
       }),
-      // resolve(),
       typescript({ tsconfig: './tsconfig.json' }),
       nodeResolve({ preferBuiltins: false }),
       commonjs(),
       json(),
       terser(),
-      // polyfillNode(),
+      nodePolyfills(), // この行を変更
     ],
   },
   {

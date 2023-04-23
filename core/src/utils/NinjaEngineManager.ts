@@ -60,22 +60,29 @@ export class NinjaEngine {
    * 初期化
    */
   async initialize() {
-    this.config = this.config?this.config: InitMobileConfipParams;
-    this.world = new World();
-    this.octree = new Octree({
-      min: new Vector3(
-        -this.config.mapsize / 2,
-        -this.config.mapsize / 2,
-        -this.config.mapsize / 2
-      ),
-      max: new Vector3(
-        this.config.mapsize / 2,
-        this.config.mapsize / 2,
-        this.config.mapsize / 2
-      ),
-      maxDepth: this.config.octreeDepth
-    } as IOctree);
-    this.world.addOctree(this.octree);
+    this.config = this.config? this.config: InitMobileConfipParams;
+    this.detectDevice();// デバイスを検出
+    if (this.config.autoScale){
+      // AutoScaleが有効の場合デバイスに合わせて設定を変更する
+      this.setConfigFromDevice();
+    }
+    if (this.config.physics === "octree"){
+      this.world = new World();
+      this.octree = new Octree({
+        min: new Vector3(
+          -this.config.mapsize / 2,
+          -this.config.mapsize / 2,
+          -this.config.mapsize / 2
+        ),
+        max: new Vector3(
+          this.config.mapsize / 2,
+          this.config.mapsize / 2,
+          this.config.mapsize / 2
+        ),
+        maxDepth: this.config.octreeDepth
+      } as IOctree);
+      this.world.addOctree(this.octree);
+    }
     this.possibleLayers = [...Array((this.config.layerGridNum * this.config.layerGridNum))].map((_, idx) => { return idx + 1 });
     this.initializeLoadOMs();
     this.runScriptsInitialize();
@@ -107,6 +114,33 @@ export class NinjaEngine {
   }
   getCanvasPos = (): Vector2 => {
     return this.canvasPos;
+  }
+
+  /**
+   * 接続デバイスを検出
+   */
+  detectDevice = () => {
+    const ua = navigator.userAgent;
+    if (ua.indexOf('iPhone') > 0 || ua.indexOf('iPod') > 0 || (ua.indexOf('Android') > 0 && ua.indexOf('Mobile') > 0)) {
+      this.deviceType = "mobile";
+    } else if (ua.indexOf('iPad') > 0 || ua.indexOf('Android') > 0) {
+      this.deviceType = "tablet";
+    } else {
+      this.deviceType = "desktop";
+    }
+  }
+
+  /**
+   * 接続デバイスから設定を変更する
+   */
+  setConfigFromDevice = () => {
+    if (this.deviceType === "mobile") {
+      this.config = InitMobileConfipParams;
+    } else if (this.deviceType === "tablet") {
+      this.config = InitTabletConfipParams;
+    } else {
+      this.config = InitDesktopConfipParams;
+    }
   }
 
   /**
@@ -558,6 +592,20 @@ export class NinjaEngine {
   }
 
   /**
+   * テキストデータを取得する
+   */
+  getTexts(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "text");
+  }
+
+  /**
+   * テキスト3Dデータを取得する
+   */
+  getTexts3D(): IObjectManagement[] {
+    return this.oms.filter(om => om.type == "text3d");
+  }
+
+  /**
    * Threeデータを取得する
   */
   getThreeObjects(): IObjectManagement[] {
@@ -817,6 +865,17 @@ export class NinjaEngine {
   }
 
   /**
+   * LoopAnimationを実行する
+   */
+  loopAnimation(timeDelta: number) {
+    this.oms.map(om => {
+      if (om.args.defaultAnimation && om.animations.length > 0 && om.mixer) {
+        om.mixer.update(timeDelta);
+      }
+    });
+  }
+
+  /**
    * ユーザースクリプトの初期関数を実行する
    */
   runScriptsInitialize() {
@@ -855,6 +914,8 @@ export class NinjaEngine {
       // this.updateViewableObject();
       // 物理ワールドを更新する
       if (this.world) this.world.step(timeDelta, input);
+      // ループアニメーションがあれば更新する
+      this.loopAnimation(timeDelta);
       // 動態管理をリフレッシュする
       this.moveOrderKeys = [];
       // スクリプトを実行する

@@ -1,6 +1,5 @@
-import { useFrame } from "@react-three/fiber";
 import { Environment, Lightformer, useHelper } from "@react-three/drei";
-import { use, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "ninja-core";
 import { Euler, Vector3, BoxHelper, DoubleSide } from "three";
@@ -97,7 +96,8 @@ const LightFormerControl = ({ om }) => {
     if (om.args.rotation)catchRef.current.rotation.copy(om.args.rotation.clone());
     if (om.args.scale)catchRef.current.scale.copy(om.args.scale.clone());
     if (om.args.lookAt) {
-      catchRef.current.lookAt(om.args.lookAt);
+      const newVector = new Vector3().copy(om.args.lookAt);
+      catchRef.current.lookAt(newVector);
     }
   }, [om]);
 
@@ -138,7 +138,8 @@ const LightFormer = ({ om }) => {
       scale={om.args.scale}
       onUpdate={(self) => {
         if (om.args.lookAt){
-          self.lookAt(om.args.lookAt);
+          const newVector = new Vector3().copy(om.args.lookAt);
+          self.lookAt(newVector);
         }
       }}
      />

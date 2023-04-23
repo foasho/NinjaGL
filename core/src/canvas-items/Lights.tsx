@@ -1,14 +1,13 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 import React, { useContext, useEffect, useState, useRef } from "react"
-import { MathUtils } from "three";
+import { MathUtils, Vector2 } from "three";
 import { ShaderMaterial } from "three";
 
 const Light = (om: IObjectManagement) => {
   const ref = useRef<any>();
   let light = undefined;
-  let color: string = (om.args.materialData && om.args.materialData.value) 
-    ? om.args.materialData.value : '#fadcb9';
+  let color: string = (om.args.color) ? om.args.color : '#fadcb9';
   if (om.args.type == "spot") {
     light = (
       <>

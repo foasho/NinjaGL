@@ -81,6 +81,10 @@ export class NinjaEditorManager {
     this.ums = [];
     this.camera = undefined;
     this.tms = [];
+    this.sms = [];
+    this.notifyOMsChanged();
+    this.notifySMsChanged();
+    this.notifyCameraChanged();
   }
 
   /**
@@ -210,7 +214,7 @@ export class NinjaEditorManager {
   /**
    * CastShadowを変更
    */
-  setreceiveShadow(id: string, value: boolean){
+  setReceiveShadow(id: string, value: boolean){
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.receiveShadow = value;
@@ -225,6 +229,17 @@ export class NinjaEditorManager {
     const target = this.oms.find(om => om.id == id);
     if (id && target) {
       target.args.helper = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+  /**
+   * Colorの変更
+   */
+  setColor(id: string, value: string){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.color = value;
       this.notifyOMIdChanged(id);
     }
   }
@@ -333,6 +348,41 @@ export class NinjaEditorManager {
       this.notifyEnvChanged();
     }
   }
+
+  /**
+   * デフォルトアニメーションの設定
+   */
+  setDefaultAnimation(id: string, value: string){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.defaultAnimation = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+  /**
+   * AnimationLoopの設定
+   */
+  setAnimationLoop(id: string, value: boolean){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      target.args.animationLoop = value;
+      this.notifyOMIdChanged(id);
+    }
+  }
+
+  /**
+   * Offsetの設定
+   */
+  setOffset(id: string, offset: Vector3){
+    const target = this.oms.find(om => om.id == id);
+    if (id && target) {
+      if (target.args.offset == null) target.args.offset = new Vector3(0, 0, 0);
+      target.args.offset.copy(offset);
+      this.notifyOMIdChanged(id);
+    }
+  }
+
 
 
   /**
@@ -644,6 +694,43 @@ export class NinjaEditorManager {
   }
 
   /**
+   * Text3D取得
+   */
+  getText3Ds = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "text3d");
+    return data;
+  }
+  private text3DChangedListeners: (() => void)[] = [];
+  onText3DChanged(listener: () => void) {
+    this.text3DChangedListeners.push(listener);
+  }
+  offText3DChanged(listener: () => void) {
+    this.text3DChangedListeners = this.text3DChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyText3DChanged() {
+    this.text3DChangedListeners.forEach(l => l());
+  }
+
+
+  /**
+   * Effect取得
+   */
+  getEffects = (): IObjectManagement[] => {
+    const data = this.oms.filter(om => om.type == "effect");
+    return data;
+  }
+  private effectChangedListeners: (() => void)[] = [];
+  onEffectChanged(listener: () => void) {
+    this.effectChangedListeners.push(listener);
+  }
+  offEffectChanged(listener: () => void) {
+    this.effectChangedListeners = this.effectChangedListeners.filter( l => l !== listener );
+  }
+  protected notifyEffectChanged() {
+    this.effectChangedListeners.forEach(l => l());
+  }
+
+  /**
    * カメラ取得
    */
   getCameras = (): IObjectManagement[] => {
@@ -735,6 +822,12 @@ export class NinjaEditorManager {
     }
     if (type == "object"){
       this.notifyObjectChanged();
+    }
+    if (type == "effect"){
+      this.notifyEffectChanged();
+    }
+    if (type == "text3d"){
+      this.notifyText3DChanged();
     }
   }
 
@@ -866,6 +959,8 @@ export class NinjaEditorManager {
     this.ums = njcFile.ums;
     console.log("<< Complete NJC File >>");
     this.notifyNJCChanged();
+    this.notifyOMsChanged();
+    this.notifySMsChanged();
   }
   private njcChangedListeners: (() => void)[] = [];
   onNJCChanged(listener: () => void) {

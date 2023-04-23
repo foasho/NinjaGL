@@ -27,34 +27,38 @@ export const StaticObjects = () => {
   )
 }
 
-interface IStaticObject {
-  om: IObjectManagement;
-}
-const StaticObject = (props: IStaticObject) => {
+const StaticObject = ({ om }) => {
   useEffect(() => {
-    if (props.om.object) {
+    if (om.object) {
       // posistion, rotation, scale
-      if (props.om.args.position) {
-        props.om.object.position.copy(props.om.args.position);
+      if (om.args.position) {
+        om.object.position.copy(om.args.position);
       }
-      if (props.om.args.rotation) {
-        props.om.object.rotation.copy(props.om.args.rotation);
+      if (om.args.rotation) {
+        om.object.rotation.copy(om.args.rotation);
       }
-      if (props.om.args.scale) {
-        props.om.object.scale.copy(props.om.args.scale);
+      if (om.args.scale) {
+        om.object.scale.copy(om.args.scale);
       }
     }
     // layerNum
-    if (props.om.layerNum) {
-      props.om.object.layers.set(props.om.layerNum);
+    if (om.layerNum) {
+      om.object.layers.set(om.layerNum);
     }
-  }, [props.om.object]);
+    // Animationがあればmiserにセット
+    if (om.args.defaultAnimation){
+      const animation = om.animations.find((anim) => anim.name == om.args.defaultAnimation);
+      if (animation && om.mixer){
+        om.mixer.clipAction(animation).play();
+      }
+    }
+  }, [om.object]);
 
   return (
     <>
-      {props.om.object &&
+      {om.object &&
         <primitive 
-          object={props.om.object}
+          object={om.object}
         />
       }
     </>

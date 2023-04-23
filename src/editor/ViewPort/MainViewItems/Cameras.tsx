@@ -1,17 +1,34 @@
 import { IObjectManagement } from "ninja-core";
 import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { PerspectiveCamera, useGLTF, useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
-import { CameraHelper, Euler, Vector3, BoxHelper, Mesh, Group, PerspectiveCamera as TPerspectiveCamera } from "three";
-import { useFrame } from "@react-three/fiber";
+import { 
+  CameraHelper, 
+  Euler, 
+  Vector3, 
+  BoxHelper, 
+  Mesh, 
+  Group, 
+  PerspectiveCamera as TPerspectiveCamera,
+  Camera as ThreeCamera
+} from "three";
 
 export const Cameras = () => {
   const editor = useContext(NinjaEditorContext);
-  const cameras = editor ? editor.getCameras() : null;
-
+  const [cameras, setCameras] = useState<IObjectManagement[]>([]);
+  useEffect(() => {
+    setCameras(editor.getCameras());
+    const handleCameraChanged = () => {
+      setCameras([...editor.getCameras()]);
+    }
+    editor.onCameraChanged(handleCameraChanged);
+    return () => {
+      editor.offCameraChanged(handleCameraChanged);
+    }
+  }, [editor]);
   return (
     <>
       {cameras.map((om) => {
@@ -31,9 +48,9 @@ const Camera = (props: ICamera) => {
   const catchRef = useRef<any>();
   const state = useSnapshot(globalStore);
   const { scene } = useGLTF("/fileicons/camera.glb");
-  // scene.scale.set(0.33, 0.33, 0.33);
 
-  useHelper((ref), CameraHelper);
+  useHelper(ref, CameraHelper);
+  useHelper(catchRef, BoxHelper);
 
   const onDragStart = () => {
     globalStore.pivotControl = true;
@@ -57,7 +74,7 @@ const Camera = (props: ICamera) => {
 
   useEffect(() => {
     const init = () => {
-      if (scene && ref.current) {
+      if (ref.current  && catchRef.current) {
         if (props.om.args.position){
           ref.current.position.copy(props.om.args.position.clone());
           catchRef.current.position.copy(props.om.args.position.clone());
@@ -85,10 +102,6 @@ const Camera = (props: ICamera) => {
         if (props.om.args.aspect) {
           ref.current.aspect = props.om.args.aspect;
         }
-        // const cameraDirection = new Vector3();
-        // ref.current.getWorldDirection(cameraDirection);
-        // // パラメータに追加
-        // editor.setCameraDirection(id, cameraDirection);
       }
     }
     init();
@@ -108,7 +121,6 @@ const Camera = (props: ICamera) => {
       <>
         {!state.editorFocus &&
           <PivotControls
-            // scale={5}
             object={(state.currentId == id) ? catchRef : undefined}
             visible={(state.currentId == id)}
             depthTest={false}
@@ -121,13 +133,14 @@ const Camera = (props: ICamera) => {
         }
         <primitive 
           ref={catchRef}
-          object={scene} 
+          object={scene}
           onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
           onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
         />
-        <PerspectiveCamera
-          makeDefault={false}
+        <perspectiveCamera
           ref={ref}
+          visible={false}
+          frustumCulled={true}
         />
       </>
     }

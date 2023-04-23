@@ -2,7 +2,7 @@ import { reqApi } from "@/services/ServciceApi";
 import { Environment, OrbitControls, useHelper } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { DragEventHandler, MutableRefObject, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils, BoxHelper, Scene } from "three";
+import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils, BoxHelper, Scene, Box3 } from "three";
 import { GLTFLoader } from "three-stdlib";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { useTranslation } from "react-i18next";
@@ -13,8 +13,18 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
-import { convertObjectToFile, exportGLTF } from "ninja-core";
+import { convertObjectToFile, exportGLTF, gltfLoader } from "ninja-core";
 
+interface IOffsetParams {
+  tp: {
+    offset: Vector3,
+    lookAt: Vector3,
+  },
+  fp: {
+    offset: Vector3,
+    lookAt: Vector3,
+  },
+}
 
 export const PlayerEditor = () => {
   const editor = useContext(NinjaEditorContext);
@@ -28,18 +38,19 @@ export const PlayerEditor = () => {
   const { t } = useTranslation();
   const contentState = useSnapshot(globalContentStore);
   const { data: session } = useSession();
+  const [offsetParams, setOffsetParams] = useState<IOffsetParams>();
   /**
    * ドラッグアンドドロップでモデルを読み込む
    * @param e 
    */
   const handleDrop: DragEventHandler<HTMLDivElement> = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const loader = new GLTFLoader();
+    // const loader = new GLTFLoader();
     if (!contentState.currentType) {
       // 外部からのモデル読み込み
       const file = e.dataTransfer?.files[0];
       if (!file) return;
-      loader.load(URL.createObjectURL(file), (gltf) => {
+      gltfLoader.load(URL.createObjectURL(file), (gltf) => {
         const _mixer = new AnimationMixer(gltf.scene);
         setMixer(_mixer);
         setAnimations(gltf.animations);
@@ -52,7 +63,7 @@ export const PlayerEditor = () => {
       if (
         type == "gltf"
       ) {
-        loader.load(
+        gltfLoader.load(
           contentState.currentUrl,
           async (gltf) => {
             const scene = gltf.scene || gltf.scenes[0] as Object3D;
@@ -132,98 +143,161 @@ export const PlayerEditor = () => {
     )
   }
 
-    /**
+  /**
+   * 読み込んだアバターからカメラのオフセットと LookAt 座標を計算する
+   * @param avatar 
+   * @param offsetFactor 
+   * @param heightFactor 
+   * @returns 
+   */
+  const calculateCameraOffsetAndLookAt = (
+    avatar: Object3D, 
+    offsetFactor = 1.0, 
+    heightFactor = 1.0
+  ) =>{
+    // アバターのバウンディングボックスを計算
+    const avatarBox3 = new Box3().setFromObject(avatar);
+
+    // アバターのバウンディングボックスのサイズを取得
+    const avatarSize = new Vector3();
+    avatarBox3.getSize(avatarSize);
+
+    // サイズに基づいてサードパーソンのカメラオフセットと LookAt 座標を計算
+    const tpCameraOffset = new Vector3(
+      -avatarSize.x * offsetFactor,
+      avatarSize.y * heightFactor,
+      -avatarSize.z * offsetFactor
+    );
+
+    const tpCameraLookAtOffset = new Vector3(
+      0,
+      avatarSize.y * 0.75, // アバターの高さの 75% に注視点を設定
+      0
+    );
+
+    // ファーストパーソンのカメラオフセットと LookAt 座標を計算
+    const fpCameraOffset = new Vector3(0, tpCameraLookAtOffset.y, 0);
+    const fpCameraLookAtOffset = new Vector3(0, tpCameraLookAtOffset.y, 1); // 人間の標準の LookAt に近い形で設定
+
+    setOffsetParams({
+      tp: {
+        offset: tpCameraOffset,
+        lookAt: tpCameraLookAtOffset,
+      },
+      fp: {
+        offset: fpCameraOffset,
+        lookAt: fpCameraLookAtOffset,
+      },
+    });
+    // return {
+    //   tp: {
+    //     offset: tpCameraOffset,
+    //     lookAt: tpCameraLookAtOffset,
+    //   },
+    //   fp: {
+    //     offset: fpCameraOffset,
+    //     lookAt: fpCameraLookAtOffset,
+    //   },
+    // };
+  }
+
+  /**
    * 保存する
    */
-    const onSave = async (animMapper) => {
-      // 最低限typeが選択されていればOK
-      if (playerState.type && scene) {
-        //ファイル名の確認
-        // const objectClone = scene.clone();
-        const target = SkeletonUtils.clone(scene);
-        target.animations = animations;
-        console.log("animation checks");
-        console.log(target);
-        console.log("usedata check")
-        const type = playerState.type;
-        console.log(type);
-        const file = await convertObjectToFile(
-          target, 
-          { 
-            animMapper: animMapper,
-            type: type,
-          }
-        );
-        // const arrayBufferToBlob = (arrayBuffer, mimeType) => {
-        //   return new Blob([arrayBuffer], { type: mimeType });
-        // }
-        // const tscene = new Scene();
-        // tscene.add(target);
-        // const ab = await exportGLTF(tscene);
-        // const mimeType = 'application/octet-stream';
-        // const blob = arrayBufferToBlob(ab, mimeType);
+  const onSave = async (animMapper) => {
+    // 最低限typeが選択されていればOK
+    if (playerState.type && scene) {
+      //ファイル名の確認
+      const target = SkeletonUtils.clone(scene);
+      target.animations = animations;
+      console.log("animation checks");
+      console.log(target);
+      console.log("usedata check")
+      const type = playerState.type;
+      console.log(type);
+      target.userData = {
+        type: type,
+        animMapper: animMapper,
+        offsetParams: offsetParams,
+        defaultMode: "tp"
+      };
+      const file = await convertObjectToFile(
+        target, 
+        { 
+          animMapper: animMapper,
+          type: type,
+        }
+      );
+      // const arrayBufferToBlob = (arrayBuffer, mimeType) => {
+      //   return new Blob([arrayBuffer], { type: mimeType });
+      // }
+      // const tscene = new Scene();
+      // tscene.add(target);
+      // const ab = await exportGLTF(tscene);
+      // const mimeType = 'application/octet-stream';
+      // const blob = arrayBufferToBlob(ab, mimeType);
 
-        Swal.fire({
-          title: t("inputFileName"),
-          input: 'text',
-          showCancelButton: true,
-          confirmButtonText: t("confirmSave"),
-          showLoaderOnConfirm: true,
-          preConfirm: async (inputStr: string) => {
-            //バリデーションを入れたりしても良い
-            if (inputStr.length == 0) {
-              return Swal.showValidationMessage(t("leastInput"));
-            }
-            if (session){
-              // ログインしていればストレージに保存
-              const formData = new FormData();
-              formData.append("file", file);
-              // formData.append("file", blob);
-              const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/players`;
-              const keyPath = (uploadPath + `/${inputStr}.glb`).replaceAll("//", "/");
-              formData.append("filePath", keyPath);
-              try {
-                const response = await fetch("/api/storage/upload", {
-                  method: "POST",
-                  body: formData,
-                });
-                if (!response.ok) {
-                  throw new Error("Error uploading file");
-                }
-                const result = await response.json();
-                // Success message
-                Swal.fire({
-                  icon: 'success',
-                  title: t("success"),
-                  text: t("saveSuccess") + `\npersonal/players/${inputStr}.glb`,
-                });
-              } catch (error) {
-                console.error("Error:", error.message);
-              }
-            }
-            else {
-              // ログインしていなければダウンロード
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(file);
-              // link.href = URL.createObjectURL(blob);
-              link.download = `${inputStr}.glb`;
-              link.click();
-              link.remove();
-            }
-          },
-          allowOutsideClick: function () {
-            return !Swal.isLoading();
+      Swal.fire({
+        title: t("inputFileName"),
+        input: 'text',
+        showCancelButton: true,
+        confirmButtonText: t("confirmSave"),
+        showLoaderOnConfirm: true,
+        preConfirm: async (inputStr: string) => {
+          //バリデーションを入れたりしても良い
+          if (inputStr.length == 0) {
+            return Swal.showValidationMessage(t("leastInput"));
           }
-        });
-      }
-      else {
-        Swal.fire({
-          icon: 'error',
-          title: t("error"),
-          text: t("leastSelect"),
-        });
-      }
+          if (session){
+            // ログインしていればストレージに保存
+            const formData = new FormData();
+            formData.append("file", file);
+            // formData.append("file", blob);
+            const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/players`;
+            const keyPath = (uploadPath + `/${inputStr}.glb`).replaceAll("//", "/");
+            formData.append("filePath", keyPath);
+            try {
+              const response = await fetch("/api/storage/upload", {
+                method: "POST",
+                body: formData,
+              });
+              if (!response.ok) {
+                throw new Error("Error uploading file");
+              }
+              const result = await response.json();
+              // Success message
+              Swal.fire({
+                icon: 'success',
+                title: t("success"),
+                text: t("saveSuccess") + `\npersonal/players/${inputStr}.glb`,
+              });
+            } catch (error) {
+              console.error("Error:", error.message);
+            }
+          }
+          else {
+            // ログインしていなければダウンロード
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(file);
+            // link.href = URL.createObjectURL(blob);
+            link.download = `${inputStr}.glb`;
+            link.click();
+            link.remove();
+          }
+        },
+        allowOutsideClick: function () {
+          return !Swal.isLoading();
+        }
+      });
     }
+    else {
+      Swal.fire({
+        icon: 'error',
+        title: t("error"),
+        text: t("leastSelect"),
+      });
+    }
+  }
 
   return (
     <>
