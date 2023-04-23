@@ -1,6 +1,6 @@
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "./NinjaProps";
 import { saveAs } from "file-saver";
-import { Euler, Vector3, Object3D, Mesh, Scene, LoadingManager } from "three";
+import { Euler, Vector3, Object3D, Mesh, Scene, LoadingManager, Quaternion } from "three";
 import { GLTFLoader, SkeletonUtils, DRACOLoader, KTX2Loader } from "three-stdlib";
 import JSZip from 'jszip';
 import { MeshoptDecoder } from "meshoptimizer";
@@ -11,7 +11,7 @@ const MANAGER = new LoadingManager();
 const THREE_PATH = `https://unpkg.com/three@0.149.0`;
 export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
 export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
-const gltfLoader = new GLTFLoader()
+export const gltfLoader = new GLTFLoader()
   .setCrossOrigin('anonymous')
   .setDRACOLoader( DRACO_LOADER )
   .setMeshoptDecoder( MeshoptDecoder );
@@ -201,6 +201,28 @@ export const loadNJCFile = async (
           om.args.scale.x, 
           om.args.scale.y, 
           om.args.scale.z
+        );
+      }
+      if (om.args && om.args.quaternion){
+        om.args.quaternion = new Quaternion(
+          om.args.quaternion._x,
+          om.args.quaternion._y,
+          om.args.quaternion._z,
+          om.args.quaternion._w
+        );
+      }
+      if (om.args && om.args.cameraDirection){
+        om.args.cameraDirection = new Vector3(
+          om.args.cameraDirection.x,
+          om.args.cameraDirection.y,
+          om.args.cameraDirection.z
+        );
+      }
+      if (om.args && om.args.offset){
+        om.args.offset = new Vector3(
+          om.args.offset.x,
+          om.args.offset.y,
+          om.args.offset.z
         );
       }
       njcFile.addOM(om);

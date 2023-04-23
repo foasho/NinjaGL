@@ -20,7 +20,7 @@ import {
   AiFillFolderOpen
 } from "react-icons/ai";
 import Swal from "sweetalert2";
-import { InitScriptManagement } from "ninja-core";
+import { gltfLoader, InitScriptManagement } from "ninja-core";
 import { useSnapshot } from "valtio";
 import { globalContentStore, globalScriptStore } from "../Store";
 import { useSession } from "next-auth/react";
@@ -645,10 +645,10 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   )
 }
 
-const MANAGER = new LoadingManager();
-const THREE_PATH = `https://unpkg.com/three@0.149.0`;
-export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
-export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
+// const MANAGER = new LoadingManager();
+// const THREE_PATH = `https://unpkg.com/three@0.149.0`;
+// export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
+// export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
 
 /**
  * 
@@ -699,13 +699,7 @@ const CreateGLTFImage = (gltfUrl): Promise<string> => {
   spotLight.position.set(-3, 3, -3);
   scene.add(spotLight);
   scene.add(directionalLight);
-
-  // Create GLTF Loader
-  const gltfLoader = new GLTFLoader()
-        .setCrossOrigin('anonymous')
-        .setDRACOLoader( DRACO_LOADER )
-        .setMeshoptDecoder( MeshoptDecoder );
-
+  
   // Load GLTF and Making Image
   return new Promise((resolve) => {
     gltfLoader.load(

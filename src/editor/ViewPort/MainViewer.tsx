@@ -15,7 +15,7 @@ import { TiSpanner } from "react-icons/ti";
 import { ImEarth } from "react-icons/im";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
-import { useInputControl } from "ninja-core";
+import { gltfLoader, useInputControl } from "ninja-core";
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";
@@ -28,7 +28,7 @@ import { useSnapshot } from "valtio";
 import { globalConfigStore, globalContentStore, globalStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
-import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
+// import { DRACO_LOADER } from "../Hierarchy/ContentViewer";
 import { MyTexts } from "./MainViewItems/MyTexts";
 import { MyEffects } from "./MainViewItems/MyEffects";
 
@@ -66,10 +66,10 @@ export const MainViewer = () => {
    */
   const handleDrop = async (e) => {
     e.preventDefault();
-    const loader = new GLTFLoader()
-          .setCrossOrigin('anonymous')
-          .setDRACOLoader( DRACO_LOADER )
-          .setMeshoptDecoder( MeshoptDecoder );
+    // const loader = new GLTFLoader()
+    //       .setCrossOrigin('anonymous')
+    //       .setDRACOLoader( DRACO_LOADER )
+    //       .setMeshoptDecoder( MeshoptDecoder );
     if (!contentsState.currentUrl) {
       /**
        * ここは、一度アセットに落として、表示する必要がある
@@ -104,7 +104,7 @@ export const MainViewer = () => {
           loadingRef.current.style.display = "block";
         }
         const filePath = contentsState.currentUrl;
-        loader.load(
+        gltfLoader.load(
           filePath,
           async (gltf) => {
             const scene = gltf.scene || gltf.scenes[0] as Object3D;

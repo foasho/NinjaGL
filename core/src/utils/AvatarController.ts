@@ -190,10 +190,20 @@ export class AvatarController {
     };
   }
 
-  setCamera(camera: PerspectiveCamera | OrthographicCamera, offset?: Vector3) {
+
+  /**
+   * カメラ情報をセットする
+   * @param camera 
+   * @param offset 
+   * @param lookAtOffset 
+   */
+  setCamera(camera: PerspectiveCamera | OrthographicCamera, offset?: Vector3, lookAtOffset?: Vector3) {
     this.camera = camera;
     if (offset) this.cameraOffset.copy(offset);
+    if (lookAtOffset) this.cameraLookAtOffset.copy(lookAtOffset);
   }
+
+  
 
   /**
    * 更新処理

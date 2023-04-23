@@ -40,6 +40,7 @@ export const MainViewInspector = () => {
   const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
   const [rotation, setRotation] = useState<Euler>(selectOM?.object?.rotation);
   const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
+  // const [offset, setOffset] = useState<Vector3>();
   const { t } = useTranslation();
 
   
@@ -117,6 +118,7 @@ export const MainViewInspector = () => {
         if (selectOM.args.defaultAnim) setDefalutAnim(selectOM.args.defaultAnim);
         if (selectOM.args.animLoop !== undefined) setAnimLoop(selectOM.args.animLoop);
         if (selectOM.args.color) setColor(selectOM.args.color);
+        // if (selectOM.args.offset) setOffset(selectOM.args.offset);
       };
     }
     init();
@@ -358,7 +360,7 @@ export const MainViewInspector = () => {
   }
 
   /**
-   * 
+   * アバター間の距離を変更
    */
   const changeOffset = (e, xyz: "x" | "y" | "z") => {
     const targetValue = e.target.value;
@@ -378,7 +380,7 @@ export const MainViewInspector = () => {
         newOffset.setZ(Number(targetValue));
       }
     }
-    editor.setOffset(id, newOffset);
+    // editor.setOffset(id, newOffset); // 表示がないので特になし
   }
 
   return (
@@ -767,20 +769,75 @@ export const MainViewInspector = () => {
 
       {selectOM && selectOM.type == "avatar" &&
       <>
-        <div className={styles.offset}>
+        {/* オフセットは現在自動で設定されます。 */}
+        {/* <div className={styles.offset}>
           <div className={styles.title}>
             {t("offset")}
           </div>
-          <div className={styles.input}>
-            <input
-              type="number"
-              // value={offset}
-              // onChange={(e) => changeOffset(e)}
+          <div className={styles.name}>
+            <div>X</div>
+            <div>Y</div>
+            <div>Z</div>
+          </div>
+          <div className={styles.inputContainer}>
+            <input 
+              type="text" 
+              placeholder={offset?offset.x.toString(): "0"}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  changeOffset(e, "x");
+                }
+              }}
+              onInput={(e: any) => {
+                if (isNumber(e.target.value)){
+                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                  newOffset.set(e.target.value, newOffset.y, newOffset.z);
+                  setOffset(newOffset);
+                }
+              }}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+              />
+            <input 
+              // value={scale?(scale.y).toFixed(1): ""}
+              type="text" 
+              placeholder={offset?offset.y.toString(): "0"}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  changeOffset(e, "y");
+                }
+              }}
+              onInput={(e: any) => {
+                if (isNumber(e.target.value)){
+                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                  newOffset.set(newOffset.x, e.target.value, newOffset.z);
+                  setOffset(newOffset);
+                } 
+              }}
+              onFocus={() => globalStore.editorFocus = true}
+              onBlur={() => globalStore.editorFocus = false}
+            />
+            <input 
+              // value={scale?(scale.z).toFixed(1): ""}
+              type="text" 
+              placeholder={offset?offset.z.toString(): "0"}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  changeOffset(e, "z");
+                }
+              }}
+              onInput={(e: any) => {
+                if (isNumber(e.target.value)){
+                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                  newOffset.set(newOffset.x, newOffset.y, e.target.value);
+                  setOffset(newOffset);
+                }
+              }}
               onFocus={() => globalStore.editorFocus = true}
               onBlur={() => globalStore.editorFocus = false}
             />
           </div>
-        </div>
+        </div> */}
       </>
       }
 
