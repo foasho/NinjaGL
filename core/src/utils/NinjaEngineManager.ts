@@ -210,7 +210,6 @@ export class NinjaEngine {
           }
         })
         if (this.octree){
-          console.log("OctreeにTerrainをセットするよん");
           this.octree.importThreeObj3D(om.id, om.object, om.type);
         }
       }

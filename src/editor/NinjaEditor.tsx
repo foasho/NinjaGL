@@ -426,7 +426,49 @@ export const NinjaEditor = () => {
       });
     }
     else {
-      saveAs(blob, `${project.name}.njc`);
+      // saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+      // もしログインしているのならクラウドに保存する
+      if (session){
+        const formData = new FormData();
+        formData.append("file", blob);
+        const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+        const keyPath = (uploadPath + `/${project.name.replace(".njc", "")}.njc`).replaceAll("//", "/");
+        formData.append("filePath", keyPath);
+        try {
+          const response = await fetch("/api/storage/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) {
+            throw new Error("Error uploading file");
+          }
+          const res = await response.json();
+          // 成功したら、ローカルストレージの追加しておく
+          localStorage.setItem(
+            "recentprojects", 
+            JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: project.name, path: keyPath}])
+          );
+          setProject({name: project.name, path: keyPath});
+          // Success message
+          if (completeAlert){
+            Swal.fire({
+              icon: 'success',
+              title: t("success"),
+              text: t("saveSuccess") + `\npersonal/savedata/${project.name.replace(".njc", "")}.njc`,
+            });
+          }
+        } catch (error) {
+          console.error("Error:", error.message);
+          // 失敗したらをローカルに保存
+          saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+          setProject({name: project.name, path: undefined});
+        }
+      }
+      else {
+        // ZIPファイルをローカルに保存
+        saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+        setProject({name: project.name.replace(".njc", ""), path: undefined});
+      }
     }
   }
 
@@ -630,16 +672,17 @@ export const NinjaEditor = () => {
   , []);
 
   useEffect(() => {
+    // ※AutoSave調整中
     // AutoSaveが有効なら、AutoSaveを開始
-    let autoSaveInterval;
-    if (autoSave && session){
-      autoSaveInterval = setInterval(() => {
-        onSave();
-      }, 900 * 1000);
-    }
-    return () => {
-      clearInterval(autoSaveInterval);
-    }
+    // let autoSaveInterval;
+    // if (autoSave && session){
+    //   autoSaveInterval = setInterval(() => {
+    //     onSave();
+    //   }, 900 * 1000);
+    // }
+    // return () => {
+    //   clearInterval(autoSaveInterval);
+    // }
   }, [autoSave]);
 
 
