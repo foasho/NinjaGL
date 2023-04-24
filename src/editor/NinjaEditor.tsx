@@ -43,6 +43,7 @@ export const NinjaEditor = () => {
   const { data: session } = useSession();
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
+  const configState = useSnapshot(globalConfigStore);
   const [project, setProject] = useState<{name: string; path: string}>();
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
   const [selectSubNav, setSelectSubNav] = useState<"ui" | "shader" | "script" | "texture">("ui");
@@ -359,7 +360,25 @@ export const NinjaEditor = () => {
    * ビルド処理
    */
   const onSave = async(completeAlert: boolean=true) => {
-    const njcFile = ExportNjcFile(editor.getEditor());
+    const njcFile = ExportNjcFile(
+      editor.getEditor(), 
+      {
+        physics: configState.physics,
+        autoScale: configState.autoScale,
+        alpha: configState.alpha,
+        logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
+        antialias: configState.antialias,
+        shadowResolution: configState.shadowResolution,
+        mapsize: configState.mapsize,
+        layerGridNum: configState.layerGridNum,
+        lodDistance: configState.lodDistance,
+        dpr: undefined,
+        viewGridLength: configState.viewGridLength,
+        initCameraPosition: configState.initCameraPosition,
+        octreeDepth: configState.octreeDepth,
+        isDebug: true,
+      }
+    );
     const blob = await saveNJCBlob(njcFile);
     if (!project){
       Swal.fire({

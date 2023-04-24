@@ -7,8 +7,12 @@ import { SkeletonUtils } from "three-stdlib";
 import { NJCFile } from "ninja-core";
 import { IConfigParams, InitMobileConfipParams } from "ninja-core";
 import { globalConfigStore } from "../Store";
+import { useSnapshot } from "valtio";
 
-export const ExportNjcFile = (editor: NinjaEditorManager): NJCFile => {
+export const ExportNjcFile = (
+  editor: NinjaEditorManager,
+  config: IConfigParams,
+): NJCFile => {
   // EditorからOMを取得してJSON化する
   const oms = [...editor.getOMs()];
   oms.map((om) => {
@@ -35,7 +39,6 @@ export const ExportNjcFile = (editor: NinjaEditorManager): NJCFile => {
   const ums = [...editor.getUMs()];
   const tms = [...editor.getTMs()];
   const sms = [...editor.getSMs()];
-  const config = globalConfigStore;
   // Configパラメータを設定する
   const _config: IConfigParams = {
     ...config,
@@ -56,20 +59,38 @@ export const ExportNjcFile = (editor: NinjaEditorManager): NJCFile => {
 * NinjaEngineを実行する
 */
 export const DebugPlay = () => {
+  const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
   const [engine, setEngine] = useState<NinjaEngine>();
-  const { t } = useTranslation();
   useEffect(() => {
     const _engine = new NinjaEngine();
-    const njcFile = ExportNjcFile(editor.getEditor());
-    _engine.setNJCFile(njcFile).then(() => {
+    const njcFile = ExportNjcFile(editor, {
+      physics: configState.physics,
+      autoScale: configState.autoScale,
+      alpha: configState.alpha,
+      logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
+      antialias: configState.antialias,
+      shadowResolution: configState.shadowResolution,
+      mapsize: configState.mapsize,
+      layerGridNum: configState.layerGridNum,
+      lodDistance: configState.lodDistance,
+      dpr: undefined,
+      viewGridLength: configState.viewGridLength,
+      initCameraPosition: configState.initCameraPosition,
+      octreeDepth: configState.octreeDepth,
+      isDebug: true,
+    });
+    // _engine.setNJCFile(njcFile).then(() => {
+    //   // エンジンにセット
+    //   setEngine(_engine);
+    // });
+    _engine.setNJCFile(njcFile).then(async () => {
+      await Promise.resolve();
       // エンジンにセット
       setEngine(_engine);
-    });
-    return () => {
-      setEngine(undefined);
-    }
-  }, []);
+    });    
+    return () => {}
+  }, [editor, configState]);
 
   return (
     <>
@@ -79,7 +100,13 @@ export const DebugPlay = () => {
             <NinjaCanvas />
           </NinjaEngineContext.Provider>
         }
-        {/* <NinjaGL/> */}
+        {!engine &&
+          <div style={{ height: "100%", width: "100%", backgroundColor: "black", zIndex: 9999 }}>
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
+            </div>
+          </div>
+        }
       </div>
     </>
   )
