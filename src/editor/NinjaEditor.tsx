@@ -20,7 +20,7 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { loadNJCFileFromURL, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
+import { loadNJCFileFromURL, NinjaEngineProvider, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
 import { loadNJCFile } from "ninja-core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
@@ -58,7 +58,7 @@ export const NinjaEditor = () => {
    */
   const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
-      globalStore.init();
+      // globalStore.init();
       setViewSelect(viewType);
       if (viewType == "scripteditor"){
         setSelectSubNav("script");
@@ -749,7 +749,6 @@ export const NinjaEditor = () => {
                   {viewSelect == "debugplay"? <><BsStop /></>: <><BsPlay /></>}
                 </span>
                   {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
-                
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
@@ -917,14 +916,14 @@ export const NinjaEditor = () => {
                </>
               }
               {viewSelect == "debugplay" &&
-                <>
+                <NinjaEngineProvider>
                   <DebugPlay />
-                </>
+                </NinjaEngineProvider>
               }
               {viewSelect == "terrainmaker" &&
-                <>
+                
                   <TerrainMakerCanvas />
-                </>
+                
               }
               {viewSelect == "playereditor" &&
                 <>

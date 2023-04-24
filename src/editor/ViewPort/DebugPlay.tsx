@@ -61,9 +61,9 @@ export const ExportNjcFile = (
 export const DebugPlay = () => {
   const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
-  const [engine, setEngine] = useState<NinjaEngine>();
+  const engine = useContext(NinjaEngineContext);
   useEffect(() => {
-    const _engine = new NinjaEngine();
+    if (!engine) return;
     const njcFile = ExportNjcFile(editor, {
       physics: configState.physics,
       autoScale: configState.autoScale,
@@ -80,28 +80,19 @@ export const DebugPlay = () => {
       octreeDepth: configState.octreeDepth,
       isDebug: true,
     });
-    // _engine.setNJCFile(njcFile).then(() => {
-    //   // エンジンにセット
-    //   setEngine(_engine);
-    // });
-    _engine.setNJCFile(njcFile).then(async () => {
-      await Promise.resolve();
-      // エンジンにセット
-      setEngine(_engine);
-    });    
+    engine.setNJCFile(njcFile);
     return () => {}
-  }, [editor, configState]);
+  }, [engine]);
 
   return (
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
-        {engine &&
-          <NinjaEngineContext.Provider value={engine}>
-            <NinjaCanvas />
-          </NinjaEngineContext.Provider>
-        }
-        {!engine &&
-          <div style={{ height: "100%", width: "100%", backgroundColor: "black", zIndex: 9999 }}>
+        {engine?
+        <>
+          <NinjaCanvas/>
+        </>
+        :
+          <div style={{ height: "100%", width: "100%", top: "0", left: "0", backgroundColor: "black", zIndex: 9999 }}>
             <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
               <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
             </div>

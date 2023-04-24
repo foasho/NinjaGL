@@ -1,35 +1,40 @@
 import Head from 'next/head';
 import styles from '../App.module.scss';
-import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
-import { useState, useEffect, useCallback } from "react";
+import { NinjaEditorContext, NinjaEditorManager, NinjaEditorProvider } from "@/editor/NinjaEditorManager";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { NinjaEditor } from "@/editor/NinjaEditor";
 import { ToastContainer } from "react-toastify";
 
-function Home() {
-  const [editor, setEditor] = useState<NinjaEditorManager>();
-
+const ReadyNinjaEditor = () => {
+  const [ready, setReady] = useState(false);
+  const editor = useContext(NinjaEditorContext);
   useEffect(() => {
-    const editor = new NinjaEditorManager();
-    setEditor(editor);
-    return () => {
-      setEditor(undefined);
+    if (!editor) return;
+    else {
+      setReady(true);
     }
-  }, []);
+    return () => {};
+  }, [editor]);
+  return (
+    <>
+      {ready && <NinjaEditor />}
+    </>
+  );
+};
 
+function Home() {
   return (
     <>
       <Head>
         <title>NinjaGL</title>
-        <meta name="ReactGameEngine" content="NinjaGL" />
+        <meta name="R3F-GameEngine" content="NinjaGL" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        {editor &&
-          <NinjaEditorContext.Provider value={editor}>
-              <NinjaEditor />
-          </NinjaEditorContext.Provider>
-        }
+        <NinjaEditorProvider>
+          <ReadyNinjaEditor />
+        </NinjaEditorProvider>
         <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -39,9 +44,5 @@ function Home() {
     </>
   )
 }
-
-
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-
 
 export default Home;

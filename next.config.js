@@ -18,9 +18,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
     // compiler: {
     //   styledComponents: true,
     // },
-
-    swcMinify: false,
-    reactStrictMode: false, // Recommended for the `pages` directory, default in `app`.
     experimental: {
       reactRoot: 'concurrent',
       appDir: true,

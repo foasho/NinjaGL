@@ -4,7 +4,7 @@ import { RootState } from "@react-three/fiber";
 import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
 import { AvatarController } from "./AvatarController";
-import React, { createContext } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2, SkinnedMesh, Box3 } from "three";
 import { NinjaShader } from "./NinjaShader";
 import { NJCFile, loadNJCFile, loadNJCFileFromURL } from "./NinjaFileControl";
@@ -116,6 +116,16 @@ export class NinjaEngine {
     return this.canvasPos;
   }
 
+  getLoadingPercentages = (): number => {
+    return this.loadingPercentages;
+  }
+  getNowLoading = (): boolean => {
+    return this.nowLoading;
+  }
+  getLoadCompleted = (): boolean => {
+    return this.loadCompleted;
+  }
+
   /**
    * 接続デバイスを検出
    */
@@ -157,6 +167,20 @@ export class NinjaEngine {
     await this.setSMsInWorker();
     await this.initialize();
     this.loadCompleted = true;
+    console.info("NinjaEngine: << Complete NJC File >>");
+    this.notifyNJCChanged();
+  }
+  private njcChangedListeners: (() => void)[] = [];
+  onNJCChanged(listener: () => void) {
+    this.njcChangedListeners.push(listener);
+  }
+  offNJCChanged(listener: () => void) {
+    this.njcChangedListeners = this.njcChangedListeners.filter(
+      l =>  l !== listener
+    );
+  }
+  protected notifyNJCChanged() {
+    this.njcChangedListeners.forEach(l => l());
   }
 
   /**
@@ -944,4 +968,19 @@ export class NinjaEngine {
 
 }
 
-export const NinjaEngineContext = createContext<NinjaEngine>(undefined as any);
+export const NinjaEngineContext = createContext<NinjaEngine>(undefined);
+
+export const NinjaEngineProvider = ({ children }) => {
+  const [engine, setEngine] = useState(null);
+
+  useEffect(() => {
+    const _engine = new NinjaEngine();
+    setEngine(_engine);
+  }, []);
+
+  return (
+    <NinjaEngineContext.Provider value={engine}>
+      {children}
+    </NinjaEngineContext.Provider>
+  )
+};

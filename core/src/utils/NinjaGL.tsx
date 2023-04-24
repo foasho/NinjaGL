@@ -50,5 +50,3 @@ export const NinjaGL = (props: INinjaGLProps) => {
     </>
   )
 }
-
-const defaultProjectJsonPath = "savedata/default.json";

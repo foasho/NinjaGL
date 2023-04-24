@@ -1,5 +1,5 @@
 import { AnimationClip, AnimationMixer, Euler, Group, Material, Matrix4, Object3D, Vector3, WebGLRenderer } from "three";
-import { createContext } from "react";
+import { createContext, useEffect, useState } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "ninja-core";
 import { NJCFile } from "ninja-core";
@@ -1007,4 +1007,19 @@ export class NinjaEditorManager {
   }
 }
 
-export const NinjaEditorContext = createContext<NinjaEditorManager>(new NinjaEditorManager());
+export const NinjaEditorContext = createContext<NinjaEditorManager>(undefined);
+
+export const NinjaEditorProvider = ({ children }) => {
+  const [editor, setEditor] = useState(null);
+
+  useEffect(() => {
+    const _editor = new NinjaEditorManager();
+    setEditor(_editor);
+  }, []);
+
+  return (
+    <NinjaEditorContext.Provider value={editor}>
+      {children}
+    </NinjaEditorContext.Provider>
+  )
+};

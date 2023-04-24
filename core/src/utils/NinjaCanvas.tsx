@@ -22,31 +22,45 @@ import { MyText3Ds } from "../canvas-items/MyText3D";
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
+  const [renderCount, setRenderCount] = useState(0);
+  const [dpr, setDpr] = useState<number | [number, number]>(1);
 
   const [engineState, setEngineState] = useState({
     nowLoading: false,
     loadCompleted: false,
     loadingPercentages: 0,
   });
+  console.log("check build");
 
+  /**
+  * NJCの変更を検知して、再レンダリングする
+  */
   useEffect(() => {
     if (!engine) return;
-    setEngineState({
-      nowLoading: engine.nowLoading,
-      loadCompleted: engine.loadCompleted,
-      loadingPercentages: engine.loadingPercentages,
-    });
+    const init = ( ) => {
+      let _dpr: number | [number, number] = window.devicePixelRatio || 1;
+      if (engine && engine.config.dpr) {
+        _dpr = engine.config.dpr;
+      } 
+      setDpr(_dpr);
+      setEngineState({
+        nowLoading: engine.getNowLoading(),
+        loadCompleted: engine.getLoadCompleted(),
+        loadingPercentages: engine.getLoadingPercentages(),
+      });
+    }
+    init();
+    engine.onNJCChanged(init);
+    return () => {
+      engine.offNJCChanged(init);
+    }
   }, [engine]);
-
-  let dpr: number | [number, number] = window.devicePixelRatio || 1;
-  if (engine && engine.config.dpr) {
-    dpr = engine.config.dpr;
-  }
 
   return (
     <>
       <Canvas 
         id="ninjagl" 
+        key={renderCount}
         shadows 
         dpr={dpr}
         gl={{ 
@@ -74,13 +88,13 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
             </>
           }
           {props.children && props.children}
-          <Preload all />
         </Suspense>
+        <Preload all />
       </Canvas>
-      {(engineState.loadCompleted) &&
+      {engine && (engineState.loadCompleted) &&
         <NinjaUI />
       }
-      {engine &&
+      {/* {engine &&
         <LoadProcessing
           loadingPercentages={engineState.loadingPercentages}
           nowLoading={engineState.nowLoading}
@@ -91,7 +105,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         <>
           <DebugComponent />
         </>
-      }
+      } */}
     </>
   )
 }
