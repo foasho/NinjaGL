@@ -1,9 +1,0 @@
-{
-  "build": {
-    "env": {
-      "NODE_ENV": "production",
-      "DISABLE_SSR": "true"
-    }
-  }
-}
-  
