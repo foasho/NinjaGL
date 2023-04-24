@@ -80,10 +80,15 @@ export const DebugPlay = () => {
       octreeDepth: configState.octreeDepth,
       isDebug: true,
     });
-    _engine.setNJCFile(njcFile).then(() => {
+    // _engine.setNJCFile(njcFile).then(() => {
+    //   // エンジンにセット
+    //   setEngine(_engine);
+    // });
+    _engine.setNJCFile(njcFile).then(async () => {
+      await Promise.resolve();
       // エンジンにセット
       setEngine(_engine);
-    });
+    });    
     return () => {}
   }, [editor, configState]);
 
@@ -95,7 +100,13 @@ export const DebugPlay = () => {
             <NinjaCanvas />
           </NinjaEngineContext.Provider>
         }
-        {/* <NinjaGL/> */}
+        {!engine &&
+          <div style={{ height: "100%", width: "100%", backgroundColor: "black", zIndex: 9999 }}>
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
+            </div>
+          </div>
+        }
       </div>
     </>
   )
