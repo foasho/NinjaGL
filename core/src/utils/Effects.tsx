@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { EffectComposer, SSR, Bloom, LUT } from "@react-three/postprocessing";
 import { NinjaEngineContext } from "./NinjaEngineManager";
 import { useTexture } from "@react-three/drei";
 import { Texture } from "three";
+import { LUTCubeLoader } from "three-stdlib";
 
 export const MyEffects = () => {
   const engine = useContext(NinjaEngineContext);
@@ -25,60 +26,49 @@ export const MyEffects = () => {
 }
 
 const MyEffect = ({ om }) => {
-  let effect;
-  switch (om.args.type) {
-    case "SSR":
-      effect = <SSR                                temporalResolve={om.args.temporalResolve}
-                USE_MRT={om.args.USE_MRT}
-                USE_NORMALMAP={om.args.USE_NORMALMAP}
-                USE_ROUGHNESSMAP={om.args.USE_ROUGHNESSMAP}
-                ENABLE_JITTERING={om.args.ENABLE_JITTERING}
-                ENABLE_BLUR={om.args.ENABLE_BLUR}
-                temporalResolveMix={om.args.temporalResolveMix}
-                temporalResolveCorrectionMix={om.args.temporalResolveCorrectionMix}
-                maxSamples={om.args.maxSamples}
-                blurMix={om.args.blurMix}
-                blurKernelSize={om.args.blurKernelSize}
-                rayStep={om.args.rayStep}
-                intensity={om.args.intensity}
-                maxRoughness={om.args.maxRoughness}
-                jitter={om.args.jitter}
-                jitterSpread={om.args.jitterSpread}
-                jitterRough={om.args.jitterRough}
-                MAX_STEPS={om.args.MAX_STEPS}
-                NUM_BINARY_SEARCH_STEPS={om.args.NUM_BINARY_SEARCH_STEPS}
-                maxDepthDifference={om.args.maxDepthDifference}
-                maxDepth={om.args.maxDepth}
-                STRETCH_MISSED_RAYS={om.args.STRETCH_MISSED_RAYS}
-                ior={om.args.ior}
-                thickness={om.args.thickness}
-                />
-      break;
-    case "Bloom":
-      effect = <Bloom
-                luminanceThreshold={om.args.luminanceThreshold}
-                mipmapBlur={om.args.mipmapBlur}
-                luminanceSmoothing={om.args.luminanceSmoothing}
-                intensity={om.args.intensity}
-                />
-      break;
-    case "LUT":
-      const texture = useTexture(om.args.texture);
-      if (!texture) {
-        return <></>;
-      }
-      else if (texture instanceof Texture){
-        effect = <LUT
-          lut={texture as Texture}
+  const [renderCount, setRenderCount] = useState(0);
+  const engine = useContext(NinjaEngineContext);
+  const [texture, setTexture] = useState(null);
+  const id = om.id;
+
+  useEffect(() => {
+    if (om.args.type === "lut" && om.args.texture) {
+      const loader = new LUTCubeLoader();
+      loader.load(om.args.texture, (loadedTexture) => {
+        setTexture(loadedTexture);
+      });
+    } else {
+      setTexture(null);
+    }
+    const handleIdChanged = () => {
+      setRenderCount(renderCount + 1);
+    }
+    // engine.onOMIdChanged(id, handleIdChanged);
+    // return () => {
+    //   engine.offOMIdChanged(id, handleIdChanged);
+    // }
+  }, [om, renderCount]);
+
+  const effect = useMemo(() => {
+    if (om.args.type === "bloom") {
+      return (
+        <Bloom
+          luminanceThreshold={om.args.luminanceThreshold}
+          mipmapBlur={om.args.mipmapBlur}
+          luminanceSmoothing={om.args.luminanceSmoothing}
+          intensity={om.args.intensity}
         />
-      }
-      break;
-    default:
-      break;
-  }
-  return (
-    <>
-      {effect}
-    </>
-  )
-}
+      );
+    } else if (om.args.type === "ssr") {
+      return (
+        <SSR
+          {...om.args}
+        />
+      );
+    } else if (om.args.type === "lut" && texture) {
+      return <LUT lut={texture as Texture} />;
+    }
+  }, [om, texture, renderCount]);
+
+  return <>{effect}</>;
+};

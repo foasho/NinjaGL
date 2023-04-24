@@ -5,6 +5,7 @@ import { IObjectManagement } from "../utils/NinjaProps";
 import { Vector3 } from "three";
 
 export const MyEnvirments = () => {
+  const [degraded, degrade] = useState(false)
   const engine = useContext(NinjaEngineContext);
   const [environment, setEnvironment] = useState<IObjectManagement>();
   const [lightformers, setLightformers] = useState<IObjectManagement[]>([]);
@@ -23,24 +24,28 @@ export const MyEnvirments = () => {
   return (
     <>
       {environment &&
-        <Environment
-          resolution={256}// default
-          preset={environment.args.preset}
-          background={environment.args.background}
-          blur={environment.args.blur}
-        >
-          {lightformers.map((om) => {
-            return <LightFormer om={om} key={om.id}/>
-          })}
-        </Environment>
+        <>
+          <Environment 
+            resolution={512}
+            preset={environment.args.preset}
+            background={environment.args.background}
+            blur={environment.args.blur}
+            frames={(degraded && lightformers.length > 0) ? 1 : Infinity}
+          >
+            {lightformers.map((om) => {
+              return <LightFormer om={om} key={om.id}/>
+            })}
+          </Environment>
+        </>
       }
       {!environment && lightformers.length > 0 &&
         <>
           <Environment 
+            frames={(degraded && lightformers.length > 0) ? 1 : Infinity}
             resolution={512}
           >
-            {lightformers.map((om) => {
-              return <LightFormer om={om} key={om.id}/>
+            {lightformers.map((om, idx) => {
+              return <LightFormer om={om} key={idx}/>
             })}
           </Environment>
         </>

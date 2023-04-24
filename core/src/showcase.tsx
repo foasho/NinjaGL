@@ -45,7 +45,7 @@ const DebugPlay = () => {
  const [engine, setEngine] = useState<NinjaEngine>();
   useEffect(() => {
     const load = async () => {
-      const _njcFile = await loadNJCFileFromURL("samplecamera.njc");
+      const _njcFile = await loadNJCFileFromURL("sampleobject.njc");
       // EditorからOMを取得してJSON化する
       const oms = [..._njcFile.oms];
       oms.map((om) => {
@@ -105,7 +105,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <Showcase />
-    {/* <DebugPlay /> */}
+    {/* <Showcase /> */}
+    <DebugPlay />
   </React.StrictMode>
 );
