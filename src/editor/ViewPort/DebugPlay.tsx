@@ -64,7 +64,7 @@ export const DebugPlay = () => {
   const [engine, setEngine] = useState<NinjaEngine>();
   useEffect(() => {
     const _engine = new NinjaEngine();
-    const njcFile = ExportNjcFile(editor.getEditor(), {
+    const njcFile = ExportNjcFile(editor, {
       physics: configState.physics,
       autoScale: configState.autoScale,
       alpha: configState.alpha,
@@ -84,10 +84,8 @@ export const DebugPlay = () => {
       // エンジンにセット
       setEngine(_engine);
     });
-    return () => {
-      setEngine(undefined);
-    }
-  }, []);
+    return () => {}
+  }, [editor, configState]);
 
   return (
     <>
