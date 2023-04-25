@@ -6,7 +6,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
 
 const codeStared = `
-import { NinjaGL } from "ninja-core";
+import { NinjaGL } from "ninjagl-core";
 
 function App() {
 
@@ -17,7 +17,7 @@ function App() {
 `;
 
 const codeMerge = `
-import { NinjaGL } from "ninja-core";
+import { NinjaGL } from "ninjagl-core";
 
 function App() {
 
@@ -72,7 +72,7 @@ export const HelperDialog = (prop: IResponse) => {
                 </div>
                 <div className={styles.getstarted}>
                     <SyntaxHighlighter language="bash">
-                        npm install ninja-core
+                        npm install ninjagl-core
                     </SyntaxHighlighter>
                 </div>
             </div>

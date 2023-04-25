@@ -1,9 +1,13 @@
 import Head from 'next/head';
 import styles from '../App.module.scss';
-import { NinjaEditorContext, NinjaEditorManager, NinjaEditorProvider } from "@/editor/NinjaEditorManager";
-import { useState, useEffect, useCallback, useContext } from "react";
-import { NinjaEditor } from "@/editor/NinjaEditor";
+import { NinjaEditorContext, NinjaEditorProvider } from "@/editor/NinjaEditorManager";
+import { useState, useEffect,  useContext } from "react";
+// import { NinjaEditor } from "@/editor/NinjaEditor";
 import { ToastContainer } from "react-toastify";
+import dynamic from 'next/dynamic';
+
+// Dynamic import
+const NinjaEditor = dynamic(() => import('@/editor/NinjaEditor').then((mod) => mod.NinjaEditor), { ssr: false });
 
 const ReadyNinjaEditor = () => {
   const [ready, setReady] = useState(false);

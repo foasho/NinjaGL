@@ -1,5 +1,5 @@
 import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "ninjagl-core";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Text, Text3D, useFont, FontData } from "@react-three/drei";
 

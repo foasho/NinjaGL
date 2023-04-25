@@ -1,6 +1,9 @@
 {
-  "name": "ninja-core",
-  "version": "0.1.140",
+  "name": "@ninjagl/core",
+  "version": "1.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "private": false,
   "author": "ShoOsaka",
   "license": "MIT",

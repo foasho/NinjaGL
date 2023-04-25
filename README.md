@@ -26,7 +26,7 @@ npm run dev
 
 ## 自分のプロダクトへ組み込み
 ```
-npm install ninja-core
+npm install ninjagl-core
 ```
 
 Reactコンポネントへ

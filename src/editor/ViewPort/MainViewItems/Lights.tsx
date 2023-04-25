@@ -1,4 +1,4 @@
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "ninjagl-core";
 import { 
   // PivotControls, 
   useHelper } from "@react-three/drei";

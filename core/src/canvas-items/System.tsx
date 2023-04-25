@@ -8,7 +8,7 @@ export const System = () => {
   const engine = useContext(NinjaEngineContext);
   const input = useInputControl(engine.deviceType ? engine.deviceType : "desktop");
   useFrame((state: RootState, timeDelta: number) => {
-    if (engine) {
+    if (engine && engine.loadCompleted) {
       const _input = engine.deviceType == "desktop" ? input : manualKeyState;
       engine.frameUpdate(state, timeDelta, _input);
     }

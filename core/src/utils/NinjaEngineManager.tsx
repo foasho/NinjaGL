@@ -164,11 +164,11 @@ export class NinjaEngine {
     if (njcFile.config){
       this.config = njcFile.config;
     }
-    await this.setSMsInWorker();
-    await this.initialize();
-    this.loadCompleted = true;
-    console.info("NinjaEngine: << Complete NJC File >>");
-    this.notifyNJCChanged();
+    // await this.setSMsInWorker();
+    // await this.initialize();
+    // this.loadCompleted = true;
+    // console.info("NinjaEngine: << Complete NJC File >>");
+    // this.notifyNJCChanged();
   }
   private njcChangedListeners: (() => void)[] = [];
   onNJCChanged(listener: () => void) {

@@ -15,7 +15,7 @@ import { TiSpanner } from "react-icons/ti";
 import { ImEarth } from "react-icons/im";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
-import { gltfLoader, useInputControl } from "ninja-core";
+import { gltfLoader, useInputControl } from "ninjagl-core";
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";

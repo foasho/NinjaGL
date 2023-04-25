@@ -2,7 +2,7 @@ import { useHelper } from "@react-three/drei";
 import { BoxHelper, Euler, Matrix4, Object3D, Vector3 } from "three";
 import { useState, useEffect, useContext, useRef } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "ninjagl-core";
 import { PivotControls } from "./PivoitControl";
 import { globalStore } from "@/editor/Store";
 import { useSnapshot } from "valtio";

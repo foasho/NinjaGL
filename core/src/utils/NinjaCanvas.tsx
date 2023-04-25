@@ -30,7 +30,6 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     loadCompleted: false,
     loadingPercentages: 0,
   });
-  console.log("check build");
 
   /**
   * NJCの変更を検知して、再レンダリングする
@@ -43,21 +42,22 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         _dpr = engine.config.dpr;
       } 
       setDpr(_dpr);
-      setEngineState({
-        nowLoading: engine.getNowLoading(),
-        loadCompleted: engine.getLoadCompleted(),
-        loadingPercentages: engine.getLoadingPercentages(),
-      });
+      // setEngineState({
+      //   nowLoading: engine.getNowLoading(),
+      //   loadCompleted: engine.getLoadCompleted(),
+      //   loadingPercentages: engine.getLoadingPercentages(),
+      // });
     }
     init();
-    engine.onNJCChanged(init);
-    return () => {
-      engine.offNJCChanged(init);
-    }
+    // engine.onNJCChanged(init);
+    // return () => {
+    //   engine.offNJCChanged(init);
+    // }
   }, [engine]);
 
   return (
     <>
+      {(engineState.loadCompleted && engine) &&
       <Canvas 
         id="ninjagl" 
         key={renderCount}
@@ -71,7 +71,6 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         {...props.canvasProps}
       >
         <Suspense fallback={null}>
-          {(engineState.loadCompleted && engine) &&
             <>
               <System />
               <Terrain />
@@ -86,15 +85,15 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
               <MyTexts/>
               <MyText3Ds/>
             </>
-          }
           {props.children && props.children}
         </Suspense>
         <Preload all />
       </Canvas>
+      }
       {engine && (engineState.loadCompleted) &&
         <NinjaUI />
       }
-      {/* {engine &&
+      {engine &&
         <LoadProcessing
           loadingPercentages={engineState.loadingPercentages}
           nowLoading={engineState.nowLoading}
@@ -105,7 +104,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         <>
           <DebugComponent />
         </>
-      } */}
+      }
     </>
   )
 }
@@ -122,6 +121,7 @@ const DebugComponent = () => {
 
   const myFrame = (timeDelta: number) => {
     if (!engine) return;
+    if (!treeRef.current) return;
     engine.debugFrameUpdate(timeDelta, {});
     treeRef.current = engine.getDebugTree();
   }

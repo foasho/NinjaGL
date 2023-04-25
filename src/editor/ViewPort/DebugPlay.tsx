@@ -1,11 +1,10 @@
-import { NinjaEngine, NinjaEngineContext, NinjaGL } from "ninja-core";
-import { NinjaCanvas } from "ninja-core";
-import { useContext, useEffect, useState } from "react"
-import { useTranslation } from "react-i18next";
+import { NinjaEngineContext } from "ninjagl-core";
+import { NinjaCanvas } from "ninjagl-core";
+import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
-import { NJCFile } from "ninja-core";
-import { IConfigParams, InitMobileConfipParams } from "ninja-core";
+import { NJCFile } from "ninjagl-core";
+import { IConfigParams } from "ninjagl-core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
 
@@ -59,6 +58,7 @@ export const ExportNjcFile = (
 * NinjaEngineを実行する
 */
 export const DebugPlay = () => {
+  const [ready, setReady] = useState(false);
   const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
   const engine = useContext(NinjaEngineContext);
@@ -80,24 +80,34 @@ export const DebugPlay = () => {
       octreeDepth: configState.octreeDepth,
       isDebug: true,
     });
-    engine.setNJCFile(njcFile);
+    const setupNjcFile = async (nf) => {
+      await engine.setNJCFile(nf);
+      setReady(true);
+    }
+    setupNjcFile(njcFile);
     return () => {}
   }, [engine]);
 
   return (
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
-        {engine?
-        <>
+        {ready && engine &&
+        <Suspense fallback={<LoadingComponent/>}>
           <NinjaCanvas/>
-        </>
-        :
-          <div style={{ height: "100%", width: "100%", top: "0", left: "0", backgroundColor: "black", zIndex: 9999 }}>
-            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-              <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
-            </div>
-          </div>
+        </Suspense>
         }
+      </div>
+    </>
+  )
+}
+
+const LoadingComponent = () => {
+  return (
+    <>
+      <div style={{ height: "100%", width: "100%", top: "0", left: "0", backgroundColor: "black", zIndex: 9999 }}>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+          <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
+        </div>
       </div>
     </>
   )

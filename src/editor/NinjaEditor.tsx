@@ -20,8 +20,8 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { loadNJCFileFromURL, NinjaEngineProvider, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
-import { loadNJCFile } from "ninja-core";
+import { loadNJCFileFromURL, NinjaEngineProvider, NJCFile, saveNJCBlob, saveNJCFile } from "ninjagl-core";
+import { loadNJCFile } from "ninjagl-core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
 import { globalConfigStore, globalStore } from "./Store";
@@ -915,15 +915,16 @@ export const NinjaEditor = () => {
                 <MainViewer />
                </>
               }
+              {/* <span style={{ display: (viewSelect == "mainview")?"block": "none" }}>
+                <MainViewer />
+              </span> */}
+              <NinjaEngineProvider>
               {viewSelect == "debugplay" &&
-                <NinjaEngineProvider>
                   <DebugPlay />
-                </NinjaEngineProvider>
-              }
+                }
+              </NinjaEngineProvider>
               {viewSelect == "terrainmaker" &&
-                
-                  <TerrainMakerCanvas />
-                
+                <TerrainMakerCanvas />
               }
               {viewSelect == "playereditor" &&
                 <>

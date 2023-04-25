@@ -1,5 +1,5 @@
 import React from 'react';
-// import { NinjaGL } from "ninja-core";
+// import { NinjaGL } from "ninjagl-core";
 
 const SamlePage = () => {
   return (

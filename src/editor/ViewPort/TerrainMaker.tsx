@@ -31,7 +31,7 @@ import {
   PerspectiveCamera,
   Quaternion
 } from "three";
-import { useInputControl, convertObjectToBlob } from "ninja-core";
+import { useInputControl, convertObjectToBlob } from "ninjagl-core";
 import { useSnapshot } from "valtio";
 import { globalTerrainStore, globalStore } from "../Store";
 import { Perf } from "r3f-perf";

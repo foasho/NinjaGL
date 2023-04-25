@@ -1,4 +1,4 @@
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "ninjagl-core";
 import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
 import { useContext, useEffect, useRef, useState } from "react";
 import { PerspectiveCamera, useGLTF, useHelper } from "@react-three/drei";
