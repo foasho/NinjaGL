@@ -26,12 +26,12 @@ npm run dev
 
 ## 自分のプロダクトへ組み込み
 ```
-npm install ninjagl-core
+npm install @ninjagl/core
 ```
 
 Reactコンポネントへ
 ```tsx
-import { NinjaGL } from "ninjagl-core";
+import { NinjaGL } from "@ninjagl/core";
 
 function App() {
   return (

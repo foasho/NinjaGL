@@ -1,10 +1,10 @@
-import { NinjaEngineContext } from "ninjagl-core";
-import { NinjaCanvas } from "ninjagl-core";
+import { NinjaEngineContext } from "@ninjagl/core";
+import { NinjaCanvas } from "@ninjagl/core";
 import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
-import { NJCFile } from "ninjagl-core";
-import { IConfigParams } from "ninjagl-core";
+import { NJCFile } from "@ninjagl/core";
+import { IConfigParams } from "@ninjagl/core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
 

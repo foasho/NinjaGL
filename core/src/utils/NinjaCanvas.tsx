@@ -42,11 +42,11 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         _dpr = engine.config.dpr;
       } 
       setDpr(_dpr);
-      // setEngineState({
-      //   nowLoading: engine.getNowLoading(),
-      //   loadCompleted: engine.getLoadCompleted(),
-      //   loadingPercentages: engine.getLoadingPercentages(),
-      // });
+      setEngineState({
+        nowLoading: engine.getNowLoading(),
+        loadCompleted: engine.getLoadCompleted(),
+        loadingPercentages: engine.getLoadingPercentages(),
+      });
     }
     init();
     // engine.onNJCChanged(init);

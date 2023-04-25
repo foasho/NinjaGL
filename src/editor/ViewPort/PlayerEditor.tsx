@@ -13,7 +13,7 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
-import { convertObjectToFile, exportGLTF, gltfLoader } from "ninjagl-core";
+import { convertObjectToFile, exportGLTF, gltfLoader } from "@ninjagl/core";
 
 interface IOffsetParams {
   tp: {

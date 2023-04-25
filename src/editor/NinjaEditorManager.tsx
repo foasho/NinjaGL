@@ -1,9 +1,9 @@
 import { AnimationClip, AnimationMixer, Euler, Group, Material, Matrix4, Object3D, Vector3, WebGLRenderer } from "three";
 import { createContext, useEffect, useState } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "ninjagl-core";
-import { NJCFile } from "ninjagl-core";
-import { InitMobileConfipParams } from "ninjagl-core";
+import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from "@ninjagl/core";
+import { NJCFile } from "@ninjagl/core";
+import { InitMobileConfipParams } from "@ninjagl/core";
 
 interface ISetObjectManagement {
   id?: string;
