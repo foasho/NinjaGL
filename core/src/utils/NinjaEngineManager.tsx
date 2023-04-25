@@ -59,7 +59,41 @@ export class NinjaEngine {
   /**
    * 初期化
    */
-  async initialize() {
+  initialize = () => {
+    this.oms = [];
+    this.ums = [];
+    this.tms = [];
+    this.sms = [];
+    this.world = null;
+    this.octree = null;
+    this.avatar = null;
+    this.camera = null;
+    this.sounds = [];
+    this.viewableKeys = [];
+    this.moveOrderKeys = [];
+    this.ui = null;
+    this.debugTree = {};
+    this.canvasSize = new Vector2(0, 0);
+    this.canvasPos = new Vector2(0, 0);
+    this.loadingPercentages = 0;
+    this.cameraLayer = 1;
+    this.possibleLayers = [];
+    this.nowLoading = false;
+    this.loadCompleted = false;
+    this.deviceType = "desktop";
+    this.useGPU = false;
+    this.memory = {
+      totalHeap: 0,
+      usedHeap: 0,
+      availableHeap: 0
+    }
+    this.notifyNJCChanged();
+  }
+
+  /**
+   * セットアップを行う
+   */
+  async setup() {
     this.config = this.config? this.config: InitMobileConfipParams;
     this.detectDevice();// デバイスを検出
     if (this.config.autoScale){
@@ -165,8 +199,8 @@ export class NinjaEngine {
       this.config = njcFile.config;
     }
     // await this.setSMsInWorker();
-    // await this.initialize();
-    // this.loadCompleted = true;
+    await this.setup();
+    this.loadCompleted = true;
     // console.info("NinjaEngine: << Complete NJC File >>");
     // this.notifyNJCChanged();
   }
@@ -314,7 +348,7 @@ export class NinjaEngine {
     console.log("--- 全設定ファイルの読み込み完了 ---");
     this.nowLoading = false;
     this.loadCompleted = true;
-    this.initialize();
+    this.setup();
     return true;
   }
 

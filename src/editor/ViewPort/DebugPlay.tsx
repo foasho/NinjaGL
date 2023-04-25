@@ -85,7 +85,10 @@ export const DebugPlay = () => {
       setReady(true);
     }
     setupNjcFile(njcFile);
-    return () => {}
+    return () => {
+      // engine.initialize();
+      setReady(false);
+    }
   }, [engine]);
 
   return (
