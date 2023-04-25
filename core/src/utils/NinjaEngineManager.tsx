@@ -198,9 +198,9 @@ export class NinjaEngine {
     if (njcFile.config){
       this.config = njcFile.config;
     }
-    // await this.setSMsInWorker();
+    await this.setSMsInWorker();
     await this.setup();
-    this.loadCompleted = true;
+    // this.loadCompleted = true;
     // console.info("NinjaEngine: << Complete NJC File >>");
     // this.notifyNJCChanged();
   }

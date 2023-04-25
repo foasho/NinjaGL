@@ -25,11 +25,11 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
   const [renderCount, setRenderCount] = useState(0);
   const [dpr, setDpr] = useState<number | [number, number]>(1);
 
-  const [engineState, setEngineState] = useState({
-    nowLoading: false,
-    loadCompleted: false,
-    loadingPercentages: 0,
-  });
+  // const [engineState, setEngineState] = useState({
+  //   nowLoading: false,
+  //   loadCompleted: false,
+  //   loadingPercentages: 0,
+  // });
 
   /**
   * NJCの変更を検知して、再レンダリングする
@@ -42,11 +42,11 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         _dpr = engine.config.dpr;
       } 
       setDpr(_dpr);
-      setEngineState({
-        nowLoading: engine.getNowLoading(),
-        loadCompleted: engine.getLoadCompleted(),
-        loadingPercentages: engine.getLoadingPercentages(),
-      });
+      // setEngineState({
+      //   nowLoading: engine.getNowLoading(),
+      //   loadCompleted: engine.getLoadCompleted(),
+      //   loadingPercentages: engine.getLoadingPercentages(),
+      // });
     }
     init();
     // engine.onNJCChanged(init);
@@ -57,7 +57,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
 
   return (
     <>
-      {(engineState.loadCompleted && engine) &&
+      {(engine) &&
       <Canvas 
         id="ninjagl" 
         key={renderCount}
@@ -90,17 +90,17 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         <Preload all />
       </Canvas>
       }
-      {engine && (engineState.loadCompleted) &&
+      {engine &&
         <NinjaUI />
       }
-      {engine &&
+      {/* {engine &&
         <LoadProcessing
           loadingPercentages={engineState.loadingPercentages}
           nowLoading={engineState.nowLoading}
           loadCompleted={engineState.loadCompleted}
         />
-      }
-      {engine && engine.config.isDebug && engineState.loadCompleted &&
+      } */}
+      {engine && engine.config.isDebug &&
         <>
           <DebugComponent />
         </>
