@@ -75,7 +75,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
 
   return (
     <>
-      {engine &&
+      {ready && engine &&
       <>
         <Canvas 
           id="ninjagl" 

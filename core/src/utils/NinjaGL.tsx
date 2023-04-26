@@ -16,11 +16,8 @@ export const NinjaGL = (props: INinjaGLProps) => {
 
   return (
     <NinjaEngineProvider>
-      <NinjaCanvas {...props} />
-      <mesh>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="hotpink" />
-      </mesh>
+      <NinjaCanvas {...props}>
+      </NinjaCanvas>
     </NinjaEngineProvider>
   )
 }
