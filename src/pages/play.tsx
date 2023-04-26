@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { NinjaGL } from "@ninjagl/core";
+import dynamic from 'next/dynamic';
+
+const DynamicNinjaGL = dynamic(() => import('@ninjagl/core').then((mod) => mod.NinjaGL), {
+  ssr: false,
+});
+
 
 const BuildPlay = () => {
   const router = useRouter();
@@ -16,7 +21,7 @@ const BuildPlay = () => {
   return (
     <div style={{ height: "100vh", width: "100%" }}>
       {decodedNjcPath ? (
-        <NinjaGL njcPath={decodedNjcPath} />
+         <DynamicNinjaGL njcPath={decodedNjcPath} />
       ) : (
         <p>Not Found NjcPath</p>
       )}

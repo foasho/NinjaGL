@@ -1,6 +1,6 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { Canvas } from "@react-three/fiber";
-import React, { Suspense, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Avatar } from "../canvas-items/Avatar";
 import { SkyComponents } from "../canvas-items/Sky";
 import { StaticObjects } from "../canvas-items/StaticObjects";
@@ -12,10 +12,8 @@ import { Lights } from "../canvas-items/Lights";
 import { INinjaGLProps } from "./NinjaGL";
 import { ThreeObjects } from "../canvas-items/ThreeObjects";
 import { Cameras } from "../canvas-items/Camera";
-import { proxy } from "valtio";
 import { JSONTree } from 'react-json-tree';
 import { MyEnvirments } from "../canvas-items/MyEnvirments";
-import { Preload } from "@react-three/drei";
 import { MyEffects } from "../canvas-items/MyEffects";
 import { MyTexts } from "../canvas-items/MyText";
 import { MyText3Ds } from "../canvas-items/MyText3D";
@@ -48,6 +46,7 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     loadingRef.current.loadingPercentages = itemsLoaded / itemsTotal;
   }
   useEffect(() => {
+    let isMounted = true;
     if (!engine) return;
     const fetchEngine = async () => {
       if (props.njcPath) {
@@ -59,14 +58,17 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         const data = await loadNJCFileFromURL(props.njcPath, onLoadingCallback);
         const endTime = new Date().getTime();
         console.info(`<< LoadedTime: ${endTime - startTime}ms >>`);
-        await engine.setNJCFile(data);
-        loadingRef.current.isNowLoading = false;
-        loadingRef.current.loadCompleted = true;
-        setReady(true);
+        if (isMounted) {
+          await engine.setNJCFile(data);
+          loadingRef.current.isNowLoading = false;
+          loadingRef.current.loadCompleted = true;
+          setReady(true);
+        }
       }
     }
     fetchEngine();
     return () => {
+      isMounted = false;
       setReady(false);
     }
   }, [props.njcPath, engine]);
@@ -76,10 +78,10 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     <>
       {ready && engine &&
       <>
-        <Canvas 
+        {/* <Canvas 
           id="ninjagl" 
           shadows 
-          dpr={engine? engine.config.dpr: 1}
+          dpr={engine&&engine.config.dpr? engine.config.dpr: 1}
           gl={{ 
             antialias: engine? engine.config.antialias: false, 
             alpha: engine? engine.config.alpha: false, 
@@ -87,7 +89,6 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
           }}
           {...props.canvasProps}
         >
-          <Suspense fallback={null}>
             <>
               <System />
               <Terrain />
@@ -102,10 +103,8 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
               <MyTexts/>
               <MyText3Ds/>
             </>
-            <Preload all />
-            {props.children && props.children}
-          </Suspense>
-        </Canvas>
+            {props.children}
+        </Canvas> */}
         <NinjaUI />
       </>
       }
@@ -146,7 +145,3 @@ const DebugComponent = () => {
     </>
   )
 }
-
-interface IEngineState {
-}
-export const globalEngineStore = proxy<IEngineState>({})
