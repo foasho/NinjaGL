@@ -56,7 +56,7 @@ export const NinjaEditor = () => {
   /**
    * ビューポートの切り替え
    */
-  const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
+  const changeView = (viewType: "mainview" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
       // globalStore.init();
       setViewSelect(viewType);
@@ -288,14 +288,43 @@ export const NinjaEditor = () => {
   }
 
   /**
-   * プレイモードと編集モードの切り替え
+   * プレイモードで実行
    */
-  const onPlayStop = () => {
-    if (viewSelect == "debugplay"){
-      setViewSelect("mainview");
+  const onPlayStart = async () => {
+    // 名前がなければ名前をつけるんだ
+    if (!project){
+      changeProjectName();
+      return;
     }
+    //　ログインしていればそのばば保存してそのURLでデバッグページで開く
+    if (session){
+      const njcFile = await ExportNjcFile(editor.getEditor(), globalConfigStore);
+      const blob = await saveNJCBlob(njcFile);
+      const formData = new FormData();
+      formData.append("file", blob);
+      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+      const keyPath = (uploadPath + `/${project.name}.njc`).replaceAll("//", "/");
+      formData.append("filePath", keyPath);
+      const response = await fetch("/api/storage/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error("Error uploading file");
+      }
+      const res = await response.json();
+      console.log(res);
+      const url = `${window.location.origin}/play?njcPath=${res.data.url}`;
+      window.open(url, "_blank");
+      setProject({name: project.name, path: keyPath});
+  }
     else {
-      setViewSelect("debugplay");
+      // プロジェクトがなければログインしてください
+      Swal.fire({
+        title: t("attention").toString(),
+        text: t("loginRequired").toString(),
+        icon: "warning",
+      });
     }
   }
 
@@ -372,7 +401,7 @@ export const NinjaEditor = () => {
         mapsize: configState.mapsize,
         layerGridNum: configState.layerGridNum,
         lodDistance: configState.lodDistance,
-        dpr: undefined,
+        dpr: configState.dpr as number,
         viewGridLength: configState.viewGridLength,
         initCameraPosition: configState.initCameraPosition,
         octreeDepth: configState.octreeDepth,
@@ -421,7 +450,6 @@ export const NinjaEditor = () => {
                 JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: result.value, path: keyPath}])
               );
               setProject({name: result.value, path: keyPath});
-              // Success message
               if (completeAlert){
                 Swal.fire({
                   icon: 'success',
@@ -429,7 +457,8 @@ export const NinjaEditor = () => {
                   text: t("saveSuccess") + `\npersonal/savedata/${result.value}.njc`,
                 });
               }
-            } catch (error) {
+            } 
+            catch (error) {
               console.error("Error:", error.message);
               // 失敗したらをローカルに保存
               saveAs(blob, `${result.value}.njc`);
@@ -445,13 +474,12 @@ export const NinjaEditor = () => {
       });
     }
     else {
-      // saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
       // もしログインしているのならクラウドに保存する
       if (session){
         const formData = new FormData();
         formData.append("file", blob);
         const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
-        const keyPath = (uploadPath + `/${project.name.replace(".njc", "")}.njc`).replaceAll("//", "/");
+        const keyPath = (uploadPath + `/${project.name}`).replaceAll("//", "/");
         formData.append("filePath", keyPath);
         try {
           const response = await fetch("/api/storage/upload", {
@@ -473,20 +501,20 @@ export const NinjaEditor = () => {
             Swal.fire({
               icon: 'success',
               title: t("success"),
-              text: t("saveSuccess") + `\npersonal/savedata/${project.name.replace(".njc", "")}.njc`,
+              text: t("saveSuccess") + `\npersonal/savedata/${project.name}`,
             });
           }
         } catch (error) {
           console.error("Error:", error.message);
           // 失敗したらをローカルに保存
-          saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+          saveAs(blob, `${project.name}`);
           setProject({name: project.name, path: undefined});
         }
       }
       else {
         // ZIPファイルをローカルに保存
-        saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
-        setProject({name: project.name.replace(".njc", ""), path: undefined});
+        saveAs(blob, `${project.name}`);
+        setProject({name: project.name, path: undefined});
       }
     }
   }
@@ -744,11 +772,10 @@ export const NinjaEditor = () => {
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.play} onClick={() => onPlayStop()}>
+              <a className={styles.play} onClick={() => onPlayStart()}>
                 <span className={styles.icon}>
-                  {viewSelect == "debugplay"? <><BsStop /></>: <><BsPlay /></>}
+                  {<><BsPlay /></>}
                 </span>
-                  {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
@@ -878,12 +905,6 @@ export const NinjaEditor = () => {
                   {t("mainView")}
                 </a>
                 <a
-                  onClick={() => changeView("debugplay")}
-                  style={viewSelect == "debugplay" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                  {t("debugPlay")}
-                </a>
-                <a
                   onClick={() => changeView("terrainmaker")}
                   style={viewSelect == "terrainmaker" ? { background: '#fff', color: "#838383" } : {}}
                 >
@@ -915,14 +936,6 @@ export const NinjaEditor = () => {
                 <MainViewer />
                </>
               }
-              {/* <span style={{ display: (viewSelect == "mainview")?"block": "none" }}>
-                <MainViewer />
-              </span> */}
-              <NinjaEngineProvider>
-              {viewSelect == "debugplay" &&
-                  <DebugPlay />
-                }
-              </NinjaEngineProvider>
               {viewSelect == "terrainmaker" &&
                 <TerrainMakerCanvas />
               }

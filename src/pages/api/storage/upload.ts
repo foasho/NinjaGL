@@ -17,11 +17,15 @@ const s3 = new S3({
   region: process.env.AWS_REGION,
 });
 
-interface UploadRequestBody {
-  file: string;
-  filePath: string;
-  contentType: string;
-}
+const getSignedUrl = async (filePath: string, expires = 60 * 60): Promise<string> => {
+  const signedUrl = await s3.getSignedUrlPromise('getObject', {
+    Bucket: process.env.S3_BUCKET_NAME!,
+    Key: filePath,
+    Expires: expires
+  });
+  return signedUrl;
+};
+
 
 const uploadFileToS3 = async (file: Buffer, contentType: string, filePath: string): Promise<S3.ManagedUpload.SendData> => {
   const params: S3.PutObjectRequest = {
@@ -69,11 +73,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const filePath = data.fields.filePath as string;
       const fileBuffer = await fs.promises.readFile(data.file.filepath);
 
-      let result;
+      let result: any = {};
       if (process.env.STORAGE_TYPE === "s3") {
-        result = await uploadFileToS3(fileBuffer, contentType, filePath);
+        result.data = await uploadFileToS3(fileBuffer, contentType, filePath);
+        result.url = await getSignedUrl(filePath);
+      
       } else {
-        result = await saveFileToLocal(fileBuffer, contentType, filePath);
+        result.data = await saveFileToLocal(fileBuffer, contentType, filePath);
+        result.url = `${AssetDir}/${filePath}`;
       }
       res.status(200).json({ message: "File uploaded successfully", data: result });
     } catch (error) {

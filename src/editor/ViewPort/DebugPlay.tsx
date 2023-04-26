@@ -12,6 +12,7 @@ export const ExportNjcFile = (
   editor: NinjaEditorManager,
   config: IConfigParams,
 ): NJCFile => {
+  const newConfig = { ...config, dpr: undefined };
   // EditorからOMを取得してJSON化する
   const oms = [...editor.getOMs()];
   oms.map((om) => {
@@ -40,7 +41,7 @@ export const ExportNjcFile = (
   const sms = [...editor.getSMs()];
   // Configパラメータを設定する
   const _config: IConfigParams = {
-    ...config,
+    ...newConfig,
     isDebug: true,
   }
   

@@ -254,7 +254,7 @@ export const loadNJCFileFromURL = async (
     "file.njc", 
     { type: 'application/octet-stream' }
   );
-  return await loadNJCFile(file);
+  return await loadNJCFile(file, onProgress);
 }
 
 async function loadGLTFFromData(
@@ -276,6 +276,7 @@ async function loadGLTFFromData(
       },
       (progress) => {
         if (onProgress) {
+          console.log("progressing...");
           onProgress(progress.loaded, totalSize!);
         }
       },

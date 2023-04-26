@@ -19,87 +19,100 @@ import { Preload } from "@react-three/drei";
 import { MyEffects } from "../canvas-items/MyEffects";
 import { MyTexts } from "../canvas-items/MyText";
 import { MyText3Ds } from "../canvas-items/MyText3D";
+import { loadNJCFileFromURL } from "./NinjaFileControl";
+
+export interface ILoadingState {
+  loadingPercentages: number;
+  isNowLoading: boolean;
+  loadCompleted: boolean;
+}
+
 
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
-  const [renderCount, setRenderCount] = useState(0);
-  const [dpr, setDpr] = useState<number | [number, number]>(1);
-
-  // const [engineState, setEngineState] = useState({
-  //   nowLoading: false,
-  //   loadCompleted: false,
-  //   loadingPercentages: 0,
-  // });
-
+  const [ready, setReady] = useState(false);
+  const loadingRef = useRef<ILoadingState>({
+    loadingPercentages: 0,
+    isNowLoading: false,
+    loadCompleted: false
+  });
   /**
-  * NJCの変更を検知して、再レンダリングする
-  */
+   * ロード中のコールバック
+   * @param itemsLoaded 
+   * @param itemsTotal 
+   */
+  const onLoadingCallback = (
+    itemsLoaded: number, 
+    itemsTotal: number
+  ) => {
+    console.info(`<< Loading: ${itemsLoaded} / ${itemsTotal} >>`);
+    loadingRef.current.loadingPercentages = itemsLoaded / itemsTotal;
+  }
   useEffect(() => {
     if (!engine) return;
-    const init = ( ) => {
-      let _dpr: number | [number, number] = window.devicePixelRatio || 1;
-      if (engine && engine.config.dpr) {
-        _dpr = engine.config.dpr;
-      } 
-      setDpr(_dpr);
-      // setEngineState({
-      //   nowLoading: engine.getNowLoading(),
-      //   loadCompleted: engine.getLoadCompleted(),
-      //   loadingPercentages: engine.getLoadingPercentages(),
-      // });
+    const fetchEngine = async () => {
+      if (props.njcPath) {
+        loadingRef.current.loadingPercentages = 0;
+        loadingRef.current.isNowLoading = true;
+        loadingRef.current.loadCompleted = false;
+        // ロード時間を計測する
+        const startTime = new Date().getTime();
+        const data = await loadNJCFileFromURL(props.njcPath, onLoadingCallback);
+        const endTime = new Date().getTime();
+        console.info(`<< LoadedTime: ${endTime - startTime}ms >>`);
+        await engine.setNJCFile(data);
+        loadingRef.current.isNowLoading = false;
+        loadingRef.current.loadCompleted = true;
+        setReady(true);
+      }
     }
-    init();
-    // engine.onNJCChanged(init);
-    // return () => {
-    //   engine.offNJCChanged(init);
-    // }
-  }, [engine]);
+    fetchEngine();
+    return () => {
+      setReady(false);
+    }
+  }, [props.njcPath, engine]);
+
 
   return (
     <>
-      {(engine) &&
-      <Canvas 
-        id="ninjagl" 
-        key={renderCount}
-        shadows 
-        dpr={dpr}
-        gl={{ 
-          antialias: engine? engine.config.antialias: false, 
-          alpha: engine? engine.config.alpha: false, 
-          logarithmicDepthBuffer: engine? engine.config.logarithmicDepthBuffer: false,
-        }}
-        {...props.canvasProps}
-      >
-        <Suspense fallback={null}>
-            <>
-              <System />
-              <Terrain />
-              <Avatar />
-              <StaticObjects/>
-              <Lights/>
-              <SkyComponents />
-              <ThreeObjects/>
-              <Cameras/>
-              <MyEnvirments/>
-              <MyEffects/>
-              <MyTexts/>
-              <MyText3Ds/>
-            </>
-          {props.children && props.children}
-        </Suspense>
-        <Preload all />
-      </Canvas>
-      }
       {engine &&
+      <>
+        <Canvas 
+          id="ninjagl" 
+          shadows 
+          dpr={engine? engine.config.dpr: 1}
+          gl={{ 
+            antialias: engine? engine.config.antialias: false, 
+            alpha: engine? engine.config.alpha: false, 
+            logarithmicDepthBuffer: engine? engine.config.logarithmicDepthBuffer: false,
+          }}
+          {...props.canvasProps}
+        >
+          <Suspense fallback={null}>
+              <>
+                <System />
+                <Terrain />
+                <Avatar />
+                <StaticObjects/>
+                <Lights/>
+                <SkyComponents />
+                <ThreeObjects/>
+                <Cameras/>
+                <MyEnvirments/>
+                <MyEffects/>
+                <MyTexts/>
+                <MyText3Ds/>
+              </>
+            {props.children && props.children}
+          </Suspense>
+          <Preload all />
+        </Canvas>
         <NinjaUI />
+      </>
       }
-      {/* {engine &&
-        <LoadProcessing
-          loadingPercentages={engineState.loadingPercentages}
-          nowLoading={engineState.nowLoading}
-          loadCompleted={engineState.loadCompleted}
-        />
-      } */}
+      {!ready &&
+        <LoadProcessing {...loadingRef.current} />
+      }
       {engine && engine.config.isDebug &&
         <>
           <DebugComponent />

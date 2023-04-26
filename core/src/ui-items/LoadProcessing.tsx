@@ -1,21 +1,15 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { ILoadingState } from "../utils/NinjaCanvas";
 
 const loadingText = "Loading...";
 
-interface ILoadProcessingProps {
-  loadingPercentages: number;
-  nowLoading: boolean;
-  loadCompleted: boolean;
-}
-
-export const LoadProcessing = (props: ILoadProcessingProps) => {
+export const LoadProcessing = (props: ILoadingState) => {
   const ref = useRef<HTMLDivElement>();
   const [per, setPer] = useState<number>(0);
-  const engine = useContext(NinjaEngineContext);
 
   useEffect(() => {
-    if (props.nowLoading) {
+    if (props.isNowLoading) {
       setPer(props.loadingPercentages);
     }
     if (!props.loadCompleted){
@@ -28,11 +22,12 @@ export const LoadProcessing = (props: ILoadProcessingProps) => {
         ref.current.style.display = "none";
       }
     }
-  }, [props.loadCompleted, props.nowLoading, props.loadingPercentages]);
+  }, [props.loadCompleted, props.isNowLoading, props.loadingPercentages]);
 
+  console.log("LoadProcessing", props);
   return (
     <>
-      {engine.nowLoading &&
+      {(props.isNowLoading && !props.loadCompleted) &&
         <>
           <div style={
             {
@@ -58,8 +53,6 @@ export const LoadProcessing = (props: ILoadProcessingProps) => {
             }>
               <div>
                 {per}%
-                <br/>
-                サイズ: {props.loadingPercentages}
               </div>
               <div>
                 {loadingText}
