@@ -313,8 +313,8 @@ export const NinjaEditor = () => {
         throw new Error("Error uploading file");
       }
       const res = await response.json();
-      console.log(res);
-      const url = `${window.location.origin}/play?njcPath=${res.data.url}`;
+      const encodedUrl = encodeURIComponent(res.data.url);
+      const url = `${window.location.origin}/play?njcPath=${encodedUrl}`;
       window.open(url, "_blank");
       setProject({name: project.name, path: keyPath});
   }
@@ -774,7 +774,7 @@ export const NinjaEditor = () => {
             <li className={`${styles.navItem} ${styles.right}`}>
               <a className={styles.play} onClick={() => onPlayStart()}>
                 <span className={styles.icon}>
-                  {<><BsPlay /></>}
+                  {<><BsPlay />Play</>}
                 </span>
               </a>
             </li>

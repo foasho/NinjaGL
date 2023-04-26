@@ -200,9 +200,6 @@ export class NinjaEngine {
     }
     await this.setSMsInWorker();
     await this.setup();
-    // this.loadCompleted = true;
-    // console.info("NinjaEngine: << Complete NJC File >>");
-    // this.notifyNJCChanged();
   }
   private njcChangedListeners: (() => void)[] = [];
   onNJCChanged(listener: () => void) {

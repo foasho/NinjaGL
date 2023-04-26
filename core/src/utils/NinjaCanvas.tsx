@@ -27,7 +27,6 @@ export interface ILoadingState {
   loadCompleted: boolean;
 }
 
-
 export const NinjaCanvas = (props: INinjaGLProps) => {
   const engine = useContext(NinjaEngineContext);
   const [ready, setReady] = useState(false);
@@ -89,23 +88,23 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
           {...props.canvasProps}
         >
           <Suspense fallback={null}>
-              <>
-                <System />
-                <Terrain />
-                <Avatar />
-                <StaticObjects/>
-                <Lights/>
-                <SkyComponents />
-                <ThreeObjects/>
-                <Cameras/>
-                <MyEnvirments/>
-                <MyEffects/>
-                <MyTexts/>
-                <MyText3Ds/>
-              </>
+            <>
+              <System />
+              <Terrain />
+              <Avatar />
+              <StaticObjects/>
+              <Lights/>
+              <SkyComponents />
+              <ThreeObjects/>
+              <Cameras/>
+              <MyEnvirments/>
+              <MyEffects/>
+              <MyTexts/>
+              <MyText3Ds/>
+            </>
+            <Preload all />
             {props.children && props.children}
           </Suspense>
-          <Preload all />
         </Canvas>
         <NinjaUI />
       </>
