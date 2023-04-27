@@ -1,6 +1,6 @@
 {
   "name": "@ninjagl/core",
-  "version": "1.0.23",
+  "version": "1.0.28",
   "publishConfig": {
     "access": "public"
   },
@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@react-three/drei": "^9.65.3",
-    "@react-three/fiber": ">=8.11.0",
+    "@react-three/fiber": ">=8.12.2",
     "@react-three/postprocessing": "^2.7.0",
     "@react-three/xr": "^5.4.1",
     "axios": "^1.3.3",

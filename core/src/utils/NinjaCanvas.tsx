@@ -49,22 +49,22 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     let isMounted = true;
     if (!engine) return;
     const fetchEngine = async () => {
-      if (props.njcPath) {
-        loadingRef.current.loadingPercentages = 0;
-        loadingRef.current.isNowLoading = true;
-        loadingRef.current.loadCompleted = false;
-        // ロード時間を計測する
-        const startTime = new Date().getTime();
-        const data = await loadNJCFileFromURL(props.njcPath, onLoadingCallback);
-        const endTime = new Date().getTime();
-        console.info(`<< LoadedTime: ${endTime - startTime}ms >>`);
-        if (isMounted) {
-          await engine.setNJCFile(data);
-          loadingRef.current.isNowLoading = false;
-          loadingRef.current.loadCompleted = true;
-          setReady(true);
-        }
-      }
+      // if (props.njcPath) {
+      //   loadingRef.current.loadingPercentages = 0;
+      //   loadingRef.current.isNowLoading = true;
+      //   loadingRef.current.loadCompleted = false;
+      //   // ロード時間を計測する
+      //   const startTime = new Date().getTime();
+      //   const data = await loadNJCFileFromURL(props.njcPath, onLoadingCallback);
+      //   const endTime = new Date().getTime();
+      //   console.info(`<< LoadedTime: ${endTime - startTime}ms >>`);
+      //   if (isMounted) {
+      //     await engine.setNJCFile(data);
+      //     loadingRef.current.isNowLoading = false;
+      //     loadingRef.current.loadCompleted = true;
+      //     setReady(true);
+      //   }
+      // }
     }
     fetchEngine();
     return () => {
@@ -76,37 +76,47 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
 
   return (
     <>
+      {/* <Canvas 
+        id="ninjagl" 
+        shadows 
+        dpr={engine&&engine.config.dpr? engine.config.dpr: 1}
+        gl={{ 
+          antialias: engine? engine.config.antialias: false, 
+          alpha: engine? engine.config.alpha: false, 
+          logarithmicDepthBuffer: engine? engine.config.logarithmicDepthBuffer: false,
+        }}
+        {...props.canvasProps}
+      >
       {ready && engine &&
       <>
-        {/* <Canvas 
-          id="ninjagl" 
-          shadows 
-          dpr={engine&&engine.config.dpr? engine.config.dpr: 1}
-          gl={{ 
-            antialias: engine? engine.config.antialias: false, 
-            alpha: engine? engine.config.alpha: false, 
-            logarithmicDepthBuffer: engine? engine.config.logarithmicDepthBuffer: false,
-          }}
-          {...props.canvasProps}
-        >
-            <>
-              <System />
-              <Terrain />
-              <Avatar />
-              <StaticObjects/>
-              <Lights/>
-              <SkyComponents />
-              <ThreeObjects/>
-              <Cameras/>
-              <MyEnvirments/>
-              <MyEffects/>
-              <MyTexts/>
-              <MyText3Ds/>
-            </>
-            {props.children}
-        </Canvas> */}
-        <NinjaUI />
+        <>
+          <System />
+          <Terrain />
+          <Avatar />
+          <StaticObjects/>
+          <Lights/>
+          <SkyComponents />
+          <ThreeObjects/>
+          <Cameras/>
+          <MyEnvirments/>
+          <MyEffects/>
+          <MyTexts/>
+          <MyText3Ds/>
+        </>
+        {props.children}
       </>
+      }
+      </Canvas> */}
+      <Canvas>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <mesh>
+          <boxGeometry />
+          <meshStandardMaterial color="orange" />
+        </mesh>
+      </Canvas>
+      {ready &&
+        <NinjaUI />
       }
       {!ready &&
         <LoadProcessing {...loadingRef.current} />
