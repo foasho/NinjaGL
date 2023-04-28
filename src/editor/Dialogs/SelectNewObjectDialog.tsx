@@ -48,6 +48,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectEffect = (value: string) => {
     prop.response({ type: "effect", value: value });
   }
+  const selectXR = (value: string) => {
+    prop.response({ type: "xr", value: value });
+  }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
     console.log(e);
@@ -142,6 +145,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
               <div className={styles.name}>
                 {t("effect")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("xr")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/xr.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("XR")}
               </div>
             </div>
           </>
@@ -404,6 +415,27 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           </>
         }
 
+        {selectType == "xr" &&
+          <>
+            <div className={styles.card} onClick={() => {selectXR("vr")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/vr.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("VR")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectXR("ar")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/ar.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("XR")}
+              </div>
+            </div>
+          </>
+        }
+
         </div>
       </div>
     </div>
@@ -413,7 +445,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound" | "object" | "three" 
+  type: "light" | "sky" | "sound" | "object" | "three" | "xr"
     | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer" | "effect";
   value: string;
 }

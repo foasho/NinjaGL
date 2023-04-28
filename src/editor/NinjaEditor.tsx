@@ -262,6 +262,17 @@ export const NinjaEditor = () => {
         visibleType: "auto",
       })
     }
+    else if (data.type == "xr"){
+      editor.setUM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: "xr",
+        args: {
+          type: data.value,
+        },
+        visible: true,
+      });
+    }
   }
 
   /**

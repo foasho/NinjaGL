@@ -931,7 +931,29 @@ export class NinjaEditorManager {
     return true;
   }
   
-  
+  /**
+   * 特定のUMをセットする
+   */
+  setUM(props: IUIManagement){
+    this.ums.push(props);
+    this.notifyUMsChanged();
+  }
+  /**
+   * UMの変更リスナー
+   */
+  private uiManagementChangedListeners: (() => void)[] = [];
+  onUMsChanged(listener: () => void) {
+    this.uiManagementChangedListeners.push(listener);
+  }
+  offUMsChanged(listener: () => void) {
+    this.uiManagementChangedListeners = this.uiManagementChangedListeners.filter(
+      l =>  l !== listener
+    );
+  }
+  // UMの変更を通知する
+  protected notifyUMsChanged() {
+    this.uiManagementChangedListeners.forEach(l => l());
+  }
 
   /**
    * 全てのUIを取得する
@@ -968,13 +990,6 @@ export class NinjaEditorManager {
   // SMの変更を通知する
   protected notifySMsChanged() {
     this.scriptManagementChangedListeners.forEach(l => l());
-  }
-  
-
-  /**
-   * 特定のUIをセットする
-   */
-  setUI(){
   }
 
   /**
