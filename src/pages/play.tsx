@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
+import { Canvas } from "@react-three/fiber";
+// import { NinjaGL } from "@ninjagl/core";
+// import dynamic from 'next/dynamic';
 
-const DynamicNinjaGL = dynamic(() => import('@ninjagl/core').then((mod) => mod.NinjaGL), {
-  ssr: false,
-});
+// const DynamicNinjaGL = dynamic(() => import('@ninjagl/core').then((mod) => mod.NinjaGL), {
+//   ssr: false,
+// });
 
 
 const BuildPlay = () => {
@@ -21,7 +23,16 @@ const BuildPlay = () => {
   return (
     <div style={{ height: "100vh", width: "100%" }}>
       {decodedNjcPath ? (
-         <DynamicNinjaGL njcPath={decodedNjcPath} />
+        //  <DynamicNinjaGL njcPath={decodedNjcPath} />
+        // <NinjaGL njcPath={decodedNjcPath} />
+        <Canvas>
+          <mesh>
+            <boxGeometry />
+            <meshStandardMaterial color="hotpink" />
+          </mesh>
+          <directionalLight/>
+          <spotLight/>
+        </Canvas>
       ) : (
         <p>Not Found NjcPath</p>
       )}

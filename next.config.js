@@ -2,7 +2,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const withTM = require('next-transpile-modules')(['three'])
+// const withTM = require('next-transpile-modules')(['three'])
 
 /**
  * A fork of 'next-pwa' that has app directory support
@@ -77,7 +77,11 @@ const nextConfig = {
 const KEYS_TO_OMIT = ['webpackDevMiddleware', 'configOrigin', 'target', 'analyticsId', 'webpack5', 'amp', 'assetPrefix']
 
 module.exports = (_phase, { defaultConfig }) => {
-  const plugins = [[withPWA], [withBundleAnalyzer, {}], [withTM, {}]]
+  const plugins = [
+    [withPWA], 
+    [withBundleAnalyzer, {}], 
+    // [withTM, {}]
+  ]
 
   const wConfig = plugins.reduce((acc, [plugin, config]) => plugin({ ...acc, ...config }), {
     ...defaultConfig,

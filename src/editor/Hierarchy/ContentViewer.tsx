@@ -6,13 +6,10 @@ import {
 import { useContext, useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { AmbientLight, DirectionalLight, LoadingManager, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
-import { DRACOLoader, GLTFLoader, KTX2Loader } from "three-stdlib";
-import { MeshoptDecoder } from "meshoptimizer";
+import { DirectionalLight, LoadingManager, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 import { useTranslation } from "react-i18next";
 import { 
   AiFillHome, 
-  AiOutlineCloudUpload, 
   AiOutlineDoubleLeft, 
   AiOutlineDoubleRight, 
   AiOutlineLeft, 
@@ -21,7 +18,6 @@ import {
 } from "react-icons/ai";
 import Swal from "sweetalert2";
 import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
-import { useSnapshot } from "valtio";
 import { globalContentStore, globalScriptStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
@@ -111,7 +107,9 @@ interface IContentsBrowser {
  */
 export const ContentsBrowser = (props: IContentsBrowser) => {
   const { data: session } = useSession();
+  const [showContainerMenu, setShowContainerMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [containerPosition, setContainerPosition] = useState({ x: 0, y: 0 });
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [isPersonalDir, setIsPersonalDir] = useState(false);
   const [path, setPath] = useState("");
@@ -224,15 +222,14 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     setOffset(0);
   }
 
-
   /**
-   * 右クリックメニューの表示
-   * @param event 
+   * Itemコンテナ内の右クリックメニューの表示
    */
-  const handleContextMenu = (event) => {
+  const handleItemContainerMenu = (event) => {
     event.preventDefault();
-    setShowMenu(true);
-    setMenuPosition({ x: event.clientX, y: event.clientY });
+    setShowContainerMenu(true);
+    console.log("OpenCheck");
+    setContainerPosition({ x: event.clientX, y: event.clientY });
   };
 
   const handleClick = () => {
@@ -299,7 +296,13 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           )
         })}
       </div>
-      <div className={styles.itemContainer}>
+      <div 
+        className={styles.itemContainer}
+        onContextMenu={handleItemContainerMenu} 
+        onClick={handleClick}
+        onMouseLeave={() => setShowContainerMenu(false)}
+      >
+        {showContainerMenu && <AssetsContextMenu position={containerPosition} path={path} onUploadCallback={MoveDirectory} />}
         {files.map((file, index) => {
           return (
             <>
@@ -315,21 +318,17 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
         })}
         {(session && !isPersonalDir) && 
         <>
+          {/* パーソナルディレクトリ */}
           <div
             className={styles.itemCard}
-            onContextMenu={handleContextMenu} 
-            onClick={handleClick}
-            onMouseLeave={() => setShowMenu(false)}
             onDoubleClick={() => {
               setPath("");
               setOffset(0);
               setIsPersonalDir(true);
             }}
           >
-            {showMenu && <AssetsContextMenu position={menuPosition} />}
             <div
               className={styles.icon}
-
             >
               <a className={styles.iconImg}>
                 <AiFillFolderOpen />

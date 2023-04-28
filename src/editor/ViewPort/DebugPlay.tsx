@@ -1,4 +1,4 @@
-import { NinjaEngineContext } from "@ninjagl/core";
+import { NinjaEngine, NinjaEngineContext } from "@ninjagl/core";
 import { NinjaCanvas } from "@ninjagl/core";
 import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
@@ -62,10 +62,9 @@ export const DebugPlay = () => {
   const [ready, setReady] = useState(false);
   const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
-  const engine = useContext(NinjaEngineContext);
+  const [engine, setEngine] = useState(null);
   useEffect(() => {
-    if (!engine) return;
-    const njcFile = ExportNjcFile(editor, {
+    const njcFile = ExportNjcFile(editor.getEditor(), {
       physics: configState.physics,
       autoScale: configState.autoScale,
       alpha: configState.alpha,
@@ -82,23 +81,24 @@ export const DebugPlay = () => {
       isDebug: true,
     });
     const setupNjcFile = async (nf) => {
-      await engine.setNJCFile(nf);
+      const _engine = new NinjaEngine();
+      await _engine.setNJCFile(nf);
+      setEngine(_engine);
       setReady(true);
     }
     setupNjcFile(njcFile);
     return () => {
-      // engine.initialize();
       setReady(false);
     }
-  }, [engine]);
+  }, []);
 
   return (
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
         {ready && engine &&
-        <Suspense fallback={<LoadingComponent/>}>
-          <NinjaCanvas/>
-        </Suspense>
+          <NinjaEngineContext.Provider value={engine}>
+            <NinjaCanvas />
+          </NinjaEngineContext.Provider>
         }
       </div>
     </>
@@ -110,7 +110,9 @@ const LoadingComponent = () => {
     <>
       <div style={{ height: "100%", width: "100%", top: "0", left: "0", backgroundColor: "black", zIndex: 9999 }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-          <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
+          <div style={{ color: "white", fontSize: "20px" }}>
+            Loading...
+          </div>
         </div>
       </div>
     </>

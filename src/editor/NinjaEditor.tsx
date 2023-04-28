@@ -2,8 +2,8 @@ import "./Locale";
 import styles from "@/App.module.scss";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
-import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
-import { useState, useEffect, useContext, useRef, createContext } from "react";
+import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
+import { useState, useEffect, useContext } from "react";
 import { Euler, MathUtils, Vector3 } from "three";
 import { ContentsBrowser } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
@@ -34,7 +34,6 @@ import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
 import 'setimmediate';
 import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
-import { SkeletonUtils } from "three-stdlib";
 
 /**
  * NinjaEngineメインコンポネント
@@ -56,7 +55,7 @@ export const NinjaEditor = () => {
   /**
    * ビューポートの切り替え
    */
-  const changeView = (viewType: "mainview" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
+  const changeView = (viewType: "mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
       // globalStore.init();
       setViewSelect(viewType);
@@ -288,9 +287,9 @@ export const NinjaEditor = () => {
   }
 
   /**
-   * プレイモードで実行
+   * Buildモードでプレイ
    */
-  const onPlayStart = async () => {
+  const onBuildPlay = async () => {
     // 名前がなければ名前をつけるんだ
     if (!project){
       changeProjectName();
@@ -325,6 +324,18 @@ export const NinjaEditor = () => {
         text: t("loginRequired").toString(),
         icon: "warning",
       });
+    }
+  }
+
+  /**
+   * デバッグプレイ
+   */
+  const onPlayStop = () => {
+    if (viewSelect == "debugplay"){
+      setViewSelect("mainview");
+    }
+    else {
+      setViewSelect("debugplay");
     }
   }
 
@@ -772,10 +783,18 @@ export const NinjaEditor = () => {
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.play} onClick={() => onPlayStart()}>
+              <a className={styles.play} onClick={() => onBuildPlay()}>
                 <span className={styles.icon}>
-                  {<><BsPlay />Play</>}
+                  {<><BsPlay />Build</>}
                 </span>
+              </a>
+            </li>
+            <li className={`${styles.navItem} ${styles.right}`}>
+              <a className={styles.play} onClick={() => onPlayStop()}>
+                <span className={styles.icon}>
+                  {viewSelect == "debugplay"? <><BsStop /></>: <><BsPlay /></>}
+                </span>
+                  {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
@@ -935,6 +954,11 @@ export const NinjaEditor = () => {
                <>
                 <MainViewer />
                </>
+              }
+              {viewSelect == "debugplay" &&
+              <>
+                <DebugPlay />
+              </>
               }
               {viewSelect == "terrainmaker" &&
                 <TerrainMakerCanvas />

@@ -1,23 +1,12 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { Canvas } from "@react-three/fiber";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Avatar } from "../canvas-items/Avatar";
-import { SkyComponents } from "../canvas-items/Sky";
-import { StaticObjects } from "../canvas-items/StaticObjects";
-import { System } from "../canvas-items/System";
-import { Terrain } from "../canvas-items/Terrain";
+import { INinjaGLProps } from "./NinjaGL";
 import { NinjaUI } from "./NinjaUI";
 import { LoadProcessing } from "../ui-items/LoadProcessing";
-import { Lights } from "../canvas-items/Lights";
-import { INinjaGLProps } from "./NinjaGL";
-import { ThreeObjects } from "../canvas-items/ThreeObjects";
-import { Cameras } from "../canvas-items/Camera";
 import { JSONTree } from 'react-json-tree';
-import { MyEnvirments } from "../canvas-items/MyEnvirments";
-import { MyEffects } from "../canvas-items/MyEffects";
-import { MyTexts } from "../canvas-items/MyText";
-import { MyText3Ds } from "../canvas-items/MyText3D";
 import { loadNJCFileFromURL } from "./NinjaFileControl";
+import { NinjaCanvasElements } from "./NinjaCanvasElements";
 
 export interface ILoadingState {
   loadingPercentages: number;
@@ -46,40 +35,40 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
     loadingRef.current.loadingPercentages = itemsLoaded / itemsTotal;
   }
   useEffect(() => {
-    let isMounted = true;
     if (!engine) return;
     const fetchEngine = async () => {
-      // if (props.njcPath) {
-      //   loadingRef.current.loadingPercentages = 0;
-      //   loadingRef.current.isNowLoading = true;
-      //   loadingRef.current.loadCompleted = false;
-      //   // ロード時間を計測する
-      //   const startTime = new Date().getTime();
-      //   const data = await loadNJCFileFromURL(props.njcPath, onLoadingCallback);
-      //   const endTime = new Date().getTime();
-      //   console.info(`<< LoadedTime: ${endTime - startTime}ms >>`);
-      //   if (isMounted) {
-      //     await engine.setNJCFile(data);
-      //     loadingRef.current.isNowLoading = false;
-      //     loadingRef.current.loadCompleted = true;
-      //     setReady(true);
-      //   }
-      // }
+      if (props.njcPath) {
+        loadingRef.current.loadingPercentages = 0;
+        loadingRef.current.isNowLoading = true;
+        loadingRef.current.loadCompleted = false;
+        // ロード時間を計測する
+        const startTime = new Date().getTime();
+        const data = await loadNJCFileFromURL(props.njcPath, onLoadingCallback);
+        const endTime = new Date().getTime();
+        console.info(`<< LoadedTime: ${endTime - startTime}ms >>`);
+        await engine.setNJCFile(data);
+        loadingRef.current.isNowLoading = false;
+        loadingRef.current.loadCompleted = true;
+        setReady(true); 
+      }
+      else if (engine) {
+        // すでにengineがある場合はそのまま
+        setReady(true);
+      }
     }
-    // fetchEngine();
+    fetchEngine();
     return () => {
-      // isMounted = false;
-      // setReady(false);
+      setReady(false);
     }
   }, [
-    props.njcPath, 
-    // engine
+    props.njcPath,
+    engine
   ]);
 
 
   return (
     <>
-      {/* <Canvas 
+      <Canvas 
         id="ninjagl" 
         shadows 
         dpr={engine&&engine.config.dpr? engine.config.dpr: 1}
@@ -91,32 +80,8 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
         {...props.canvasProps}
       >
       {ready && engine &&
-      <>
-        <>
-          <System />
-          <Terrain />
-          <Avatar />
-          <StaticObjects/>
-          <Lights/>
-          <SkyComponents />
-          <ThreeObjects/>
-          <Cameras/>
-          <MyEnvirments/>
-          <MyEffects/>
-          <MyTexts/>
-          <MyText3Ds/>
-        </>
-        {props.children}
-      </>
+        <NinjaCanvasElements children={props.children}/>
       }
-      </Canvas> */}
-      <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <mesh>
-          <boxGeometry />
-          <meshStandardMaterial color="orange" />
-        </mesh>
       </Canvas>
       {ready &&
         <NinjaUI />
