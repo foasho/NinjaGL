@@ -20,7 +20,7 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { loadNJCFileFromURL, NinjaEngineProvider, NJCFile, saveNJCBlob, saveNJCFile } from "@ninjagl/core";
+import { loadNJCFileFromURL, saveNJCBlob } from "@ninjagl/core";
 import { loadNJCFile } from "@ninjagl/core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";

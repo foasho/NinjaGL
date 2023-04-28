@@ -66,12 +66,15 @@ export const NinjaCanvas = (props: INinjaGLProps) => {
       //   }
       // }
     }
-    fetchEngine();
+    // fetchEngine();
     return () => {
-      isMounted = false;
-      setReady(false);
+      // isMounted = false;
+      // setReady(false);
     }
-  }, [props.njcPath, engine]);
+  }, [
+    props.njcPath, 
+    // engine
+  ]);
 
 
   return (

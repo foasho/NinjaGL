@@ -26,5 +26,5 @@ export {
 export { 
   NinjaEngine, 
   NinjaEngineContext,
-  NinjaEngineProvider
+  // NinjaEngineProvider
 } from "./utils/NinjaEngineManager";

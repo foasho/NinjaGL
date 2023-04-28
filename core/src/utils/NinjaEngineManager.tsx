@@ -1001,17 +1001,17 @@ export class NinjaEngine {
 
 export const NinjaEngineContext = createContext<NinjaEngine>(undefined);
 
-export const NinjaEngineProvider = ({ children }) => {
-  const [engine, setEngine] = useState(null);
+// export const NinjaEngineProvider = ({ children }) => {
+//   const [engine, setEngine] = useState(null);
 
-  useEffect(() => {
-    const _engine = new NinjaEngine();
-    setEngine(_engine);
-  }, []);
+//   useEffect(() => {
+//     const _engine = new NinjaEngine();
+//     setEngine(_engine);
+//   }, []);
 
-  return (
-    <NinjaEngineContext.Provider value={engine}>
-      {children}
-    </NinjaEngineContext.Provider>
-  )
-};
+//   return (
+//     <NinjaEngineContext.Provider value={engine}>
+//       {children}
+//     </NinjaEngineContext.Provider>
+//   )
+// };

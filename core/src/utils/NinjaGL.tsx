@@ -1,6 +1,5 @@
-import { NinjaEngine, NinjaEngineContext, NinjaEngineProvider } from "./NinjaEngineManager";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { loadNJCFileFromURL } from "./NinjaFileControl";
+import { NinjaEngine, NinjaEngineContext } from "./NinjaEngineManager";
+import React from "react";
 import { RenderProps } from "@react-three/fiber";
 import { NinjaCanvas } from "./NinjaCanvas";
 
@@ -13,11 +12,10 @@ export interface INinjaGLProps extends INinjaCanvasProps {
 }
 
 export const NinjaGL = (props: INinjaGLProps) => {
-
   return (
-    <NinjaEngineProvider>
+    <NinjaEngineContext.Provider value={new NinjaEngine()}>
       <NinjaCanvas {...props}>
       </NinjaCanvas>
-    </NinjaEngineProvider>
+    </NinjaEngineContext.Provider>
   )
 }
