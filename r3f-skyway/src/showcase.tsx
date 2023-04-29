@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import ReactDOM from 'react-dom/client';
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { useInputControl } from "./hooks/InputControl";
 import { Euler, Mesh, Vector3 } from "three";
@@ -24,32 +24,36 @@ const Showcase = () => {
 
 const SkywayComponent = () => {
   const ref = useRef<Mesh>();
+  const { camera } = useThree();
   const input = useInputControl();
   const baseSpeed = 5; // 移動速度を調整できるように定数を追加
   useFrame((state, delta) => {
     if (ref.current) {
       let speed = baseSpeed * input.speed;
-      
+      // カメラの方向ベクトルを取得し、XY平面に投影する
+      const cameraDirection = camera.getWorldDirection(new Vector3()).normalize();
+      const cameraDirectionFlat = new Vector3(cameraDirection.x, 0, cameraDirection.z).normalize();
+      // 左右の方向ベクトルを計算
+      const rightDirection = new Vector3().crossVectors(cameraDirectionFlat, new Vector3(0, 1, 0));
+      if (input.dash) {
+        // ダッシュ機能が必要であれば、移動量を増やす
+        speed *= 2;
+      }
       if (input.forward) {
-        ref.current.position.z += speed * delta;
+        ref.current.position.addScaledVector(cameraDirectionFlat, speed * delta);
       }
       if (input.backward) {
-        ref.current.position.z -= speed * delta;
+        ref.current.position.addScaledVector(cameraDirectionFlat.negate(), speed * delta);
       }
       if (input.left) {
-        ref.current.position.x += speed * delta;
+        ref.current.position.addScaledVector(rightDirection.negate(), speed * delta);
       }
       if (input.right) {
-        ref.current.position.x -= speed * delta;
+        ref.current.position.addScaledVector(rightDirection, speed * delta);
       }
       if (input.jump) {
         ref.current.position.y += speed * delta;
       }
-      if (input.dash) {
-        // ダッシュ機能が必要であれば、ここで実装してください。
-      }
-      //positionの確認
-      // console.log(ref.current.position);
     }
   });
   return (
