@@ -2,11 +2,18 @@
   "name": "r3f-skyway",
   "version": "0.1.0",
   "description": "ReactThreeFiber and Skyway library for real-time 3D object sharing",
+  "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc",
-    "start": "tsc -w"
+    "prebuild": "rimraf dist",
+    "prepublishOnly": "npm run build && npm version patch",
+    "build": "rollup -c",
+    "showcase": "react-app-rewired start --config-overrides ./config-overrides.cjs"
   },
   "repository": {
     "type": "git",
@@ -24,7 +31,6 @@
   "bugs": {
     "url": "https://github.com/foasho/NinjaGL/issues"
   },
-  "homepage": "https://github.com/foasho/NinjaGL#readme",
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -49,6 +55,35 @@
   "devDependencies": {
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
-    "typescript": "^5.0.4"
+    "@rollup/plugin-alias": "^5.0.0",
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@types/file-saver": "^2.0.5",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.23",
+    "@types/styled-components": "^5.1.26",
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.2.1",
+    "react-scripts": "5.0.1",
+    "rimraf": "^5.0.0",
+    "rollup": "^2.79.1",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "typescript": "^4.9.5"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
