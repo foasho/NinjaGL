@@ -14,7 +14,7 @@ const Showcase = () => {
           <ambientLight />
           <pointLight position={[10, 10, 10]} castShadow />
           <SkywayComponent />
-          {/* <OrbitControls /> */}
+          <OrbitControls />
           <Environment preset="sunset" blur={0.7} background />
         </Canvas>
       </div>
@@ -49,7 +49,7 @@ const SkywayComponent = () => {
         // ダッシュ機能が必要であれば、ここで実装してください。
       }
       //positionの確認
-      console.log(ref.current.position);
+      // console.log(ref.current.position);
     }
   });
   return (

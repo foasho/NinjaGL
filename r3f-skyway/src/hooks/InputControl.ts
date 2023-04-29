@@ -14,6 +14,7 @@ const detectDeviceType = (): "mobile"|"tablet"|"desktop" => {
   return "desktop";
 }
 
+
 /**
  * 入力系のInputパラメータ
  */
@@ -119,6 +120,37 @@ export const getManualState = (): IInputMovement => {
 }
 
 /**
+ * 十字のSVG
+ */
+const svgString = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <!-- 上向き矢印 -->
+    <path
+      d="M50 20 L70 40 H60 V60 H40 V40 H30 Z"
+      fill="rgba(32, 32, 32, 0.05)"
+      fill-opacity="0.5"
+    />
+    <!-- 右向き矢印 -->
+    <path
+      d="M80 50 L60 70 V60 H40 V40 H60 V30 Z"
+      fill="rgba(32, 32, 32, 0.05)"
+      fill-opacity="0.5"
+    />
+    <!-- 下向き矢印 -->
+    <path
+      d="M50 80 L30 60 H40 V40 H60 V60 H70 Z"
+      fill="rgba(32, 32, 32, 0.05)"
+      fill-opacity="0.5"
+    />
+    <!-- 左向き矢印 -->
+    <path
+      d="M20 50 L40 30 V40 H60 V60 H40 V70 Z"
+      fill="rgba(32, 32, 32, 0.05)"
+      fill-opacity="0.5"
+    />
+  </svg>`;
+
+/**
  * 入力イベント / 入力の型
  */
 interface HTMLElementEvent<T extends HTMLElement> extends Event {
@@ -129,8 +161,11 @@ export const useInputControl = (
   device: "auto"|"mobile" | "tablet" | "desktop" = "auto",
   targetId: string = "target",
   ratio: number = 0.3,// 0 ~ 1: 画面の何割をジョイスティックにするか
-  margin: number = 0.1,// 0 ~ 1: 画面の端から何割の位置にをジョイスティックを配置するか
+  margin: number|[number, number] = [48, 102],// 画面の端から何pxMarginをとるか
+  joyColor: string = "rgba(255, 242, 189, 0.8)",
 ) => {
+  // タッチ発火フラグ
+  const touchFlag = useRef<boolean>(false);
   const joystick = useRef<HTMLDivElement>(document.createElement("div"));
   joystick.current.id = "joystick";
   const joystickOuter = useRef<HTMLDivElement>(document.createElement("div"));
@@ -140,16 +175,15 @@ export const useInputControl = (
   // 追加: ジョイスティックのスタイル設定
   const outerLineWidth = 5;
   joystickOuter.current.style.position = "relative";
-  joystickOuter.current.style.border = `${outerLineWidth}px solid rgba(0, 0, 0, 0.2)`;
+  joystickOuter.current.style.outlineOffset = `-${outerLineWidth}px`;
+  joystickOuter.current.style.outline = `${outerLineWidth}px solid rgba(32, 32, 32, 0.05)`;
   joystickOuter.current.style.borderRadius = "50%";
   joystickInner.current.style.position = "absolute";
   joystickOuter.current.style.zIndex = "100";
   joystickInner.current.style.left = "50%";
   joystickInner.current.style.top = "50%";
   joystickInner.current.style.transform = "translate(-50%, -50%)";
-  joystickInner.current.style.border = "1px solid rgba(0, 0, 0, 0.7)";
   joystickInner.current.style.borderRadius = "50%";
-  joystickInner.current.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
   joystickInner.current.style.pointerEvents = "none";
   joystickOuter.current.style.position = "absolute";
   // innerのデザインを非表示にする
@@ -162,12 +196,15 @@ export const useInputControl = (
     const rect = target.getBoundingClientRect();
     // 画面が縦長のときは、中央下部に配置、横長のときは左下部に配置
     if (rect.width < rect.height) {
-      joystickOuter.current.style.bottom = "0px";
+      const mg = Array.isArray(margin) ? margin[0] : margin;
+      joystickOuter.current.style.bottom = `${mg}px`;
       joystickOuter.current.style.left = "50%";
       joystickOuter.current.style.transform = "translateX(-50%)";
     } else {
-      joystickOuter.current.style.bottom = "0px";
-      joystickOuter.current.style.left = "0px";
+      const mg_x = Array.isArray(margin) ? margin[0] : margin;
+      const mg_y = Array.isArray(margin) ? margin[1] : margin;
+      joystickOuter.current.style.bottom = `${mg_x}px`;
+      joystickOuter.current.style.left = `${mg_y}px`;
     }
     // 追加: ジョイスティックのサイズ設定
     joyRadius = Math.min(rect.width, rect.height) * ratio;
@@ -188,13 +225,46 @@ export const useInputControl = (
     joystickOuter.current.appendChild(canvas.current); // Canvasを追加
     joystickOuter.current.appendChild(joystickInner.current);
 
+    const utf8_to_b64 = (str) => {
+      return window.btoa(unescape(encodeURIComponent(str)));
+    }
+    
+    const svgBase64 = `data:image/svg+xml;base64,${utf8_to_b64(svgString)}`;
+    const img = new Image();
+    img.src = svgBase64;
+    img.onload = () => {
+      // 十字キーを生成し、joyStickOuterに追加
+      const cross = document.createElement("div");
+      cross.style.position = "absolute";
+      cross.style.width = "50%";
+      cross.style.height = "50%";
+      cross.style.left = "25%";
+      cross.style.top = "25%";
+      cross.style.backgroundImage = `url(${svgBase64})`;
+      cross.style.backgroundSize = "100% 100%";
+      cross.style.backgroundRepeat = "no-repeat";
+      cross.style.backgroundPosition = "center";
+      joystickOuter.current.appendChild(cross);
+    };
+  }
+
+  // デスクトップ表示のときは、ジョイスティックを非表示にする
+  const isDesktop = () => {
+    const deviceType = device === "auto" ? detectDeviceType() : device;
+    return deviceType === "desktop";
+  };
+  if (isDesktop()) {
+    joystick.current.style.display = "none";
+    canvas.current.style.display = "none";
   }
 
   // 描画関数
   const drawArc = (angle: number) => {
     const ctx = canvas.current.getContext("2d");
-    const range = 0.125// 弧の範囲を円の1/8に変更
+    const range = 0.125;// 弧の範囲を円の1/8に変更
+    const innerRange = range / 1.5; // さらに内側の弧の範囲を円の1/2に変更
     if (ctx) {
+      // 外周に弧を描画
       ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
       ctx.beginPath();
       ctx.arc(
@@ -206,11 +276,24 @@ export const useInputControl = (
         false
       );
       ctx.lineWidth = outerLineWidth; // 線の太さを設定
-      ctx.strokeStyle = "rgba(245, 222, 179, 1)";
+      ctx.strokeStyle = joyColor;
+      ctx.stroke();
+
+      // さらに内側に弧を描画
+      ctx.beginPath();
+      ctx.arc(
+        joyRadius * 0.5,
+        joyRadius * 0.5,
+        joyRadius * 0.5 - outerLineWidth * 3,
+        angle - Math.PI * innerRange,
+        angle + Math.PI * innerRange,
+        false
+      );
+      ctx.lineWidth = outerLineWidth * 2; // 線の太さを設定
+      ctx.strokeStyle = joyColor;
       ctx.stroke();
     }
   };
-  
 
   const moveKeyFromCode = (key: string) => {
     if (EActionKey[key] === undefined) {
@@ -249,10 +332,12 @@ export const useInputControl = (
   const handleTouchStart = (e: TouchEvent) => {
     movement.current.prevDrag = new Vector2(e.touches[0].clientX, e.touches[0].clientY);
     canvas.current.style.visibility = "visible";
+    touchFlag.current = true;
   }
 
   const handleTouchMove = (e: TouchEvent) => {
     e.preventDefault();
+    if (!touchFlag.current) return;
     movement.current.curDrag = new Vector2(e.touches[0].clientX, e.touches[0].clientY);
     const deltaX = movement.current.curDrag.x - movement.current.prevDrag.x;
     const deltaY = movement.current.curDrag.y - movement.current.prevDrag.y;
@@ -301,6 +386,8 @@ export const useInputControl = (
     movement.current.left = false;
     movement.current.right = false;
     movement.current.speed = 0; // タッチ終了時にスピードをリセット
+
+    touchFlag.current = false;
   };
   
 
@@ -351,10 +438,10 @@ export const useInputControl = (
 
     // スマホ / タブレット対応
     if (deviceType == "mobile" || deviceType == "tablet") {
-      document.addEventListener("touchstart", handleTouchStart);
+      // 発火はOuter範囲内のみ
+      joystickOuter.current.addEventListener("touchstart", handleTouchStart);
       document.addEventListener("touchmove", handleTouchMove, { passive: false });
       document.addEventListener("touchend", handleTouchEnd);
-
     }
 
     // ゲームパッド対応
