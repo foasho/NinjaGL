@@ -13,7 +13,7 @@ const Showcase = () => {
         <Canvas shadows camera={{ position: [-3, 5, -10] }}>
           <ambientLight />
           <pointLight position={[10, 10, 10]} castShadow />
-          <SkywayComponent />
+          <SkywayComponent syncRotation />
           <OrbitControls />
           <Environment preset="sunset" blur={0.7} background />
         </Canvas>
@@ -22,7 +22,10 @@ const Showcase = () => {
   );
 };
 
-const SkywayComponent = () => {
+interface IS {
+  syncRotation: boolean;
+}
+const SkywayComponent = ({ syncRotation }: IS) => {
   const ref = useRef<Mesh>();
   const { camera } = useThree();
   const input = useInputControl();
@@ -39,20 +42,30 @@ const SkywayComponent = () => {
         // ダッシュ機能が必要であれば、移動量を増やす
         speed *= 2;
       }
+      let moveDirection = new Vector3();
       if (input.forward) {
         ref.current.position.addScaledVector(cameraDirectionFlat, speed * delta);
+        moveDirection.add(cameraDirectionFlat);
       }
       if (input.backward) {
         ref.current.position.addScaledVector(cameraDirectionFlat.negate(), speed * delta);
+        moveDirection.add(cameraDirectionFlat.negate());
       }
       if (input.left) {
         ref.current.position.addScaledVector(rightDirection.negate(), speed * delta);
+        moveDirection.add(rightDirection.negate());
       }
       if (input.right) {
         ref.current.position.addScaledVector(rightDirection, speed * delta);
+        moveDirection.add(rightDirection);
       }
       if (input.jump) {
         ref.current.position.y += speed * delta;
+      }
+      if (syncRotation && moveDirection.length() > 0) {
+        moveDirection.normalize();
+        const targetRotation = Math.atan2(moveDirection.x, moveDirection.z);
+        ref.current.rotation.y = targetRotation;
       }
     }
   });
