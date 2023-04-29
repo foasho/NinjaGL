@@ -5,6 +5,7 @@ import {
   LocalSFURoomMember,
   LocalVideoStream,
   nowInSec, 
+  P2PRoom, 
   RoomMember, 
   RoomPublication, 
   SfuRoom, 
@@ -22,7 +23,8 @@ import { IInputMovement, useInputControl } from './InputControl';
 export const contextOptions: Partial<SkyWayConfigOptions> = {
   log: { level: 'debug' },
 };
-export const sfuOptions: Partial<SfuRoomOptions> = {};
+// export const sfuOptions: Partial<SfuRoomOptions> = {};
+// export const p2pOptions: Partial<P2PRoom
 
 export interface IPublishData {
   position: Vector3;
@@ -53,10 +55,12 @@ export interface IUseSkywayProps {
   username?: string;
   videoElement?: RefObject<HTMLVideoElement|HTMLAudioElement>;
 }
+
+
 export const useSkyway = (props: IUseSkywayProps) => {
   const input = useInputControl("desktop");
   const me = useRef<LocalSFURoomMember|null>(null);
-  const roomRef = useRef<SfuRoom>(null);
+  const roomRef = useRef<P2PRoom>(null);
   let localVideo = useRef<HTMLVideoElement|HTMLAudioElement>(null);
   let subscribers = useRef<ISubscribers[]>([]);
   let data: LocalDataStream;
@@ -143,7 +147,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
       const context = await SkyWayContext.Create(token);
   
       // 4.Roomに参加/作成する
-      await createRoom(context, "sfu", props.roomName, audio, video, data);
+      await createRoom(context, "p2p", props.roomName, audio, video, data);
 
     })();
 
@@ -161,7 +165,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
    */
   const createRoom = async(
     context: SkyWayContext, 
-    type: "sfu",
+    type: "p2p",
     name: string,
     audio: LocalAudioStream,
     video: LocalVideoStream,
@@ -173,10 +177,9 @@ export const useSkyway = (props: IUseSkywayProps) => {
         type: type,
         name: name,
         id: name,
-        options: sfuOptions,
     }
     );
-    me.current = await roomRef.current.join();
+    await roomRef.current.join();
     if (audio) {
       await me.current.publish(audio, {
         maxSubscribers: 50,
