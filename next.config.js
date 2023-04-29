@@ -53,6 +53,15 @@ const nextConfig = {
       use: ['raw-loader', 'glslify-loader'],
     });
 
+    // JSONの読めるようにする
+    config.module.rules.push(
+      {
+        test: /\.json$/,
+        loader: 'json-loader',
+        type: 'javascript/auto'
+      }
+    );
+
     // InstanceAPIのクラス名と変数名を変更しないように設定
     if (!isServer) {
       const terserIndex = config.optimization.minimizer.findIndex(

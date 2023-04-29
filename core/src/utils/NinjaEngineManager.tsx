@@ -786,6 +786,32 @@ export class NinjaEngine {
   }
 
   /**
+   * UMを取得する
+   */
+  getUMs(): IUIManagement[] {
+    return this.ums;
+  }
+
+  /**
+   * [UM] Web3WalletConnectBtnを取得する
+   */
+  getWalletConnectBtn(): IUIManagement{
+    return this.ums.find(um => um.type == "walletbtn");
+  }
+
+  /**
+   * [UM] VRBtnを取得する
+   */
+  getVRBtn(): IUIManagement{
+    return this.ums.find(um => um.type == "vrbtn");
+  }
+
+  /**
+   * 
+   */
+
+
+  /**
    * 現在のレイヤーから可視する周辺のレイヤー番号を取得する
    */
   getActiveLayers(

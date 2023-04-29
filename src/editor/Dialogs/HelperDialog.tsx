@@ -3,7 +3,6 @@ import { useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useTranslation } from "react-i18next";
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import MonacoEditor, { Monaco } from "@monaco-editor/react";
 
 const codeStared = `
 import { NinjaGL } from "@ninjagl/core";
@@ -32,12 +31,6 @@ function App() {
     );
 }
 `;
-
-
-interface PackageJson {
-    version: string;
-    [key: string]: any;
-}
 
 interface IResponse {
     response: () => void;
