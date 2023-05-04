@@ -1,15 +1,12 @@
 import React, { useEffect, useState, useRef, RefObject, useCallback } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { 
   LocalAudioStream,
-  LocalSFURoomMember,
+  LocalP2PRoomMember,
   LocalVideoStream,
   nowInSec, 
   P2PRoom, 
   RoomMember, 
   RoomPublication, 
-  SfuRoom, 
-  SfuRoomOptions, 
   SkyWayAuthToken, 
   SkyWayContext, 
   SkyWayRoom, 
@@ -18,20 +15,20 @@ import {
 } from '@skyway-sdk/room';
 import {  LocalDataStream, SkyWayConfigOptions } from '@skyway-sdk/core';
 import { Euler, Vector3 } from 'three';
-import { IInputMovement, useInputControl } from './InputControl';
+import { IInputMovement } from './InputControl';
 
 export const contextOptions: Partial<SkyWayConfigOptions> = {
   log: { level: 'debug' },
 };
-// export const sfuOptions: Partial<SfuRoomOptions> = {};
-// export const p2pOptions: Partial<P2PRoom
 
 export interface IPublishData {
   position: Vector3;
   rotation: Euler;
   input: IInputMovement;
+  id?: string;
   username?: string;
   message?: string;
+  userData?: { [key: string]: any };
 }
 
 export interface ISubscribers {
@@ -44,8 +41,10 @@ export interface ISubscribers {
 }
 
 export interface IUseSkywayProps {
-  enabled: boolean;
   roomName: string;
+  enabled?: boolean;
+  videoEnabled?: boolean;
+  audioEnabled?: boolean;
   tokenString?: string;
   appId?: string;
   appSecretKey?: string;
@@ -58,21 +57,21 @@ export interface IUseSkywayProps {
 
 
 export const useSkyway = (props: IUseSkywayProps) => {
-  const input = useInputControl("desktop");
-  const me = useRef<LocalSFURoomMember|null>(null);
+  const [updateCnt, setUpdateCnt] = useState(0);
+  const _enabled = props.enabled? props.enabled: false;
+  const me = useRef<LocalP2PRoomMember|null>(null);
+  const members = useRef<RoomMember[]>([]);
+  const membersData = useRef<IPublishData[]>([]);
   const roomRef = useRef<P2PRoom>(null);
   let localVideo = useRef<HTMLVideoElement|HTMLAudioElement>(null);
-  let subscribers = useRef<ISubscribers[]>([]);
-  let data: LocalDataStream;
+  let videoStream: LocalVideoStream|null = null;
+  let audioStream: LocalAudioStream|null = null;
+  let dataStream: LocalDataStream;
 
-  const join = useCallback( async () => {
-    try {
-      // 0. マイクとビデオへのアクセス許可を求める
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    } catch (error) {
-      console.error("マイクとビデオへのアクセス許可が拒否されました。", error);
-      return;
-    }
+  /**
+   * Roomに参加する
+   */
+  const RoomJoin = async () => {
     /**
      * 1.SkywayAuthTokenを作成する
      */
@@ -135,30 +134,55 @@ export const useSkyway = (props: IUseSkywayProps) => {
       // localVideo.current.playsInline = true;// これはiOSで動かない
     }
     (async () => {
-      const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream({
-        video: { height: 640, width: 360, frameRate: 15 },// 品質を落とす
-      });
-      video.attach(localVideo.current);
-      await localVideo.current.play();
+      if (props.videoEnabled || props.audioEnabled){
+        const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream({
+          video: { height: 640, width: 360, frameRate: 15 },// 品質を落とす
+        });
+        if (props.videoEnabled){
+          videoStream = video;
+        }
+        if (props.audioEnabled){
+          audioStream = audio;
+        }
+        video.attach(localVideo.current);
+        await localVideo.current.play();
+      }
       // DataStream
-      data = await SkyWayStreamFactory.createDataStream();
+      dataStream = await SkyWayStreamFactory.createDataStream();
       
       // 3.SkywayContextを作成する
       const context = await SkyWayContext.Create(token);
   
-      // 4.Roomに参加/作成する
-      await createRoom(context, "p2p", props.roomName, audio, video, data);
+      // 4.P2PRoomに参加/作成する
+      await createRoom(context, "p2p", props.roomName);
 
     })();
-
-  }, [props]);
+  }
 
   useEffect(() => {
     // Enableがtrueの場合に自動で、Skywayに接続する
-    if (props.enabled) {
-      join();
+    if (_enabled && props.roomName) {
+      if (!roomRef.current && !me.current){
+        RoomJoin();
+      }
     }
-  }, [props.enabled, join]);
+    return () => {
+      if (me.current && roomRef.current){
+        // 退出して初期化
+        roomRef.current.leave(me.current);
+        me.current = null;
+        roomRef.current = null;
+      }
+    }
+  }, [props.enabled, props.roomName]);
+
+  /**
+   * メンバーのデータを取得する
+   */
+  const getPData = useCallback((id): IPublishData => {
+    const memberData = membersData.current.find((data) => data.id === id);
+    return memberData || null;
+  }, [membersData]);
   
   /**
    * SkywayでRoomを参加する
@@ -167,26 +191,22 @@ export const useSkyway = (props: IUseSkywayProps) => {
     context: SkyWayContext, 
     type: "p2p",
     name: string,
-    audio: LocalAudioStream,
-    video: LocalVideoStream,
-    data: LocalDataStream
   ) => {
     roomRef.current = await SkyWayRoom.FindOrCreate(
-        context,
-    {
+        context, {
         type: type,
         name: name,
         id: name,
-    }
-    );
-    await roomRef.current.join();
-    if (audio) {
-      await me.current.publish(audio, {
+    });
+    me.current = await roomRef.current.join();
+    console.log("My member: ", me.current);
+    if (audioStream) {
+      await me.current.publish(audioStream, {
         maxSubscribers: 50,
       });
     }
-    if (video){
-      await me.current.publish(video, {
+    if (videoStream){
+      await me.current.publish(videoStream, {
         maxSubscribers: 50,
         encodings: [
           { maxBitrate: 80_000, id: 'low' },
@@ -194,53 +214,102 @@ export const useSkyway = (props: IUseSkywayProps) => {
         ],
       });
     }
-    if (data) {
-      await me.current.publish(data, {
+    if (dataStream) {
+      await me.current.publish(dataStream, {
         maxSubscribers: 50,
       });
     }
 
     // ルーム内に新しいメンバーが入室したときに呼ばれる
-    roomRef.current.onMemberJoined.add((e) => {addMember(e.member)});
+    roomRef.current.onMemberJoined.add((e) => {
+      addMember(e.member);
+      console.log("新しいユーザーが入室しました。: ", e.member);
+    });
 
     // ルーム内にメンバーが退出したときに呼ばれる
-    roomRef.current.onMemberLeft.add((e) => {console.log(e.member)});
+    roomRef.current.onMemberLeft.add((e) => {
+      removeMember(e.member);
+      console.log("新しいユーザーが退出しました。: ", e.member);
+    });
 
     /**
-     * 音声,ビデオ,データをSubscribeする
+     * 音声,ビデオ,データをSubscribeする(受信)
      */
-    const subscribe = async(publication: RoomPublication) => {
+    const subscribeAndAttach = async (publication: RoomPublication) => {
+      if (!me.current) return;
       if (publication.publisher.id == me.current.id) return;
-      if (publication.contentType === 'video') {
-        // ビデオは、低品質のものをSubscribeする
-        await me.current.subscribe(publication, {
-          preferredEncodingId: 'low',
-        });
-      } 
-      else if (publication.contentType === 'audio') {
-        // 音声とデータは、デフォルトでSubscribeする
-        await me.current.subscribe(publication);
-      }
-      else if (publication.contentType === 'data') {
-        // const { stream } = await me.current.subscribe(publication.id);
-        // stream.
-        const a = await me.current.subscribe(publication);
-        // if (a.subscription.stream.)
+      const { stream } = await me.current.subscribe(publication.id);
+      switch (stream.contentType) {
+        case 'video':
+          {
+            const elm = document.createElement('video');
+            elm.playsInline = true;
+            elm.autoplay = true;
+            stream.attach(elm);
+            // remoteMediaArea.appendChild(elm);
+          }
+          break;
+        case 'audio':
+          {
+            const elm = document.createElement('audio');
+            elm.controls = true;
+            elm.autoplay = true;
+            stream.attach(elm);
+            // remoteMediaArea.appendChild(elm);
+          }
+          break;
+        case 'data': {
+          stream.onData.add((data) => {
+            // JSONデータに変換
+            const pdata = JSON.parse(data as string) as IPublishData;
+            // Position/Rotationを更新する
+            if (pdata.position){
+              pdata.position = new Vector3().copy(pdata.position);
+            }
+            if (pdata.rotation){
+              pdata.rotation = new Euler().copy(pdata.rotation);
+            }
+            // メンバーデータをセットする
+            setMemberData(pdata);
+          });
+        }
       }
     }
     
+    // ルーム内に既に存在するメンバーのStreamをSubscribeする
+    roomRef.current.publications.forEach(subscribeAndAttach);
     // ルーム内に新しいメンバーがStreamをPublishしたときに呼ばれる
-    roomRef.current.onStreamPublished.add(async (e) => {subscribe(e.publication)});
-    await Promise.all(roomRef.current.publications.map(subscribe));
+    roomRef.current.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
+  }
 
-    // roomRef.current.onData
+  /**
+   * メンバーデータをセットする
+   */
+  const setMemberData = (pdata: IPublishData) => {
+    // もし任意のIDがすでに存在する場合は、上書きする
+    const index = membersData.current.findIndex((m) => m.id == pdata.id);
+    if (index >= 0){
+      membersData.current[index] = {...pdata};
+    } else {
+      // 新しいメンバーの場合は、破壊的に追加する
+      const _membersData = membersData.current;
+      _membersData.push({...pdata});
+      membersData.current = [..._membersData];
+      setUpdateCnt((prevCounter) => prevCounter + 1);
+    }
   }
   
   /**
    * データを送信する
    */
   const publishData = (pdata: IPublishData) => {
-    if (data) data.write(JSON.stringify({...pdata}));
+    if (dataStream) {
+      if (!pdata.id){
+        pdata.id = me.current?.id;
+      }
+      const sendData = JSON.stringify({...pdata});
+      dataStream.write(sendData);
+    }
   }
   /**
    * SkywayでRoomを退出する
@@ -253,14 +322,30 @@ export const useSkyway = (props: IUseSkywayProps) => {
   /**
    * メンバーが追加
    */
-  const addMember = async(member: RoomMember) => {
-    if (member.id == me.current.id) return;
-    // if (){ }
+  const addMember = (member: RoomMember) => {
+    if (me.current && member.id == me.current.id) return;
+    const newMbs = members.current;
+    newMbs.push(member);
+    members.current = [...newMbs];
+  }
+
+  /**
+   * メンバーが削除
+   */
+  const removeMember = (member: RoomMember) => {
+    if (me.current && member.id == me.current.id) return;
+    const newMbs = members.current.filter((m) => m.id !== member.id);
+    members.current = [...newMbs];
   }
 
   return { 
+    me: me.current,
+    updateCnt: updateCnt,
     publishData: publishData, 
     leaveRoom: leaveRoom,
-    subscribers: subscribers,
+    localVideo: localVideo,
+    members: members.current,
+    membersData: membersData.current,
+    getPData: getPData,
   }
 }

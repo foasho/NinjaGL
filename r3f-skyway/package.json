@@ -32,29 +32,28 @@
     "url": "https://github.com/foasho/NinjaGL/issues"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@react-three/fiber": ">=8.11.0",
-    "@skyway-sdk/core": "^1.2.2",
-    "@skyway-sdk/room": "^1.2.2",
-    "@skyway-sdk/sfu-bot": "^1.2.2",
-    "@skyway-sdk/token": "^1.2.2"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@types/three": "^0.149.0",
-    "@react-three/drei": "^9.65.3",
     "@react-three/fiber": ">=8.11.0",
     "@skyway-sdk/core": "^1.2.2",
     "@skyway-sdk/room": "^1.2.2",
     "@skyway-sdk/sfu-bot": "^1.2.2",
     "@skyway-sdk/token": "^1.2.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.65.3",
+    "@react-three/fiber": ">=8.11.0",
+    "@react-three/xr": "^5.5.0",
+    "@skyway-sdk/core": "^1.2.2",
+    "@skyway-sdk/room": "^1.2.2",
+    "@skyway-sdk/sfu-bot": "^1.2.2",
+    "@skyway-sdk/token": "^1.2.2",
+    "@types/three": "^0.149.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "three": ">=0.149.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.37",
-    "@types/react-dom": "^18.0.11",
     "@rollup/plugin-alias": "^5.0.0",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-json": "^6.0.0",
@@ -62,6 +61,8 @@
     "@types/file-saver": "^2.0.5",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.23",
+    "@types/react": "^18.0.37",
+    "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.26",
     "customize-cra": "^1.0.0",
     "react-app-rewired": "^2.2.1",
