@@ -31,15 +31,6 @@ export interface IPublishData {
   userData?: { [key: string]: any };
 }
 
-export interface ISubscribers {
-  input: IInputMovement;
-  position: Vector3;
-  rotation: Euler;
-  username?: string;
-  message?: string;
-  stream?: LocalVideoStream|LocalAudioStream;
-}
-
 export interface IUseSkywayProps {
   roomName: string;
   enabled?: boolean;
@@ -348,4 +339,40 @@ export const useSkyway = (props: IUseSkywayProps) => {
     membersData: membersData.current,
     getPData: getPData,
   }
+}
+
+export interface IPrivateCallProps {
+  token: string;
+  audio: boolean;
+  video: boolean;
+  myId: string;
+  connectIds: string[];
+}
+
+export class SkywayPrivateCall {
+  context: SkyWayContext;
+  room: P2PRoom;
+  constructor(props: IPrivateCallProps){
+    this.init(props.token);
+  }
+
+  async init (token: string) {
+    this.context = await SkyWayContext.Create(token);
+    const id = uuidV4();
+    await this.joinOrCreateRoom(id);
+  }
+
+  private async joinOrCreateRoom(roomName: string) {
+    if (!this.context) return;
+
+    this.room = await SkyWayRoom.FindOrCreate(this.context, {
+      type: 'p2p',
+      name: roomName,
+      id: roomName,
+    });
+  }
+
+  enableAudio= () => {}
+
+  enableVideo= () => {}
 }

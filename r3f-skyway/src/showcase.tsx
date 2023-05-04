@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from 'react-dom/client';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Text, Environment, Html, OrbitControls, RoundedBox, useFont, Text3D, useTexture, Billboard, Detailed } from "@react-three/drei";
-import { VRButton, XR } from "@react-three/xr";
+import { Text, Environment, OrbitControls, useFont, useTexture } from "@react-three/drei";
+import { VRButton, XR, useXR } from "@react-three/xr";
 import { IInputMovement, useInputControl } from "./hooks/InputControl";
 import { Box3, Color, Mesh, Object3D, Vector3 } from "three";
-import { Font, FontLoader, OrbitControls as OrbitControlsImpl, SkeletonUtils, TextGeometry } from "three-stdlib";
+import { OrbitControls as OrbitControlsImpl, SkeletonUtils } from "three-stdlib";
 import { IPublishData, useSkyway } from "./hooks/useSkyway";
 import { LocalP2PRoomMember } from "@skyway-sdk/room";
 
@@ -29,7 +29,6 @@ const Showcase = () => {
               <planeBufferGeometry args={[100, 100]} />
               <meshStandardMaterial color="gray" />
             </mesh>
-            <UserCard name="ShoOsaka" position={new Vector3(1.3123, 4.412231, 8.234235)} />
             <Environment preset="sunset" blur={0.7} background />
           </XR>
         </Canvas>
@@ -220,6 +219,7 @@ const Other = ({ id, object }: IOtherProps) => {
   const sw = useContext(SkywayContext);
   const [select, setSelect] = useState(false);
   const ref = useRef<Mesh>();
+  const pData = useRef<IPublishData>();
   const [obj, setObj] = useState<Mesh|Object3D>();
   useEffect(() => {
     if (object && object.current) {
@@ -258,6 +258,7 @@ const Other = ({ id, object }: IOtherProps) => {
         }
         ref.current.position.copy(pdata.position);
         ref.current.rotation.copy(pdata.rotation);
+        pData.current = pdata;
       }
       lastUpdateTimeRef.current = elapsedTimeRef.current;
     }
@@ -266,33 +267,43 @@ const Other = ({ id, object }: IOtherProps) => {
   return (
     <>
       {obj?
-      <mesh 
-        ref={ref}
-      >
-        <primitive object={obj} />
-      </mesh>
-      :
-      <mesh 
-        ref={ref}
-      >
-        <boxBufferGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-    }
+        <mesh 
+          ref={ref}
+          onClick={(e) => (e.stopPropagation(), setSelect(true))}
+          onPointerMissed={(e) => e.type === 'click' && (setSelect(false))}
+        >
+          <primitive object={obj} />
+        </mesh>
+        :
+        <mesh 
+          ref={ref}
+          onClick={(e) => (e.stopPropagation(), setSelect(true))}
+          onPointerMissed={(e) => e.type === 'click' && (setSelect(false))}
+        >
+          <boxBufferGeometry args={[2, 2, 2]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      }
+      {select && 
+      <>
+        <UserCard pdata={pData.current} />
+      </>
+      }
     </>
   )
 }
 
 
 interface IUserCardProps {
-  name: string;
-  position: Vector3;
+  pdata: IPublishData;
+  stream?: MediaStream;
 }
-const UserCard = ({ name, position }: IUserCardProps) => {
+const UserCard = ({ pdata, stream }: IUserCardProps) => {
+  const baseColor = "#00B6CF";
   const ref = useRef<any>();
   const cardRef = useRef<any>();
   const { camera, size } = useThree();
-  const [texture1] = useTexture(["phone.png"])
+  const [phoneTexture, userTexture] = useTexture(["phone.png", "user.png"])
   useFrame(() => {
     if (ref.current && cardRef.current) {
       // カメラの向きを取得
@@ -328,46 +339,103 @@ const UserCard = ({ name, position }: IUserCardProps) => {
         ref={ref}
       >
         <mesh ref={cardRef}>
-          <planeBufferGeometry args={[1, 2]}/>
+          <planeBufferGeometry args={[1, 1.7]}/>
           <meshBasicMaterial 
-            color="#e2e2e2" 
-            opacity={0.5} // 透明度を設定 (0 から 1 までの値)
-            transparent={true} // 透明度を有効にする
+            color="#FFF" 
+            // opacity={0.5} // 透明度を設定 (0 から 1 までの値)
+            // transparent={true} // 透明度を有効にする
           />
         </mesh>
         <group
           position={[0, 0, 0.001]}
         >
+
+          <mesh
+            position={[0, 0.65, 0]}
+          >
+            <planeBufferGeometry args={[1.0, 0.7]}/>
+            <meshBasicMaterial color="#FFF" />
+          </mesh>
+          {stream ?
+            <mesh
+              position={[0, 0.6, 0.001]}
+            >
+              <planeBufferGeometry args={[0.6, 0.6]}/>
+              <meshBasicMaterial color="#fff" />
+            </mesh>
+            :
+            <mesh
+              position={[0, 0.6, 0.001]}
+            >
+              <planeBufferGeometry args={[0.6, 0.6]}/>
+              <meshBasicMaterial
+                map={userTexture}
+                transparent={true}
+              />
+            </mesh>
+          }
+
           <Text
-            position={[0, 0.8, 0]}
-            color={'#000'}
+            position={[-0.15, 0.1, 0.01]}
+            color={baseColor}
             fontSize={0.1}
             font={font}
           >
-            {name}
+            {(pdata && pdata.username)? pdata.username: "NoName"}
           </Text>
+          {/* 通話ボタン */}
           <group
-            position={[0, -0.8, 0]}
+            position={[-0.25, -0.7, 0]}
           >
             <mesh>
-              <planeBufferGeometry args={[0.8, 0.2]}/>
-              <meshBasicMaterial color="#113649" />
-            </mesh>
-            <mesh position={[0.35, 0, 0]}>
-              <planeBufferGeometry args={[0.2, 0.2]}/>
-              <meshBasicMaterial 
-                color="#ffffff" 
-                map={texture1}
+              <planeBufferGeometry args={[0.1, 0.1]}/>
+              <meshBasicMaterial
+                transparent={true}
+                map={phoneTexture}
               />
             </mesh>
-            <Text
-              position={[-0.1, -0.01, 0]}
-              color={'#fff'}
-              fontSize={0.1}
-              font={font}
-            >
-              Call
-            </Text>
+            <mesh>
+              <circleBufferGeometry args={[0.1, 32]}/>
+              <meshBasicMaterial
+                color={baseColor}
+              />
+            </mesh>
+          </group>
+          {/* チャットボタン */}
+          <group
+            position={[0, -0.7, 0]}
+          >
+            <mesh>
+              <planeBufferGeometry args={[0.1, 0.1]}/>
+              <meshBasicMaterial
+                transparent={true}
+                map={phoneTexture}
+              />
+            </mesh>
+            <mesh>
+              <circleBufferGeometry args={[0.1, 32]}/>
+              <meshBasicMaterial
+                color={baseColor}
+              />
+            </mesh>
+          </group>
+          {/* テレポート遷移 */}
+          <group
+            position={[0.25, -0.7, 0]}
+          >
+            <mesh>
+              <planeBufferGeometry args={[0.1, 0.1]}/>
+              <meshBasicMaterial
+                transparent={true}
+                map={phoneTexture}
+              />
+            </mesh>
+            <mesh>
+              <circleBufferGeometry args={[0.1, 32]}/>
+              <meshBasicMaterial
+                color={baseColor}
+              />
+            </mesh>
           </group>
         </group>
       </group>

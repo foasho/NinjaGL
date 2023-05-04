@@ -121,31 +121,37 @@ export const getManualState = (): IInputMovement => {
  */
 const svgString = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <!-- 上向き矢印 -->
+    <!-- 上向き三角形 -->
     <path
-      d="M50 20 L70 40 H60 V60 H40 V40 H30 Z"
-      fill="rgba(32, 32, 32, 0.05)"
-      fill-opacity="0.5"
+      d="M50 22.5 L55 30 H45 Z"
+      fill="rgba(255, 255, 255, 0.1)"
     />
-    <!-- 右向き矢印 -->
+    <!-- 右向き三角形 -->
     <path
-      d="M80 50 L60 70 V60 H40 V40 H60 V30 Z"
-      fill="rgba(32, 32, 32, 0.05)"
-      fill-opacity="0.5"
+      d="M77.5 50 L70 55 V45 Z"
+      fill="rgba(255, 255, 255, 0.1)"
     />
-    <!-- 下向き矢印 -->
+    <!-- 下向き三角形 -->
     <path
-      d="M50 80 L30 60 H40 V40 H60 V60 H70 Z"
-      fill="rgba(32, 32, 32, 0.05)"
-      fill-opacity="0.5"
+      d="M50 77.5 L45 70 H55 Z"
+      fill="rgba(255, 255, 255, 0.1)"
     />
-    <!-- 左向き矢印 -->
+    <!-- 左向き三角形 -->
     <path
-      d="M20 50 L40 30 V40 H60 V60 H40 V70 Z"
-      fill="rgba(32, 32, 32, 0.05)"
-      fill-opacity="0.5"
+      d="M22.5 50 L30 55 V45 Z"
+      fill="rgba(255, 255, 255, 0.1)"
     />
-  </svg>`;
+    <!-- 中央の円のボーダー線 -->
+    <circle
+      cx="50"
+      cy="50"
+      r="15"
+      fill="transparent"
+      stroke="rgba(255, 255, 255, 0.1)"
+      stroke-width="2"
+    />
+  </svg>
+  `;
 
 /**
  * 入力イベント / 入力の型
@@ -176,7 +182,7 @@ export const useInputControl = (
   const outerLineWidth = 5;
   joystickOuter.current.style.position = "relative";
   joystickOuter.current.style.outlineOffset = `-${outerLineWidth}px`;
-  joystickOuter.current.style.outline = `${outerLineWidth}px solid rgba(32, 32, 32, 0.05)`;
+  joystickOuter.current.style.outline = `${outerLineWidth}px solid rgba(16, 16, 16, 0)`;
   joystickOuter.current.style.borderRadius = "50%";
   joystickInner.current.style.position = "absolute";
   joystickOuter.current.style.zIndex = "100";
@@ -186,7 +192,7 @@ export const useInputControl = (
   joystickInner.current.style.borderRadius = "50%";
   joystickInner.current.style.pointerEvents = "none";
   joystickOuter.current.style.position = "absolute";
-  // innerのデザインを非表示にする
+  // Outer/Innerのデザインを非表示にする
   joystickInner.current.style.visibility = "hidden";
   // JoyStickをtargetのidをもつ子要素として追加
   let joyRadius = 0;
@@ -261,7 +267,7 @@ export const useInputControl = (
   // 描画関数
   const drawArc = (angle: number) => {
     const ctx = canvas.current.getContext("2d");
-    const range = 0.125;// 弧の範囲を円の1/8に変更
+    const range = 0.17;// 弧の範囲を円の1/6に変更
     const innerRange = range / 1.5; // さらに内側の弧の範囲を円の1/2に変更
     if (ctx) {
       // 外周に弧を描画
@@ -289,7 +295,7 @@ export const useInputControl = (
         angle + Math.PI * innerRange,
         false
       );
-      ctx.lineWidth = outerLineWidth * 2; // 線の太さを設定
+      ctx.lineWidth = outerLineWidth; // 線の太さを設定
       ctx.strokeStyle = joyColor;
       ctx.stroke();
     }
@@ -339,6 +345,7 @@ export const useInputControl = (
   const handleTouchStart = (e: TouchEvent) => {
     movement.current.prevDrag = new Vector2(e.touches[0].clientX, e.touches[0].clientY);
     canvas.current.style.visibility = "visible";
+    joystickOuter.current.style.outline = `${outerLineWidth}px solid rgba(16, 16, 16, 0.1)`;
     touchFlag.current = true;
   }
 
@@ -389,6 +396,7 @@ export const useInputControl = (
     joystickInner.current.style.top = "50%";
     // Canvas Reset
     canvas.current.style.visibility = "hidden";
+    joystickOuter.current.style.outline = `${outerLineWidth}px solid rgba(16, 16, 16, 0)`;
   
     // Reset movement states
     movement.current.prevDrag = null;
