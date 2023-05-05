@@ -2,18 +2,20 @@ import React, { useEffect, useState, useRef, RefObject, useCallback } from 'reac
 import { 
   LocalAudioStream,
   LocalP2PRoomMember,
+  LocalSFURoomMember,
   LocalVideoStream,
   nowInSec, 
   P2PRoom, 
   RoomMember, 
   RoomPublication, 
+  SfuRoom, 
   SkyWayAuthToken, 
   SkyWayContext, 
   SkyWayRoom, 
   SkyWayStreamFactory, 
   uuidV4
 } from '@skyway-sdk/room';
-import {  LocalDataStream, SkyWayConfigOptions } from '@skyway-sdk/core';
+import {  LocalDataStream, SkyWayConfigOptions, Subscription } from '@skyway-sdk/core';
 import { Euler, Vector3 } from 'three';
 import { IInputMovement } from './InputControl';
 
@@ -44,6 +46,7 @@ export interface IUseSkywayProps {
   attach?: string;
   username?: string;
   videoElement?: RefObject<HTMLVideoElement|HTMLAudioElement>;
+  maxSubscribers?: number;
 }
 
 
@@ -55,9 +58,8 @@ export const useSkyway = (props: IUseSkywayProps) => {
   const membersData = useRef<IPublishData[]>([]);
   const roomRef = useRef<P2PRoom>(null);
   let localVideo = useRef<HTMLVideoElement|HTMLAudioElement>(null);
-  let videoStream: LocalVideoStream|null = null;
-  let audioStream: LocalAudioStream|null = null;
   let dataStream: LocalDataStream;
+  const maxSubscribers = props.maxSubscribers? props.maxSubscribers: 320;// 最大320人まで
 
   /**
    * Roomに参加する
@@ -125,19 +127,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
       // localVideo.current.playsInline = true;// これはiOSで動かない
     }
     (async () => {
-      if (props.videoEnabled || props.audioEnabled){
-        const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream({
-          video: { height: 640, width: 360, frameRate: 15 },// 品質を落とす
-        });
-        if (props.videoEnabled){
-          videoStream = video;
-        }
-        if (props.audioEnabled){
-          audioStream = audio;
-        }
-        video.attach(localVideo.current);
-        await localVideo.current.play();
-      }
+
       // DataStream
       dataStream = await SkyWayStreamFactory.createDataStream();
       
@@ -190,24 +180,10 @@ export const useSkyway = (props: IUseSkywayProps) => {
         id: name,
     });
     me.current = await roomRef.current.join();
-    console.log("My member: ", me.current);
-    if (audioStream) {
-      await me.current.publish(audioStream, {
-        maxSubscribers: 50,
-      });
-    }
-    if (videoStream){
-      await me.current.publish(videoStream, {
-        maxSubscribers: 50,
-        encodings: [
-          { maxBitrate: 80_000, id: 'low' },
-          { maxBitrate: 400_000, id: 'high' },
-        ],
-      });
-    }
+
     if (dataStream) {
       await me.current.publish(dataStream, {
-        maxSubscribers: 50,
+        maxSubscribers: maxSubscribers,
       });
     }
 
@@ -224,7 +200,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
     });
 
     /**
-     * 音声,ビデオ,データをSubscribeする(受信)
+     * データをSubscribeする(受信)
      */
     const subscribeAndAttach = async (publication: RoomPublication) => {
       if (!me.current) return;
@@ -327,6 +303,8 @@ export const useSkyway = (props: IUseSkywayProps) => {
     if (me.current && member.id == me.current.id) return;
     const newMbs = members.current.filter((m) => m.id !== member.id);
     members.current = [...newMbs];
+    membersData.current = membersData.current.filter((m) => m.id !== member.id);
+    setUpdateCnt((prevCounter) => prevCounter + 1);
   }
 
   return { 
@@ -341,38 +319,141 @@ export const useSkyway = (props: IUseSkywayProps) => {
   }
 }
 
+
+/**
+ * プライベート通話には、SFUを利用する
+ */
 export interface IPrivateCallProps {
   token: string;
   audio: boolean;
   video: boolean;
+  localVideo: HTMLVideoElement;
   myId: string;
   connectIds: string[];
+  onStreamCallback: (elm: HTMLVideoElement|HTMLAudioElement) => void;
 }
 
 export class SkywayPrivateCall {
+  me: LocalSFURoomMember;
   context: SkyWayContext;
-  room: P2PRoom;
+  room: SfuRoom;
+  audioStream: LocalAudioStream;
+  videoStream: LocalVideoStream;
+  maxSubscribers: number = 8;
   constructor(props: IPrivateCallProps){
-    this.init(props.token);
+    this.init(props);
   }
 
-  async init (token: string) {
-    this.context = await SkyWayContext.Create(token);
+  async init (props: IPrivateCallProps) {
+    this.context = await SkyWayContext.Create(props.token);
+    if (props.video || props.audio){
+      const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream({
+        video: { height: 640, width: 360, frameRate: 15 },// 品質を落とす
+      });
+      if (props.video){
+        this.videoStream = video;
+      }
+      if (props.audio){
+        this.audioStream = audio;
+      }
+      video.attach(props.localVideo);
+      await props.localVideo.play();
+    }
+
     const id = uuidV4();
-    await this.joinOrCreateRoom(id);
+    await this.joinOrCreateRoom(props, id);
   }
 
-  private async joinOrCreateRoom(roomName: string) {
+  private async joinOrCreateRoom(props: IPrivateCallProps, id: string) {
     if (!this.context) return;
-
     this.room = await SkyWayRoom.FindOrCreate(this.context, {
-      type: 'p2p',
-      name: roomName,
-      id: roomName,
+      type: 'sfu',
+      name: id,
+      id: id,
     });
+    // ルーム内に既に存在するメンバーのStreamをSubscribeする
+    this.room.publications.forEach((publish) => {
+      this.subscribeAndAttach(props, publish);
+    });
+    // ルーム内に新しいメンバーがStreamをPublishしたときに呼ばれる
+    this.room.onStreamPublished.add((e) => 
+      this.subscribeAndAttach(props, e.publication)
+    );
   }
 
-  enableAudio= () => {}
+  /**
+   * 通話を切る
+   */
+  public destroyRoom = async () => {
+    if (this.room){
+      await this.room.close();
+      this.context = null;
+      this.room = null;
+      this.me = null;
+      this.audioStream = null;
+      this.videoStream = null;
+    }
+  }
 
-  enableVideo= () => {}
+  /**
+   * 音声を有効にする
+   * ※自分のStreamデータを送信する
+   */
+  public enableAudio= async () => {
+    if (this.audioStream) {
+      await this.me.publish(this.audioStream, {
+        maxSubscribers: this.maxSubscribers,
+      });
+    }
+  }
+
+  /**
+   * 音声を無効にする
+   */
+  public disableAudio = async () => {}
+
+  /**
+   * ビデオを有効にする(送信)
+   * ※自分のStreamデータを送信する
+   */
+  public enableVideo = async () => {
+    if (this.videoStream){
+      await this.me.publish(this.videoStream, {
+        maxSubscribers: this.maxSubscribers,
+        encodings: [
+          { maxBitrate: 80_000, id: 'low' },
+          { maxBitrate: 400_000, id: 'high' },
+        ],
+      });
+    }
+  }
+
+/**
+ * 音声,ビデオをSubscribeする(受信)
+ */
+  private subscribeAndAttach = async (props: IPrivateCallProps, publication: RoomPublication) => {
+    if (!this.me) return;
+    if (publication.publisher.id == this.me.id) return;
+    const { stream } = await this.me.subscribe(publication.id);
+    switch (stream.contentType) {
+      case 'video':
+        {
+          const elm = document.createElement('video');
+          elm.playsInline = true;
+          elm.autoplay = true;
+          stream.attach(elm);
+          props.onStreamCallback(elm);
+        }
+        break;
+      case 'audio':
+        {
+          const elm = document.createElement('audio');
+          elm.controls = true;
+          elm.autoplay = true;
+          stream.attach(elm);
+          props.onStreamCallback(elm);
+        }
+        break;
+    }
+  }
 }
