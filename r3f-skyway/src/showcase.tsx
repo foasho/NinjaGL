@@ -1,22 +1,21 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from 'react-dom/client';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Text, Environment, OrbitControls, useFont, useTexture } from "@react-three/drei";
-import { VRButton, XR, useXR } from "@react-three/xr";
+import { Text, Environment, OrbitControls, useFont, useTexture, Text3D } from "@react-three/drei";
+import { VRButton, XR, startSession, stopSession, useXR } from "@react-three/xr";
 import { IInputMovement, useInputControl } from "./hooks/InputControl";
-import { Box3, Color, Mesh, Object3D, Vector3 } from "three";
+import { Box3, Color, Mesh, Object3D, Vector2, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl, SkeletonUtils } from "three-stdlib";
-import { IPublishData, useSkyway } from "./hooks/useSkyway";
+import { IPrivateCallProps, IPublishData, SkywayPrivateCall, useSkyway } from "./hooks/useSkyway";
 import { LocalP2PRoomMember } from "@skyway-sdk/room";
-
-const font = useFont.preload("font.json");
+import { Form, Input } from "./form";
 
 const Showcase = () => {
   const ref = useRef<Mesh>();
   return (
     <>
       <div id="target" style={{ height: "100vh", width: "100vw" }}>
-        <VRButton />
+        {/* <VRButton /> */}
         <Canvas shadows camera={{ position: [-3, 5, -10] }}>
           <XR>
             <pointLight position={[10, 10, 10]} castShadow />
@@ -45,25 +44,49 @@ export interface IR3FSkywayProps {
   roomName: string;
   playerName?: string;
   frameRate?: 12 | 24 | 30 | 60; // default 12
-  visibleDistance?: number; // default 25
+  visibleDistance?: number; // default 25,
+  fontPath?: string; // ttf or woff
+  supportVR?: boolean; // VRがサポートされているかどうか
 }
 
-export const R3FSkyway = ({ object, syncRotation, offset, roomName, playerName, frameRate, visibleDistance }: IR3FSkywayProps) => {
+export const R3FSkyway = ({ object, syncRotation, offset, roomName, playerName, frameRate, visibleDistance, fontPath }: IR3FSkywayProps) => {
   const refNameText = useRef<any>();
   const input = useInputControl();
   const { camera } = useThree();
   const _frameRate = frameRate || 12;
   const _visibleDistance = visibleDistance ||25;
+  const [callRoom, setCallRoom] = useState<SkywayPrivateCall>();
+  const _fontPath = fontPath? fontPath:'/fonts/MPLUS1.ttf';
+  const [supportVR, setSupportVR] = useState<boolean>(false);
 
   const { publishData, membersData, me, updateCnt } = useSkyway({
     enabled: true,
     roomName: roomName,
   });
 
+  const isVRSupported = async () => {
+    // Check if WebXR API is available
+    if ('xr' in navigator) {
+      try {
+        // Check if immersive VR session is supported
+        const isSupported = await navigator.xr.isSessionSupported('immersive-vr');
+        return isSupported;
+      } catch (err) {
+        console.error('Error checking VR support:', err);
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
       SkywayFrame(1000 / _frameRate);
     }, 1000 / _frameRate);
+    isVRSupported().then((supported) => {
+      setSupportVR(supported);
+    });
     return () => clearInterval(interval);
   }, [roomName]);
 
@@ -90,7 +113,17 @@ export const R3FSkyway = ({ object, syncRotation, offset, roomName, playerName, 
   }
 
   return (
-    <SkywayContext.Provider value={{ object, syncRotation, offset, roomName, playerName, frameRate: _frameRate, visibleDistance: _visibleDistance }}>
+    <SkywayContext.Provider value={{ 
+      object, 
+      syncRotation, 
+      offset, 
+      roomName, 
+      playerName, 
+      frameRate: _frameRate, 
+      visibleDistance: _visibleDistance,
+      fontPath: _fontPath,
+      supportVR: supportVR,
+    }}>
       <SkywayInput 
         input={input}
         object={object}
@@ -101,14 +134,17 @@ export const R3FSkyway = ({ object, syncRotation, offset, roomName, playerName, 
         ref={refNameText}
         color={"black"}
         fontSize={0.5}
+        font={_fontPath}
       >
-        {playerName? playerName: "Player"}
+        {playerName? playerName: "プレイヤー"}
       </Text>
       <Others 
         membersData={membersData} 
         me={me} 
         updateCnt={updateCnt}
       />
+      <MessageWindow/>
+      <SupportVRButton/>
     </SkywayContext.Provider>
   )
 }
@@ -212,21 +248,32 @@ const Others = ({ membersData, me, updateCnt }: IOthersProps) => {
 
 interface IOtherProps {
   id: string;
-  object?: React.RefObject<Mesh|Object3D>;
 }
 
-const Other = ({ id, object }: IOtherProps) => {
+const Other = ({ id }: IOtherProps) => {
   const sw = useContext(SkywayContext);
   const [select, setSelect] = useState(false);
   const ref = useRef<Mesh>();
+  const refNameText = useRef<any>();
   const pData = useRef<IPublishData>();
   const [obj, setObj] = useState<Mesh|Object3D>();
+  const { camera } = useThree();
+
   useEffect(() => {
-    if (object && object.current) {
-      const target = SkeletonUtils.clone(object.current);
-      target.animations = object.current.animations || [];
-      setObj(target);
+    const loadModel = async () => {
+      if (pData.current && pData.current.objectURL) {
+        // 後で実装
+        // const object = await loadObject(pData.current.objectURL);
+        // const target = SkeletonUtils.clone(object);
+        // target.animations = object.current.animations || [];
+        // setObj(target);
+      }
     }
+    loadModel();
+    const interval = setInterval(() => {
+      SkywayFrame(1000 / sw.frameRate);
+    }, 1000 / sw.frameRate);
+    return () => clearInterval(interval);
   }, []);
 
   const { getPData } = useSkyway({ enabled: true, roomName: sw.roomName });
@@ -236,33 +283,34 @@ const Other = ({ id, object }: IOtherProps) => {
     return new Color().setHSL(Math.random(), 1.0, 0.5);
   }, []);
 
-  // 経過時間と前回のアップデート時間を追跡
-  const elapsedTimeRef = useRef(0);
-  const lastUpdateTimeRef = useRef(0);
-
-  useFrame((state, delta) => {
-    elapsedTimeRef.current += delta;
-    const updateInterval = 1 / sw.frameRate;
-    if (elapsedTimeRef.current - lastUpdateTimeRef.current >= updateInterval) {
-      const pdata = getPData(id);
-      if (ref.current && pdata) {
-        if (sw.object && sw.object.current){
-          const distance = sw.object.current.position.distanceTo(pdata.position);
-          if (distance > sw.visibleDistance) {
-            ref.current.visible = false;
-            return;
-          }
-          else if (ref.current.visible === false) {
-            ref.current.visible = true;
-          }
+  const SkywayFrame = (timeDelta: number) => {
+    const pdata = getPData(id);
+    if (ref.current && pdata) {
+      if (sw.object && sw.object.current){
+        const distance = sw.object.current.position.distanceTo(pdata.position);
+        if (distance > sw.visibleDistance) {
+          ref.current.visible = false;
+          return;
         }
-        ref.current.position.copy(pdata.position);
-        ref.current.rotation.copy(pdata.rotation);
-        pData.current = pdata;
+        else if (ref.current.visible === false) {
+          ref.current.visible = true;
+        }
       }
-      lastUpdateTimeRef.current = elapsedTimeRef.current;
+      ref.current.position.copy(pdata.position);
+      ref.current.rotation.copy(pdata.rotation);
+      pData.current = pdata;
     }
-  });
+    if (refNameText.current && ref.current){
+      const aabb = new Box3().setFromObject(ref.current);
+      const yOffset = aabb.max.y - aabb.min.y;
+      refNameText.current.position.copy(
+        ref.current.position.clone().add(new Vector3(0, yOffset, 0))
+      )
+      refNameText.current.lookAt(
+        camera.position.clone()
+      )
+    }
+  };
 
   return (
     <>
@@ -284,6 +332,14 @@ const Other = ({ id, object }: IOtherProps) => {
           <meshStandardMaterial color={color} />
         </mesh>
       }
+      <Text
+        ref={refNameText}
+        color={"black"}
+        fontSize={0.5}
+        font={sw.fontPath}
+      >
+        {pData.current && pData.current.username? pData.current.username: "名前未設定"}
+      </Text>
       {select && 
       <>
         <UserCard pdata={pData.current} />
@@ -299,11 +355,12 @@ interface IUserCardProps {
   stream?: MediaStream;
 }
 const UserCard = ({ pdata, stream }: IUserCardProps) => {
+  const sw = useContext(SkywayContext);
   const baseColor = "#00B6CF";
   const ref = useRef<any>();
   const cardRef = useRef<any>();
   const { camera, size } = useThree();
-  const [phoneTexture, userTexture] = useTexture(["phone.png", "user.png"])
+  const [phoneTexture, userTexture, chatTexture, teleportTexture] = useTexture(["phone.png", "user.png", "chat.png", "teleport.png"])
   useFrame(() => {
     if (ref.current && cardRef.current) {
       // カメラの向きを取得
@@ -311,9 +368,7 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
       camera.getWorldDirection(cameraDirection);
 
       // カメラの位置から少し離れた位置を計算
-      const cameraPosition = camera.position
-        .clone()
-        .add(cameraDirection.multiplyScalar(3));
+      const cameraPosition = camera.position.clone().add(cameraDirection);
 
       // カメラのクリップ空間にオブジェクトの位置を変換
       const clipPosition = cameraPosition.project(camera);
@@ -321,7 +376,7 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
       // オフセットをクリップ空間に適用
       const ratio = size.width / size.height;
       clipPosition.x = -1 + 0.3 + (ratio<1? 0.9-ratio: 0); // 左端に移動し、さらに少し右にオフセット
-      clipPosition.y = 1 - 0.6; // 上端に移動し、さらに少し下にオフセット
+      clipPosition.y = 1 - 0.7; // 上端に移動し、さらに少し下にオフセット
 
       // クリップ空間からワールド空間にオブジェクトの位置を逆変換
       const worldPosition = clipPosition.unproject(camera);
@@ -333,10 +388,12 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
       ref.current.quaternion.copy(camera.quaternion);
     }
   });
+
   return (
     <>
       <group
         ref={ref}
+        scale={[0.5, 0.5, 0.5]}
       >
         <mesh ref={cardRef}>
           <planeBufferGeometry args={[1, 1.7]}/>
@@ -379,9 +436,9 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
             position={[-0.15, 0.1, 0.01]}
             color={baseColor}
             fontSize={0.1}
-            font={font}
+            font={sw.fontPath}
           >
-            {(pdata && pdata.username)? pdata.username: "NoName"}
+            {(pdata && pdata.username)? pdata.username: "名前未設定"}
           </Text>
           {/* 通話ボタン */}
           <group
@@ -409,7 +466,7 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
               <planeBufferGeometry args={[0.1, 0.1]}/>
               <meshBasicMaterial
                 transparent={true}
-                map={phoneTexture}
+                map={chatTexture}
               />
             </mesh>
             <mesh>
@@ -427,7 +484,7 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
               <planeBufferGeometry args={[0.1, 0.1]}/>
               <meshBasicMaterial
                 transparent={true}
-                map={phoneTexture}
+                map={teleportTexture}
               />
             </mesh>
             <mesh>
@@ -443,7 +500,103 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
   );
 }
 
+/**
+ * メッセージウィンドウ
+ */
+const MessageWindow = () => {
+  const sw = useContext(SkywayContext);
+  const ref = useRef<any>();
+  const { camera, size } = useThree();
+  const [sendTexture] = useTexture(["send.png"]);
 
+  useFrame(() => {
+    if (ref.current) {
+      // カメラの向きを取得
+      const cameraDirection = new Vector3();
+      camera.getWorldDirection(cameraDirection);
+
+      // カメラの位置から少し離れた位置を計算
+      const cameraPosition = camera.position.clone().add(cameraDirection);
+
+      // カメラのクリップ空間にオブジェクトの位置を変換
+      const clipPosition = cameraPosition.project(camera);
+
+      // オフセットをクリップ空間に適用
+      const ratio = size.width / size.height;
+      clipPosition.x = -1 + 0.4 + (ratio<1? 0.9-ratio: 0); // 左端に移動し、さらに少し右にオフセット
+      clipPosition.y = -1 + 0.1; // 上端に移動し、さらに少し下にオフセット
+
+      // クリップ空間からワールド空間にオブジェクトの位置を逆変換
+      const worldPosition = clipPosition.unproject(camera);
+
+      // オブジェクトの位置を更新
+      ref.current.position.copy(worldPosition);
+
+      // オブジェクトがカメラの向きに追従するようにする
+      ref.current.quaternion.copy(camera.quaternion);
+    }
+  });
+
+  return (
+    <group ref={ref}>
+      <Form>
+        <Input 
+          name="message" 
+          type="text" 
+          scale={[0.5, 0.5, 0.5]}
+          font={sw.fontPath}
+          width={1}
+        />
+        <mesh
+          position={[0.2, 0, 0]}
+        >
+          <planeBufferGeometry args={[0.06, 0.06]}/>
+          <meshBasicMaterial 
+            color="#FFF"
+            transparent={true}
+            map={sendTexture}
+          />
+        </mesh>
+      </Form>
+    </group>
+  )
+}
+
+/**
+ * VRサポートボタン
+ */
+const SupportVRButton = () => {
+  const sw = useContext(SkywayContext);
+  const [vrTexture] = useTexture(["vr.png"]);
+  const { isPresenting } = useXR();
+  const trigVR = () => {
+    if (!isPresenting) {
+      startSession("immersive-vr", undefined);
+    }
+    else {
+      stopSession();
+    }
+  }
+  return (
+    <>
+    {sw.supportVR &&
+      <mesh
+        onClick={trigVR}
+      >
+        <circleBufferGeometry args={[0.5, 32]}/>
+        <meshBasicMaterial
+          transparent={true}
+          map={vrTexture}
+        />
+      </mesh>
+    }
+    </>
+  )
+}
+
+/**
+ * ShowCaseコンポネント
+ */
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

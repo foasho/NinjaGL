@@ -26,11 +26,13 @@ export const contextOptions: Partial<SkyWayConfigOptions> = {
 export interface IPublishData {
   position: Vector3;
   rotation: Euler;
+  objectURL?: string;
   input: IInputMovement;
   id?: string;
   username?: string;
   message?: string;
   userData?: { [key: string]: any };
+  callingId?: string;// 電話をかけている人のID
 }
 
 export interface IUseSkywayProps {
@@ -60,6 +62,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
   let localVideo = useRef<HTMLVideoElement|HTMLAudioElement>(null);
   let dataStream: LocalDataStream;
   const maxSubscribers = props.maxSubscribers? props.maxSubscribers: 320;// 最大320人まで
+  const callingId = useRef<string|null>(null);
 
   /**
    * Roomに参加する
@@ -278,6 +281,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
       dataStream.write(sendData);
     }
   }
+
   /**
    * SkywayでRoomを退出する
    */
@@ -307,6 +311,20 @@ export const useSkyway = (props: IUseSkywayProps) => {
     setUpdateCnt((prevCounter) => prevCounter + 1);
   }
 
+  /**
+   * ユーザーに電話をかける
+   */
+  const Calling = (memberId: string) => {
+    callingId.current = memberId;
+  }
+
+  /**
+   * 電話を切る
+   */
+  const HangUp = () => {
+    callingId.current = null;
+  }
+
   return { 
     me: me.current,
     updateCnt: updateCnt,
@@ -316,6 +334,8 @@ export const useSkyway = (props: IUseSkywayProps) => {
     members: members.current,
     membersData: membersData.current,
     getPData: getPData,
+    Calling: Calling,
+    HangUp: HangUp,
   }
 }
 
@@ -324,12 +344,12 @@ export const useSkyway = (props: IUseSkywayProps) => {
  * プライベート通話には、SFUを利用する
  */
 export interface IPrivateCallProps {
+  name?: string;
   token: string;
   audio: boolean;
   video: boolean;
   localVideo: HTMLVideoElement;
   myId: string;
-  connectIds: string[];
   onStreamCallback: (elm: HTMLVideoElement|HTMLAudioElement) => void;
 }
 
@@ -340,11 +360,13 @@ export class SkywayPrivateCall {
   audioStream: LocalAudioStream;
   videoStream: LocalVideoStream;
   maxSubscribers: number = 8;
+  params: IPrivateCallProps;
   constructor(props: IPrivateCallProps){
-    this.init(props);
+    this.params = {...props};
   }
 
-  async init (props: IPrivateCallProps) {
+  async init () {
+    const props = this.params;
     this.context = await SkyWayContext.Create(props.token);
     if (props.video || props.audio){
       const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream({
@@ -360,7 +382,7 @@ export class SkywayPrivateCall {
       await props.localVideo.play();
     }
 
-    const id = uuidV4();
+    const id = props.name? props.name: uuidV4();
     await this.joinOrCreateRoom(props, id);
   }
 
@@ -428,9 +450,9 @@ export class SkywayPrivateCall {
     }
   }
 
-/**
- * 音声,ビデオをSubscribeする(受信)
- */
+  /**
+   * 音声,ビデオをSubscribeする(受信)
+   */
   private subscribeAndAttach = async (props: IPrivateCallProps, publication: RoomPublication) => {
     if (!this.me) return;
     if (publication.publisher.id == this.me.id) return;
