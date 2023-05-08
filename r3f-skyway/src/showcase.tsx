@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from 'react-dom/client';
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Text, Environment, OrbitControls, useFont, useTexture, Text3D } from "@react-three/drei";
-import { VRButton, XR, startSession, stopSession, useXR } from "@react-three/xr";
+import { Canvas, RootState, useFrame, useThree } from "@react-three/fiber";
+import { Text, Environment, OrbitControls, useFont, useTexture, Text3D, useHelper, Billboard } from "@react-three/drei";
+import { Controllers, VRButton, XR, startSession, stopSession, useXR } from "@react-three/xr";
 import { IInputMovement, useInputControl } from "./hooks/InputControl";
-import { Box3, Color, Mesh, Object3D, Vector2, Vector3 } from "three";
+import { Box3, Color, DoubleSide, Matrix4, Mesh, Object3D, Quaternion, Vector2, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl, SkeletonUtils } from "three-stdlib";
 import { IPrivateCallProps, IPublishData, SkywayPrivateCall, useSkyway } from "./hooks/useSkyway";
 import { LocalP2PRoomMember } from "@skyway-sdk/room";
@@ -144,7 +144,7 @@ export const R3FSkyway = ({ object, syncRotation, offset, roomName, playerName, 
         updateCnt={updateCnt}
       />
       <MessageWindow/>
-      <SupportVRButton/>
+      <SkywayVRSupport/>
     </SkywayContext.Provider>
   )
 }
@@ -406,7 +406,6 @@ const UserCard = ({ pdata, stream }: IUserCardProps) => {
         <group
           position={[0, 0, 0.001]}
         >
-
           <mesh
             position={[0, 0.65, 0]}
           >
@@ -554,6 +553,7 @@ const MessageWindow = () => {
           <meshBasicMaterial 
             color="#FFF"
             transparent={true}
+            opacity={0.5}
             map={sendTexture}
           />
         </mesh>
@@ -563,12 +563,25 @@ const MessageWindow = () => {
 }
 
 /**
- * VRサポートボタン
+ * VRサポート
  */
-const SupportVRButton = () => {
+const SkywayVRSupport = () => {
+  const ref = useRef<Mesh>();
+  const { camera, size } = useThree();
   const sw = useContext(SkywayContext);
   const [vrTexture] = useTexture(["vr.png"]);
-  const { isPresenting } = useXR();
+  const { isPresenting, controllers, session } = useXR();
+  const [refSpace, setRefSpace] = useState<XRReferenceSpace | null>(null);
+  const radius = 0.1;
+
+  useEffect(() => {
+    if (isPresenting) {
+      session.requestReferenceSpace("local-floor").then(setRefSpace);
+    } else {
+      setRefSpace(null);
+    }
+  }, [isPresenting, session]);
+
   const trigVR = () => {
     if (!isPresenting) {
       startSession("immersive-vr", undefined);
@@ -577,18 +590,83 @@ const SupportVRButton = () => {
       stopSession();
     }
   }
+
+  useFrame((state: RootState, delta: number, frame?: XRFrame) => {
+    if (ref.current && !isPresenting) {
+      // カメラの向きを取得
+      const cameraDirection = new Vector3();
+      camera.getWorldDirection(cameraDirection);
+
+      // カメラの位置から少し離れた位置を計算
+      const cameraPosition = camera.position.clone().add(cameraDirection);
+
+      // 正規化されたXY座標を指定（例: 左上の角に位置する場合、x: 0, y: 0）
+      const normalizedPosition = new Vector2(1, 0);
+
+      // パディングを指定（0〜1の範囲）
+      const padding = new Vector2(radius, radius/2);
+
+      // クリップ空間におけるオブジェクトの位置を計算
+      const clipPosition = cameraPosition.project(camera);
+
+      // オフセットをクリップ空間に適用
+      const offsetX = (-1 + padding.x * 2) * (1 - normalizedPosition.x) + (1 - padding.x * 2) * normalizedPosition.x;
+      const offsetY = (-1 + padding.y * 2) * normalizedPosition.y + (1 - padding.y * 2) * (1 - normalizedPosition.y);
+      
+      clipPosition.x = offsetX;
+      clipPosition.y = offsetY;
+
+      // クリップ空間からワールド空間にオブジェクトの位置を逆変換
+      const worldPosition = clipPosition.unproject(camera);
+
+      // オブジェクトの位置を更新
+      ref.current.position.copy(worldPosition);
+
+      // オブジェクトがカメラの向きに追従するようにする
+      ref.current.quaternion.copy(camera.quaternion);
+    }    
+
+    if (ref.current && isPresenting && frame && refSpace) {
+      const pose = frame.getViewerPose(refSpace);
+      const controllerType = controllers.length > 0? controllers[0].inputSource.targetRayMode: "none";
+      const offset = new Vector3(1, 0, -1); // オフセットを定義
+
+      const newPosition = new Vector3();
+      const newQuaternion = new Quaternion();
+      const newScale = new Vector3();
+      if (pose){
+        const matrix = pose.transform.matrix;
+        const mat = new Matrix4().fromArray(matrix);
+        newQuaternion.setFromRotationMatrix(mat);
+        newPosition.setFromMatrixPosition(mat).add(offset.applyQuaternion(newQuaternion));
+        newScale.setFromMatrixScale(mat);
+      }
+
+      ref.current.position.copy(newPosition);
+      ref.current.quaternion.copy(newQuaternion);
+    }
+
+  });
+
+
+
   return (
     <>
     {sw.supportVR &&
+    <>
       <mesh
+        ref={ref}
         onClick={trigVR}
       >
-        <circleBufferGeometry args={[0.5, 32]}/>
+        <circleBufferGeometry args={[radius/2, 32]}/>
         <meshBasicMaterial
+          side={DoubleSide}
           transparent={true}
           map={vrTexture}
         />
       </mesh>
+      <Controllers />
+    </>
     }
     </>
   )

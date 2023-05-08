@@ -63,6 +63,8 @@ export const useSkyway = (props: IUseSkywayProps) => {
   let dataStream: LocalDataStream;
   const maxSubscribers = props.maxSubscribers? props.maxSubscribers: 320;// 最大320人まで
   const callingId = useRef<string|null>(null);
+  const recieveCalling = useRef<boolean>(false);
+  const recieveCallData = useRef<IPublishData|null>(null);
 
   /**
    * Roomに参加する
@@ -267,6 +269,18 @@ export const useSkyway = (props: IUseSkywayProps) => {
       membersData.current = [..._membersData];
       setUpdateCnt((prevCounter) => prevCounter + 1);
     }
+    if (me.current){
+      if (pdata.callingId == me.current.id){
+        // 自分当ての電話の呼び出しあれば呼び出し中にする
+        recieveCallData.current = pdata;
+        recieveCalling.current = true;
+      }
+      else if (recieveCalling.current && !pdata.callingId){
+        // 呼び出し中になっていて切れた場合は、呼び出し中を解除する
+        recieveCallData.current = null;
+        recieveCalling.current = false;
+      }
+    }
   }
   
   /**
@@ -312,10 +326,10 @@ export const useSkyway = (props: IUseSkywayProps) => {
   }
 
   /**
-   * ユーザーに電話をかける
+   * ユーザーに電話をかける/電話に出る
    */
-  const Calling = (memberId: string) => {
-    callingId.current = memberId;
+  const Calling = (userId: string) => {
+    callingId.current = userId;
   }
 
   /**
@@ -323,6 +337,18 @@ export const useSkyway = (props: IUseSkywayProps) => {
    */
   const HangUp = () => {
     callingId.current = null;
+  }
+
+  /**
+   * 電話をとる
+   */
+  const TakeCall = (): string => {
+    if (recieveCallData.current){
+      callingId.current = recieveCallData.current.id;
+      recieveCallData.current = null;
+      return callingId.current;
+    }
+    return null;
   }
 
   return { 
@@ -336,6 +362,7 @@ export const useSkyway = (props: IUseSkywayProps) => {
     getPData: getPData,
     Calling: Calling,
     HangUp: HangUp,
+    TakeCall: TakeCall,
   }
 }
 
@@ -380,6 +407,12 @@ export class SkywayPrivateCall {
       }
       video.attach(props.localVideo);
       await props.localVideo.play();
+      if (props.audio){
+        this.enableAudio();
+      }
+      if (props.video){
+        this.enableVideo();
+      }
     }
 
     const id = props.name? props.name: uuidV4();
