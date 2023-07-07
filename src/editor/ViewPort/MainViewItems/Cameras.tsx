@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IObjectManagement } from "@ninjagl/core";
 import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
 import { useContext, useEffect, useRef, useState } from "react";

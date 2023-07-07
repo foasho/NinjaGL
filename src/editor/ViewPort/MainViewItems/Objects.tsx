@@ -119,30 +119,6 @@ const StaticObject = ({ om }) => {
       editor.offOMIdChanged(id, init);
     }
   }, []);
-  
-  // 美しくないので廃止
-  // useFrame((_, delta) => {
-  //   if (state.currentId == id && state.editorFocus && ref.current){
-  //     const pos = editor.getPosition(id);
-  //     ref.current.position.copy(pos);
-  //     const rot = editor.getRotation(id);
-  //     ref.current.rotation.copy(rot);
-  //     const sca = editor.getScale(id);
-  //     ref.current.scale.copy(sca);
-  //     const materialData = editor.getMaterialData(id);
-  //     if (materialData && tempMaterialData.current !== materialData) {
-  //       tempMaterialData.current = materialData;
-  //       ref.current.traverse((node: any) => {
-  //         if (node.isMesh && node instanceof Mesh) {
-  //           const material = StandardMaterial.clone();
-  //           material.color.set(new Color(materialData.value));
-  //           node.material = material;
-  //         }
-  //       })
-  //     }
-
-  //   }
-  // });
 
   useHelper(((state.currentId == id) && om.physics == "aabb") && ref, BoxHelper);
   

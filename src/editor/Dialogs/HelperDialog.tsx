@@ -94,7 +94,7 @@ export const HelperDialog = (prop: IResponse) => {
           </div>
         </div>
         ,
-        document.getElementById("myDialog")
+        document.getElementById("myDialog") as HTMLElement
       );
 }
 
@@ -105,7 +105,7 @@ export const HelperDialog = (prop: IResponse) => {
 export const showHelperDialog = async () => {
 return new Promise((resolve) => {
     const handleDialogClose = () => {
-    ReactDOM.unmountComponentAtNode(document.getElementById("myDialog"));
+    ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
         resolve(null);
     };
     ReactDOM.render(

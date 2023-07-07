@@ -1,10 +1,10 @@
+
 import styles from "@/App.module.scss";
 import { Suspense, useState } from "react";
 import ReactDOM from "react-dom";
 import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { basename, dirname, extname } from "path";
-import filesize from "@/pages/api/filesize";
 import { useTranslation } from "react-i18next";
 
 const Model = ({ url, position }) => {
@@ -58,7 +58,7 @@ const LoDViewDialog = (prop: IResponse) => {
       </div>
     </div>
     ,
-    document.getElementById("myDialog")
+    document.getElementById("myDialog") as HTMLElement
   );
 }
 
@@ -69,7 +69,7 @@ const LoDViewDialog = (prop: IResponse) => {
 export const showLoDViewDialog = async (filePath: string) => {
   return new Promise((resolve) => {
     const handleDialogClose = () => {
-      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog"));
+      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
       resolve(null);
     };
 

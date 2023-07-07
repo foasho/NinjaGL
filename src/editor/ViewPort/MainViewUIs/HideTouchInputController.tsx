@@ -3,13 +3,13 @@ import { useEffect, useState, useRef } from "react";
 import { MathUtils } from "three";
 
 interface IHideTouchInputController {
-  onChangeSelectEle: (ele: HTMLElement) => void;
+  onChangeSelectEle: (ele: HTMLDivElement) => void;
 }
 export const HideTouchInputController = (props: IHideTouchInputController) => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   const handleOuterCircleClick = () => {
-    props.onChangeSelectEle(ref.current);
+    if (ref.current) props.onChangeSelectEle(ref.current);
   }
 
   return (

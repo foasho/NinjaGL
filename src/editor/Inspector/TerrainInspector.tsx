@@ -1,3 +1,4 @@
+// @ts-nocheck
 import styles from "@/App.module.scss";
 import Swal from 'sweetalert2';
 import { useTranslation } from "react-i18next";

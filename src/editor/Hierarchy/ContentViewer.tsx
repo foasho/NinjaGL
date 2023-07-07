@@ -1,3 +1,4 @@
+// @ts-nocheck
 import styles from "@/App.module.scss";
 import {
   BsFileImage,

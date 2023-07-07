@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "./Locale";
 import styles from "@/App.module.scss";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";

@@ -23,7 +23,6 @@ const nextConfig = {
   experimental: {
     reactRoot: 'concurrent',
     appDir: true,
-    esmExternals: true,
   },
   images: {},
   webpack(config, { isServer }) {
@@ -53,14 +52,14 @@ const nextConfig = {
       use: ['raw-loader', 'glslify-loader'],
     });
 
-    // JSONの読めるようにする
-    config.module.rules.push(
-      {
-        test: /\.json$/,
-        loader: 'json-loader',
-        type: 'javascript/auto'
-      }
-    );
+    // JSONの読めるようにする // 不要
+    // config.module.rules.push(
+    //   {
+    //     test: /\.json$/,
+    //     loader: 'json-loader',
+    //     type: 'javascript/auto'
+    //   }
+    // );
 
     // InstanceAPIのクラス名と変数名を変更しないように設定
     if (!isServer) {

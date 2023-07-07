@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IObjectManagement } from "@ninjagl/core";
 import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";

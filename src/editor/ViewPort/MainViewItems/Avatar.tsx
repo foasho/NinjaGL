@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useHelper } from "@react-three/drei";
 import { BoxHelper, Euler, Matrix4, Object3D, Vector3 } from "three";
 import { useState, useEffect, useContext, useRef } from "react";

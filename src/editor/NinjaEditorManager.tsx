@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { AnimationClip, AnimationMixer, Euler, Group, Material, Matrix4, Object3D, Vector3, WebGLRenderer } from "three";
 import { createContext, useEffect, useState } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';

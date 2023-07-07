@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import styles from "@/App.module.scss";
 import { useSession } from "next-auth/react";

@@ -11,7 +11,13 @@ export const MySky = () => {
     useEffect(() => {
         setSky(editor.getSky());
         const handleSkyChanged = () => {
-            setSky(editor.getSky()?{...editor.getSky()}: undefined);
+            const newSky = editor.getSky();
+            if (newSky!== undefined){
+                setSky({...newSky});
+            }
+            else {
+                setSky(undefined);
+            }
         }
         editor.onSkyChanged(handleSkyChanged);
         return () => {

@@ -12,14 +12,16 @@ import { globalStore } from "@/editor/Store";
  */
 export const FogComponent = () => {
     const state = useSnapshot(globalStore);
-    const ref = useRef<Fog>();
+    const ref = useRef<Fog>(null);
     const editor = useContext(NinjaEditorContext);
     const [fog, setFog] = useState<IObjectManagement>();
 
     useEffect(() => {
       setFog(editor.getFog());
       const handleEnvChanged = () => {
-        setFog({...editor.getFog()});
+        const newFog = editor.getFog();
+        if (newFog!== undefined) setFog({...newFog});
+        else setFog(undefined);
       }
     }, [editor]);
 

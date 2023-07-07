@@ -33,17 +33,17 @@ import { MyEffects } from "./MainViewItems/MyEffects";
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
   const [renderCount, setRenderCount] = useState(0);
-  const loadingRef = useRef<HTMLDivElement>();
+  const loadingRef = useRef<HTMLDivElement>(null);
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const [isConfHovered, setIsConfHovered] = useState(false);
   const cameraSpeedRef = useRef<HTMLInputElement>();
   const [cameraSpeed, setCameraSpeed] = useState<number>(1);
-  const cameraFarRef = useRef<HTMLInputElement>();
+  const cameraFarRef = useRef<HTMLInputElement>(null);
   const [cameraFar, setCameraFar] = useState<number>(1000);
-  const worldSizeRef = useRef<HTMLInputElement>();
+  const worldSizeRef = useRef<HTMLInputElement>(null);
   const [worldSize, setWorldSize] = useState<number>(64);
-  const worldGridSizeRef = useRef<HTMLInputElement>();
+  const worldGridSizeRef = useRef<HTMLInputElement>(null);
   const [worldGridSize, setWorldGridSize] = useState<number>(8);
   const [uiGridNum, setUIGridNum] = useState<8|16|24|32>(8);
   const editor = useContext(NinjaEditorContext);
@@ -159,7 +159,7 @@ export const MainViewer = () => {
                   },
                   object: scene,
                   animations: animations,
-                  mixer: animations.length > 0? new AnimationMixer(scene): null
+                  mixer: animations.length > 0? new AnimationMixer(scene): undefined
                 });
                 
               }
@@ -178,7 +178,7 @@ export const MainViewer = () => {
                   },
                   object: scene,
                   animations: gltf.animations,
-                  mixer: gltf.animations.length > 0? new AnimationMixer(scene): null
+                  mixer: gltf.animations.length > 0? new AnimationMixer(scene): undefined
                 });
               }
             }
@@ -591,8 +591,8 @@ const SystemHelper = (props: ISysytemHelper) => {
   const gridHelperSize = 4096;
   const divisions = props.worldGridSize;
   const cellSize = props.worldSize / divisions;
-  const numberElements = [];
-  const numberPlanes = [];
+  const numberElements: any[] = [];
+  const numberPlanes: any[] = [];
 
   const getCenterPosFromLayer = (
     layer: number, 
@@ -730,7 +730,7 @@ export const CameraControl = (props: ICameraControl) => {
       const distance = 5;
   
       // ターゲットの前方向ベクトルをカメラの現在の位置から計算
-      const forwardDirection = new Vector3().subVectors(target, cameraRef.current.position).normalize();
+      const forwardDirection = new Vector3().subVectors(target, cameraRef.current!.position).normalize();
       forwardDirection.negate(); // ターゲットの背後方向を取得
   
       // ターゲットの上方向ベクトルを取得
@@ -748,8 +748,8 @@ export const CameraControl = (props: ICameraControl) => {
       // ターゲットに上方向ベクトル、右方向ベクトル、背後方向ベクトルを加算して、フォーカス位置を計算
       const focusPosition = new Vector3().addVectors(target, upDirection).add(rightDirection).add(forwardDirection);
   
-      cameraRef.current.position.copy(focusPosition);
-      cameraRef.current.lookAt(target);
+      cameraRef.current!.position.copy(focusPosition);
+      cameraRef.current!.lookAt(target);
       if (ref && ref.current) {
         ref.current.target.copy(target);
       }
@@ -778,8 +778,8 @@ export const CameraControl = (props: ICameraControl) => {
     if (input.dash && (input.forward || input.backward || input.right || input.left)) {
       const st = props.cameraSpeed * delta * 10;
       const cameraDirection = new Vector3();
-      cameraRef.current.getWorldDirection(cameraDirection);
-      const cameraPosition = cameraRef.current.position.clone();
+      cameraRef.current!.getWorldDirection(cameraDirection);
+      const cameraPosition = cameraRef.current!.position.clone();
 
       if (input.forward) {
         cameraPosition.add(cameraDirection.clone().multiplyScalar(st));
@@ -789,17 +789,17 @@ export const CameraControl = (props: ICameraControl) => {
       }
       if (input.right) {
         const cameraRight = new Vector3();
-        cameraRight.crossVectors(cameraDirection, cameraRef.current.up).normalize();
+        cameraRight.crossVectors(cameraDirection, cameraRef.current!.up).normalize();
         cameraPosition.add(cameraRight.multiplyScalar(st));
       }
       if (input.left) {
         const cameraLeft = new Vector3();
-        cameraLeft.crossVectors(cameraDirection, cameraRef.current.up).normalize();
+        cameraLeft.crossVectors(cameraDirection, cameraRef.current!.up).normalize();
         cameraPosition.sub(cameraLeft.multiplyScalar(st));
       }
       globalContentStore.cameraPosition.copy(cameraPosition.clone());
-      cameraRef.current.position.copy(cameraPosition);
-      ref.current.target.copy(cameraPosition.add(cameraDirection));
+      cameraRef.current!.position.copy(cameraPosition);
+      ref.current!.target.copy(cameraPosition.add(cameraDirection));
 
     }
     else if (ref.current && cameraRef.current) {
@@ -821,8 +821,8 @@ export const CameraControl = (props: ICameraControl) => {
       <DPerspectiveCamera makeDefault ref={cameraRef} />
       <OrbitControls
         ref={ref}
-        args={[cameraRef.current, gl.domElement]}
-        camera={cameraRef.current}
+        args={[cameraRef.current!, gl.domElement]}
+        camera={cameraRef.current!}
         makeDefault={true}
       />
     </>

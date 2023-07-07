@@ -53,7 +53,7 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
       }
       query += encodeURIComponent(key);
       query += "=";
-      query += encodeURIComponent(props.queryObject[key]);
+      query += encodeURIComponent(props.queryObject![key]);
     });
   }
   const method = ConvertToMethod(props.route);
@@ -63,7 +63,7 @@ export const reqApi = async (props: IApiProps): Promise<any> => {
     )
   }
   else if (method == "POST") {
-    sapi.options(BASE_URL, { headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+    sapi.options(BASE_URL as any, { headers: { 'Content-Type': 'application/json;charset=utf-8' } });
     return await sapi.post(
       "/api/" + props.route + query,
       props.data

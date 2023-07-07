@@ -17,15 +17,15 @@ export const ExportNjcFile = (
   const oms = [...editor.getOMs()];
   oms.map((om) => {
     const _om = { ...om };
-    if (om.type == "avatar") {
+    if (om.type == "avatar" && _om.object) {
       const target = SkeletonUtils.clone(_om.object);
-      target.animations = om.animations;
+      target.animations = om.animations? om.animations : [];
       _om.object = target;
     }
     else if (om.type == "object" || om.type == "terrain") {
       if (!om.object) return _om;
       // Animationがある場合のみSckeletonUtilsでクローンする
-      if (om.animations && om.animations.length > 0) {
+      if (om.animations && om.animations.length > 0 && _om.object) {
         const target = SkeletonUtils.clone(_om.object);
         target.animations = om.animations;
         _om.object = target;
@@ -62,7 +62,7 @@ export const DebugPlay = () => {
   const [ready, setReady] = useState(false);
   const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
-  const [engine, setEngine] = useState(null);
+  const [engine, setEngine] = useState<NinjaEngine|null>(null);
   useEffect(() => {
     const njcFile = ExportNjcFile(editor.getEditor(), {
       physics: configState.physics,
@@ -83,7 +83,7 @@ export const DebugPlay = () => {
     const setupNjcFile = async (nf) => {
       const _engine = new NinjaEngine();
       await _engine.setNJCFile(nf);
-      setEngine(_engine);
+      if (!engine) setEngine(_engine);
       setReady(true);
     }
     setupNjcFile(njcFile);

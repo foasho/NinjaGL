@@ -15,13 +15,13 @@ import { globalStore } from "@/editor/Store";
 export const Terrain = () => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const [terrain, setTerrain] = useState<IObjectManagement>(null);
+  const [terrain, setTerrain] = useState<IObjectManagement>();
   const object = terrain? terrain.object: null;
   const id = terrain? terrain.id: MathUtils.generateUUID();
   const handleDrag = useRef<boolean>(false);
   const [helper, setHelper] = useState<boolean>(true)
 
-  const lineSegs = [];
+  const lineSegs: LineSegments[] = [];
   if (object && helper){
     object.traverse((node) => {
       if (node instanceof Mesh) {
@@ -40,7 +40,10 @@ export const Terrain = () => {
   }
 
   useEffect(() => {
-    setTerrain(editor.getTerrain());
+    const newTerrain = editor.getTerrain();
+    if (newTerrain !== terrain){
+      setTerrain(newTerrain);
+    }
   });
 
   useFrame((_, delta) => {
