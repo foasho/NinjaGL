@@ -194,7 +194,7 @@ export const AutoGltfLoader = async (props: IAutoGLTFLoaderProps): Promise<IGLTF
                 if (node.material instanceof Material) {
                   mat.push(node.material.clone())
                 }
-                else if (node.material instanceof Array<Material>) {
+                else if (node.material instanceof Array) {
                   node.material.map(m => mat.push(m.clone()));
                 }
               }
