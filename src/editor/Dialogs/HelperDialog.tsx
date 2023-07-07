@@ -24,7 +24,7 @@ function App() {
         <NinjaGL njcPath={"<YourNjcFile>"} >
             <!-- Your React Three Fiber Code -->
             <mesh>
-                <boxBufferGeometry args={[1, 1, 1]} />
+                <boxGeometry args={[1, 1, 1]} />
                 <meshStandardMaterial color="hotpink" />
             </mesh>
         </NinjaGL>

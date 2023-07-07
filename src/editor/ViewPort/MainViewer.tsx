@@ -642,7 +642,7 @@ const SystemHelper = (props: ISysytemHelper) => {
             position={planePosition}
             rotation={[-Math.PI/2, 0, 0]}
           >
-            <planeBufferGeometry args={[cellSize, cellSize]} />
+            <planeGeometry args={[cellSize, cellSize]} />
             <meshBasicMaterial 
               color={color2}
               transparent={true}

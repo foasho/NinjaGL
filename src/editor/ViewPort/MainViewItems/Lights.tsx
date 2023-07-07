@@ -158,7 +158,7 @@ export const MyLight = (prop: ILightProps) => {
           ref={catchRef}
           // onContextMenu={(e) => {e.stopPropagation()}}
         >
-          <boxBufferGeometry args={[1, 1, 1]}  />
+          <boxGeometry args={[1, 1, 1]}  />
           <meshStandardMaterial 
             wireframe={true} 
             visible={false} 

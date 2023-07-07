@@ -123,7 +123,7 @@ const LightFormerControl = ({ om }) => {
         onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
         ref={catchRef}
       >
-        <planeBufferGeometry />
+        <planeGeometry />
         <meshStandardMaterial side={DoubleSide} wireframe={true} color={om.args.color?om.args.color:0x00ff00} visible={true} />
       </mesh>
     </>
