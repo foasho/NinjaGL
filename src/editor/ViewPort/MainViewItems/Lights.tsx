@@ -1,7 +1,5 @@
 import { IObjectManagement } from "@ninjagl/core";
-import { 
-  // PivotControls, 
-  useHelper } from "@react-three/drei";
+import { useHelper } from "@react-three/drei";
 import { useContext, useEffect, useState, useRef } from "react";
 import { Color, DirectionalLightHelper, DoubleSide, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
@@ -99,7 +97,11 @@ export const MyLight = (prop: ILightProps) => {
   else if (om.args.type == "point"){
     _helperObject = PointLightHelper;
   }
-  useHelper((ref), _helperObject);
+  
+
+  // @ts-ignore
+  useHelper(ref, _helperObject);
+  
   
   return (
       <>
