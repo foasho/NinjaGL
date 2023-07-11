@@ -21,6 +21,7 @@
     "lint": "next lint --fix --dir app",
     "dev": "next dev",
     "build": "next build",
+    "build:debug": "INLINE_RUNTIME_CHUNK=false npm run build",
     "analyze": "ANALYZE=true next build",
     "start": "next start"
   },

@@ -480,7 +480,7 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       />
       
         <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleBufferGeometry args={[terrainState.radius]} />
+          <circleGeometry args={[terrainState.radius]} />
           <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
         </mesh>
       <Perf position={"bottom-right"}/>

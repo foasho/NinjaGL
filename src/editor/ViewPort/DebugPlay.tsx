@@ -7,6 +7,7 @@ import { NJCFile } from "@ninjagl/core";
 import { IConfigParams } from "@ninjagl/core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
+import { Canvas } from "@react-three/fiber";
 
 export const ExportNjcFile = (
   editor: NinjaEditorManager,
@@ -96,9 +97,18 @@ export const DebugPlay = () => {
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
         {ready && engine &&
-          <NinjaEngineContext.Provider value={engine}>
-            <NinjaCanvas />
-          </NinjaEngineContext.Provider>
+          <Suspense fallback={null}>
+            <NinjaEngineContext.Provider value={engine}>
+              <NinjaCanvas />
+            </NinjaEngineContext.Provider>
+          </Suspense>
+          // <Canvas>
+          //   <ambientLight />
+          //   <mesh>
+          //     <boxGeometry />
+          //     <meshStandardMaterial color="hotpink" />
+          //   </mesh>
+          // </Canvas>
         }
       </div>
     </>
