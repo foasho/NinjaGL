@@ -1,7 +1,5 @@
-import { IObjectManagement } from "ninja-core";
-import { 
-  // PivotControls, 
-  useHelper } from "@react-three/drei";
+import { IObjectManagement } from "@ninjagl/core";
+import { useHelper } from "@react-three/drei";
 import { useContext, useEffect, useState, useRef } from "react";
 import { Color, DirectionalLightHelper, DoubleSide, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
@@ -39,7 +37,7 @@ interface ILightProps {
 export const MyLight = (prop: ILightProps) => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const catchRef = useRef<Mesh>();
+  const catchRef = useRef<Mesh>(null);
   const ref = useRef<any>();
   const { om } = prop;
   const id = om.id;
@@ -62,6 +60,7 @@ export const MyLight = (prop: ILightProps) => {
 
   useEffect(() => {
     const init = () => {
+      if (!catchRef.current) return;
       if (om.args.position){
         ref.current.position.copy(om.args.position.clone());
         catchRef.current.position.copy(ref.current.position.clone());
@@ -98,7 +97,11 @@ export const MyLight = (prop: ILightProps) => {
   else if (om.args.type == "point"){
     _helperObject = PointLightHelper;
   }
-  useHelper((ref), _helperObject);
+  
+
+  // @ts-ignore
+  useHelper(ref, _helperObject);
+  
   
   return (
       <>
@@ -131,6 +134,7 @@ export const MyLight = (prop: ILightProps) => {
         {/* ヘルパーはやはり一緒にいれる */}
         {!state.editorFocus &&
           <PivotControls
+            // @ts-ignore
             object={(state.currentId == id) ? catchRef : undefined}
             visible={(state.currentId == id)}
             depthTest={false}
@@ -156,7 +160,7 @@ export const MyLight = (prop: ILightProps) => {
           ref={catchRef}
           // onContextMenu={(e) => {e.stopPropagation()}}
         >
-          <boxBufferGeometry args={[1, 1, 1]}  />
+          <boxGeometry args={[1, 1, 1]}  />
           <meshStandardMaterial 
             wireframe={true} 
             visible={false} 

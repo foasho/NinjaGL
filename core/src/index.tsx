@@ -25,5 +25,6 @@ export {
 } from "./utils/InputControls";
 export { 
   NinjaEngine, 
-  NinjaEngineContext 
+  NinjaEngineContext,
+  // NinjaEngineProvider
 } from "./utils/NinjaEngineManager";

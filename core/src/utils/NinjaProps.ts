@@ -13,7 +13,7 @@ export interface IConfigParams {
   mapsize: number; // マップサイズ
   layerGridNum: number; // レイヤーグリッド数
   lodDistance: number; // LODの切り替えStep距離
-  dpr: undefined | number| [number, number]; // デバイスピクセル比※undefinedの場合は(window.devicePixelRatio || 1)を利用
+  dpr: undefined | number | [number, number]; // デバイスピクセル比※undefinedの場合は(window.devicePixelRatio || 1)を利用
   viewGridLength: number; // ビューグリッドの長さ
   initCameraPosition?: Vector3; // カメラの初期位置
   octreeDepth: number; // オクトリーツリーの深さ
@@ -61,12 +61,16 @@ export interface IObjectManagement {
  * 操作系UI上に表示されるもの
  */
 export interface IUIManagement {
-  type: "touchController" | "radioButton" | "icon";
+  type: "controller" | "radio" | "icon" | "vrbtn" | "walletbtn" | "rtc";
   id: string;
   name?: string;
+  position: {
+    x: number;
+    y: number;
+  }
   styles?: string;
-  args?: string;
-  visibleType: "view" | "none";
+  args?: any;
+  visible: boolean;
 }
 
 /**

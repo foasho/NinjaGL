@@ -1,7 +1,7 @@
 import { Environment, Float, Lightformer, useHelper } from "@react-three/drei";
 import { useContext, useEffect, useRef, useState } from "react";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "@ninjagl/core";
 import { Euler, Vector3, BoxHelper, DoubleSide } from "three";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
@@ -123,7 +123,7 @@ const LightFormerControl = ({ om }) => {
         onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
         ref={catchRef}
       >
-        <planeBufferGeometry />
+        <planeGeometry />
         <meshStandardMaterial side={DoubleSide} wireframe={true} color={om.args.color?om.args.color:0x00ff00} visible={true} />
       </mesh>
     </>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { reqApi } from "@/services/ServciceApi";
 import { Environment, OrbitControls, useHelper } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -13,7 +14,7 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
-import { convertObjectToFile, exportGLTF, gltfLoader } from "ninja-core";
+import { convertObjectToFile, exportGLTF, gltfLoader } from "@ninjagl/core";
 
 interface IOffsetParams {
   tp: {
@@ -61,7 +62,8 @@ export const PlayerEditor = () => {
       // プロジェクト内のモデル読み込み
       const type = contentState.currentType;
       if (
-        type == "gltf"
+        type == "gltf" &&
+        contentState.currentUrl
       ) {
         gltfLoader.load(
           contentState.currentUrl,
@@ -137,7 +139,7 @@ export const PlayerEditor = () => {
 
   
   const Model = ({ obj }) => {
-    const ref2 = useRef();
+    const ref2 = useRef<any>();
     useHelper(ref2, BoxHelper);
     return (
       <primitive object={obj} ref={ref2} />

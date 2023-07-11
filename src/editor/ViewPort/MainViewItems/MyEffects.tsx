@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { useTexture } from "@react-three/drei";
 import { Bloom, SSR, LUT, EffectComposer } from "@react-three/postprocessing";
 import { NinjaEditorContext } from '@/editor/NinjaEditorManager';
-import { IObjectManagement } from 'ninja-core';
+import { IObjectManagement } from '@ninjagl/core';
 import { LUTCubeLoader } from 'postprocessing';
 import { CubeTextureLoader, Texture } from 'three';
 

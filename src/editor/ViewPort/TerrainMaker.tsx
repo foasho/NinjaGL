@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import styles from "@/App.module.scss";
 import { 
@@ -31,7 +32,7 @@ import {
   PerspectiveCamera,
   Quaternion
 } from "three";
-import { useInputControl, convertObjectToBlob } from "ninja-core";
+import { useInputControl, convertObjectToBlob } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 import { globalTerrainStore, globalStore } from "../Store";
 import { Perf } from "r3f-perf";
@@ -479,7 +480,7 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       />
       
         <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleBufferGeometry args={[terrainState.radius]} />
+          <circleGeometry args={[terrainState.radius]} />
           <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
         </mesh>
       <Perf position={"bottom-right"}/>

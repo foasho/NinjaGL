@@ -1,4 +1,4 @@
-# NinjaGL-Coreライブラリ
+# @ninjagl/coreライブラリ
 
 ## 主な依存関係
 - three

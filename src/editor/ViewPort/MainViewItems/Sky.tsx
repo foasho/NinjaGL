@@ -1,4 +1,4 @@
-import { IObjectManagement } from "ninja-core"
+import { IObjectManagement } from "@ninjagl/core"
 import { Sky } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useState } from "react"
@@ -11,7 +11,13 @@ export const MySky = () => {
     useEffect(() => {
         setSky(editor.getSky());
         const handleSkyChanged = () => {
-            setSky(editor.getSky()?{...editor.getSky()}: undefined);
+            const newSky = editor.getSky();
+            if (newSky!== undefined){
+                setSky({...newSky});
+            }
+            else {
+                setSky(undefined);
+            }
         }
         editor.onSkyChanged(handleSkyChanged);
         return () => {

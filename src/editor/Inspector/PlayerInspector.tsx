@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useContext, useEffect, useState } from "react"
 import { NinjaEditorContext } from "../NinjaEditorManager"
 import Select from 'react-select';
@@ -6,7 +7,7 @@ import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";
 import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
-import { convertObjectToFile } from "ninja-core";
+import { convertObjectToFile } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 import { globalPlayerStore } from "../Store";
 import { useSession } from "next-auth/react";

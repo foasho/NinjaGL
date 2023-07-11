@@ -1,5 +1,5 @@
 import styles from "@/App.module.scss";
-import { IObjectManagement } from "ninja-core"
+import { IObjectManagement } from "@ninjagl/core"
 import { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
@@ -15,7 +15,7 @@ export const HierarchyTree = () => {
   const [oms, setOMs] = useState<IObjectManagement[]>([]);
   const state = useSnapshot(globalStore);
   const id = state.currentId;
-  const selectOM = editor.getOMById(id);
+  const selectOM = editor.getOMById(id!);
   const { t } = useTranslation();
   
   useEffect(() => {
@@ -58,7 +58,7 @@ interface ITreeItem {
 }
 const TreeItem = (prop: ITreeItem) => {
   const state = useSnapshot(globalStore);
-  const ref = useRef<HTMLDivElement>();
+  const ref = useRef<HTMLDivElement>(null);
   const editor = useContext(NinjaEditorContext);
   const [visible, setVisible] = useState<boolean>(true);
   const { t } = useTranslation();
@@ -133,7 +133,7 @@ const TreeItem = (prop: ITreeItem) => {
    * 選択/非選択を切り替える
    */
   const onSelectObject = () => {
-    if (ref.current.classList.contains(styles.select)){
+    if (ref.current!.classList.contains(styles.select)){
       state.init();
     }
     else {

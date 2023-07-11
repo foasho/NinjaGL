@@ -1,4 +1,5 @@
-import { IObjectManagement } from "ninja-core";
+// @ts-nocheck
+import { IObjectManagement } from "@ninjagl/core";
 import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react"
@@ -47,16 +48,16 @@ const ThreeObject = (props: IThreeObject) => {
   // const matRef = useRef<any>();
   let geometry;
   if (om.args.type == "plane") {
-    geometry = (<planeBufferGeometry />);
+    geometry = (<planeGeometry />);
   }
   else if (om.args.type == "sphere") {
-    geometry = (<sphereBufferGeometry />);
+    geometry = (<sphereGeometry />);
   }
   else if (om.args.type == "box") {
-    geometry = (<boxBufferGeometry />);
+    geometry = (<boxGeometry />);
   }
   else if (om.args.type == "cylinder") {
-    geometry = (<cylinderBufferGeometry />);
+    geometry = (<cylinderGeometry />);
   }
   else if (om.args.type == "capsule") {
     geometry = (<capsuleGeometry />);

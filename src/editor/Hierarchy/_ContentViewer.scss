@@ -55,7 +55,9 @@
     flex-wrap: wrap;
     justify-content: space-between;
     position: relative;
-
+    background-color: #000000a2;
+    padding: 3px;
+    border-radius: 3px;
     .tooltip {
       position: fixed;
       user-select: none;

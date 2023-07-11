@@ -1,31 +1,32 @@
-import { NinjaEngine, NinjaEngineContext, NinjaGL } from "ninja-core";
-import { NinjaCanvas } from "ninja-core";
-import { useContext, useEffect, useState } from "react"
-import { useTranslation } from "react-i18next";
+import { NinjaEngine, NinjaEngineContext } from "@ninjagl/core";
+import { NinjaCanvas } from "@ninjagl/core";
+import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
-import { NJCFile } from "ninja-core";
-import { IConfigParams, InitMobileConfipParams } from "ninja-core";
+import { NJCFile } from "@ninjagl/core";
+import { IConfigParams } from "@ninjagl/core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
+import { Canvas } from "@react-three/fiber";
 
 export const ExportNjcFile = (
   editor: NinjaEditorManager,
   config: IConfigParams,
 ): NJCFile => {
+  const newConfig = { ...config, dpr: undefined };
   // EditorからOMを取得してJSON化する
   const oms = [...editor.getOMs()];
   oms.map((om) => {
     const _om = { ...om };
-    if (om.type == "avatar") {
+    if (om.type == "avatar" && _om.object) {
       const target = SkeletonUtils.clone(_om.object);
-      target.animations = om.animations;
+      target.animations = om.animations? om.animations : [];
       _om.object = target;
     }
     else if (om.type == "object" || om.type == "terrain") {
       if (!om.object) return _om;
       // Animationがある場合のみSckeletonUtilsでクローンする
-      if (om.animations && om.animations.length > 0) {
+      if (om.animations && om.animations.length > 0 && _om.object) {
         const target = SkeletonUtils.clone(_om.object);
         target.animations = om.animations;
         _om.object = target;
@@ -41,7 +42,7 @@ export const ExportNjcFile = (
   const sms = [...editor.getSMs()];
   // Configパラメータを設定する
   const _config: IConfigParams = {
-    ...config,
+    ...newConfig,
     isDebug: true,
   }
   
@@ -59,12 +60,12 @@ export const ExportNjcFile = (
 * NinjaEngineを実行する
 */
 export const DebugPlay = () => {
+  const [ready, setReady] = useState(false);
   const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
-  const [engine, setEngine] = useState<NinjaEngine>();
+  const [engine, setEngine] = useState<NinjaEngine|null>(null);
   useEffect(() => {
-    const _engine = new NinjaEngine();
-    const njcFile = ExportNjcFile(editor, {
+    const njcFile = ExportNjcFile(editor.getEditor(), {
       physics: configState.physics,
       autoScale: configState.autoScale,
       alpha: configState.alpha,
@@ -80,33 +81,49 @@ export const DebugPlay = () => {
       octreeDepth: configState.octreeDepth,
       isDebug: true,
     });
-    // _engine.setNJCFile(njcFile).then(() => {
-    //   // エンジンにセット
-    //   setEngine(_engine);
-    // });
-    _engine.setNJCFile(njcFile).then(async () => {
-      await Promise.resolve();
-      // エンジンにセット
-      setEngine(_engine);
-    });    
-    return () => {}
-  }, [editor, configState]);
+    const setupNjcFile = async (nf) => {
+      const _engine = new NinjaEngine();
+      await _engine.setNJCFile(nf);
+      if (!engine) setEngine(_engine);
+      setReady(true);
+    }
+    setupNjcFile(njcFile);
+    return () => {
+      setReady(false);
+    }
+  }, []);
 
   return (
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
-        {engine &&
-          <NinjaEngineContext.Provider value={engine}>
-            <NinjaCanvas />
-          </NinjaEngineContext.Provider>
+        {ready && engine &&
+          <Suspense fallback={null}>
+            <NinjaEngineContext.Provider value={engine}>
+              <NinjaCanvas />
+            </NinjaEngineContext.Provider>
+          </Suspense>
+          // <Canvas>
+          //   <ambientLight />
+          //   <mesh>
+          //     <boxGeometry />
+          //     <meshStandardMaterial color="hotpink" />
+          //   </mesh>
+          // </Canvas>
         }
-        {!engine &&
-          <div style={{ height: "100%", width: "100%", backgroundColor: "black", zIndex: 9999 }}>
-            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-              <div style={{ color: "white", fontSize: "20px" }}>Loading...</div>
-            </div>
+      </div>
+    </>
+  )
+}
+
+const LoadingComponent = () => {
+  return (
+    <>
+      <div style={{ height: "100%", width: "100%", top: "0", left: "0", backgroundColor: "black", zIndex: 9999 }}>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+          <div style={{ color: "white", fontSize: "20px" }}>
+            Loading...
           </div>
-        }
+        </div>
       </div>
     </>
   )

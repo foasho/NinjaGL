@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef } from "react";
 import { GLTFLoader } from "three-stdlib";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "@ninjagl/core";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
@@ -15,13 +15,13 @@ import { globalStore } from "@/editor/Store";
 export const Terrain = () => {
   const state = useSnapshot(globalStore);
   const editor = useContext(NinjaEditorContext);
-  const [terrain, setTerrain] = useState<IObjectManagement>(null);
+  const [terrain, setTerrain] = useState<IObjectManagement>();
   const object = terrain? terrain.object: null;
   const id = terrain? terrain.id: MathUtils.generateUUID();
   const handleDrag = useRef<boolean>(false);
   const [helper, setHelper] = useState<boolean>(true)
 
-  const lineSegs = [];
+  const lineSegs: LineSegments[] = [];
   if (object && helper){
     object.traverse((node) => {
       if (node instanceof Mesh) {
@@ -40,7 +40,10 @@ export const Terrain = () => {
   }
 
   useEffect(() => {
-    setTerrain(editor.getTerrain());
+    const newTerrain = editor.getTerrain();
+    if (newTerrain !== terrain){
+      setTerrain(newTerrain);
+    }
   });
 
   useFrame((_, delta) => {

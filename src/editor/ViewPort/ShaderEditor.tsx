@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
@@ -268,7 +269,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
               <Canvas shadows>
                 <SoftShadows/>
                 <mesh castShadow receiveShadow scale={[10, 10, 10]} rotation={[-Math.PI/2, 0, 0]} position={[0, -1, 0]}>
-                  <planeBufferGeometry/>
+                  <planeGeometry/>
                   <meshStandardMaterial side={DoubleSide} color={0xf2f2f2} />
                 </mesh>
                 <ShaderViewer vertexCode={vertexCode} fragmentCode={fragmentCode} objectType={objectType}/>

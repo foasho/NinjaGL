@@ -1,5 +1,6 @@
+// @ts-nocheck
 import styles from "@/App.module.scss";
-import { IObjectManagement } from "ninja-core";
+import { IObjectManagement } from "@ninjagl/core";
 import { useRef, useContext, useEffect, useState } from "react";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';

@@ -1,9 +1,10 @@
+// @ts-nocheck
 import { useContext, useEffect, useState } from "react";
 import { NinjaEditorContext } from "../NinjaEditorManager";
-import { IScriptManagement } from "ninja-core";
+import { IScriptManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
-import { InitScriptManagement } from "ninja-core";
+import { InitScriptManagement } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 import { globalScriptStore } from "../Store";
 import { MathUtils } from "three";

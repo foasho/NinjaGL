@@ -11,7 +11,7 @@ interface IResponse {
   response: (data: ISelectNewObjectDialog) => void;
 }
 const SelectNewObjectDialog = (prop: IResponse) => {
-  const [selectType, setSelectType] = useState<string>(null);
+  const [selectType, setSelectType] = useState<string|null>(null);
   const { t } = useTranslation();
   const handleClickOutside = (event) => {
     if (event.target.classList.contains(styles.selectNewObjectDialog)) {
@@ -47,6 +47,9 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   }
   const selectEffect = (value: string) => {
     prop.response({ type: "effect", value: value });
+  }
+  const selectXR = (value: string) => {
+    prop.response({ type: "xr", value: value });
   }
   const uploadSound = (e) => {
     console.log("サウンドがアップロードされました");
@@ -142,6 +145,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
               <div className={styles.name}>
                 {t("effect")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {setSelectType("xr")}} >
+              <div className={styles.icon}>
+                <img className={styles.img} src="fileicons/xr.png"/>
+              </div>
+              <div className={styles.name}>
+                {t("XR")}
               </div>
             </div>
           </>
@@ -404,18 +415,39 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           </>
         }
 
+        {selectType == "xr" &&
+          <>
+            <div className={styles.card} onClick={() => {selectXR("vr")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/vr.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("VR")}
+              </div>
+            </div>
+            <div className={styles.card} onClick={() => {selectXR("ar")}}>
+              <div className={styles.icon}>
+                <img className={styles.img} src={"fileicons/ar.png"} />
+              </div>
+              <div className={styles.name}>
+                {t("XR")}
+              </div>
+            </div>
+          </>
+        }
+
         </div>
       </div>
     </div>
     ,
-    document.getElementById("myDialog")
+    document.getElementById("myDialog") as HTMLElement
   );
 }
 
 interface ISelectNewObjectDialog {
-  type: "light" | "sky" | "sound" | "object" | "three" 
-    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer" | "effect";
-  value: string;
+  type: "light" | "sky" | "sound" | "object" | "three" | "xr"
+    | "ui" | "camera" | "fog" | "cloud" | "environment" | "lightformer" | "effect" | null;
+  value: string | null;
 }
 /**
  * 新しいオブジェクトの選択ダイアログ表示
@@ -424,7 +456,7 @@ interface ISelectNewObjectDialog {
 export const showSelectNewObjectDialog = async ():Promise<ISelectNewObjectDialog> => {
   return new Promise((resolve) => {
     const handleDialogClose = (props: ISelectNewObjectDialog) => {
-      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog"));
+      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
       resolve(props);
     };
 

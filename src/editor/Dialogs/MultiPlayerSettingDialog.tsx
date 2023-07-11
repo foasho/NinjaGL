@@ -37,7 +37,7 @@ export const MultiPlayerDialog = (prop: IResponse) => {
       </div>
     </div>
     ,
-    document.getElementById("myDialog")
+    document.getElementById("myDialog") as HTMLElement
   );
 }
 
@@ -48,7 +48,7 @@ export const MultiPlayerDialog = (prop: IResponse) => {
 export const showMultiPlayerDialog = async () => {
   return new Promise((resolve) => {
     const handleDialogClose = () => {
-      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog"));
+      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
       resolve(null);
     };
     ReactDOM.render(

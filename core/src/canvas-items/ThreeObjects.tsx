@@ -12,16 +12,16 @@ const ThreeObject = (om: IObjectManagement) => {
   let geometry;
   let material;
   if (om.args.type == "plane") {
-    geometry = (<planeBufferGeometry />);
+    geometry = (<planeGeometry />);
   }
   else if (om.args.type == "sphere") {
-    geometry = (<sphereBufferGeometry />);
+    geometry = (<sphereGeometry />);
   }
   else if (om.args.type == "box") {
-    geometry = (<boxBufferGeometry />);
+    geometry = (<boxGeometry />);
   }
   else if (om.args.type == "cylinder") {
-    geometry = (<cylinderBufferGeometry />);
+    geometry = (<cylinderGeometry />);
   }
   else if (om.args.type == "capsule") {
     geometry = (<capsuleGeometry />);

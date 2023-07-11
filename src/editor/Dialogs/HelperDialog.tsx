@@ -3,10 +3,9 @@ import { useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useTranslation } from "react-i18next";
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import MonacoEditor, { Monaco } from "@monaco-editor/react";
 
 const codeStared = `
-import { NinjaGL } from "ninja-core";
+import { NinjaGL } from "@ninjagl/core";
 
 function App() {
 
@@ -17,7 +16,7 @@ function App() {
 `;
 
 const codeMerge = `
-import { NinjaGL } from "ninja-core";
+import { NinjaGL } from "@ninjagl/core";
 
 function App() {
 
@@ -25,19 +24,13 @@ function App() {
         <NinjaGL njcPath={"<YourNjcFile>"} >
             <!-- Your React Three Fiber Code -->
             <mesh>
-                <boxBufferGeometry args={[1, 1, 1]} />
+                <boxGeometry args={[1, 1, 1]} />
                 <meshStandardMaterial color="hotpink" />
             </mesh>
         </NinjaGL>
     );
 }
 `;
-
-
-interface PackageJson {
-    version: string;
-    [key: string]: any;
-}
 
 interface IResponse {
     response: () => void;
@@ -72,7 +65,7 @@ export const HelperDialog = (prop: IResponse) => {
                 </div>
                 <div className={styles.getstarted}>
                     <SyntaxHighlighter language="bash">
-                        npm install ninja-core
+                        npm install @ninjagl/core
                     </SyntaxHighlighter>
                 </div>
             </div>
@@ -101,7 +94,7 @@ export const HelperDialog = (prop: IResponse) => {
           </div>
         </div>
         ,
-        document.getElementById("myDialog")
+        document.getElementById("myDialog") as HTMLElement
       );
 }
 
@@ -112,7 +105,7 @@ export const HelperDialog = (prop: IResponse) => {
 export const showHelperDialog = async () => {
 return new Promise((resolve) => {
     const handleDialogClose = () => {
-    ReactDOM.unmountComponentAtNode(document.getElementById("myDialog"));
+    ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
         resolve(null);
     };
     ReactDOM.render(

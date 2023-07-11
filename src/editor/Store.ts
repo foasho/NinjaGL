@@ -1,4 +1,5 @@
-import { IConfigParams, IScriptManagement } from 'ninja-core';
+// @ts-nocheck
+import { IConfigParams, IScriptManagement } from '@ninjagl/core';
 import { AnimationClip, Group, Mesh, Object3D, Vector3 } from 'three';
 import { proxy } from 'valtio';
 import { HomeCameraPosition } from './NinjaEditorManager';

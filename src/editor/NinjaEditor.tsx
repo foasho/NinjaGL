@@ -1,9 +1,10 @@
+// @ts-nocheck
 import "./Locale";
 import styles from "@/App.module.scss";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
-import { NinjaEditorContext, NinjaEditorManager } from "@/editor/NinjaEditorManager";
-import { useState, useEffect, useContext, useRef, createContext } from "react";
+import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
+import { useState, useEffect, useContext } from "react";
 import { Euler, MathUtils, Vector3 } from "three";
 import { ContentsBrowser } from "./Hierarchy/ContentViewer";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
@@ -20,8 +21,8 @@ import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
 import { UINavigation } from "./Hierarchy/UINavigation";
 import { useTranslation } from "react-i18next";
-import { loadNJCFileFromURL, NJCFile, saveNJCBlob, saveNJCFile } from "ninja-core";
-import { loadNJCFile } from "ninja-core";
+import { loadNJCFileFromURL, saveNJCBlob } from "@ninjagl/core";
+import { loadNJCFile } from "@ninjagl/core";
 import { BiEditAlt } from "react-icons/bi";
 import { useSnapshot } from "valtio";
 import { globalConfigStore, globalStore } from "./Store";
@@ -34,7 +35,6 @@ import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
 import 'setimmediate';
 import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
-import { SkeletonUtils } from "three-stdlib";
 
 /**
  * NinjaEngineメインコンポネント
@@ -56,9 +56,9 @@ export const NinjaEditor = () => {
   /**
    * ビューポートの切り替え
    */
-  const changeView = (viewType: "mainview" |"debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
+  const changeView = (viewType: "mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
     if (viewSelect !== viewType) {
-      globalStore.init();
+      // globalStore.init();
       setViewSelect(viewType);
       if (viewType == "scripteditor"){
         setSelectSubNav("script");
@@ -263,6 +263,17 @@ export const NinjaEditor = () => {
         visibleType: "auto",
       })
     }
+    else if (data.type == "xr"){
+      editor.setUM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: "xr",
+        args: {
+          type: data.value,
+        },
+        visible: true,
+      });
+    }
   }
 
   /**
@@ -288,7 +299,48 @@ export const NinjaEditor = () => {
   }
 
   /**
-   * プレイモードと編集モードの切り替え
+   * Buildモードでプレイ
+   */
+  const onBuildPlay = async () => {
+    // 名前がなければ名前をつけるんだ
+    if (!project){
+      changeProjectName();
+      return;
+    }
+    //　ログインしていればそのばば保存してそのURLでデバッグページで開く
+    if (session){
+      const njcFile = await ExportNjcFile(editor.getEditor(), globalConfigStore);
+      const blob = await saveNJCBlob(njcFile);
+      const formData = new FormData();
+      formData.append("file", blob);
+      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+      const keyPath = (uploadPath + `/${project.name}.njc`).replaceAll("//", "/");
+      formData.append("filePath", keyPath);
+      const response = await fetch("/api/storage/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error("Error uploading file");
+      }
+      const res = await response.json();
+      const encodedUrl = encodeURIComponent(res.data.url);
+      const url = `${window.location.origin}/play?njcPath=${encodedUrl}`;
+      window.open(url, "_blank");
+      setProject({name: project.name, path: keyPath});
+  }
+    else {
+      // プロジェクトがなければログインしてください
+      Swal.fire({
+        title: t("attention").toString(),
+        text: t("loginRequired").toString(),
+        icon: "warning",
+      });
+    }
+  }
+
+  /**
+   * デバッグプレイ
    */
   const onPlayStop = () => {
     if (viewSelect == "debugplay"){
@@ -372,7 +424,7 @@ export const NinjaEditor = () => {
         mapsize: configState.mapsize,
         layerGridNum: configState.layerGridNum,
         lodDistance: configState.lodDistance,
-        dpr: undefined,
+        dpr: configState.dpr as number,
         viewGridLength: configState.viewGridLength,
         initCameraPosition: configState.initCameraPosition,
         octreeDepth: configState.octreeDepth,
@@ -421,7 +473,6 @@ export const NinjaEditor = () => {
                 JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: result.value, path: keyPath}])
               );
               setProject({name: result.value, path: keyPath});
-              // Success message
               if (completeAlert){
                 Swal.fire({
                   icon: 'success',
@@ -429,7 +480,8 @@ export const NinjaEditor = () => {
                   text: t("saveSuccess") + `\npersonal/savedata/${result.value}.njc`,
                 });
               }
-            } catch (error) {
+            } 
+            catch (error) {
               console.error("Error:", error.message);
               // 失敗したらをローカルに保存
               saveAs(blob, `${result.value}.njc`);
@@ -445,13 +497,12 @@ export const NinjaEditor = () => {
       });
     }
     else {
-      // saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
       // もしログインしているのならクラウドに保存する
       if (session){
         const formData = new FormData();
         formData.append("file", blob);
         const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
-        const keyPath = (uploadPath + `/${project.name.replace(".njc", "")}.njc`).replaceAll("//", "/");
+        const keyPath = (uploadPath + `/${project.name}`).replaceAll("//", "/");
         formData.append("filePath", keyPath);
         try {
           const response = await fetch("/api/storage/upload", {
@@ -473,20 +524,20 @@ export const NinjaEditor = () => {
             Swal.fire({
               icon: 'success',
               title: t("success"),
-              text: t("saveSuccess") + `\npersonal/savedata/${project.name.replace(".njc", "")}.njc`,
+              text: t("saveSuccess") + `\npersonal/savedata/${project.name}`,
             });
           }
         } catch (error) {
           console.error("Error:", error.message);
           // 失敗したらをローカルに保存
-          saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
+          saveAs(blob, `${project.name}`);
           setProject({name: project.name, path: undefined});
         }
       }
       else {
         // ZIPファイルをローカルに保存
-        saveAs(blob, `${project.name.replace(".njc", "")}.njc`);
-        setProject({name: project.name.replace(".njc", ""), path: undefined});
+        saveAs(blob, `${project.name}`);
+        setProject({name: project.name, path: undefined});
       }
     }
   }
@@ -744,12 +795,18 @@ export const NinjaEditor = () => {
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
+              <a className={styles.play} onClick={() => onBuildPlay()}>
+                <span className={styles.icon}>
+                  {<><BsPlay />Build</>}
+                </span>
+              </a>
+            </li>
+            <li className={`${styles.navItem} ${styles.right}`}>
               <a className={styles.play} onClick={() => onPlayStop()}>
                 <span className={styles.icon}>
                   {viewSelect == "debugplay"? <><BsStop /></>: <><BsPlay /></>}
                 </span>
                   {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
-                
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>
@@ -879,12 +936,6 @@ export const NinjaEditor = () => {
                   {t("mainView")}
                 </a>
                 <a
-                  onClick={() => changeView("debugplay")}
-                  style={viewSelect == "debugplay" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                  {t("debugPlay")}
-                </a>
-                <a
                   onClick={() => changeView("terrainmaker")}
                   style={viewSelect == "terrainmaker" ? { background: '#fff', color: "#838383" } : {}}
                 >
@@ -917,14 +968,12 @@ export const NinjaEditor = () => {
                </>
               }
               {viewSelect == "debugplay" &&
-                <>
-                  <DebugPlay />
-                </>
+              <>
+                <DebugPlay />
+              </>
               }
               {viewSelect == "terrainmaker" &&
-                <>
-                  <TerrainMakerCanvas />
-                </>
+                <TerrainMakerCanvas />
               }
               {viewSelect == "playereditor" &&
                 <>

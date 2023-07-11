@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useContext, useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
@@ -5,7 +6,7 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { reqApi } from '@/services/ServciceApi';
 import { useTranslation } from 'react-i18next';
-import { IScriptManagement } from 'ninja-core';
+import { IScriptManagement } from '@ninjagl/core';
 import { useSnapshot } from 'valtio';
 import { globalScriptStore } from '../Store';
 import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';

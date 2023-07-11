@@ -74,3 +74,6 @@ examples/*
 
 # ProjectData
 *.njc
+
+public/sw.js
+public/workbox-*.js

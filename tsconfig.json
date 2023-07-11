@@ -5,10 +5,11 @@
       "@/*": [
         "app/*",
         "src/*",
-        "core/*"
+        "core/*",
+        "providers/*",
       ]
     },
-    "target": "es5",
+    "target": "es6",
     "lib": [
       "dom",
       "dom.iterable",
@@ -24,16 +25,14 @@
     "module": "esnext",
     "moduleResolution": "node",
     "isolatedModules": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "outDir": "dist",
-    "rootDir": "src",
     "jsx": "preserve",
+    "resolveJsonModule": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -45,6 +44,6 @@
     "node_modules",
     "core/examples",
     "core",
-    "r3f-skyway",
+    "r3f-skyway"
   ]
 }
