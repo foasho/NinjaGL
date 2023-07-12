@@ -104,11 +104,13 @@ export const detectDeviceType = (): EDeviceType => {
 interface INinjaEngineProvider {
   njc?: NJCFile|null;
   njcPath?: string;
+  noCanvas?: boolean;
   children?: React.ReactNode;
 }
 export const NinjaGL = ({ 
   njc,
   njcPath,
+  noCanvas = false,
   children,
 }: INinjaEngineProvider
 ) => {
@@ -246,13 +248,20 @@ export const NinjaGL = ({
     }}>
       {init && njcFile &&
         <>
-          <Canvas>
-            <Suspense fallback={<Loading3D isLighting position={[0, 0, 3]} />}>
-              <NinjaCanvas/>
+          {noCanvas ?
+            <Canvas>
+              <Suspense fallback={<Loading3D isLighting position={[0, 0, 3]} />}>
+                <NinjaCanvas/>
+                {children}
+              </Suspense>
+              <Preload all />
+            </Canvas>
+            :
+            <>
               {children}
-            </Suspense>
-            <Preload all />
-          </Canvas>
+              <Preload all />
+            </>
+          }
           {/** UIレンダリング */}
 
         </>
@@ -311,11 +320,9 @@ export const NinjaCanvas = () => {
 
   return (
     <>
-      {/** テストケース */}
-      <TestCase3D />
       {/** OMのID */}
       {oms.map((om) => 
-        <OMObject om={om} key={om.id}/>
+        <OMObject om={om}/>
       )}
       {/** エフェクト */}
       <MyEffects oms={oms} />

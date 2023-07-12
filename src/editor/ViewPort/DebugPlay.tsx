@@ -1,13 +1,13 @@
-import { NinjaGL } from "@ninjagl/core";
-import { NinjaCanvas } from "@ninjagl/core";
+// import { NinjaGL } from "@ninjagl/core";
 import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
-import { NJCFile } from "@ninjagl/core";
-import { IConfigParams } from "@ninjagl/core";
+import { NJCFile, IConfigParams } from "@ninjagl/core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
-import { Canvas } from "@react-three/fiber";
+import dynamic from "next/dynamic";
+
+const NinjaGL = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaGL), { ssr: false });
 
 export const ExportNjcFile = (
   editor: NinjaEditorManager,
@@ -91,7 +91,7 @@ export const DebugPlay = () => {
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
         {njcFile && 
-          <NinjaGL njc={njcFile} />
+          <NinjaGL />
         }
       </div>
     </>

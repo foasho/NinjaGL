@@ -31,7 +31,7 @@
     "@gltf-transform/functions": "^3.1.1",
     "@monaco-editor/react": "^4.4.6",
     "@next/font": "13.1.6",
-    "@ninjagl/core": "^1.0.41",
+    "@ninjagl/core": "^1.0.43",
     "@react-three/drei": "^9.77.9",
     "@react-three/fiber": "^8.13.4",
     "@react-three/postprocessing": "^2.7.0",
@@ -104,9 +104,5 @@
     "react-json-tree": "^0.18.0",
     "typescript": "^5.0.4",
     "url-loader": "^4.1.1"
-  },
-  "resolutions": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0"
   }
 }

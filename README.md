@@ -1,9 +1,8 @@
 # NinjaGL
 
 - React18
-- Three.js(r149)
+- Three.js
 - ReactThreeFiber
-- ES6
 
 デモページ
 
