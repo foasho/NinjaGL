@@ -6,7 +6,6 @@ import { MoveableCamera } from "./MoveableCamera";
 import { useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
 
-
 const CameraComponent = (om: IObjectManagement) => {
   const engine = useContext(NinjaEngineContext);
   let _camera;

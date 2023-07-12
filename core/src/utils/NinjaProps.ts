@@ -24,18 +24,18 @@ export interface IConfigParams {
  * 入力系のInputパラメータ
  */
 export interface IInputMovement {
-  forward: boolean;
-  backward: boolean;
-  left: boolean;
-  right: boolean;
+  forward: number;
+  backward: number;
+  left: number;
+  right: number;
   jump: boolean;
   dash: boolean;
   action: boolean;
-  prevDrag?: Vector2 | null; // カメラ向きに利用（あとで実装）
-  currDrag?: Vector2 | null; // カメラ向きに利用（あとで実装）
-  deviceType: "mobile" | "tablet" | "desktop";
-  [key: string]: any;
-  pressedKeys: string[]; // 現在入力中キー
+  speed: number;
+  prevDrag: Vector2 | null;
+  curDrag: Vector2 | null;
+  pressedKeys: string[];
+  angleAxis: [number, number];
 }
 
 /**

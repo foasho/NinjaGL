@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { NinjaGL } from "./index";
 
 function Showcase () {
-  const [scene, setScene] = React.useState('thirdperson.njc');
+  const [scene, setScene] = React.useState('samplecamera.njc');
   useEffect(() => {
     console.log('Showcase component mounted');
   }, []);

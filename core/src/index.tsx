@@ -1,6 +1,4 @@
-export { NinjaGL } from "./utils/NinjaGL"
-export { NinjaCanvas } from "./utils/NinjaCanvas";
-export { NinjaUI } from "./utils/NinjaUI";
+export { NinjaGL, NinjaCanvas } from "./hooks/useNinjaEngine";
 export {
   NJCFile,
   saveNJCFile,
@@ -22,9 +20,4 @@ export {
 } from "./utils/NinjaInit";
 export {
   useInputControl,
-} from "./utils/InputControls";
-export { 
-  NinjaEngine, 
-  NinjaEngineContext,
-  // NinjaEngineProvider
-} from "./utils/NinjaEngineManager";
+} from "./hooks/useInputControl";

@@ -7,6 +7,11 @@
 - @react-three/xr
 - @react-three/postprocessing
 
+### ShowCaseの実行
+```
+npm run showcase
+```
+
 
 ## オブジェクト種別(OM)
 

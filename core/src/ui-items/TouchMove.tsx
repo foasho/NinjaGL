@@ -1,4 +1,4 @@
-import { initInput, manualKeyState, setManualInput } from "../utils/InputControls";
+import { initInput, manualKeyState, setManualInput } from "../hooks/useInputControl";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import React, { useContext, useEffect, useState } from "react";
 import { MdOutlineGames } from "react-icons/md";
@@ -11,7 +11,7 @@ export const TouchMove = () => {
   const engine = useContext(NinjaEngineContext)
 
   const touchStart = (e) => {
-    initInput(engine.deviceType);
+    // initInput(engine.deviceType);
     if (e.touches.length > 0) {
       const touch = e.touches[0];
       const x = touch.clientX;
@@ -21,7 +21,7 @@ export const TouchMove = () => {
   }
 
   const touchEnd = () => {
-    initInput(engine.deviceType);
+    // initInput(engine.deviceType);
     currentTouch = new Vector2(0, 0);
   }
 
@@ -57,7 +57,7 @@ export const TouchMove = () => {
   }
 
   const touchCancel = () => {
-    initInput(engine.deviceType);
+    // initInput(engine.deviceType);
   }
 
   const changeOrient = () => {
@@ -79,7 +79,7 @@ export const TouchMove = () => {
 
 
   useEffect(() => {
-    initInput(engine.deviceType);
+    // initInput(engine.deviceType);
     const element = document.getElementById("touchmovepad");
     element.addEventListener("touchstart", touchStart);
     element.addEventListener("touchend", touchEnd);
