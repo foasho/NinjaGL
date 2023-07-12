@@ -1,14 +1,34 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { NinjaEngineContext } from "../utils/NinjaEngineManager";
+import React, { useMemo, useEffect } from "react";
+import { useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { MoveableCamera } from "./MoveableCamera";
-import { useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
+import { useNinjaEngine } from "../hooks/useNinjaEngine";
+
+export const Cameras = ({ oms }: { oms: IObjectManagement[] }) => {
+
+  const cameras = useMemo(() => {
+    return oms.filter((om) => om.type === "camera");
+  }, [oms]);
+
+  const camera = cameras.length > 0 ? cameras[0] : null;
+
+  return (
+    <>
+      {camera &&
+        <CameraComponent {...camera} />
+      }
+      {!camera &&
+        <OrbitControls />
+      }
+    </>
+  )
+}
 
 const CameraComponent = (om: IObjectManagement) => {
-  const engine = useContext(NinjaEngineContext);
-  let _camera;
+  const { setOMObjectById } = useNinjaEngine();
+  let _camera: any;
   const { camera } = useThree();
   if (om.args.type == "orbit"){
     _camera = (<OrbitControls/>);
@@ -48,51 +68,13 @@ const CameraComponent = (om: IObjectManagement) => {
 
   useEffect(() => {
     if (om.args.type == "fixed" && om.args.default == true) {
-      engine.setOMObjectById(om.id, camera);
+      setOMObjectById(om.id, camera);
     }
   }, []);
 
   return (
     <>
       {_camera}
-    </>
-  )
-}
-
-export const Cameras = () => {
-  const engine = useContext(NinjaEngineContext);
-  const cameras = engine ? engine.getCameras() : [];
-  const [nonCamera, setNonCamera] = useState(false);
-  if (cameras.length == 0){
-    console.info("No camera found. Add a Default Moveble Camera.");
-  }
-  useEffect(() => {
-    const cameras = engine.getCameras();
-    if (cameras.length == 0 && !engine.getAvatar()){
-      setNonCamera(true);
-    }
-    else {
-      setNonCamera(false);
-    }
-  }, [engine]);
-
-  return (
-    <>
-      {cameras.length > 0 &&
-        <>
-          {cameras.map((om, index) => {
-            return (
-              <CameraComponent key={index} {...om} />
-            )
-          })}
-        </>
-      }
-      {/* カメラもアバターもなければ、デフォルトのカメラを追加する */}
-      {nonCamera &&
-        <>
-          <MoveableCamera/>
-        </>
-      }
     </>
   )
 }

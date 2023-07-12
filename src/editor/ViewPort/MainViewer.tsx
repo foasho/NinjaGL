@@ -765,6 +765,7 @@ export const CameraControl = (props: ICameraControl) => {
   }
 
   useFrame((_, delta) => {
+    console.log(input);
     // Fキーが押された瞬間の検出
     if (input.pressedKeys.includes("KeyF") && !focusOnObject) {
       setFocusOnObject(true);

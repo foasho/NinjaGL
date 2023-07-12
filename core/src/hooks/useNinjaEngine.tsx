@@ -12,6 +12,7 @@ import { Loading2D } from '../loaders/Loading2D';
 import { MyEnvirments } from '../canvas-items/OMEnvironments';
 import { MyEffects } from '../canvas-items/OMEffects';
 import { OMObject } from '../canvas-items/OMObject';
+import { Cameras } from '../canvas-items/OMCamera';
 
 export enum EPhyWorldType {
   None = 0,
@@ -320,6 +321,8 @@ export const NinjaCanvas = () => {
       <MyEffects oms={oms} />
       {/** 環境 */}
       <MyEnvirments oms={oms} />
+      {/** カメラ */}
+      <Cameras oms={oms} />
     </>
   )
 }
