@@ -1,6 +1,6 @@
 {
   "name": "@ninjagl/core",
-  "version": "1.0.38",
+  "version": "1.0.40",
   "publishConfig": {
     "access": "public"
   },

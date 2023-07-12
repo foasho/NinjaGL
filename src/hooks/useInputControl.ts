@@ -1,21 +1,41 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Vector2 } from "three";
-import { IInputMovement } from "../utils/NinjaProps";
-import { detectDeviceType } from "./useNinjaEngine";
+import { IInputMovement } from "@ninjagl/core";
 
 /**
  * ----------------
  * InputController
  * ----------------
  */
-
 export enum EDeviceType {
   Unknown = 0,
   Desktop = 1,
   Tablet = 2,
   Mobile = 3,
 }
-
+export const detectDeviceType = (): EDeviceType => {
+  if (typeof window !== 'undefined') {  // check if window is defined (we are on client side)
+    const ua = navigator.userAgent;
+    if (ua.indexOf('iPhone') > 0 || ua.indexOf('iPod') > 0 || (ua.indexOf('Android') > 0 && ua.indexOf('Mobile') > 0)) {
+      return EDeviceType.Mobile;
+    } 
+    else if (ua.indexOf('iPad') > 0 || ua.indexOf('Android') > 0) {
+      return EDeviceType.Tablet;
+    }
+    else if (
+      navigator.maxTouchPoints &&
+      navigator.maxTouchPoints > 2 &&
+      /MacIntel/.test(navigator.platform)
+    ) {
+      return EDeviceType.Tablet;
+    }
+    else {
+      return EDeviceType.Desktop;
+    }
+  } else {
+    return EDeviceType.Unknown;  // as a default, return "desktop" when window is not defined (we are on server side)
+  }
+ };
 
 /**
  * ActionキーのリストEnum

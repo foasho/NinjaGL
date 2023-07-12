@@ -15,7 +15,7 @@ import { TiSpanner } from "react-icons/ti";
 import { ImEarth } from "react-icons/im";
 import { ThreeObjects } from "./MainViewItems/Three";
 import { Perf } from "r3f-perf";
-import { gltfLoader, useInputControl } from "@ninjagl/core";
+import { gltfLoader } from "@ninjagl/core";
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";
@@ -29,6 +29,7 @@ import { useSession } from "next-auth/react";
 import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { MyTexts } from "./MainViewItems/MyTexts";
 import { MyEffects } from "./MainViewItems/MyEffects";
+import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -696,7 +697,7 @@ export const CameraControl = (props: ICameraControl) => {
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();
-  const input = useInputControl("desktop");
+  const { input } = useInputControl({ device: EDeviceType.Desktop });
    // Fキーが押された瞬間にカメラをフォーカスするためのフラグ
    const [focusOnObject, setFocusOnObject] = useState(false);
 
@@ -756,7 +757,7 @@ export const CameraControl = (props: ICameraControl) => {
     }
   };
 
-  const calculateNewTarget = (camera, currentTarget, distance) => {
+  const calculateNewTarget = (camera: PerspectiveCamera, distance: number) => {
     const direction = new Vector3();
     camera.getWorldDirection(direction);
     const newPosition = new Vector3().addVectors(camera.position, direction.multiplyScalar(distance));
@@ -809,9 +810,9 @@ export const CameraControl = (props: ICameraControl) => {
     }
 
     if (ref.current && cameraRef.current) {
-      // 新しいターゲット位置を計算して更新します
+      // // 新しいターゲット位置を計算して更新します
       const distance = props.cameraSpeed * 10; // カメラとターゲットの一定距離を指定
-      const newTarget = calculateNewTarget(cameraRef.current, ref.current.target, distance);
+      const newTarget = calculateNewTarget(cameraRef.current, distance);
       ref.current.target.copy(newTarget);
     }
   });

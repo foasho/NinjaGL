@@ -1,4 +1,4 @@
-export { NinjaGL, NinjaCanvas } from "./hooks/useNinjaEngine";
+export { NinjaGL, NinjaCanvas, EDeviceType, ENinjaStatus, EPhyWorldType } from "./hooks/useNinjaEngine";
 export {
   NJCFile,
   saveNJCFile,

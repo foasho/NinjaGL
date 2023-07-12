@@ -1,4 +1,4 @@
-import { NinjaEngine, NinjaEngineContext } from "@ninjagl/core";
+import { NinjaGL } from "@ninjagl/core";
 import { NinjaCanvas } from "@ninjagl/core";
 import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
@@ -63,9 +63,9 @@ export const DebugPlay = () => {
   const [ready, setReady] = useState(false);
   const configState = useSnapshot(globalConfigStore);
   const editor = useContext(NinjaEditorContext);
-  const [engine, setEngine] = useState<NinjaEngine|null>(null);
+  const [njcFile, setNJCFile] = useState<NJCFile|null>(null);
   useEffect(() => {
-    const njcFile = ExportNjcFile(editor.getEditor(), {
+    const _njcFile = ExportNjcFile(editor.getEditor(), {
       physics: configState.physics,
       autoScale: configState.autoScale,
       alpha: configState.alpha,
@@ -81,13 +81,7 @@ export const DebugPlay = () => {
       octreeDepth: configState.octreeDepth,
       isDebug: true,
     });
-    const setupNjcFile = async (nf) => {
-      const _engine = new NinjaEngine();
-      await _engine.setNJCFile(nf);
-      if (!engine) setEngine(_engine);
-      setReady(true);
-    }
-    setupNjcFile(njcFile);
+    setNJCFile(_njcFile);
     return () => {
       setReady(false);
     }
@@ -96,19 +90,8 @@ export const DebugPlay = () => {
   return (
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
-        {ready && engine &&
-          <Suspense fallback={null}>
-            <NinjaEngineContext.Provider value={engine}>
-              <NinjaCanvas />
-            </NinjaEngineContext.Provider>
-          </Suspense>
-          // <Canvas>
-          //   <ambientLight />
-          //   <mesh>
-          //     <boxGeometry />
-          //     <meshStandardMaterial color="hotpink" />
-          //   </mesh>
-          // </Canvas>
+        {njcFile && 
+          <NinjaGL njc={njcFile} />
         }
       </div>
     </>
