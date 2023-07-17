@@ -1,4 +1,4 @@
-// import { NinjaGL } from "@ninjagl/core";
+"use client"
 import { useContext, useEffect, lazy, Suspense, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
@@ -6,8 +6,10 @@ import { NJCFile, IConfigParams } from "@ninjagl/core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
 import dynamic from "next/dynamic";
-
+import { Canvas } from "@react-three/fiber";
 const NinjaGL = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaGL), { ssr: false });
+const NinjaCanvas = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaCanvas), { ssr: false });
+const NinjaCanvasItems = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaCanvasItems), { ssr: false });
 
 export const ExportNjcFile = (
   editor: NinjaEditorManager,
@@ -87,13 +89,41 @@ export const DebugPlay = () => {
     }
   }, []);
 
+  // omsだけ渡してProviderを作成する
   return (
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
         {njcFile && 
-          <NinjaGL />
+        <NinjaGL noCanvas njc={njcFile}>
+          <DebugCanvas />
+        </NinjaGL>
         }
       </div>
+    </>
+  )
+}
+
+const DebugCanvas = () => {
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+    return () => { 
+      setIsMounted(false);
+    }
+  }, []);
+
+  return(
+    <>
+      <Canvas>
+    {isMounted &&
+
+      <mesh>
+        <boxBufferGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    }
+    </Canvas>
     </>
   )
 }

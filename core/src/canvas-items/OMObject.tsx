@@ -4,6 +4,17 @@ import { Color, Object3D, Texture } from "three";
 import { MeshReflectorMaterial, Sky } from "@react-three/drei";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
+export const OMObjects = () => {
+  const { oms } = useNinjaEngine();
+  return (
+    <>
+      {oms.map((om) => (
+        <OMObject om={om} key={om.id} />
+      ))}
+    </>
+  )
+}
+
 
 /**
  * RenderOrder

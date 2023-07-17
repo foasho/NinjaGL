@@ -6,8 +6,8 @@ import { MoveableCamera } from "./MoveableCamera";
 import { Vector3 } from "three";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
-export const Cameras = ({ oms }: { oms: IObjectManagement[] }) => {
-
+export const Cameras = () => {
+  const { oms } = useNinjaEngine();
   const cameras = useMemo(() => {
     return oms.filter((om) => om.type === "camera");
   }, [oms]);

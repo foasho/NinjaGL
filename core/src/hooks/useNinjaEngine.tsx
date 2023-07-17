@@ -4,14 +4,14 @@ import { InitMobileConfipParams } from '../utils/NinjaInit';
 import { NinjaEngineWorker } from '../utils/NinjaEngineWorker';
 import { NJCFile, loadNJCFileFromURL } from '../utils/NinjaFileControl';
 import { Group, Object3D, Vector3 } from 'three';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas as NCanvas, useFrame as useNFrame } from '@react-three/fiber';
 import { useInputControl } from './useInputControl';
 import { Loading3D } from '../loaders/Loading3D';
 import { Preload } from '@react-three/drei';
 import { Loading2D } from '../loaders/Loading2D';
 import { MyEnvirments } from '../canvas-items/OMEnvironments';
 import { MyEffects } from '../canvas-items/OMEffects';
-import { OMObject } from '../canvas-items/OMObject';
+import { OMObject, OMObjects } from '../canvas-items/OMObject';
 import { Cameras } from '../canvas-items/OMCamera';
 
 export enum EPhyWorldType {
@@ -248,25 +248,23 @@ export const NinjaGL = ({
     }}>
       {init && njcFile &&
         <>
-          {noCanvas ?
-            <Canvas>
+          {!noCanvas ?
+            <NCanvas>
               <Suspense fallback={<Loading3D isLighting position={[0, 0, 3]} />}>
-                <NinjaCanvas/>
+                <NinjaCanvasItems/>
                 {children}
               </Suspense>
-              <Preload all />
-            </Canvas>
+            </NCanvas>
             :
             <>
               {children}
-              <Preload all />
             </>
           }
           {/** UIレンダリング */}
 
         </>
       }
-      {!init &&
+      {!init && !noCanvas &&
         <>
           {/** ローディング */}
           <Loading2D />
@@ -279,7 +277,26 @@ export const NinjaGL = ({
 /**
  * Canvasレンダリング
  */
-export const NinjaCanvas = () => {
+export const NinjaCanvas = ({ children }) => (<NCanvas>{children}</NCanvas>)
+export const NinjaCanvasItems = () => {
+  return (
+    <>
+      {/** OMのID */}
+      <OMObjects />
+      {/** エフェクト */}
+      <MyEffects />
+      {/** 環境 */}
+      <MyEnvirments />
+      {/** カメラ */}
+      <Cameras />
+      <group>
+        <SystemFrame/>
+      </group>
+    </>
+  )
+}
+
+const SystemFrame = () => {
 
   const { 
     status,
@@ -291,45 +308,36 @@ export const NinjaCanvas = () => {
 
   } = useNinjaEngine();
 
-  // フレームの更新
-  useFrame((state, delta) => {
-    if (status === ENinjaStatus.Pause){
-      return;
-    }
-    // 1. 可視化管理の更新
-    // updateVisibleObject();
-    // 2. 物理時間の更新
-    if (phyWorldType === EPhyWorldType.BVH){
-      // updateBVHWorld(timeDelta);
-    }
-    if (phyWorldType === EPhyWorldType.Octree){
-      // updateOctreeWorld(timeDelta);
-    }
-    // 3. ユーザースクリプトの更新
-    if (scriptWorker.current){
-      sms.forEach((sm) => {
-        scriptWorker.current.runFrameLoop(
-          sm.id,
-          state,
-          delta,
-          input
-        );
-      });
-    }
-  });
+    // フレームの更新
+    useNFrame((state, delta) => {
+      if (status === ENinjaStatus.Pause){
+        return;
+      }
+      // 1. 可視化管理の更新
+      // updateVisibleObject();
+      // 2. 物理時間の更新
+      if (phyWorldType === EPhyWorldType.BVH){
+        // updateBVHWorld(timeDelta);
+      }
+      if (phyWorldType === EPhyWorldType.Octree){
+        // updateOctreeWorld(timeDelta);
+      }
+      // 3. ユーザースクリプトの更新
+      if (scriptWorker.current){
+        sms.forEach((sm) => {
+          scriptWorker.current.runFrameLoop(
+            sm.id,
+            state,
+            delta,
+            input
+          );
+        });
+      }
+    });
+  
 
   return (
     <>
-      {/** OMのID */}
-      {oms.map((om) => 
-        <OMObject om={om}/>
-      )}
-      {/** エフェクト */}
-      <MyEffects oms={oms} />
-      {/** 環境 */}
-      <MyEnvirments oms={oms} />
-      {/** カメラ */}
-      <Cameras oms={oms} />
     </>
   )
 }

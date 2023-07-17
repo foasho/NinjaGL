@@ -4,9 +4,11 @@ import { IObjectManagement } from "../utils/NinjaProps";
 import { LUTCubeLoader } from "three-stdlib";
 import { Bloom, LUT, SSR } from "@react-three/postprocessing";
 import { Texture } from "three";
+import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
-export const MyEffects = ({ oms }: { oms: IObjectManagement[] }) => {
+export const MyEffects = () => {
 
+  const { oms } = useNinjaEngine();
   const effects = useMemo(() => {
     return oms.filter((om) => om.type === "effect");
   }, [oms]);

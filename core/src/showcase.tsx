@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { NinjaGL } from "./index";
+import { NinjaCanvas, NinjaGL } from "./index";
+import { Canvas } from '@react-three/fiber';
+import { NinjaCanvasItems } from './hooks/useNinjaEngine';
 
 function Showcase () {
   const [scene, setScene] = React.useState('samplecamera.njc');
@@ -12,7 +14,10 @@ function Showcase () {
   };
   return (
     <div style={{ height: "100%" }}>
-     <NinjaGL njcPath={scene}>
+    <NinjaGL noCanvas={true} njcPath={scene}>
+      <Canvas>
+        <NinjaCanvasItems />
+      </Canvas>
     </NinjaGL>
      <div style={{ position: "absolute", top: "10px", left: "10px", zIndex: 100 }}>
       <div style={{ color: "white" }}>

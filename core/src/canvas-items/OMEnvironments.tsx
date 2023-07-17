@@ -2,11 +2,13 @@ import { Environment, Lightformer } from "@react-three/drei";
 import React, { useMemo } from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { Vector3 } from "three";
+import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
 /**
  * EnvironmentやLightformerなどの環境
  */
-export const MyEnvirments = ({ oms }: { oms: IObjectManagement[]}) => {
+export const MyEnvirments = () => {
+  const { oms } = useNinjaEngine();
   const environments = useMemo(() => {
     return oms.filter((om) => om.type === "environment");
   }, [oms]);

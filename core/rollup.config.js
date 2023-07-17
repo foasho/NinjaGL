@@ -11,7 +11,7 @@ import copy from 'rollup-plugin-copy';
 export default [
   {
     input: 'src/index.tsx',
-    external: ['react', 'react-dom', 'three'],
+    external: ['react', 'react-dom', 'three', '@react-three/fiber'],
     output: [
       {
         file: 'dist/index.js',
@@ -47,20 +47,20 @@ export default [
         ]
       }),
     ],
-  },
-  {
-    input: 'src/index.tsx',
-    external: ['react', 'react-dom', 'three'],
-    output: {
-      file: 'dist/index.d.ts',
-      format: 'es',
-    },
-    plugins: [
-      typescript({
-        tsconfig: './tsconfig.json',
-        declarationDir: './dist'
-      }),
-       terser() // minifies generated bundles
-    ],
-  },
+  }
+  // ,{
+  //   input: 'src/index.tsx',
+  //   external: ['react', 'react-dom', 'three'],
+  //   output: {
+  //     file: 'dist/index.d.ts',
+  //     format: 'es',
+  //   },
+  //   plugins: [
+  //     typescript({
+  //       tsconfig: './tsconfig.json',
+  //       declarationDir: './dist'
+  //     }),
+  //      terser() // minifies generated bundles
+  //   ],
+  // },
 ];

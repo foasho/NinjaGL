@@ -1,4 +1,7 @@
-export { NinjaGL, NinjaCanvas, EDeviceType, ENinjaStatus, EPhyWorldType } from "./hooks/useNinjaEngine";
+export { NinjaGL, NinjaCanvas, NinjaCanvasItems, EDeviceType, ENinjaStatus, EPhyWorldType } from "./hooks/useNinjaEngine";
+export { MyEffects } from "./canvas-items/OMEffects";
+export { Cameras } from "./canvas-items/OMCamera";
+export { OMObject, OMObjects } from "./canvas-items/OMObject";
 export {
   NJCFile,
   saveNJCFile,
