@@ -1,8 +1,8 @@
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { useThree } from "@react-three/fiber";
-import React, { useState } from "react";
-import { useContext, useEffect, useRef } from "react";
+import * as React from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
+import { Object3D } from "three";
 
 /**
  * アバター表示
@@ -10,13 +10,14 @@ import { IObjectManagement } from "../utils/NinjaProps";
  * @returns 
  */
 export const Avatar = () => {
-  const ref = useRef<any>();
-  const engine = useContext(NinjaEngineContext);
-  const [avatar, setAvatar] = useState<IObjectManagement>();
+  const ref = React.useRef<any>();
+  const engine = React.useContext(NinjaEngineContext);
+  const [avatar, setAvatar] = React.useState<IObjectManagement>();
   const { camera } = useThree();
-  const objRef = useRef<any>();
+  const objRef = React.useRef<any>();
   // 初回ロード時にAvatarObjectをセットする 
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!engine) return;
     setAvatar(engine.getAvatar());
     const handleAvatarChanged = () => {
       setAvatar(engine.getAvatar());
@@ -28,8 +29,8 @@ export const Avatar = () => {
   }, []);
 
   // AvatarObjectが変更された場合にカメラをセットする
-  useEffect(() => {
-    if (avatar && ref.current) {
+  React.useEffect(() => {
+    if (avatar && ref.current && engine) {
       if (avatar.args.position){
         ref.current.position.copy(avatar.args.position.clone());
       }
@@ -51,7 +52,7 @@ export const Avatar = () => {
         <mesh ref={ref} layers={0}>
           <primitive
             ref={objRef}
-            object={avatar.object}
+            object={avatar.object as Object3D}
           />
         </mesh>
       }

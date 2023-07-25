@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import * as React from "react";
 import { useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";
@@ -8,7 +8,7 @@ import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
 export const Cameras = () => {
   const { oms } = useNinjaEngine();
-  const cameras = useMemo(() => {
+  const cameras = React.useMemo(() => {
     return oms.filter((om) => om.type === "camera");
   }, [oms]);
 
@@ -36,7 +36,7 @@ const CameraComponent = (om: IObjectManagement) => {
   else if (om.args.type == "moveable"){
     _camera = (<MoveableCamera/>);
   }
-  useEffect(() => {
+  React.useEffect(() => {
     if (om.args.type == "fixed" && om.args.default == true) {
       if (om.args.position) {
         camera.position.copy(om.args.position);
@@ -66,7 +66,7 @@ const CameraComponent = (om: IObjectManagement) => {
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (om.args.type == "fixed" && om.args.default == true) {
       setOMObjectById(om.id, camera);
     }

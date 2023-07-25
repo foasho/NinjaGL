@@ -4,6 +4,7 @@ import { detectSegmentTriangle, IIntersectProps, isIntersectTriSphere } from "./
 import { Face } from "./Octree";
 import { World } from "./World";
 import { NinjaEngine } from "./NinjaEngineManager";
+import { AnimationClipCreator } from "three-stdlib";
 
 /**
  * ベース: https://github.com/yomotsu/meshwalk

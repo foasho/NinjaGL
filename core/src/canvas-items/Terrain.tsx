@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import * as React from "react"
 import { Object3D } from "three";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
@@ -13,7 +13,7 @@ export const Terrain = () => {
         if (om.args.type === "terrain") {
           return (
             <mesh>
-              <primitive object={om.object} />
+              <primitive object={om.object as Object3D} />
             </mesh>
           )
         }

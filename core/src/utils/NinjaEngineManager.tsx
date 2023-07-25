@@ -4,7 +4,7 @@ import { RootState } from "@react-three/fiber";
 import { AutoGltfLoader, AvatarDataSetter, AvatarLoader, TerrainLoader } from "./NinjaLoaders";
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ISetSoundOption, ISoundProps, ITextureManagement, IUIManagement, IUpdateSoundOption } from "./NinjaProps";
 import { AvatarController } from "./AvatarController";
-import React, { createContext, useState, useEffect } from "react";
+import * as React from "react";
 import { AnimationClip, AnimationMixer, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Vector3, Audio, AudioListener, AudioLoader, LoopOnce, MathUtils, Quaternion, Euler, Vector2, SkinnedMesh, Box3 } from "three";
 import { NinjaShader } from "./NinjaShader";
 import { NJCFile, loadNJCFile, loadNJCFileFromURL } from "./NinjaFileControl";
@@ -29,10 +29,10 @@ export class NinjaEngine {
   ums: IUIManagement[] = [];
   tms: ITextureManagement[] = [];
   sms: IScriptManagement[] = [];
-  world: World;
-  octree: Octree;
-  avatar: AvatarController;
-  camera: PerspectiveCamera | OrthographicCamera;
+  world: World|null = null;
+  octree: Octree|null = null;
+  avatar: AvatarController | null = null;
+  camera: PerspectiveCamera | OrthographicCamera | null = null;
   listener: AudioListener = new AudioListener();
   sounds: ISoundProps[] = [];
   shader: NinjaShader = new NinjaShader();
@@ -458,7 +458,7 @@ export class NinjaEngine {
   /**
    * アバターのオブジェクトマネジメントを取得
    */
-  getAvatar(): IObjectManagement {
+  getAvatar(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "avatar");
   }
   private avatarChangedListeners: (() => void)[] = [];
@@ -540,7 +540,7 @@ export class NinjaEngine {
    */
   setAvatarCamera(camera: any) {
     this.camera = camera;
-    if (this.avatar) {
+    if (this.avatar && this.camera) {
       this.avatar.setCamera(this.camera);
     }
     // Listenerをセットする
@@ -558,14 +558,14 @@ export class NinjaEngine {
   /**
    * 地形データを取得する
    */
-  getTerrain(): IObjectManagement {
+  getTerrain(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "terrain");
   }
 
   /**
    * そらデータを取得する
    */
-  getSky(): IObjectManagement {
+  getSky(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "sky");
   }
   /**
@@ -587,14 +587,14 @@ export class NinjaEngine {
   /**
    * 雲データを取得する
    */
-  getCloud(): IObjectManagement {
+  getCloud(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "cloud");
   }
 
   /**
    * Environmentデータを取得する
    */
-  getEnvironment(): IObjectManagement {
+  getEnvironment(): IObjectManagement | undefined {
     return this.oms.find(om => om.type == "environment");
   }
   /**
@@ -795,14 +795,14 @@ export class NinjaEngine {
   /**
    * [UM] Web3WalletConnectBtnを取得する
    */
-  getWalletConnectBtn(): IUIManagement{
+  getWalletConnectBtn(): IUIManagement | undefined {
     return this.ums.find(um => um.type == "walletbtn");
   }
 
   /**
    * [UM] VRBtnを取得する
    */
-  getVRBtn(): IUIManagement{
+  getVRBtn(): IUIManagement | undefined {
     return this.ums.find(um => um.type == "vrbtn");
   }
 
@@ -929,7 +929,7 @@ export class NinjaEngine {
    * 可視上オブジェクトの更新
    */
   updateViewableObject() {
-    if (this.camera !== undefined) {
+    if (this.camera) {
       const nowCameraLayer = this.getLayerNumber(this.camera.position);
       if (nowCameraLayer !== this.cameraLayer){
         const visibleLayers = this.getActiveLayers(nowCameraLayer);
@@ -958,7 +958,7 @@ export class NinjaEngine {
    */
   loopAnimation(timeDelta: number) {
     this.oms.map(om => {
-      if (om.args.defaultAnimation && om.animations.length > 0 && om.mixer) {
+      if (om.args.defaultAnimation && om.animations && om.animations.length > 0 && om.mixer) {
         om.mixer.update(timeDelta);
       }
     });
@@ -1025,19 +1025,4 @@ export class NinjaEngine {
 
 }
 
-export const NinjaEngineContext = createContext<NinjaEngine>(undefined);
-
-// export const NinjaEngineProvider = ({ children }) => {
-//   const [engine, setEngine] = useState(null);
-
-//   useEffect(() => {
-//     const _engine = new NinjaEngine();
-//     setEngine(_engine);
-//   }, []);
-
-//   return (
-//     <NinjaEngineContext.Provider value={engine}>
-//       {children}
-//     </NinjaEngineContext.Provider>
-//   )
-// };
+export const NinjaEngineContext = React.createContext<NinjaEngine|null>(null);

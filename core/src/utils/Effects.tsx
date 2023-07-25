@@ -1,15 +1,16 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import * as React from "react";
 import { EffectComposer, SSR, Bloom, LUT } from "@react-three/postprocessing";
 import { NinjaEngineContext } from "./NinjaEngineManager";
 import { useTexture } from "@react-three/drei";
 import { Texture } from "three";
 import { LUTCubeLoader } from "three-stdlib";
+import { IObjectManagement } from "./NinjaProps";
 
 export const MyEffects = () => {
-  const engine = useContext(NinjaEngineContext);
-  const [effects, setEffects] = useState(engine.getEffects());
-  useEffect(() => {
-    setEffects(engine.getEffects());
+  const engine = React.useContext(NinjaEngineContext);
+  const [effects, setEffects] = React.useState<IObjectManagement[]>([]);
+  React.useEffect(() => {
+    setEffects(engine!.getEffects());
   }, [engine]);
   return (
     <>
@@ -26,12 +27,12 @@ export const MyEffects = () => {
 }
 
 const MyEffect = ({ om }) => {
-  const [renderCount, setRenderCount] = useState(0);
-  const engine = useContext(NinjaEngineContext);
-  const [texture, setTexture] = useState(null);
+  const [renderCount, setRenderCount] = React.useState(0);
+  const engine = React.useContext(NinjaEngineContext);
+  const [texture, setTexture] = React.useState<any>(null);
   const id = om.id;
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
       loader.load(om.args.texture, (loadedTexture) => {
@@ -43,13 +44,9 @@ const MyEffect = ({ om }) => {
     const handleIdChanged = () => {
       setRenderCount(renderCount + 1);
     }
-    // engine.onOMIdChanged(id, handleIdChanged);
-    // return () => {
-    //   engine.offOMIdChanged(id, handleIdChanged);
-    // }
   }, [om, renderCount]);
 
-  const effect = useMemo(() => {
+  const effect = React.useMemo(() => {
     if (om.args.type === "bloom") {
       return (
         <Bloom

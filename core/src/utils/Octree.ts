@@ -232,7 +232,7 @@ export class Octree {
    * 特定の名前を持つFaceを取得する
    */
   getFacesByName(name: string): Face[] {
-    const faces = [];
+    const faces: Face[] = [];
     for (const node of this.nodes[0]) {
       for (const face of node.trianglePool) {
         if (face.name === name) {
@@ -357,7 +357,7 @@ export class Octree {
    */
   getIntersectedNodes(sphere: Sphere, depth: number): OctreeNode[] {
     var tmp: OctreeNode[] = [];
-    var intersectedNodes = [];
+    var intersectedNodes: OctreeNode[] = [];
     var isIntersected = isInstersectSphereBox(
       sphere, 
       this.box3// this

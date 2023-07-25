@@ -1,12 +1,13 @@
-import React, { useContext, useEffect, useRef } from "react";
+import * as React from "react";
 import { Text } from "@react-three/drei";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 
 export const MyTexts = () => {
-  const engine = useContext(NinjaEngineContext);
+  const engine = React.useContext(NinjaEngineContext);
   const [texts, setTexts] = React.useState<IObjectManagement[]>([]);
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!engine) return;
     setTexts(engine.getTexts());
   }, [engine]);
   return (
@@ -20,8 +21,8 @@ export const MyTexts = () => {
 }
 
 const MyText = ({ om }) => {
-  const ref = useRef<any>();
-  useEffect(() => {
+  const ref = React.useRef<any>();
+  React.useEffect(() => {
     if (ref.current) {
       if (om.args.position) {
         ref.current.position.copy(om.args.position);
@@ -36,8 +37,9 @@ const MyText = ({ om }) => {
   }, [])
   return (
     <>
+      {/** @ts-ignore */}
       <Text font={""} ref={ref}>
-        {om.args.content}
+        {om.args.content as string}
       </Text>
     </>
   )

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import * as React from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
-import { Color, Object3D, Texture } from "three";
+import { Color, Object3D } from "three";
 import { MeshReflectorMaterial, Sky } from "@react-three/drei";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
@@ -27,7 +27,7 @@ export const OMObject = ({ om }: { om: IObjectManagement }) => {
       {/** 地形データ */}
       {om.type === "terrain" && (
         <mesh renderOrder={0}>
-          <primitive object={om.object} />
+          <primitive object={om.object as Object3D} />
         </mesh>
       )}
       {/** ライティング */}
@@ -49,8 +49,8 @@ export const OMObject = ({ om }: { om: IObjectManagement }) => {
  * --------------------
  */
 const Light = ({ om }: { om: IObjectManagement }) => {
-  const ref = useRef<any>();
-  let light = undefined;
+  const ref = React.useRef<any>();
+  let light: any = undefined;
   let color: string = (om.args.color) ? om.args.color : '#fadcb9';
   if (om.args.type == "spot") {
     light = (
@@ -103,7 +103,7 @@ const Light = ({ om }: { om: IObjectManagement }) => {
     )
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (ref.current) {
       if (om.layerNum){
         ref.current.layers.set(om.layerNum);
@@ -134,7 +134,7 @@ const Light = ({ om }: { om: IObjectManagement }) => {
  * --------------------
  */
 const ThreeObject = ({ om }: { om: IObjectManagement }) => {
-  const ref = useRef<any>();
+  const ref = React.useRef<any>();
   const { setOMObjectById } = useNinjaEngine();
   // const matRef = useRef<any>();
   let geometry;
@@ -182,7 +182,7 @@ const ThreeObject = ({ om }: { om: IObjectManagement }) => {
     receiveShadow = om.args.receiveShadow;
   }
   
-  useEffect(() => {
+  React.useEffect(() => {
     if (ref.current) {
       setOMObjectById(om.id, ref.current as Object3D);
       if (ref.current) {

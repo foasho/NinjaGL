@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import * as React from "react";
 import { Vector2 } from "three";
 import { IInputMovement } from "../utils/NinjaProps";
 import { detectDeviceType } from "./useNinjaEngine";
@@ -158,22 +158,22 @@ export const useInputControl = (
   }
     : IInputControl
 ) => {
-  const [enabledFlag, setEnabledFlag] = useState<boolean>(enabled);
-  const [setupCount, setSetupCount] = useState<number>(1);
+  const [enabledFlag, setEnabledFlag] = React.useState<boolean>(enabled);
+  const [setupCount, setSetupCount] = React.useState<number>(1);
   // タッチ発火フラグ(入力が競合しないように)
   // Touch操作中はCallbackでisTouchフラグを持ちたい
-  const [touchFlag, setTouchFlag] = useState<boolean>(false);
-  const keyboardFlag = useRef<boolean>(false);
-  const gamepadFlag = useRef<boolean>(false);
-  const [runId, setRunId] = useState<string | undefined>(undefined);
-  const [jumpId, setJumpId] = useState<string | undefined>(undefined);
+  const [touchFlag, setTouchFlag] = React.useState<boolean>(false);
+  const keyboardFlag = React.useRef<boolean>(false);
+  const gamepadFlag = React.useRef<boolean>(false);
+  const [runId, setRunId] = React.useState<string | undefined>(undefined);
+  const [jumpId, setJumpId] = React.useState<string | undefined>(undefined);
   // -------------------------------------------------
   // ジョイスティックのRef
-  const joystick = useRef<HTMLDivElement | undefined>();
-  const joystickOuter = useRef<HTMLDivElement | undefined>();
-  const joystickInner = useRef<HTMLDivElement | undefined>();
-  const canvas = useRef<HTMLCanvasElement | undefined>();
-  const joyRadius = useRef<number>(0);
+  const joystick = React.useRef<HTMLDivElement | undefined>();
+  const joystickOuter = React.useRef<HTMLDivElement | undefined>();
+  const joystickInner = React.useRef<HTMLDivElement | undefined>();
+  const canvas = React.useRef<HTMLCanvasElement | undefined>();
+  const joyRadius = React.useRef<number>(0);
   const outerLineWidth = 5;
 
   const setup = () => {
@@ -505,7 +505,7 @@ export const useInputControl = (
     }
   };
 
-  let movement = useRef<IInputMovement>({
+  let movement = React.useRef<IInputMovement>({
     forward: 0,
     backward: 0,
     left: 0,
@@ -520,7 +520,7 @@ export const useInputControl = (
     angleAxis: [0, 0],
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (enabled) {
       setup();
     }

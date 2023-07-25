@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import * as React from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Mesh, Vector3 } from "three";
 
@@ -18,7 +18,7 @@ export const Loading3D = (
   }: ILoading3D
 ) => {
 
-  const ref = useRef<Group>(null);
+  const ref = React.useRef<Group>(null);
 
   useFrame((state, delta) => {
     if (ref.current) {

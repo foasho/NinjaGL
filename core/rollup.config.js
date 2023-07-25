@@ -1,66 +1,75 @@
-import typescript from 'rollup-plugin-typescript2';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json';
-import { terser } from 'rollup-plugin-terser';
-import alias from '@rollup/plugin-alias';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
-import path from 'path';
-import copy from 'rollup-plugin-copy';
+import path from 'path'
+import babel from '@rollup/plugin-babel'
+import resolve from '@rollup/plugin-node-resolve'
+import json from '@rollup/plugin-json'
+import glslify from 'rollup-plugin-glslify'
+import multiInput from 'rollup-plugin-multi-input'
+import { terser } from 'rollup-plugin-terser'
+
+const root = process.platform === 'win32' ? path.resolve('/') : '/';
+const external = (id) => !id.startsWith('.') && !id.startsWith(root);
+const extensions = ['.js', '.jsx', '.ts', '.tsx', '.json'];
+
+/**
+ * Babel options factory
+ */
+const getBabelOptions = ({ useESModules }) => ({
+  babelrc: false,
+  extensions,
+  exclude: '**/node_modules/**',
+  babelHelpers: 'runtime',
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        include: [
+          '@babel/plugin-proposal-class-properties',
+          '@babel/plugin-proposal-optional-chaining',
+          '@babel/plugin-proposal-nullish-coalescing-operator',
+          '@babel/plugin-proposal-numeric-separator',
+          '@babel/plugin-proposal-logical-assignment-operators',
+        ],
+        bugfixes: true,
+        loose: true,
+        modules: false,
+        targets: '> 1%, not dead, not ie 11, not op_mini all',
+      },
+    ],
+    '@babel/preset-react',
+    '@babel/preset-typescript',
+  ],
+  plugins: [
+    '@babel/plugin-proposal-nullish-coalescing-operator',
+    ['@babel/transform-runtime', { regenerator: false, useESModules }],
+  ],
+})
 
 export default [
   {
-    input: 'src/index.tsx',
-    external: ['react', 'react-dom', 'three', '@react-three/fiber'],
-    output: [
-      {
-        file: 'dist/index.js',
-        format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        file: 'dist/index.esm.js',
-        format: 'esm',
-        sourcemap: true,
-      },
-    ],
+    input: ['src/**/*.ts', 'src/**/*.tsx', '!src/index.ts', '!src/showcase.tsx'],
+    output: { dir: `dist`, format: 'esm' },
+    external,
     plugins: [
-      alias({
-        entries: [
-          {
-            find: 'three/examples/jsm',
-            replacement: path.resolve(
-              'node_modules/three/examples/jsm'
-            ),
-          },
-        ],
-      }),
-      typescript({ tsconfig: './tsconfig.json' }),
-      nodeResolve({ preferBuiltins: false }),
-      commonjs(),
+      multiInput(),
       json(),
-      terser(),
-      nodePolyfills(),
-      copy({
-        targets: [
-          { src: 'public/*', dest: 'dist' }
-        ]
+      glslify(),
+      babel(getBabelOptions({ useESModules: true }, '>1%, not dead, not ie 11, not op_mini all')),
+      resolve({ extensions }),
+    ],
+  },
+  {
+    input: ['src/**/*.ts', 'src/**/*.tsx', '!src/index.ts', '!src/showcase.tsx'],
+    output: { dir: `dist`, format: 'cjs' },
+    external,
+    plugins: [
+      multiInput({
+        transformOutputPath: (output) => output.replace(/\.[^/.]+$/, '.cjs.js'),
       }),
+      json(),
+      glslify(),
+      babel(getBabelOptions({ useESModules: false })),
+      resolve({ extensions }),
+      terser(),
     ],
   }
-  // ,{
-  //   input: 'src/index.tsx',
-  //   external: ['react', 'react-dom', 'three'],
-  //   output: {
-  //     file: 'dist/index.d.ts',
-  //     format: 'es',
-  //   },
-  //   plugins: [
-  //     typescript({
-  //       tsconfig: './tsconfig.json',
-  //       declarationDir: './dist'
-  //     }),
-  //      terser() // minifies generated bundles
-  //   ],
-  // },
-];
+]

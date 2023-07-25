@@ -1,14 +1,14 @@
 import { initInput, manualKeyState, setManualInput } from "../hooks/useInputControl";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
-import React, { useContext, useEffect, useState } from "react";
+import * as React from "react";
 import { MdOutlineGames } from "react-icons/md";
 import { Vector2 } from "three";
 
 export const TouchMove = () => {
-  const [isOrientation, setOrientation] = useState<boolean>((window.innerHeight < window.innerWidth) ? true : false);
+  const [isOrientation, setOrientation] = React.useState<boolean>((window.innerHeight < window.innerWidth) ? true : false);
   let currentTouch: Vector2 = new Vector2(0, 0);
   let currentTouchCamera: Vector2 = new Vector2(0, 0);
-  const engine = useContext(NinjaEngineContext)
+  const engine = React.useContext(NinjaEngineContext)
 
   const touchStart = (e) => {
     // initInput(engine.deviceType);
@@ -78,14 +78,14 @@ export const TouchMove = () => {
   }
 
 
-  useEffect(() => {
+  React.useEffect(() => {
     // initInput(engine.deviceType);
-    const element = document.getElementById("touchmovepad");
+    const element = document.getElementById("touchmovepad") as  any;
     element.addEventListener("touchstart", touchStart);
     element.addEventListener("touchend", touchEnd);
     element.addEventListener("touchmove", touchMove);
     element.addEventListener("touchcancel", touchCancel);
-    const cameraele = document.getElementById("touchcamerapad");
+    const cameraele = document.getElementById("touchcamerapad") as any;
     cameraele.addEventListener("touchstart", touchCameraStart);
     cameraele.addEventListener("touchmove", touchCameraMove);
     cameraele.addEventListener("touchend", touchCameraEnd);

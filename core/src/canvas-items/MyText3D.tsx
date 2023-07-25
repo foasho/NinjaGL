@@ -1,12 +1,13 @@
 import { Text3D } from "@react-three/drei"
-import React, { useContext, useEffect, useRef } from "react"
+import * as React from "react"
 import { IObjectManagement } from "../utils/NinjaProps"
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 
 export const MyText3Ds = () => {
-  const engine = useContext(NinjaEngineContext);
+  const engine = React.useContext(NinjaEngineContext);
   const [text3ds, setText3ds] = React.useState<IObjectManagement[]>([]);
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!engine) return;
     setText3ds(engine.getTexts3D());
   }, [engine]);
   return (
@@ -20,8 +21,8 @@ export const MyText3Ds = () => {
 }
 
 const MyText3D = ({ om }) => {
-  const ref = useRef<any>();
-  useEffect(() => {
+  const ref = React.useRef<any>();
+  React.useEffect(() => {
     if (ref.current) {
       if (om.args.position) {
         ref.current.position.copy(om.args.position);
@@ -36,6 +37,7 @@ const MyText3D = ({ om }) => {
   }, [])
   return (
     <>
+      {/** @ts-ignore */}
       <Text3D font={""} ref={ref}>
         {om.args.content}
       </Text3D>

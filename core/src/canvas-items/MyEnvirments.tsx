@@ -1,19 +1,21 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import React, { useContext, useState, useEffect } from "react";
+import * as React from "react";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { Vector3 } from "three";
 
 export const MyEnvirments = () => {
-  const [degraded, degrade] = useState(false)
-  const engine = useContext(NinjaEngineContext);
-  const [environment, setEnvironment] = useState<IObjectManagement>();
-  const [lightformers, setLightformers] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
+  const [degraded, degrade] = React.useState(false)
+  const engine = React.useContext(NinjaEngineContext);
+  const [environment, setEnvironment] = React.useState<IObjectManagement>();
+  const [lightformers, setLightformers] = React.useState<IObjectManagement[]>([]);
+  React.useEffect(() => {
+    if (!engine) return;
     setEnvironment(engine.getEnvironment());
     setLightformers(engine.getLightFormers());
     const handleEnvChanged = () => {
-      setEnvironment(engine.getEnvironment()?{...engine.getEnvironment()}: undefined);
+      if (!engine) return;
+      setEnvironment(engine.getEnvironment());
       setLightformers([...engine.getLightFormers()]);
     }
     engine.onEnvChanged(handleEnvChanged);
@@ -57,6 +59,7 @@ export const MyEnvirments = () => {
 
 const LightFormer = ({ om }) => {
   return (
+    // @ts-ignore
     <Lightformer
       form={om.args.form}
       intensity={om.args.intensity}

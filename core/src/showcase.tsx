@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom/client';
-import { NinjaCanvas, NinjaGL } from "./index";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom/client';
+import { NinjaCanvas, NinjaGL } from "./hooks";
 import { Canvas } from '@react-three/fiber';
 import { NinjaCanvasItems } from './hooks/useNinjaEngine';
 
 function Showcase () {
   const [scene, setScene] = React.useState('samplecamera.njc');
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('Showcase component mounted');
   }, []);
   const changeScene = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -35,12 +35,11 @@ function Showcase () {
   );
 };
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-
+/**
+ * Html entry point
+ */
+const container = document.getElementById('root')
+const root = ReactDOM.createRoot(container as HTMLElement)
 root.render(
-  <React.StrictMode>
-    <Showcase />
-  </React.StrictMode>
-);
+  <Showcase />
+)

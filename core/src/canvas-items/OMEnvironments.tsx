@@ -1,5 +1,5 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import React, { useMemo } from "react";
+import * as React from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { Vector3 } from "three";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
@@ -9,11 +9,11 @@ import { useNinjaEngine } from "../hooks/useNinjaEngine";
  */
 export const MyEnvirments = () => {
   const { oms } = useNinjaEngine();
-  const environments = useMemo(() => {
+  const environments = React.useMemo(() => {
     return oms.filter((om) => om.type === "environment");
   }, [oms]);
   const environment = environments.length>0? environments[0]: null;
-  const lightformers = useMemo(() => {
+  const lightformers = React.useMemo(() => {
     return oms.filter((om) => om.type === "lightformer");
   }, [oms])
   return (
@@ -52,6 +52,7 @@ export const MyEnvirments = () => {
 
 const LightFormer = ({ om }) => {
   return (
+    // @ts-ignore
     <Lightformer
       form={om.args.form}
       intensity={om.args.intensity}

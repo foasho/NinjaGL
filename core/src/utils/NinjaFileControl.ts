@@ -2,13 +2,13 @@ import { IConfigParams, IObjectManagement, IScriptManagement, ITextureManagement
 import { saveAs } from "file-saver";
 import { Euler, Vector3, Object3D, Mesh, Scene, LoadingManager, Quaternion } from "three";
 import { GLTFLoader, SkeletonUtils, DRACOLoader, KTX2Loader } from "three-stdlib";
-import JSZip from 'jszip';
+import * as JSZip from 'jszip';
 import { MeshoptDecoder } from "meshoptimizer";
 import { InitMobileConfipParams } from "./NinjaInit";
 import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
 
 const MANAGER = new LoadingManager();
-const THREE_PATH = `https://unpkg.com/three@0.149.0`;
+const THREE_PATH = `https://unpkg.com/three@0.154.0`;
 export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
 export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
 export const gltfLoader = new GLTFLoader()

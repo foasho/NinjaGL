@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import * as React from "react";
 import { Euler, Vector3 } from "three";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
@@ -6,9 +6,10 @@ import { IObjectManagement } from "../utils/NinjaProps";
 export interface IStaticObjectsProps { }
 
 export const StaticObjects = () => {
-  const engine = useContext(NinjaEngineContext);
-  const [staticObjects, setStaticObjects] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
+  const engine = React.useContext(NinjaEngineContext);
+  const [staticObjects, setStaticObjects] = React.useState<IObjectManagement[]>([]);
+  React.useEffect(() => {
+    if (!engine) return;
     setStaticObjects(engine.getStaticObjects());
     const handleObjectChanged = () => {
       setStaticObjects(engine.getLights());
@@ -29,7 +30,7 @@ export const StaticObjects = () => {
 
 const StaticObject = ({ om }) => {
   // const ref = React.useRef();
-  useEffect(() => {
+  React.useEffect(() => {
     // Animationがあればmiserにセット
     if (om.args.defaultAnimation){
       const animation = om.animations.find((anim) => anim.name == om.args.defaultAnimation);

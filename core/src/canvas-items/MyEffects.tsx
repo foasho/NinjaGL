@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import * as React from 'react';
 import {  } from '@react-three/drei';
 import { EffectComposer, Bloom, SSR, LUT } from "@react-three/postprocessing";
 import { IObjectManagement } from '../utils/NinjaProps';
@@ -7,10 +7,11 @@ import { LUTCubeLoader } from 'three-stdlib';
 import { Texture } from 'three';
 
 export const MyEffects = () => {
-  const engine = useContext(NinjaEngineContext);
-  const [effects, setEffects] = useState<IObjectManagement[]>([]);
+  const engine = React.useContext(NinjaEngineContext);
+  const [effects, setEffects] = React.useState<IObjectManagement[]>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!engine) return;
     const handleEffectsChanged = () => {
       setEffects([...engine.getEffects()]);
     };
@@ -38,9 +39,9 @@ export const MyEffects = () => {
 
 
 const MyEffect = ({ om }) => {
-  const [texture, setTexture] = useState(null);
+  const [texture, setTexture] = React.useState<any>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
       loader.load(om.args.texture, (loadedTexture) => {
@@ -51,7 +52,7 @@ const MyEffect = ({ om }) => {
     }
   }, [om]);
 
-  const effect = useMemo(() => {
+  const effect = React.useMemo(() => {
     if (om.args.type === "bloom") {
       return (
         <Bloom

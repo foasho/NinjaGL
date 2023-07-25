@@ -1,11 +1,11 @@
 // import { manualKeyState, useInputControl } from "../utils/InputControls";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { useFrame, RootState } from "@react-three/fiber"
-import React, { useContext } from "react";
+import * as React from "react";
 
 
 export const System = () => {
-  const engine = useContext(NinjaEngineContext);
+  const engine = React.useContext(NinjaEngineContext);
   // const input = useInputControl(engine.deviceType ? engine.deviceType : "desktop");
   useFrame((state: RootState, timeDelta: number) => {
     if (engine && engine.loadCompleted) {

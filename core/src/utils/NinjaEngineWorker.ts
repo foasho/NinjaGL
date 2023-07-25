@@ -7,7 +7,7 @@ import { RootState } from "@react-three/fiber";
  * NinjaEngineから呼び出されるWorker
  */
 export class NinjaEngineWorker {
-  ThreeJSVer: string = "0.149.0";
+  ThreeJSVer: string = "0.154.0";
   engine: NinjaEngine;
   worker: Worker | undefined;
   constructor(engine: NinjaEngine) {
@@ -150,7 +150,7 @@ export class NinjaEngineWorker {
       // 特定の名前のOMの位置を取得する
       const { name } = data;
       const om = this.engine.getOMByName(name);
-      if (om) {
+      if (om && om.object) {
         this.worker.postMessage({ type: "response", data: om.object.position, messageId: messageId });
       }
       else {
@@ -162,7 +162,7 @@ export class NinjaEngineWorker {
       // 特定の名前のOMの回転を取得する
       const { name } = data;
       const om = this.engine.getOMByName(name);
-      if (om) {
+      if (om && om.object) {
         this.worker.postMessage({ type: "response", data: om.object.rotation, messageId: messageId });
       }
       else {
@@ -174,7 +174,7 @@ export class NinjaEngineWorker {
       // 特定の名前のOMのスケールを取得する
       const { name } = data;
       const om = this.engine.getOMByName(name);
-      if (om) {
+      if (om && om.object) {
         this.worker.postMessage({ type: "response", data: om.object.scale, messageId: messageId });
       }
       else {
@@ -186,7 +186,7 @@ export class NinjaEngineWorker {
       // 特定の名前のOMの位置を設定する
       const { name, position } = data;
       const om = this.engine.getOMByName(name);
-      if (om) {
+      if (om && om.object) {
         om.object.position.copy(position);
         this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
@@ -199,7 +199,7 @@ export class NinjaEngineWorker {
       // 特定の名前のOMの回転を設定する
       const { name, rotation } = data;
       const om = this.engine.getOMByName(name);
-      if (om) {
+      if (om && om.object) {
         om.object.rotation.copy(rotation);
         this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }
@@ -212,7 +212,7 @@ export class NinjaEngineWorker {
       // 特定の名前のOMのスケールを設定する
       const { name, scale } = data;
       const om = this.engine.getOMByName(name);
-      if (om) {
+      if (om && om.object) {
         om.object.scale.copy(scale);
         this.worker.postMessage({ type: "response", data: null, messageId: messageId });
       }

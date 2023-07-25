@@ -1,13 +1,13 @@
 import { Environment, Lightformer } from "@react-three/drei"
-import { IObjectManagement } from "../utils/NinjaProps"
-import React, { useContext, useEffect, useState } from "react";
+import * as React from "react";
 import { NinjaEngineContext } from "../utils/NinjaEngineManager";
+import { IObjectManagement } from "utils/NinjaProps";
 
 export const LightFormers = () => {
-  const engine = useContext(NinjaEngineContext);
-  const [lightFormers, setLightFormers] = useState(engine.getLightFormers());
-  useEffect(() => {
-    setLightFormers(engine.getLightFormers());
+  const engine = React.useContext(NinjaEngineContext);
+  const [lightFormers, setLightFormers] = React.useState<IObjectManagement[]>([]);
+  React.useEffect(() => {
+    if(engine) setLightFormers(engine.getLightFormers());
   }, [engine]);
   return (
     <>
@@ -27,6 +27,7 @@ export const LightFormers = () => {
 
 const MyLightFormer = ({ om }) => {
   return (
+    // @ts-ignore
     <Lightformer 
       form={om.args.form}
       position={om.args.position}

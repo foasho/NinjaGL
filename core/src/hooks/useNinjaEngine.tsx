@@ -1,4 +1,4 @@
-import React, { Suspense, createContext, useContext, useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from '../utils/NinjaProps';
 import { InitMobileConfipParams } from '../utils/NinjaInit';
 import { NinjaEngineWorker } from '../utils/NinjaEngineWorker';
@@ -43,7 +43,7 @@ type NinjaEngineProp = {
   tms: ITextureManagement[],
   setOMObjectById: (id: string, obj: Object3D) => void,
 }
-const NinjaEngineContext = createContext<NinjaEngineProp>({
+const NinjaEngineContext = React.createContext<NinjaEngineProp>({
   status: ENinjaStatus.Pause,
   phyWorldType: EPhyWorldType.None,
   scriptWorker: {current: null},
@@ -68,7 +68,7 @@ const NinjaEngineContext = createContext<NinjaEngineProp>({
   setOMObjectById: () => {},
 } as NinjaEngineProp);
 
-export const useNinjaEngine = () => useContext(NinjaEngineContext);
+export const useNinjaEngine = () => React.useContext(NinjaEngineContext);
 
 export const detectDeviceType = (): EDeviceType => {
  if (typeof window !== 'undefined') {  // check if window is defined (we are on client side)
@@ -114,35 +114,35 @@ export const NinjaGL = ({
   children,
 }: INinjaEngineProvider
 ) => {
-  const [init, setInit] = useState(false);
-  const [status, setStatus] = useState<ENinjaStatus>(ENinjaStatus.Pause);
+  const [init, setInit] = React.useState(false);
+  const [status, setStatus] = React.useState<ENinjaStatus>(ENinjaStatus.Pause);
   // coreファイル
-  const [njcFile, setNjcFile] = useState<NJCFile|null>(null);
+  const [njcFile, setNjcFile] = React.useState<NJCFile|null>(null);
   // Loading周り
-  const loadingPercentage = useRef<number>(0);
-  const cameraLayer = useRef<number>(1);
+  const loadingPercentage = React.useRef<number>(0);
+  const cameraLayer = React.useRef<number>(1);
   // ユーザー設定
-  const [config, setConfig] = useState<IConfigParams>(InitMobileConfipParams);
-  const [device, setDevice] = useState<EDeviceType>(EDeviceType.Unknown);
+  const [config, setConfig] = React.useState<IConfigParams>(InitMobileConfipParams);
+  const [device, setDevice] = React.useState<EDeviceType>(EDeviceType.Unknown);
   // コンテンツ管理
-  const [oms, setOMs] = useState<IObjectManagement[]>([]);
-  const [ums, setUMs] = useState<IUIManagement[]>([]);
-  const [tms, setTMs] = useState<ITextureManagement[]>([]);
-  const [sms, setSMs] = useState<IScriptManagement[]>([]);
+  const [oms, setOMs] = React.useState<IObjectManagement[]>([]);
+  const [ums, setUMs] = React.useState<IUIManagement[]>([]);
+  const [tms, setTMs] = React.useState<ITextureManagement[]>([]);
+  const [sms, setSMs] = React.useState<IScriptManagement[]>([]);
   // 可視化管理 / 動態管理
-  const visibleOmKeys = useRef<string[]>([]);
-  const movementOmKeys = useRef<string[]>([]);
+  const visibleOmKeys = React.useRef<string[]>([]);
+  const movementOmKeys = React.useRef<string[]>([]);
   // 物理世界
-  const [phyWorldType, setPhyWorldType] = useState<EPhyWorldType>(EPhyWorldType.None);
-  const bvhGrp = useRef<Group>(null); // BVH用コライダー
+  const [phyWorldType, setPhyWorldType] = React.useState<EPhyWorldType>(EPhyWorldType.None);
+  const bvhGrp = React.useRef<Group>(null); // BVH用コライダー
   // 汎用入力
   const { input, attachJumpBtn, attachRunBtn } = useInputControl({});
   // Debugツリー
-  const debugTree = useRef<any>(null);
+  const debugTree = React.useRef<any>(null);
   // スクリプトワーカー
-  const scriptWorker = useRef<NinjaEngineWorker|null>(null);
+  const scriptWorker = React.useRef<NinjaEngineWorker|null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // njcが指定されていればそのままセット
     if (njc && !njcFile){
       setNjcFile(njc);
@@ -157,7 +157,7 @@ export const NinjaGL = ({
       // 1. 接続デバイスを判定する
       setDevice(detectDeviceType());
       // 2. NinjaEngineWorkerを生成する
-      scriptWorker.current = new NinjaEngineWorker(this);
+      scriptWorker.current = new NinjaEngineWorker(this as any);
       // 3. Coreファイルを読み込む
       setOMs(njcFile.oms);
       setUMs(njcFile.ums);
@@ -170,7 +170,7 @@ export const NinjaGL = ({
     }
   }, [njcFile, njc, njcPath]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (init){
       // 1. 初期設定完了後にPhyWold/ScriptWorkerの設置アップ
       if (scriptWorker.current){
@@ -250,10 +250,10 @@ export const NinjaGL = ({
         <>
           {!noCanvas ?
             <NCanvas>
-              <Suspense fallback={<Loading3D isLighting position={[0, 0, 3]} />}>
+              <React.Suspense fallback={<Loading3D isLighting position={[0, 0, 3]} />}>
                 <NinjaCanvasItems/>
                 {children}
-              </Suspense>
+              </React.Suspense>
             </NCanvas>
             :
             <>
@@ -325,7 +325,7 @@ const SystemFrame = () => {
       // 3. ユーザースクリプトの更新
       if (scriptWorker.current){
         sms.forEach((sm) => {
-          scriptWorker.current.runFrameLoop(
+          scriptWorker.current!.runFrameLoop(
             sm.id,
             state,
             delta,

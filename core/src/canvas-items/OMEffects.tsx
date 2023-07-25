@@ -1,15 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { EffectComposer } from "@react-three/postprocessing";
+import * as React from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { LUTCubeLoader } from "three-stdlib";
-import { Bloom, LUT, SSR } from "@react-three/postprocessing";
+import { Bloom, LUT, SSR, EffectComposer } from "@react-three/postprocessing";
 import { Texture } from "three";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
 export const MyEffects = () => {
 
   const { oms } = useNinjaEngine();
-  const effects = useMemo(() => {
+  const effects = React.useMemo(() => {
     return oms.filter((om) => om.type === "effect");
   }, [oms]);
 
@@ -34,9 +33,9 @@ export const MyEffects = () => {
  * -------
  */
 const MyEffect = ({ om }) => {
-  const [texture, setTexture] = useState(null);
+  const [texture, setTexture] = React.useState<any>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
       loader.load(om.args.texture, (loadedTexture) => {
@@ -47,7 +46,7 @@ const MyEffect = ({ om }) => {
     }
   }, [om]);
 
-  const effect = useMemo(() => {
+  const effect = React.useMemo(() => {
     if (om.args.type === "bloom") {
       return (
         <Bloom

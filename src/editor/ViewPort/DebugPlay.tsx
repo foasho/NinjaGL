@@ -94,40 +94,13 @@ export const DebugPlay = () => {
     <>
       <div id="Ninjaviewer" style={{ height: "100%" }}>
         {njcFile && 
-        <NinjaGL noCanvas njc={njcFile}>
-          <DebugCanvas />
+        <NinjaGL njc={njcFile}>
         </NinjaGL>
         }
       </div>
     </>
   )
 }
-
-const DebugCanvas = () => {
-
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-    return () => { 
-      setIsMounted(false);
-    }
-  }, []);
-
-  return(
-    <>
-      <Canvas>
-    {isMounted &&
-
-      <mesh>
-        <boxBufferGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-    }
-    </Canvas>
-    </>
-  )
-}
-
 const LoadingComponent = () => {
   return (
     <>
