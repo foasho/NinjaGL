@@ -1,12 +1,11 @@
 "use client"
-import { useContext, useEffect, lazy, Suspense, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
 import { SkeletonUtils } from "three-stdlib";
 import { NJCFile, IConfigParams } from "@ninjagl/core";
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
 import dynamic from "next/dynamic";
-import { Canvas } from "@react-three/fiber";
 const NinjaGL = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaGL), { ssr: false });
 const NinjaCanvas = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaCanvas), { ssr: false });
 const NinjaCanvasItems = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaCanvasItems), { ssr: false });
@@ -97,19 +96,6 @@ export const DebugPlay = () => {
         <NinjaGL njc={njcFile}>
         </NinjaGL>
         }
-      </div>
-    </>
-  )
-}
-const LoadingComponent = () => {
-  return (
-    <>
-      <div style={{ height: "100%", width: "100%", top: "0", left: "0", backgroundColor: "black", zIndex: 9999 }}>
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-          <div style={{ color: "white", fontSize: "20px" }}>
-            Loading...
-          </div>
-        </div>
       </div>
     </>
   )
