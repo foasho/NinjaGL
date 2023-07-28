@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
@@ -16,13 +15,13 @@ interface IShaderEditor {
   shaderPath?: string;
 }
 export const ShaderEditor = (props: IShaderEditor) => {
-  const fragmentRef = useRef(null);
-  const vertexRef = useRef(null);
+  const fragmentRef = useRef<any>(null);
+  const vertexRef = useRef<any>(null);
   const [objectType, setObjectType] = useState<"box"|"plane"|"sphere"|"gltf">("box");
   const [uploadModel, setUploadModel] = useState<string>("");
   const [fragmentCode, setFragmentCode] = useState<string>(initCodeFragment);
   const [vertexCode, setVertexCode] = useState<string>(initCodeVertex);
-  const [fileName, setFileName] = useState<string>(null);
+  const [fileName, setFileName] = useState<string|null>(null);
   const { t } = useTranslation();
   const [mode, setMode] = useState<"Fragment"|"Vertex">("Fragment");
   const [showPreview, setShowPreview] = useState<boolean>(true);
@@ -149,7 +148,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
       const fetchData = async () => {
         try {
           const scriptPath = `${props.shaderPath}`;
-          const response = await fetch(props.shaderPath, { signal });
+          const response = await fetch(props.shaderPath!, { signal });
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }

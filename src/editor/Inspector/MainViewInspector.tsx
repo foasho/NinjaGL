@@ -1,20 +1,17 @@
-// @ts-nocheck
 import styles from "@/App.module.scss";
 import { IObjectManagement } from "@ninjagl/core";
 import { useRef, useContext, useEffect, useState } from "react";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import Select from 'react-select';
-import { reqApi } from "@/services/ServciceApi";
-import { showLoDViewDialog } from "../Dialogs/LoDViewDialog";
 import { Euler, Vector3, MathUtils, MeshStandardMaterial, AnimationClip } from "three";
 import { isNumber } from "@/commons/functional";
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const MainViewInspector = () => {
   const state = useSnapshot(globalStore);
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const [isPhysics, setIsPhysics] = useState<boolean>(false);
   const [isLod, setIsLod] = useState<boolean>(false);
   const [physics, setPhysics] = useState<{ value: string; label: string; }>();
@@ -37,10 +34,10 @@ export const MainViewInspector = () => {
   // Colorの設定
   const [color, setColor] = useState<string>();
   const id = state.currentId;
-  const selectOM = editor.getOMById(id);
-  const [position, setPosition] = useState<Vector3>(selectOM?.object?.position ? selectOM.object.position.clone() : new Vector3());
-  const [rotation, setRotation] = useState<Euler>(selectOM?.object?.rotation);
-  const [scale, setScale] = useState<Vector3>(selectOM?.object?.scale);
+  const selectOM = id? editor.getOMById(id): null;
+  const [position, setPosition] = useState<Vector3>(selectOM? selectOM.object!.position.clone() : new Vector3(0, 0, 0));
+  const [rotation, setRotation] = useState<Euler>(selectOM? selectOM?.object!.rotation: new Euler(0, 0, 0));
+  const [scale, setScale] = useState<Vector3>(selectOM? selectOM?.object!.scale: new Vector3(1, 1, 1));
   const [luminanceThreshold, setLuminanceThreshold] = useState<number>(0.2);
   const [mipmapBlur, setMipmapBlur] = useState<boolean>(true);
   const [luminanceSmoothing, setLuminanceSmoothing] = useState<number>(0);
@@ -90,14 +87,14 @@ export const MainViewInspector = () => {
    */
   const deleteObject = (id: string) => {
     const did = id;
-    const dtype = selectOM.type;
+    const dtype = (selectOM as IObjectManagement).type;
     globalStore.currentId = null;
-    editor.deleteOM(did, dtype);
+    editor.removeOM(did);
   }
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.key == "Delete"){
+      if (e.key == "Delete" && id){
         deleteObject(id);
       }
     }
@@ -132,10 +129,10 @@ export const MainViewInspector = () => {
       };
     }
     init();
-    editor.onOMIdChanged(id, init);
+    if (id) editor.onOMIdChanged(id, init);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      editor.offOMIdChanged(id, init);
+      if (id) editor.offOMIdChanged(id, init);
       document.removeEventListener("keydown", onKeyDown);
     }
   }, [id, globalStore.editorFocus, globalStore.pivotControl]);
@@ -146,6 +143,7 @@ export const MainViewInspector = () => {
    * @param xyz 
    */
   const changePosition = (e, xyz: "x" | "y" | "z") => { 
+    if (!selectOM) return;
     const targetValue = e.target.value;
     const newPosition: Vector3 = selectOM.args.position? selectOM.args.position.clone(): new Vector3();
     if (xyz == "x") {
@@ -163,7 +161,7 @@ export const MainViewInspector = () => {
         newPosition.setZ(Number(targetValue));
       }
     }
-    editor.setPosition(id, newPosition);
+    if (id) editor.setPosition(id, newPosition);
   }
 
   /**
@@ -172,6 +170,7 @@ export const MainViewInspector = () => {
    * @param xyz 
    */
   const changeRotation = (e, xyz: "x" | "y" | "z") => { 
+    if (!selectOM) return;
     const targetValue = e.target.value;
     const newRotation: Euler = selectOM.args.rotation? selectOM.args.rotation.clone(): new Euler();
     if (xyz == "x") {
@@ -192,13 +191,14 @@ export const MainViewInspector = () => {
         newRotation.set(newRotation.x, newRotation.y, Number(targetRad));
       }
     }
-    editor.setRotation(id, newRotation);
+    if (id) editor.setRotation(id, newRotation);
   }
 
   /**
    * 拡大縮小変更　Inspector -> Object
    */
   const changeScale = (e, xyz: "x" | "y" | "z") => {
+    if (!selectOM) return;
     const targetValue = e.target.value;
     const newScale: Vector3 = selectOM.args.scale? selectOM.args.scale.clone(): new Vector3();
     if (xyz == "x") {
@@ -216,7 +216,7 @@ export const MainViewInspector = () => {
         newScale.setZ(Number(targetValue));
       }
     }
-    editor.setScale(id, newScale);
+    if (id) editor.setScale(id, newScale);
   }
 
 
@@ -225,7 +225,7 @@ export const MainViewInspector = () => {
    * マテリアル(種別/色)の変更
    */
   const changeMaterial = (type: "shader"|"standard"|"phong"|"toon"|"reflection", value: any) => {
-    if (type !== "shader" && value){
+    if (type !== "shader" && value && id){
       editor.setMaterialData(id, type, value);
       setMaterialColor(value);
       setMaterialType(materialOptions.find((option) => option.value == type));
@@ -236,7 +236,9 @@ export const MainViewInspector = () => {
    * 色属性の変更
    */
   const changeColor = (e) => {
-    editor.setColor(id, e.target.value);
+    if (id){
+      editor.setArg(id, "color", e.target.value);
+    }
     setColor(e.target.value);
   }
 
@@ -267,19 +269,10 @@ export const MainViewInspector = () => {
   }
 
   /**
-   * Lodを確認する
-   */
-  const onLoDView = async () => {
-    if (selectOM.filePath && selectOM.filePath.length > 3){
-      const data = await showLoDViewDialog(selectOM.filePath);
-    }
-  }
-
-  /**
    * CastShadowを変更
    */
   const onCheckCastShadow = () => {
-    editor.setCastShadow(id, !castShadow);
+    if (id) editor.setArg(id, "castShadow", !castShadow);
     setCastShadow(!castShadow);
   }
 
@@ -287,7 +280,7 @@ export const MainViewInspector = () => {
    * receiveShadowを変更
    */
   const onCheckReceiveShadow = () => {
-    editor.setReceiveShadow(id, !receiveShadow);
+    if (id) editor.setArg(id, "receiveShadow", !receiveShadow);
     setReceiveShadow(!receiveShadow);
   }
 
@@ -295,7 +288,7 @@ export const MainViewInspector = () => {
    * Helper表示切り替え
    */
   const onCheckHelper = () => {
-    editor.setHelper(id, !helper);
+    if (id) editor.setArg(id, "helper", !helper);
     setHelper(!helper);
   }
 
@@ -303,7 +296,7 @@ export const MainViewInspector = () => {
    * 描画種別の変更
    */
   const changeVisibleType = (selectVisibleType) => {
-    editor.setVisibleType(id, selectVisibleType.value);
+    if (id) editor.setVisibleType(id, selectVisibleType.value);
     setVisibleType(selectVisibleType);
   }
 
@@ -311,7 +304,7 @@ export const MainViewInspector = () => {
    * EnvironmentのPresetを変更
    */
   const changeEnvironmentPreset = (selectEnvironmentPreset) => {
-    editor.setEnvironmentPreset(id, selectEnvironmentPreset.value);
+    if (id) editor.setArg(id, "preset", selectEnvironmentPreset.value);
     setEnvironmentPreset(selectEnvironmentPreset);
   }
 
@@ -320,8 +313,8 @@ export const MainViewInspector = () => {
    */
   const changeEnvironmentBlur = (e) => {
     const targetValue = e.target.value;
-    if (isNumber(targetValue)){
-      editor.setEnvironmentBlur(id, Number(targetValue));
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "blur", Number(targetValue));
       setBlur(Number(targetValue));
     }
   }
@@ -330,7 +323,7 @@ export const MainViewInspector = () => {
    * Helper表示切り替え
    */
   const onCheckEnvironmentBackGround = () => {
-    editor.setEnvironmentBackground(id, !background);
+    if (id) editor.setArg(id, "background", !background);
     setBackground(!background);
   }
 
@@ -338,7 +331,7 @@ export const MainViewInspector = () => {
    * Formの変更
    */
   const changeForm = (selectForm) => {
-    editor.setForm(id, selectForm.value);
+    if (id) editor.setArg(id, "form",selectForm.value);
     setForm(selectForm);
   }
 
@@ -347,8 +340,8 @@ export const MainViewInspector = () => {
    */
   const changeIntensity = (e) => {
     const targetValue = e.target.value;
-    if (isNumber(targetValue)){
-      editor.setIntensity(id, Number(targetValue));
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "intensity", Number(targetValue));
       setIntensity(Number(targetValue));
     }
   }
@@ -357,7 +350,7 @@ export const MainViewInspector = () => {
    * デフォルトアニメーションの変更
    */
   const changeDefaultAnimation = (selectDefaultAnimation) => {
-    editor.setDefaultAnimation(id, selectDefaultAnimation.value);
+    if (id) editor.setArg(id, "defaultAnimation", selectDefaultAnimation.value);
     setDefalutAnim(selectDefaultAnimation);
   }
 
@@ -365,7 +358,7 @@ export const MainViewInspector = () => {
    * アニメーションループの切り替え
    */
   const onCheckAnimationLoop = () => {
-    editor.setAnimationLoop(id, !animLoop);
+    if (id) editor.setArg(id, "animationLoop", !animLoop);
     setAnimLoop(!animLoop);
   }
 
@@ -374,8 +367,8 @@ export const MainViewInspector = () => {
    */
   const changeLuminanceThreshold = (e) => {
     const targetValue = e.target.value;
-    if (isNumber(targetValue)){
-      editor.setLuminanceThreshold(id, Number(targetValue));
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "luminanceThreshold", Number(targetValue));
       setLuminanceThreshold(Number(targetValue));
     }
   }
@@ -384,7 +377,7 @@ export const MainViewInspector = () => {
    * mipmapBlurの切り替え
    */
   const onCheckMipmapBlur = () => {
-    editor.setMipmapBlur(id, !mipmapBlur);
+    if (id) editor.setArg(id, "mipmapBlur", !mipmapBlur);
     setMipmapBlur(!mipmapBlur);
   }
 
@@ -393,8 +386,8 @@ export const MainViewInspector = () => {
    */
   const changeLuminanceSmoothing = (e) => {
     const targetValue = e.target.value;
-    if (isNumber(targetValue)){
-      editor.setLuminanceSmoothing(id, Number(targetValue));
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "luminanceSmoothing", Number(targetValue));
       setLuminanceSmoothing(Number(targetValue));
     }
   }
@@ -655,7 +648,7 @@ export const MainViewInspector = () => {
               <Select
                 options={materialOptions}
                 value={materialType}
-                onChange={(select) => changeMaterial(select.value, materialColor)}
+                onChange={(select) => select && changeMaterial(select.value, materialColor)}
                 styles={normalStyles}
                 />
             </div>
@@ -712,23 +705,6 @@ export const MainViewInspector = () => {
           }
         </div>
         <div className={styles.lod}>
-          <div className={styles.title}>
-          {t("isLoD")}
-          </div>
-          <div className={styles.input}>
-            <input 
-              type="checkbox" 
-              className={styles.checkbox} 
-              checked={isLod} 
-              onInput={() => onCheckLoD()}
-            />
-            <span className={styles.customCheckbox}></span>
-          </div>
-          {isLod &&
-            <a className={styles.lodbtn} onClick={() => onLoDView()}>
-              {t("chakeLoD")}
-            </a>
-          }
         </div>
       </>
       }

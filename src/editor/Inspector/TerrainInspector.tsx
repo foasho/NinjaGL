@@ -1,4 +1,3 @@
-// @ts-nocheck
 import styles from "@/App.module.scss";
 import Swal from 'sweetalert2';
 import { useTranslation } from "react-i18next";
@@ -43,6 +42,7 @@ export const TerrainInspector = ({ onSave }) => {
       if (isNumber(e.target.value)) globalTerrainStore.mapSize = Number(e.target.value);
     }
     else if (e.target.value && Number(e.target.value) >= 4096){
+      // @ts-ignore
       Swal.fire(
         {
           icon: 'error',
@@ -60,12 +60,11 @@ export const TerrainInspector = ({ onSave }) => {
       if (isNumber(e.target.value)) globalTerrainStore.mapResolution = Number(e.target.value);
     }
     else if (e.target.value && Number(e.target.value) >= 4096){
-      Swal.fire(
-        {
-          icon: 'error',
-          title: t("tooLarge")
-        }
-      )
+      // @ts-ignore
+      Swal.fire({
+        icon: 'error',
+        title: t("tooLarge")
+      });
     }
   }
 

@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { ITextureManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const TextureNavigation = () => {
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const [textures, setTextures] = useState<ITextureManagement[]>([]);
   const { t } = useTranslation();
   useEffect(() => {

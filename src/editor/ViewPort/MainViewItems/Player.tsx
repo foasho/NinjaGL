@@ -1,20 +1,25 @@
-// @ts-nocheck
 import { useHelper } from "@react-three/drei";
 import { BoxHelper, Euler, Matrix4, Object3D, Vector3 } from "three";
 import { useState, useEffect, useContext, useRef } from "react";
-import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { IObjectManagement } from "@ninjagl/core";
 import { PivotControls } from "./PivoitControl";
 import { globalStore } from "@/editor/Store";
 import { useSnapshot } from "valtio";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**
  * アバターデータ
  */
 export const Avatar = () => {
   const state = useSnapshot(globalStore);
-  const editor = useContext(NinjaEditorContext);
-  const [avatar, setAvatar] = useState<IObjectManagement>(null);
+  const {
+    oms,
+    getOMById,
+    setPosition,
+    setRotation,
+    setScale,
+  } = useNinjaEditor();
+  const [avatar, setAvatar] = useState<IObjectManagement|null>(null);
   const id = avatar? avatar.id: null;
   const ref = useRef<any>();
   const [helper, setHelper] = useState<boolean>(true)
@@ -31,15 +36,9 @@ export const Avatar = () => {
   });
 
   useEffect(() => {
-    setAvatar(editor.getAvatar());
-    const init = () => {
-      setAvatar(editor.getAvatar());
-    }
-    editor.onOMIdChanged(id, init);
-    editor.onAvatarChanged(init);
-    return () => {
-      editor.offOMIdChanged(id, init);
-      editor.offAvatarChanged(init);
+    const om = oms.find((om) => om.type == "avatar");
+    if (om){
+      setAvatar(om);
     }
   }, []);
 
@@ -76,9 +75,11 @@ export const Avatar = () => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
+    if (id){
+      setPosition(id, position);
+      setScale(id, scale);
+      setRotation(id, rotation);
+    }
     globalStore.pivotControl = true;
   }
 
@@ -108,7 +109,7 @@ export const Avatar = () => {
             ref={ref}
           >
             <primitive
-              object={avatar.object}
+              object={avatar.object!}
               onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
               onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
             />

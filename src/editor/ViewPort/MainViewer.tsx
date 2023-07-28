@@ -3,20 +3,18 @@ import { AnimationMixer, Box3, Euler, LineBasicMaterial, LineSegments, Matrix4, 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState, useEffect, useContext, useRef, useLayoutEffect, Suspense } from "react";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { MyLights } from "./MainViewItems/Lights";
 import { StaticObjects } from "./MainViewItems/Objects";
 import { Terrain } from "./MainViewItems/Terrain";
-import { Avatar } from "./MainViewItems/Avatar";
+import { Avatar } from "./MainViewItems/Player";
 import { MySky } from "./MainViewItems/Sky";
 import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
 import { TiSpanner } from "react-icons/ti";
 import { ImEarth } from "react-icons/im";
 import { ThreeObjects } from "./MainViewItems/Three";
-import { Perf } from "r3f-perf";
+// import { Perf } from "r3f-perf";
 import { gltfLoader } from "@ninjagl/core";
-import { AiFillCamera, AiFillEye, AiFillEyeInvisible, AiFillSetting } from "react-icons/ai";
+import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
 import styles from "@/App.module.scss";
 import { isNumber } from "@/commons/functional";
@@ -31,7 +29,7 @@ import { MyTexts } from "./MainViewItems/MyTexts";
 import { MyEffects } from "./MainViewItems/MyEffects";
 import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -239,6 +237,8 @@ export const MainViewer = () => {
       offNJCChanged(init);
     }
   }, []);
+
+  const { t } = useTranslation();
 
   return (
     <div className={styles.mainView}>
@@ -624,15 +624,15 @@ const SystemHelper = (props: ISysytemHelper) => {
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
       }
-      <Perf 
+      {/* <Perf 
         position={"bottom-right"} 
         style={{ position: "absolute" }} 
         minimal={minimal}
         onClick={() => setMinimal(!minimal)}
-      />
+      /> */}
       <>
-      {numberElements}
-      {numberPlanes}
+        {numberElements}
+        {numberPlanes}
       </>
     </>
   )
@@ -651,7 +651,7 @@ interface ICameraControl {
 export const CameraControl = (props: ICameraControl) => {
   const state = useSnapshot(globalStore);
   const contentState = useSnapshot(globalContentStore);
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const ref = useRef<OrbitControlsImpl>(null);
   const cameraRef = useRef<PerspectiveCamera>(null);
   const { gl, camera } = useThree();

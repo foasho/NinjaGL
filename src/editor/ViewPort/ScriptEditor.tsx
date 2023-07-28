@@ -1,29 +1,27 @@
-// @ts-nocheck
 import { useContext, useEffect, useRef, useState } from 'react';
 import styles from "@/App.module.scss";
-import MonacoEditor, { Monaco } from "@monaco-editor/react";
+import MonacoEditor from "@monaco-editor/react";
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { reqApi } from '@/services/ServciceApi';
 import { useTranslation } from 'react-i18next';
 import { IScriptManagement } from '@ninjagl/core';
 import { useSnapshot } from 'valtio';
 import { globalScriptStore } from '../Store';
 import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';
-import { NinjaEditorContext } from '../NinjaEditorManager';
 import { useSession } from 'next-auth/react';
 import { b64EncodeUnicode } from '@/commons/functional';
 import { MathUtils } from 'three';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 
 export const ScriptEditor = () => {
   const { data: session } = useSession();
-  const myeditor = useContext(NinjaEditorContext);
+  const myeditor = useNinjaEditor();
   const scriptState = useSnapshot(globalScriptStore);
   const [name, setName] = useState<string>();
   const [pause, setPause] = useState<boolean>(true);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const code = useRef<string>(undefined);
+  const code = useRef<string|null>(null);
   const { t } = useTranslation();
 
   /**
@@ -52,6 +50,7 @@ export const ScriptEditor = () => {
 
         const suggestions = [];
         if (textUntilPosition.includes("Web3Instance.")) {
+          // @ts-ignore
           suggestions.push({
             label: "getWalletAddress",
             kind: monaco.languages.CompletionItemKind.Function,
@@ -60,6 +59,7 @@ export const ScriptEditor = () => {
           });
         }
         else if (textUntilPosition.includes("EngineInstance.")){
+          // @ts-ignore
           suggestions.push({
             label: "getPositionByName",
             kind: monaco.languages.CompletionItemKind.Function,
@@ -68,8 +68,8 @@ export const ScriptEditor = () => {
           });
         }
         else{
-          suggestions.push(
-            {
+          // @ts-ignore
+          suggestions.push({
               label: 'EngineInstance',
               kind: monaco.languages.CompletionItemKind.Module,
               documentation: 'EngineInstance',
@@ -123,11 +123,11 @@ export const ScriptEditor = () => {
    * @returns 
    */
   const saveCode = async(filename: string) => {
-    if (session){
+    if (session && code.current){
       const file = await convertFile(code.current);
       const formData = new FormData();
       formData.append("file", file);
-      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/scripts`;
+      const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/scripts`;
       const keyPath = (uploadPath + `/${filename}`).replaceAll("//", "/");
       formData.append("filePath", keyPath);
       const response = await fetch("/api/storage/upload", {
@@ -138,7 +138,7 @@ export const ScriptEditor = () => {
         throw new Error("Error uploading file");
       }
       if (response.ok){
-        if (scriptState.currentSM){
+        if (scriptState.currentSM && globalScriptStore.currentSM){
           const sm = myeditor.getSMById(scriptState.currentSM.id);
           if (sm) sm.script = code.current;
           globalScriptStore.currentSM.script = code.current;
@@ -150,7 +150,7 @@ export const ScriptEditor = () => {
             name: filename,
             script: code.current,
           }
-          myeditor.setSM(newSM);
+          myeditor.addSM(newSM);
           globalScriptStore.currentSM = newSM;
         }
         toast(t("completeSave"), {
@@ -167,17 +167,17 @@ export const ScriptEditor = () => {
     }
     else {
       // ログインしてなければ、SMに追加のみおこなう
-      if (scriptState.currentSM){
-        globalScriptStore.currentSM.script = code.current;
+      if (scriptState.currentSM && code.current){
+        globalScriptStore.currentSM!.script = code.current;
       }
       else {
         const newSM: IScriptManagement = {
           id: scriptState.currentSM? scriptState.currentSM.id: MathUtils.generateUUID(),
           type: "script",
           name: filename,
-          script: code.current,
+          script: code.current!,
         }
-        myeditor.setSM(newSM);
+        myeditor.addSM(newSM);
         globalScriptStore.currentSM = newSM;
       }
     }

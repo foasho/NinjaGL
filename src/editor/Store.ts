@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { IConfigParams, IScriptManagement } from '@ninjagl/core';
 import { AnimationClip, Group, Mesh, Object3D, Vector3 } from 'three';
 import { proxy } from 'valtio';
-import { HomeCameraPosition } from './NinjaEditorManager';
+export const HomeCameraPosition = new Vector3(0, 1.5, 5);
 
 /**
  * オブジェクト操作状態管理
@@ -169,13 +168,13 @@ export interface IGlobalPlayerStore {
 export const globalPlayerStore = proxy<IGlobalPlayerStore>({
   type: "avatar",
   height: 1.7,
-  selectAnim: undefined,
+  selectAnim: '',
   animMapper: {},
   animations: [],
   init: () => {
     globalPlayerStore.type = "avatar";
     globalPlayerStore.height = 1.7;
-    globalPlayerStore.selectAnim = undefined;
+    globalPlayerStore.selectAnim = '';
     globalPlayerStore.animMapper = {};
     globalPlayerStore.animations = [];
   }
@@ -185,7 +184,7 @@ export const globalPlayerStore = proxy<IGlobalPlayerStore>({
  * Engine内設定
  */
 export const globalConfigStore = proxy<IConfigParams>({
-  physics: "octree", // 物理エンジンの種類("octree" | "bvh" | "none")
+  physics: true, // 物理エンジンの種類("octree" | "bvh" | "none")
   logarithmicDepthBuffer: false, // ログ深度バッファを有効にするか
   alpha: false, // アルファチャンネルを有効にするか
   autoScale: true, // デバイスによって自動スケールさせるか
@@ -195,6 +194,4 @@ export const globalConfigStore = proxy<IConfigParams>({
   layerGridNum: 8, // レイヤーグリッド数
   lodDistance: 25, // LODの切り替え距離
   dpr: undefined, // デバイスピクセル比
-  viewGridLength: 3, // ビューグリッドの長さ
-  octreeDepth: 5, // オクトリーツリーの深さ
 });

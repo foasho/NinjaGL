@@ -1,8 +1,6 @@
 
 import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useTexture } from "@react-three/drei";
 import { Bloom, SSR, LUT, EffectComposer } from "@react-three/postprocessing";
-import { NinjaEditorContext } from '@/editor/NinjaEditorManager';
 import { IObjectManagement } from '@ninjagl/core';
 import { LUTCubeLoader } from 'postprocessing';
 import { CubeTextureLoader, Texture } from 'three';
@@ -32,9 +30,9 @@ export const MyEffects = () => {
 }
 
 
-const MyEffect = ({ om }) => {
+const MyEffect = ({ om }: { om: IObjectManagement }) => {
   const [renderCount, setRenderCount] = useState(0);
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const [texture, setTexture] = useState(null);
   const id = om.id;
 

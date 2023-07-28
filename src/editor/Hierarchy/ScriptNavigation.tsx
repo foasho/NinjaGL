@@ -1,6 +1,4 @@
-// @ts-nocheck
 import { useContext, useEffect, useState } from "react";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { IScriptManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
@@ -9,33 +7,29 @@ import { useSnapshot } from "valtio";
 import { globalScriptStore } from "../Store";
 import { MathUtils } from "three";
 import Swal from "sweetalert2";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const ScriptNavigation = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [sms, setSMs] = useState<IScriptManagement[]>([]);
+  const { 
+    sms, 
+    contentsSelectType,
+    contentsSelectPath,
+    addSM,
+  } = useNinjaEditor();
   const { t } = useTranslation();
-  useEffect(() => {
-    setSMs([...editor.getSMs()]);
-    const handleSMsChanged = () => {
-      setSMs([...editor.getSMs()]);
-    }
-    editor.onSMsChanged(handleSMsChanged);
-    return () => {
-      editor.offSMsChanged(handleSMsChanged);
-    }
-  }, [editor]);
 
   /**
    * Scriptをドラッグ＆ドロップしたときの処理
    */
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const type = editor.contentsSelectType;
+    const type = contentsSelectType;
     if (type === "js") {
-      const filePath = editor.contentsSelectPath;
+      const filePath = contentsSelectPath;
       const sm = {...InitScriptManagement};
       sm.id = MathUtils.generateUUID();
       const scriptCheck = async () => {
+        if (!filePath) return false;
         try {
           const response = await fetch(filePath);
           if (response.ok) {
@@ -56,10 +50,11 @@ export const ScriptNavigation = () => {
         return false;
       };
       const result = await scriptCheck();
-      if (result) {
+      if (result && filePath) {
         sm.name = filePath.split("/").pop() || "";
-        const success = editor.setSM(sm);
+        const success = addSM(sm);
         if (!success) {
+          // @ts-ignore
           Swal.fire({
             title: t("scriptError"),
             text: t("scriptErrorAlreadyText"),
@@ -68,6 +63,7 @@ export const ScriptNavigation = () => {
         }
       }
       else {
+        // @ts-ignore
         Swal.fire({
           title: t("scriptError"),
           text: t("scriptErrorText"),

@@ -1,11 +1,8 @@
-// @ts-nocheck
 import { reqApi } from "@/services/ServciceApi";
 import { Environment, OrbitControls, useHelper } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { DragEventHandler, MutableRefObject, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils, BoxHelper, Scene, Box3 } from "three";
-import { GLTFLoader } from "three-stdlib";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 import { globalContentStore, globalPlayerStore } from "../Store";
@@ -15,6 +12,7 @@ import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { convertObjectToFile, exportGLTF, gltfLoader } from "@ninjagl/core";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 interface IOffsetParams {
   tp: {
@@ -28,7 +26,7 @@ interface IOffsetParams {
 }
 
 export const PlayerEditor = () => {
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const playerState = useSnapshot(globalPlayerStore);
   const ref: MutableRefObject<HTMLCanvasElement | null> = useRef<HTMLCanvasElement>(null);
   const [height, setHeight] = useState<number>(1.7);
@@ -100,13 +98,13 @@ export const PlayerEditor = () => {
 
   useEffect(() => {
     if (animations.length > 0) {
-      const selectAnimName = editor.getSelectPlayerAnimation();
-      if (selectAnimName){
-        setSelectAnim(selectAnimName);
-      }
-      else {
-        setSelectAnim(animations[0].name);
-      }
+      // const selectAnimName = editor.getSelectPlayerAnimation();
+      // if (selectAnimName){
+      //   setSelectAnim(selectAnimName);
+      // }
+      // else {
+      //   setSelectAnim(animations[0].name);
+      // }
     }
   }, [scene, selectAnim]);
 
@@ -213,6 +211,7 @@ export const PlayerEditor = () => {
         defaultMode: "tp"
       };
       const file = await convertObjectToFile(target);
+      // @ts-ignore
       Swal.fire({
         title: t("inputFileName"),
         input: 'text',
@@ -229,7 +228,7 @@ export const PlayerEditor = () => {
             const formData = new FormData();
             formData.append("file", file);
             // formData.append("file", blob);
-            const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/players`;
+            const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/players`;
             const keyPath = (uploadPath + `/${inputStr}.glb`).replaceAll("//", "/");
             formData.append("filePath", keyPath);
             try {
@@ -241,7 +240,7 @@ export const PlayerEditor = () => {
                 throw new Error("Error uploading file");
               }
               const result = await response.json();
-              // Success message
+              // @ts-ignore
               Swal.fire({
                 icon: 'success',
                 title: t("success"),
@@ -267,6 +266,7 @@ export const PlayerEditor = () => {
       });
     }
     else {
+      // @ts-ignore
       Swal.fire({
         icon: 'error',
         title: t("error"),
@@ -320,14 +320,15 @@ interface IPlayerEditorUpdate {
   onCallback: (animName: string) => void;
 }
 const PlayerEditorUpdate = (props: IPlayerEditorUpdate) => {
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   useFrame((_, delta) => {
     if (props.mixer && props.animations.length > 0){
       props.mixer.update(delta);
     }
-    if (editor.getSelectPlayerAnimation() !== props.selectAnim){
-      props.onCallback(editor.getSelectPlayerAnimation());
-    }
+    // TODO: ここでアニメーションの変更を検知してEditorに通知する
+    // if (editor.getSelectPlayerAnimation() !== props.selectAnim){
+    //   props.onCallback(editor.getSelectPlayerAnimation());
+    // }
   })
 
   return <></>

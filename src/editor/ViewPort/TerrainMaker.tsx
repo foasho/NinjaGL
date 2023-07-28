@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import styles from "@/App.module.scss";
 import { 
@@ -39,8 +39,8 @@ import { Perf } from "r3f-perf";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { TerrainInspector } from "../Inspector/TerrainInspector";
 import Swal from 'sweetalert2';
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { Material } from "@gltf-transform/core";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 
 const TerrainMakeComponent = ({ meshRef, object }) => {
@@ -48,13 +48,13 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
   /**
    * 初期値
    */
-  const lightRef = useRef<SL>();
-  const gridRef = useRef<GridHelper>();
-  const matRef = useRef<MeshStandardMaterial>();
-  const mouseCircleRef = useRef<Mesh>();
+  const lightRef = useRef<SL>(null);
+  const gridRef = useRef<GridHelper>(null);
+  const matRef = useRef<MeshStandardMaterial>(null);
+  const mouseCircleRef = useRef<Mesh>(null);
   const raycaster = new Raycaster();
   const { mouse, gl, camera } = useThree();
-  const input = useInputControl("desktop");
+  const { input } = useInputControl({});
   const isMouseDown = useRef(false);
   const isReverse = useRef(false);
   // ブラシ用
@@ -166,7 +166,10 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       if (intersects.length > 0) {
         position = intersects[0].point;
         if (position) {
-          if (geometry.attributes.position instanceof GLBufferAttribute) return;
+          if (geometry.attributes.position instanceof GLBufferAttribute) return {
+            vertexIndexes: [],
+            values: []
+          };
           const vertices = geometry.attributes.position.array;
           const maxDistance = radius * radius; // 2乗距離
           for (let i = 0; i < vertices.length; i += stride) {
@@ -379,7 +382,7 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
     }
 
     // カメラ処理
-    if (input.dash && (input.forward || input.backward || input.right || input.left)) {
+    if (input.dash && (input.forward || input.backward || input.right || input.left) && cameraRef.current) {
       const st = terrainState.mapSize/2 * delta;
       const cameraDirection = new Vector3();
       cameraRef.current.getWorldDirection(cameraDirection);
@@ -403,7 +406,9 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       }
 
       cameraRef.current.position.copy(cameraPosition);
-      ref.current.target.copy(cameraPosition.add(cameraDirection));
+      if (ref.current){
+        ref.current.target.copy(cameraPosition.add(cameraDirection));
+      }
 
     } else {
       if (ref.current && cameraRef.current) {
@@ -492,7 +497,7 @@ export const TerrainMakerCanvas = () => {
   const terrainState = useSnapshot(globalTerrainStore);
   const [ready, setReady] = useState(false);
   const state = useSnapshot(globalStore);
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const meshRef = useRef<Mesh>();
   // const [type, setType] = useState<"create" | "edit">("create");
   const { data: session } = useSession();
@@ -501,14 +506,14 @@ export const TerrainMakerCanvas = () => {
   useEffect(() => {
     if (state.currentId){
       const om = editor.getOMById(state.currentId);
-      if (om.type == "terrain"){
+      if (om && om.type == "terrain"){
         if (meshRef.current){
           if (meshRef.current.geometry){
             meshRef.current.geometry.dispose();
           }
           if (meshRef.current.material){
             if (meshRef.current.material instanceof Material){
-              meshRef.current.material.dispose();
+              (meshRef.current.material as Material).dispose();
             }
             else if (meshRef.current.material instanceof Array){
               meshRef.current.material.forEach((m) => {
@@ -544,6 +549,7 @@ export const TerrainMakerCanvas = () => {
     const obj3d = new Object3D();
     obj3d.add(meshRef.current.clone());
     const blob = await convertObjectToBlob(obj3d);
+    // @ts-ignore
     Swal.fire({
       title: t("inputFileName"),
       input: 'text',
@@ -558,7 +564,7 @@ export const TerrainMakerCanvas = () => {
         if (session){
           const formData = new FormData();
           formData.append('file', blob);
-          const keyPath = `users/${b64EncodeUnicode(session.user.email)}/terrains/${inputStr}.ter`;
+          const keyPath = `users/${b64EncodeUnicode(session.user!.email as string)}/terrains/${inputStr}.ter`;
           formData.append("filePath", keyPath);
           try {
             const response = await fetch("/api/storage/upload", {
@@ -569,6 +575,7 @@ export const TerrainMakerCanvas = () => {
             if (!response.ok) {
               throw new Error("Error uploading file");
             }
+            // @ts-ignore
             Swal.fire({
               title: t("completeSave"),
               text: t("saveSuccess") + `\npersonal/terrains/${inputStr}.ter`,
@@ -605,7 +612,7 @@ export const TerrainMakerCanvas = () => {
           {globalTerrainStore.type == "edit" &&
             <TerrainMakeComponent 
               meshRef={meshRef}
-              object={state.currentId ? editor.getOMById(state.currentId).object : undefined}
+              object={state.currentId ? editor.getOMById(state.currentId)!.object : undefined}
             />
           }
           <Environment preset="dawn" background blur={0.7} resolution={512}/>

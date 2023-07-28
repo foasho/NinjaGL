@@ -6,7 +6,6 @@ import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
 import { MdTerrain } from "react-icons/md";
 import Swal from "sweetalert2";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
@@ -63,7 +62,7 @@ const TreeItem = (prop: ITreeItem) => {
     offOMIdChanged,
     setName,
     setVisible,
-  } = useContext(NinjaEditorContext);
+  } = useNinjaEditor();
   const [visible, setLocalVisible] = useState<boolean>(true);
   const { t } = useTranslation();
   const { om } = prop;

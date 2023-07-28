@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { IShaderManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
 import styles from "@/App.module.scss";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const ShaderNavigation = () => {
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const [shaders, setShaders] = useState<IShaderManagement[]>([]);
   const { t } = useTranslation();
   useEffect(() => {

@@ -1,23 +1,16 @@
-import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
 import { IObjectManagement } from "@ninjagl/core";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Text, Text3D, useFont, FontData } from "@react-three/drei";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 
 export const MyTexts = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [texts, setTexts] = useState<IObjectManagement[]>([]);
-
-  useEffect(() => {
-    setTexts(editor.getTexts());
-    const handleTextsChanged = () => {
-      setTexts([...editor.getTexts()]);
-    }
-    editor.onTextChanged(handleTextsChanged);
-    return () => {
-      editor.offTextChanged(handleTextsChanged);
-    }
-  }, [editor]);
+  const { oms } = useNinjaEditor();
+  const texts = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "text";
+    });
+  }, [oms]);
 
   return (
     <>

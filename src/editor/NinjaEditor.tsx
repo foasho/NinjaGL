@@ -1,9 +1,7 @@
-// @ts-nocheck
 import "./Locale";
 import styles from "@/App.module.scss";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
-import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
 import { useState, useEffect, useContext } from "react";
 import { Euler, MathUtils, Vector3 } from "three";
 import { ContentsBrowser } from "./Hierarchy/ContentViewer";
@@ -34,6 +32,7 @@ import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
 import 'setimmediate';
 import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**
  * NinjaEngineメインコンポネント
@@ -41,7 +40,7 @@ import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
 export const NinjaEditor = () => {
   const { data: session } = useSession();
   const state = useSnapshot(globalStore);
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const configState = useSnapshot(globalConfigStore);
   const [project, setProject] = useState<{name: string; path: string}>();
   const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
@@ -74,7 +73,7 @@ export const NinjaEditor = () => {
   const onClickNewObject = async () => {
     const data = await showSelectNewObjectDialog();
     if (data.type == "light"){
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -84,13 +83,15 @@ export const NinjaEditor = () => {
             castShadow: true,
             receiveShadow: false,
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       )
     }
     else if (data.type == "sky"){
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -98,8 +99,10 @@ export const NinjaEditor = () => {
           args: {
             type: data.value
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       )
     }
@@ -118,7 +121,7 @@ export const NinjaEditor = () => {
       // )
     }
     else if (data.type == "three"){
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -126,14 +129,17 @@ export const NinjaEditor = () => {
           args: {
             type: data.value
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       );
     }
     else if (data.type == "camera"){
       // すでにカメラがある場合は追加しない
       if (editor.oms.find((om) => om.type == "camera")){
+        // @ts-ignore
         Swal.fire({
           title: t("camera_already_exists"),
           text: "現在はカメラを１つのみ追加可能です",
@@ -141,7 +147,7 @@ export const NinjaEditor = () => {
         });
       }
       else {
-        editor.setOM(
+        editor.addOM(
           {
             id: MathUtils.generateUUID(),
             name: `*${data.value}`,
@@ -150,14 +156,16 @@ export const NinjaEditor = () => {
               type: data.value,
               default: true,
             },
-            physics: "none",
+            physics: false,
+            phyType: "box",
             visibleType: "auto",
+            visible: true
           }
         )
       }
     }
     else if (data.type == "fog"){
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -165,13 +173,15 @@ export const NinjaEditor = () => {
           args: {
             type: data.value
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       )
     }
     else if (data.type == "environment"){
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: `*${data.value}`,
@@ -179,13 +189,15 @@ export const NinjaEditor = () => {
           args: {
             preset: data.value,
           },
-          physics: "none",
-          visibleType: "force",
+          physics: false,
+          phyType: "box",
+          visibleType: "auto",
+          visible: true
         }
       );
     }
     else if (data.type == "lightformer"){
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: `*LF-(${data.value})`,
@@ -196,8 +208,10 @@ export const NinjaEditor = () => {
             intensity: 1,
             position: new Vector3(0, 1, 0),
           },
-          physics: "none",
-          visibleType: "force",
+          physics: false,
+          phyType: "box",
+          visibleType: "auto",
+          visible: true
         }
       );
     }
@@ -253,25 +267,27 @@ export const NinjaEditor = () => {
           texture: "std.cube",
         }
       }
-      editor.setOM({
+      editor.addOM({
         id: MathUtils.generateUUID(),
         name: `*${data.value}`,
         type: "effect",
         args: _args,
-        physics: "none",
+        physics: false,
+        phyType: "box",
         visibleType: "auto",
+        visible: true
       })
     }
     else if (data.type == "xr"){
-      editor.setUM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: "xr",
-        args: {
-          type: data.value,
-        },
-        visible: true,
-      });
+      // editor.setUM({
+      //   id: MathUtils.generateUUID(),
+      //   name: `*${data.value}`,
+      //   type: "xr",
+      //   args: {
+      //     type: data.value,
+      //   },
+      //   visible: true,
+      // });
     }
   }
 
@@ -295,47 +311,6 @@ export const NinjaEditor = () => {
       t("attention").toString(), 
       t("templatePrepare").toString()
     );
-  }
-
-  /**
-   * Buildモードでプレイ
-   */
-  const onBuildPlay = async () => {
-    // 名前がなければ名前をつけるんだ
-    if (!project){
-      changeProjectName();
-      return;
-    }
-    //　ログインしていればそのばば保存してそのURLでデバッグページで開く
-    if (session){
-      const njcFile = await ExportNjcFile(editor.getEditor(), globalConfigStore);
-      const blob = await saveNJCBlob(njcFile);
-      const formData = new FormData();
-      formData.append("file", blob);
-      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
-      const keyPath = (uploadPath + `/${project.name}.njc`).replaceAll("//", "/");
-      formData.append("filePath", keyPath);
-      const response = await fetch("/api/storage/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error("Error uploading file");
-      }
-      const res = await response.json();
-      const encodedUrl = encodeURIComponent(res.data.url);
-      const url = `${window.location.origin}/play?njcPath=${encodedUrl}`;
-      window.open(url, "_blank");
-      setProject({name: project.name, path: keyPath});
-  }
-    else {
-      // プロジェクトがなければログインしてください
-      Swal.fire({
-        title: t("attention").toString(),
-        text: t("loginRequired").toString(),
-        icon: "warning",
-      });
-    }
   }
 
   /**
@@ -375,7 +350,7 @@ export const NinjaEditor = () => {
         console.log("### ロードしたnjcFileを確認 ###");
         console.log(njcFile);
         editor.setNJCFile(njcFile);
-        setProject({...project, name: name});
+        // setProject({...project, name: name});
       }
     })
   }
@@ -401,7 +376,7 @@ export const NinjaEditor = () => {
       }
     }).then((result) => {
       if (result.value) {
-        setProject({...project, name: result.value});
+        // setProject({...project, name: result.value});
       }
     });
   };
@@ -412,7 +387,10 @@ export const NinjaEditor = () => {
    */
   const onSave = async(completeAlert: boolean=true) => {
     const njcFile = ExportNjcFile(
-      editor.getEditor(), 
+      editor.oms,
+      editor.ums,
+      editor.tms,
+      editor.sms, 
       {
         physics: configState.physics,
         autoScale: configState.autoScale,
@@ -424,9 +402,7 @@ export const NinjaEditor = () => {
         layerGridNum: configState.layerGridNum,
         lodDistance: configState.lodDistance,
         dpr: configState.dpr as number,
-        viewGridLength: configState.viewGridLength,
         initCameraPosition: configState.initCameraPosition,
-        octreeDepth: configState.octreeDepth,
         isDebug: true,
       }
     );
@@ -454,7 +430,7 @@ export const NinjaEditor = () => {
           if (session){
             const formData = new FormData();
             formData.append("file", blob);
-            const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+            const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/savedata`;
             const keyPath = (uploadPath + `/${result.value}.njc`).replaceAll("//", "/");
             formData.append("filePath", keyPath);
             try {
@@ -473,6 +449,7 @@ export const NinjaEditor = () => {
               );
               setProject({name: result.value, path: keyPath});
               if (completeAlert){
+                // @ts-ignore
                 Swal.fire({
                   icon: 'success',
                   title: t("success"),
@@ -484,13 +461,13 @@ export const NinjaEditor = () => {
               console.error("Error:", error.message);
               // 失敗したらをローカルに保存
               saveAs(blob, `${result.value}.njc`);
-              setProject({name: result.value, path: undefined});
+              // setProject({name: result.value, path: undefined});
             }
           }
           else {
             // ZIPファイルをローカルに保存
             saveAs(blob, `${result.value}.njc`);
-            setProject({name: result.value, path: undefined});
+            // setProject({name: result.value, path: undefined});
           }
         }
       });
@@ -500,7 +477,7 @@ export const NinjaEditor = () => {
       if (session){
         const formData = new FormData();
         formData.append("file", blob);
-        const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/savedata`;
+        const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/savedata`;
         const keyPath = (uploadPath + `/${project.name}`).replaceAll("//", "/");
         formData.append("filePath", keyPath);
         try {
@@ -520,6 +497,7 @@ export const NinjaEditor = () => {
           setProject({name: project.name, path: keyPath});
           // Success message
           if (completeAlert){
+            // @ts-ignore
             Swal.fire({
               icon: 'success',
               title: t("success"),
@@ -530,13 +508,13 @@ export const NinjaEditor = () => {
           console.error("Error:", error.message);
           // 失敗したらをローカルに保存
           saveAs(blob, `${project.name}`);
-          setProject({name: project.name, path: undefined});
+          // setProject({name: project.name, path: undefined});
         }
       }
       else {
         // ZIPファイルをローカルに保存
         saveAs(blob, `${project.name}`);
-        setProject({name: project.name, path: undefined});
+        // setProject({name: project.name, path: undefined});
       }
     }
   }
@@ -591,9 +569,9 @@ export const NinjaEditor = () => {
    * Environment(Sunset)を追加
    */
   useEffect(() => {
-    if (editor.getOMs().length == 0){
+    if (editor.oms.length == 0){
       // Box
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "movebox",
@@ -607,12 +585,14 @@ export const NinjaEditor = () => {
             },
             castShadow: true,
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       );
       // DirectionalLight
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "Directional1",
@@ -627,12 +607,14 @@ export const NinjaEditor = () => {
             intensity: 1,
             castShadow: true,
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       );
       // SpotLight
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "Spot1",
@@ -648,12 +630,14 @@ export const NinjaEditor = () => {
             castShadow: true,
             receiveShadow: true,
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       );
       // Plane
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "Plane",
@@ -670,12 +654,14 @@ export const NinjaEditor = () => {
             castShadow: true,
             receiveShadow: true,
           },
-          physics: "none",
+          physics: false,
+          phyType: "box",
           visibleType: "auto",
+          visible: true
         }
       );
       // Environment
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "Environment",
@@ -685,12 +671,14 @@ export const NinjaEditor = () => {
             blur: 0.7,
             background: true,
           },
-          physics: "none",
-          visibleType: "force",
+          physics: false,
+          phyType: "box",
+          visibleType: "auto",
+          visible: true
         }
       );
       // LightFormer追加
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "*LF (rect)",
@@ -704,11 +692,13 @@ export const NinjaEditor = () => {
             lookAt: new Vector3(0, 0, 0),
             isFloat: true,
           },
-          physics: "none",
-          visibleType: "force",
+          physics: false,
+          phyType: "box",
+          visibleType: "auto",
+          visible: true
         }
       );
-      editor.setOM(
+      editor.addOM(
         {
           id: MathUtils.generateUUID(),
           name: "*LF (ring)",
@@ -722,8 +712,10 @@ export const NinjaEditor = () => {
             lookAt: new Vector3(0, 0, 0),
             isFloat: true,
           },
-          physics: "none",
-          visibleType: "force",
+          physics: false,
+          phyType: "box",
+          visibleType: "auto",
+          visible: true
         }
       );
     }
@@ -789,13 +781,6 @@ export const NinjaEditor = () => {
                   <AiFillSave />
                 </span>
                 Save
-              </a>
-            </li>
-            <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.play} onClick={() => onBuildPlay()}>
-                <span className={styles.icon}>
-                  {<><BsPlay />Build</>}
-                </span>
               </a>
             </li>
             <li className={`${styles.navItem} ${styles.right}`}>

@@ -2,7 +2,6 @@ import { IObjectManagement } from "@ninjagl/core";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Box3, BoxHelper, Color, Euler, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3, WireframeGeometry } from "three";
-import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";

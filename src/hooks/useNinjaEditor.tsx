@@ -45,6 +45,16 @@ type NinjaEditorProp = {
   ums: IUIManagement[];
   tms: ITextureManagement[];
   sms: IScriptManagement[];
+  transformDecimal: number;
+  mode: ECBMode;
+  gltfViewerObj: Object3D|null;
+  wireFrameColor: string;
+  fileSelect: string;
+  assetRoute: string;
+  contentsSelect: boolean;
+  contentsSelectType: ECBSelectType|null;
+  contentsSelectPath: string|null;
+  ready: boolean;
   initialize: () => void;
   setCamera: (camera: OrbitControlsImpl) => void;
   setPlayerManager: (pm: IPlayerManager) => void;
@@ -74,7 +84,9 @@ type NinjaEditorProp = {
   offNJCChanged: (listener: () => void) => void;
   addOM: (om: IObjectManagement) => void;
   removeOM: (id: string) => void;
+  addSM: (sm: IScriptManagement) => boolean;
   getOMById: (id: string) => IObjectManagement | undefined;
+  getSMById: (id: string) => IScriptManagement | undefined;
   getAvatarOM: () => IObjectManagement | undefined;
   getLights: () => IObjectManagement[];
 };
@@ -83,6 +95,16 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   ums: [],
   tms: [],
   sms: [],
+  transformDecimal: 2,
+  mode: ECBMode.POSITION,
+  gltfViewerObj: null,
+  wireFrameColor: "#ffffff",
+  fileSelect: "",
+  assetRoute: "",
+  contentsSelect: false,
+  contentsSelectType: null,
+  contentsSelectPath: null,
+  ready: false,
   initialize: () => {},
   setCamera: () => {},
   setPlayerManager: () => {},
@@ -112,7 +134,9 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   offNJCChanged: () => {},
   addOM: () => {},
   removeOM: () => {},
+  addSM: () => false,
   getOMById: () => undefined,
+  getSMById: () => undefined,
   getAvatarOM: () => undefined,
   getLights: () => [],
 });
@@ -517,11 +541,29 @@ export const NinjaEditorProvider = ({ children }) => {
   const getOMById = (id: string): IObjectManagement | undefined => {
     return oms.find(om => om.id === id);
   }
+  const getSMById = (id: string): IScriptManagement | undefined => {
+    return sms.find(sm => sm.id === id);
+  }
   const getAvatarOM = () => {
     return oms.find(om => om.type === "avatar");
   }
   const getLights = () => {
     return oms.filter(om => om.type === "light");
+  }
+  const addSM = (sm: IScriptManagement): boolean => {
+    // historyに追加
+    // addHistory("undo", {
+    //   type: "add",
+    //   objectType: "script",
+    //   um: sm,
+    // });
+    // 同名のSMがある場合は追加しない
+    const target = sms.find(_sm => _sm.name === sm.name);
+    if (target) {
+      return false;
+    }
+    setSMs([...sms, sm]);
+    return true;
   }
 
 
@@ -627,6 +669,16 @@ export const NinjaEditorProvider = ({ children }) => {
       ums,
       tms,
       sms,
+      transformDecimal,
+      mode: mode.current,
+      gltfViewerObj: gltfViewerObj.current,
+      wireFrameColor: wireFrameColor.current,
+      fileSelect: fileSelect.current,
+      assetRoute: assetRoute.current,
+      contentsSelect: contentsSelect.current,
+      contentsSelectType: contentsSelectType.current,
+      contentsSelectPath: contentsSelectPath.current,
+      ready,
       initialize,
       setCamera,
       setPlayerManager,
@@ -656,7 +708,9 @@ export const NinjaEditorProvider = ({ children }) => {
       offNJCChanged,
       addOM,
       removeOM,
+      addSM,
       getOMById,
+      getSMById,
       getAvatarOM,
       getLights,
     }}>

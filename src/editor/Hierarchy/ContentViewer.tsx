@@ -1,4 +1,3 @@
-// @ts-nocheck
 import styles from "@/App.module.scss";
 import {
   BsFileImage,
@@ -6,7 +5,6 @@ import {
 } from "react-icons/bs";
 import { useContext, useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { DirectionalLight, LoadingManager, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 import { useTranslation } from "react-i18next";
 import { 
@@ -24,6 +22,7 @@ import { useSession } from "next-auth/react";
 import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { MdUploadFile } from "react-icons/md";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export interface IFileProps {
   url: string;
@@ -31,55 +30,56 @@ export interface IFileProps {
   isFile: boolean;
   isDirectory: boolean;
   name: string;
-  changeScriptEditor: () => void;
+  changeScriptEditor?: () => void;
   onDoubleClick?: (type: string, value: string, name: string) => void;
   imageUrl?: string;
 }
 
 
-const getExtension = (filename: string) => {
+const getExtension = (filename: string): string => {
   if (filename === undefined) return "";
-  return filename.split('.').pop().toLowerCase();
+  const name = filename.split('/').pop();
+  return name!.toLowerCase();
 }
 
-const isImage = (filename: string) => {
+const isImage = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
 }
 
 const gltf_icon = "fileicons/gltf.png";
 const object_icon = "fileicons/object.png";
-const isGLTF = (filename: string) => {
+const isGLTF = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['glb', 'gltf'].includes(ext);
 }
 
 const mp3_icon = "fileicons/mp3.png";
-const isMP3 = (filename: string) => {
+const isMP3 = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['mp3'].includes(ext);
 }
 
 const glsl_icon = "fileicons/glsl.png";
-const isGLSL = (filename: string) => {
+const isGLSL = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['glsl'].includes(ext);
 }
 
 const js_icon = "fileicons/js.png";
-const isJS = (filename: string) => {
+const isJS = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['js'].includes(ext);
 }
 
 const njc_icon = "fileicons/njc.png";
-const isNJC = (filename: string) => {
+const isNJC = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['njc'].includes(ext);
 }
 
 const terrain_icon = "fileicons/terrain.png";
-const isTerrain = (filename: string) => {
+const isTerrain = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['ter'].includes(ext);
 }
@@ -118,7 +118,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const [maxPages, setMaxPages] = useState(1);
   const { t } = useTranslation();
   const [files, setFiles] = useState<IFileProps[]>([]);
-  const loadRef = useRef<HTMLDivElement>();
+  const loadRef = useRef<HTMLDivElement>(null);
 
   /**
    * GLTFの画像を取得する
@@ -126,7 +126,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
    * @param name 
    * @returns 
    */
-  const getGLTFImage = async (url: string, name: string): Promise<string> => {
+  const getGLTFImage = async (url: string, name: string): Promise<string|null> => {
     if (isGLTF(name)){
       return await CreateGLTFImage(url);
     }
@@ -137,8 +137,9 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
    * 表示するファイルを移動
    */
   const MoveDirectory = async () => {
+    if (!loadRef.current) return;
     loadRef.current.style.display = "block";
-    let prefix = isPersonalDir ? `users/${b64EncodeUnicode(session.user.email)}/${path}`: path; 
+    let prefix = (isPersonalDir && session) ? `users/${b64EncodeUnicode(session.user!.email as string)}/${path}`: path; 
     // 最初に/を削除
     if (prefix.charAt(0) == "/"){
       prefix = prefix.slice(1);
@@ -156,8 +157,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             size: item.Size,
             isFile: item.signedUrl ? true : false,
             isDirectory: item.signedUrl ? false : true,
-            name: item.Key,
-            changeScriptEditor: null,
+            name: item.Key
           }
           if (file.isDirectory){
             file.url = path + "/" + file.name;
@@ -188,11 +188,11 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     return () => {}
   }, [path, offset, isPersonalDir]);
 
-  const onDoubleClick = (type: "directory" | "gltf" | "js" | "njc", path: string, name: string = undefined) => {
+  const onDoubleClick = (type: "directory" | "gltf" | "js" | "njc", path: string, name: string|null = null) => {
     if (type == "directory" && path) {
       setPath(path.replaceAll("//", "/"));
     }
-    else if (type == "njc" && path) {
+    else if (type == "njc" && path && name) {
       props.changeProject(path, name);
     }
   }
@@ -243,13 +243,14 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!session) return;
     const files = e.dataTransfer.files;
     if (files.length > 0 && session) {
       const file = files[0];
       const formData = new FormData();
       formData.append("file", file);
       let _path = path;
-      const uploadPath = `users/${b64EncodeUnicode(session.user.email)}/${_path}`;
+      const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/${_path}`;
       const keyPath = (uploadPath + "/" + file.name).replaceAll("//", "/");
       formData.append("filePath", keyPath);
       try {
@@ -407,13 +408,13 @@ interface IContenetViewerProps extends IFileProps {
 }
 
 export const ContentViewer = (props: IContenetViewerProps) => {
-  let icon: JSX.Element;
+  let icon: JSX.Element|null = null;
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  let tooltipTimer: NodeJS.Timeout = null;
-  let tooltipHideTimer: NodeJS.Timeout = null;
-  let tooltip = useRef<HTMLDivElement>();
-  const editor = useContext(NinjaEditorContext);
+  let tooltipTimer: NodeJS.Timeout|null = null;
+  let tooltipHideTimer: NodeJS.Timeout|null = null;
+  let tooltip = useRef<HTMLDivElement>(null);
+  const editor = useNinjaEditor();
   const { t } = useTranslation();
 
   /**
@@ -430,7 +431,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     setShowMenu(false);
   };
 
-  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "njc" = null;
+  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "njc" | null = null;
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
@@ -507,10 +508,12 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   }
 
   const hideTooltip = () => {
+    if (!tooltip.current) return;
     tooltip.current.style.display = "none";
   }
 
   const viewTooltip = () => {
+    if (!tooltip.current) return;
     tooltip.current.style.display = "block";
     if (tooltipHideTimer) {
       clearTimeout(tooltipHideTimer);
@@ -519,7 +522,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   }
 
   const onHover = (e) => {
-    if (icon) {
+    if (icon && tooltip.current) {
       if (props.isFile) {
         if (tooltipTimer) {
           clearTimeout(tooltipTimer)
@@ -533,6 +536,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   }
 
   const onMouseOut = (e) => {
+    if (!tooltip.current) return;
     if (tooltipTimer) {
       clearTimeout(tooltipTimer)
     }
@@ -572,8 +576,9 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       const result = await scriptCheck();
       if (result) {
         sm.name = props.name.split("/").pop() || "";
-        const success = editor.setSM(sm);
+        const success = editor.addSM(sm);
         if (!success) {
+          // @ts-ignore
           Swal.fire({
             title: t("scriptError"),
             text: t("scriptErrorAlreadyText"),
@@ -582,10 +587,11 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         }
         else {
           globalScriptStore.currentSM = sm;
-          props.changeScriptEditor();
+          if (props.changeScriptEditor) props.changeScriptEditor();
         }
       }
       else {
+        // @ts-ignore
         Swal.fire({
           title: t("scriptError"),
           text: t("scriptErrorText"),
@@ -594,7 +600,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       }
     }
     else if (props.isFile && type == "njc"){
-      props.onDoubleClick("njc", props.url, name);
+      if (props.onDoubleClick) props.onDoubleClick("njc", props.url, name);
     }
   }
 
@@ -615,7 +621,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       <div
         onContextMenu={handleContextMenu} 
         onClick={handleClick}
-        onDoubleClick={(e) => onDoubleClick(contentsSelectType, props.name)}
+        onDoubleClick={(e) => contentsSelectType && onDoubleClick(contentsSelectType, props.name)}
         className={styles.itemCard}
         onDragStart={(e) => onDragStart()}
         onDragEnd={(e) => onDragEnd()}
@@ -657,7 +663,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
  * @param gltfUrl 
  * @returns 
  */
-const CreateGLTFImage = (gltfUrl): Promise<string> => {
+const CreateGLTFImage = (gltfUrl): Promise<string|null> => {
   const canvas = document.createElement("canvas");
   canvas.width = 100;
   canvas.height = 100;

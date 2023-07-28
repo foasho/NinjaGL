@@ -1,23 +1,24 @@
 "use client"
-import { useContext, useEffect, useState } from "react"
-import { NinjaEditorContext, NinjaEditorManager } from "../NinjaEditorManager";
+import { useEffect, useState } from "react"
 import { SkeletonUtils } from "three-stdlib";
-import { NJCFile, IConfigParams } from "@ninjagl/core";
+import { NJCFile, IConfigParams, IObjectManagement, IUIManagement, ITextureManagement, IScriptManagement } from "@ninjagl/core"
 import { globalConfigStore } from "../Store";
 import { useSnapshot } from "valtio";
 import dynamic from "next/dynamic";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 const NinjaGL = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaGL), { ssr: false });
-const NinjaCanvas = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaCanvas), { ssr: false });
-const NinjaCanvasItems = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaCanvasItems), { ssr: false });
 
 export const ExportNjcFile = (
-  editor: NinjaEditorManager,
+  oms: IObjectManagement[],
+  ums: IUIManagement[],
+  tms: ITextureManagement[],
+  sms: IScriptManagement[],
   config: IConfigParams,
 ): NJCFile => {
   const newConfig = { ...config, dpr: undefined };
   // EditorからOMを取得してJSON化する
-  const oms = [...editor.getOMs()];
-  oms.map((om) => {
+  const _oms = [...oms];
+  _oms.map((om) => {
     const _om = { ...om };
     if (om.type == "avatar" && _om.object) {
       const target = SkeletonUtils.clone(_om.object);
@@ -38,9 +39,6 @@ export const ExportNjcFile = (
     }
     return _om;
   });
-  const ums = [...editor.getUMs()];
-  const tms = [...editor.getTMs()];
-  const sms = [...editor.getSMs()];
   // Configパラメータを設定する
   const _config: IConfigParams = {
     ...newConfig,
@@ -63,23 +61,29 @@ export const ExportNjcFile = (
 export const DebugPlay = () => {
   const [ready, setReady] = useState(false);
   const configState = useSnapshot(globalConfigStore);
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const [njcFile, setNJCFile] = useState<NJCFile|null>(null);
   useEffect(() => {
-    const _njcFile = ExportNjcFile(editor.getEditor(), {
-      physics: configState.physics,
-      autoScale: configState.autoScale,
-      alpha: configState.alpha,
-      logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
-      antialias: configState.antialias,
-      shadowResolution: configState.shadowResolution,
-      mapsize: configState.mapsize,
-      layerGridNum: configState.layerGridNum,
-      lodDistance: configState.lodDistance,
-      dpr: undefined,
-      initCameraPosition: configState.initCameraPosition,
-      isDebug: true,
-    });
+    const _njcFile = ExportNjcFile(
+      editor.oms,
+      editor.ums,
+      editor.tms,
+      editor.sms,
+      {
+        physics: configState.physics,
+        autoScale: configState.autoScale,
+        alpha: configState.alpha,
+        logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
+        antialias: configState.antialias,
+        shadowResolution: configState.shadowResolution,
+        mapsize: configState.mapsize,
+        layerGridNum: configState.layerGridNum,
+        lodDistance: configState.lodDistance,
+        dpr: undefined,
+        initCameraPosition: configState.initCameraPosition,
+        isDebug: true,
+      }
+    );
     setNJCFile(_njcFile);
     return () => {
       setReady(false);

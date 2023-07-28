@@ -1,12 +1,11 @@
-// @ts-nocheck
 import { IObjectManagement, IUIManagement } from "@ninjagl/core";
 import { useState, useRef, useContext, useEffect } from "react"
 import styles from "@/App.module.scss";
-import { NinjaEditorContext } from "../NinjaEditorManager";
 import { BsBox } from "react-icons/bs";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**
  * UI表示コンポネント
@@ -39,20 +38,20 @@ interface IUIItem {
   isSelect: boolean;
 }
 const UIItem = (prop: IUIItem) => {
-  const ref = useRef<HTMLDivElement>();
-  const editor = useContext(NinjaEditorContext);
+  const ref = useRef<HTMLDivElement>(null);
+  const editor = useNinjaEditor();
   const { t } = useTranslation();
   let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
     lineStyle = styles.darkLine;
   }
-  const [name, setName] = useState<string>(t("nonNameUI"));
+  const [name, setName] = useState<string>(t("nonNameUI") as string);
   let typeIcon = (<BsBox />); // デフォルトObject型
 
   let visibleIcon = (<AiFillEye />);
-  if (prop.ui.visibleType == "none") {
-    visibleIcon = (<AiFillEyeInvisible />);
-  }
+  // if (prop.ui.visibleType == "none") {
+  //   visibleIcon = (<AiFillEyeInvisible />);
+  // }
   useEffect(() => {
     if (prop.ui.name) {
       setName(prop.ui.name);
@@ -60,6 +59,7 @@ const UIItem = (prop: IUIItem) => {
   }, []);
 
   const changeName = async () => {
+    // @ts-ignore
     Swal.fire({
       title: t("changeName"),
       input: 'text',

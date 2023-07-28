@@ -1,6 +1,4 @@
-// @ts-nocheck
 import { useContext, useEffect, useState } from "react"
-import { NinjaEditorContext } from "../NinjaEditorManager"
 import Select from 'react-select';
 import styles from "@/App.module.scss";
 import { SkeletonUtils } from "three-stdlib";
@@ -13,6 +11,7 @@ import { globalPlayerStore } from "../Store";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { AnimationClip, MathUtils } from "three";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 interface IPlayerInspectorProps {
   onSave: (animMapper: { [key: string]: string }) => void;
@@ -20,14 +19,14 @@ interface IPlayerInspectorProps {
 export const PlayerInspector = (props:IPlayerInspectorProps) => {
   const { data: session } = useSession();
   const playerState = useSnapshot(globalPlayerStore);
-  const [selectedOption, setSelectedOption] = useState<{ value: string, label: string }>(null);
-  const editor = useContext(NinjaEditorContext);
+  const [selectedOption, setSelectedOption] = useState<{ value: string, label: string }|null>(null);
+  const editor = useNinjaEditor();
   const [playerType, setPlayerType] = useState<{ value: string, label: string }>({ value: "avatar", label: "操作プレイヤー" });
-  const [idleOption, setIdleOption] = useState<{ value: string, label: string }>(null);
-  const [walkOption, setWalkOption] = useState<{ value: string, label: string }>(null);
-  const [runOption, setRunOption] = useState<{ value: string, label: string }>(null);
-  const [jumpOption, setJumpOption] = useState<{ value: string, label: string }>(null);
-  const [actionOption, setActionOption] = useState<{ value: string, label: string }>(null);
+  const [idleOption, setIdleOption] = useState<{ value: string, label: string }|null>(null);
+  const [walkOption, setWalkOption] = useState<{ value: string, label: string }|null>(null);
+  const [runOption, setRunOption] = useState<{ value: string, label: string }|null>(null);
+  const [jumpOption, setJumpOption] = useState<{ value: string, label: string }|null>(null);
+  const [actionOption, setActionOption] = useState<{ value: string, label: string}|null>(null);
   const [customActions, setCustomActions] = useState<{ value: string, label: string, keyInputValue: string }[]>([]);
   const { t } = useTranslation();
 
@@ -47,7 +46,9 @@ export const PlayerInspector = (props:IPlayerInspectorProps) => {
 
   useEffect(() => {
     const opt = options.find((opt) => opt.value === playerState.type);
-    setPlayerType(opt);
+    if (opt) {
+      setPlayerType(opt);
+    }
   }, [playerState.type]);
 
   /**
@@ -112,6 +113,7 @@ export const PlayerInspector = (props:IPlayerInspectorProps) => {
       props.onSave(animMapper);
     }
     else {
+      // @ts-ignore
       Swal.fire({
         icon: 'error',
         title: t("error"),

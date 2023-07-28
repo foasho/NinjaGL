@@ -1,10 +1,8 @@
-// @ts-nocheck
 import { IObjectManagement } from "@ninjagl/core";
 import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { BoxHelper, Color, Euler, Group, Material, Matrix4, Mesh, MeshPhongMaterial, MeshStandardMaterial, MeshToonMaterial, Object3D, ShaderMaterial, Vector3 } from "three";
-import { NinjaEditorContext } from "../../NinjaEditorManager"
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
@@ -13,21 +11,12 @@ import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 
 export const ThreeObjects = () => {
-  const { onOMsChanged, offOMsChanged, oms } = useNinjaEditor();
-  const [threeOMs, setThreeOMs] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
-    setThreeOMs(editor.getThreeObjects());
-    const handleThreesChanged = () => {
-      const _threes = oms.filter((om) => {
-        return om.type == "three";
-      });
-      setThreeOMs([..._threes]);
-    }
-    onOMsChanged(handleThreesChanged);
-    return () => {
-      offOMsChanged(handleThreesChanged);
-    }
-  }, []);
+  const { oms } = useNinjaEditor();
+  const threeOMs = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "three";
+    });
+  }, [oms]);
   return (
     <>
       {threeOMs.map((om) => {
@@ -44,8 +33,8 @@ const ThreeObject = (props: IThreeObject) => {
   const { om } = props;
   const { camera } = useThree();
   const state = useSnapshot(globalStore);
-  const ref = useRef<Mesh>();
-  const editor = useContext(NinjaEditorContext);
+  const ref = useRef<Mesh>(null);
+  const editor = useNinjaEditor();
   const [helper, setHelper] = useState<boolean>(false);
   const id = props.om.id;
   const [material, setMaterial] = useState<any>();
@@ -140,7 +129,8 @@ const ThreeObject = (props: IThreeObject) => {
         <>
           {!state.editorFocus &&
             <PivotControls
-              object={(state.currentId == id) ? ref : undefined}
+              // @ts-ignore
+              object={(state.currentId == id) ? ref : null}
               visible={(state.currentId == id)}
               depthTest={false}
               lineWidth={2}
@@ -156,7 +146,7 @@ const ThreeObject = (props: IThreeObject) => {
               e.stopPropagation();
               if (EnableClickTrigger(
                 camera.position.clone(), 
-                ref.current
+                ref.current!
               )){
                 globalStore.currentId = id
               }

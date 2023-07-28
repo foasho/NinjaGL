@@ -1,38 +1,26 @@
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { IObjectManagement } from "@ninjagl/core"
 import { Sky } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useContext, useEffect, useState } from "react"
-import { NinjaEditorContext } from "../../NinjaEditorManager";
+import { useContext, useEffect, useMemo, useState } from "react"
 
 
 export const MySky = () => {
-    const editor = useContext(NinjaEditorContext);
-    const [sky, setSky] = useState<IObjectManagement>();
-    useEffect(() => {
-        setSky(editor.getSky());
-        const handleSkyChanged = () => {
-            const newSky = editor.getSky();
-            if (newSky!== undefined){
-                setSky({...newSky});
-            }
-            else {
-                setSky(undefined);
-            }
-        }
-        editor.onSkyChanged(handleSkyChanged);
-        return () => {
-            editor.offSkyChanged(handleSkyChanged);
-        }
-    }, [editor]);
-    return (<>
-        {sky &&
-            <Sky
-                distance={450000} // Camera distance (default=450000)
-                sunPosition={[0, 1, 0]}
-                inclination={0}
-                azimuth={0}
-            />
-        }
-        </>
-    )
+  const { oms } = useNinjaEditor();
+  const sky = useMemo(() => {
+    return oms.find((om) => {
+      return om.type == "sky";
+    });
+  }, [oms]);
+  return (<>
+    {sky &&
+      <Sky
+        distance={450000} // Camera distance (default=450000)
+        sunPosition={[0, 1, 0]}
+        inclination={0}
+        azimuth={0}
+      />
+    }
+  </>
+  )
 }
