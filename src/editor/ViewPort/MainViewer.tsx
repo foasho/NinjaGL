@@ -12,7 +12,7 @@ import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
 import { TiSpanner } from "react-icons/ti";
 import { ImEarth } from "react-icons/im";
 import { ThreeObjects } from "./MainViewItems/Three";
-// import { Perf } from "r3f-perf";
+import { Perf } from "r3f-perf";
 import { gltfLoader } from "@ninjagl/core";
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { UICanvas } from "./MainViewUIs/UICanvas";
@@ -624,12 +624,12 @@ const SystemHelper = (props: ISysytemHelper) => {
           <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
       }
-      {/* <Perf 
+      <Perf 
         position={"bottom-right"} 
         style={{ position: "absolute" }} 
         minimal={minimal}
         onClick={() => setMinimal(!minimal)}
-      /> */}
+      />
       <>
         {numberElements}
         {numberPlanes}

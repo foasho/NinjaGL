@@ -1,5 +1,6 @@
 import "./Locale";
 import styles from "@/App.module.scss";
+import Swal from "sweetalert2";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
 import { useState, useEffect, useContext } from "react";
@@ -13,7 +14,6 @@ import { MainViewInspector } from "./Inspector/MainViewInspector";
 import { HierarchyTree } from "./Hierarchy/HierarchyTree";
 import { BsCheck, BsPerson, BsPlay, BsStop } from "react-icons/bs";
 import { FaPeopleArrows } from "react-icons/fa";
-import Swal from "sweetalert2";
 import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
 import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
@@ -30,7 +30,6 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { showHelperDialog } from "./Dialogs/HelperDialog";
 import { b64EncodeUnicode } from "@/commons/functional";
-import 'setimmediate';
 import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
@@ -569,156 +568,6 @@ export const NinjaEditor = () => {
    * Environment(Sunset)を追加
    */
   useEffect(() => {
-    if (editor.oms.length == 0){
-      // Box
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "movebox",
-          type: "three",
-          args: {
-            type: "box",
-            position: new Vector3(0, .5, 0),
-            materialData: {
-              type: "phong",
-              value: "#137dcf",
-            },
-            castShadow: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-      // DirectionalLight
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "Directional1",
-          type: "light",
-          args: {
-            type: "directional",
-            position: new Vector3(14, 7, 8),
-            materialData: {
-              type: "standard",
-              value: "#e3dfcc",
-            },
-            intensity: 1,
-            castShadow: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-      // SpotLight
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "Spot1",
-          type: "light",
-          args: {
-            type: "spot",
-            position: new Vector3(-6, 10, -22),
-            materialData: {
-              type: "standard",
-              value: "#FDF1D9",
-            },
-            intensity: 1,
-            castShadow: true,
-            receiveShadow: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-      // Plane
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "Plane",
-          type: "three",
-          args: {
-            type: "plane",
-            position: new Vector3(0, 0, 0),
-            rotation: new Euler(-Math.PI / 2, 0, 0),
-            scale: new Vector3(32, 32, 32),
-            materialData: {
-              type: "reflection",
-              value: "#111212",
-            },
-            castShadow: true,
-            receiveShadow: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-      // Environment
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "Environment",
-          type: "environment",
-          args: {
-            preset: "sunset",
-            blur: 0.7,
-            background: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-      // LightFormer追加
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "*LF (rect)",
-          type: "lightformer",
-          args: {
-            form: "rect",
-            color: "#ffeb38",
-            intensity: 1,
-            position: new Vector3(-5, 5, -5),
-            scale: new Vector3(3, 3, 3),
-            lookAt: new Vector3(0, 0, 0),
-            isFloat: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: "*LF (ring)",
-          type: "lightformer",
-          args: {
-            form: "ring",
-            color: "#e60b0b",
-            intensity: 10,
-            position: new Vector3(10, 5, 10),
-            scale: new Vector3(3, 3, 3),
-            lookAt: new Vector3(0, 0, 0),
-            isFloat: true,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-    }
     // 最近開いたプロジェクトを取得
     const recentProjects = localStorage.getItem("recentProjects");
     if (recentProjects){

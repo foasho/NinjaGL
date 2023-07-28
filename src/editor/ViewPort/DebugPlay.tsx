@@ -1,4 +1,3 @@
-"use client"
 import { useEffect, useState } from "react"
 import { SkeletonUtils } from "three-stdlib";
 import { NJCFile, IConfigParams, IObjectManagement, IUIManagement, ITextureManagement, IScriptManagement } from "@ninjagl/core"

@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "lint": "next lint --fix --dir app",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "build:debug": "INLINE_RUNTIME_CHUNK=false npm run build",
     "analyze": "ANALYZE=true next build",

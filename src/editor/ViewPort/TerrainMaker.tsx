@@ -44,6 +44,7 @@ import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 
 const TerrainMakeComponent = ({ meshRef, object }) => {
+  const [isMounted, setIsMounted] = useState(false);
   const terrainState = useSnapshot(globalTerrainStore);
   /**
    * 初期値
@@ -148,6 +149,13 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
     terrainState.mapResolution,
     terrainState.color,
   ]);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      setIsMounted(false);
+    }
+  }, []);
 
   /**
    * 範囲内の頂点を取得
@@ -430,13 +438,15 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
   return (
     <>
       <DPerspectiveCamera makeDefault ref={cameraRef} />
-      <OrbitControls
-        ref={ref}
-        args={[cameraRef.current, gl.domElement]}
-        camera={cameraRef.current}
-        makeDefault={true}
-        enabled={terrainState.mode === "view"}
-      />
+      {isMounted &&
+        <OrbitControls
+          ref={ref}
+          args={[cameraRef.current!, gl.domElement]}
+          camera={cameraRef.current!}
+          makeDefault={true}
+          enabled={terrainState.mode === "view"}
+        />
+      }
       <axesHelper />
       <gridHelper ref={gridRef} args={[terrainState.mapSize * 2, Number(terrainState.mapResolution / 2)]} />
       {terrainState.type == "create"?
@@ -481,13 +491,22 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
         ref={lightRef}
         angle={MathUtils.degToRad(45)}
         color={'#fadcb9'}
-        volumetric={false}
+        volumetric={false} 
+        shadowCameraFov={undefined} 
+        shadowCameraLeft={undefined} 
+        shadowCameraRight={undefined} 
+        shadowCameraTop={undefined} 
+        shadowCameraBottom={undefined} 
+        shadowCameraNear={undefined} 
+        shadowCameraFar={undefined} 
+        shadowBias={undefined} 
+        shadowMapWidth={undefined} 
+        shadowMapHeight={undefined}
       />
-      
-        <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[terrainState.radius]} />
-          <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
-        </mesh>
+      <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[terrainState.radius]} />
+        <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
+      </mesh>
       <Perf position={"bottom-right"}/>
     </>
   )

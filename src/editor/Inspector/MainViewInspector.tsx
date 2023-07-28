@@ -35,9 +35,9 @@ export const MainViewInspector = () => {
   const [color, setColor] = useState<string>();
   const id = state.currentId;
   const selectOM = id? editor.getOMById(id): null;
-  const [position, setPosition] = useState<Vector3>(selectOM? selectOM.object!.position.clone() : new Vector3(0, 0, 0));
-  const [rotation, setRotation] = useState<Euler>(selectOM? selectOM?.object!.rotation: new Euler(0, 0, 0));
-  const [scale, setScale] = useState<Vector3>(selectOM? selectOM?.object!.scale: new Vector3(1, 1, 1));
+  const [position, setPosition] = useState<Vector3>((selectOM && selectOM.object)? selectOM.object!.position.clone() : new Vector3(0, 0, 0));
+  const [rotation, setRotation] = useState<Euler>((selectOM && selectOM.object)? selectOM?.object!.rotation: new Euler(0, 0, 0));
+  const [scale, setScale] = useState<Vector3>((selectOM && selectOM.object)? selectOM?.object!.scale: new Vector3(1, 1, 1));
   const [luminanceThreshold, setLuminanceThreshold] = useState<number>(0.2);
   const [mipmapBlur, setMipmapBlur] = useState<boolean>(true);
   const [luminanceSmoothing, setLuminanceSmoothing] = useState<number>(0);

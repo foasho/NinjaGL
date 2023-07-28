@@ -1,6 +1,6 @@
 import styles from "@/App.module.scss";
 import { IObjectManagement } from "@ninjagl/core"
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
@@ -14,8 +14,8 @@ export const HierarchyTree = () => {
   const { oms, getOMById } = useNinjaEditor();
   const state = useSnapshot(globalStore);
   const id = state.currentId;
-  const [selectOM, setSelectOM] = useState<IObjectManagement>();
-  // const selectOM = getOMById(id!);
+  const [selectOM, setSelectOM] = useState<IObjectManagement|null>(null);
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const HierarchyTree = () => {
         <div className={styles.tree}>
           {oms.map((om, idx) => {
             let isSelect = false;
-            if (selectOM == om){
+            if (selectOM && selectOM == om){
               isSelect = true;
             }
             return (
