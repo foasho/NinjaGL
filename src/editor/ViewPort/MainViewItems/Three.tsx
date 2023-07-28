@@ -121,6 +121,7 @@ const ThreeObject = (props: IThreeObject) => {
     }
   }, []);
 
+  // @ts-ignore
   useHelper(((state.currentId == id) && helper) && ref, BoxHelper);
 
   return (

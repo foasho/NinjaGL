@@ -2,7 +2,6 @@ import { IObjectManagement } from "@ninjagl/core";
 import { useHelper } from "@react-three/drei";
 import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { Color, DirectionalLightHelper, DoubleSide, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
-import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";

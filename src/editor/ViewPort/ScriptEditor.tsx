@@ -21,7 +21,7 @@ export const ScriptEditor = () => {
   const [name, setName] = useState<string>();
   const [pause, setPause] = useState<boolean>(true);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const code = useRef<string|null>(null);
+  const code = useRef<string>("");
   const { t } = useTranslation();
 
   /**
