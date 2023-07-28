@@ -1,6 +1,0 @@
-
-/**
- * CustomShaderMaterial
- */
-export const CustomShaderMaterial = () => {
-}

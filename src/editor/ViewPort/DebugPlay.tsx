@@ -77,9 +77,7 @@ export const DebugPlay = () => {
       layerGridNum: configState.layerGridNum,
       lodDistance: configState.lodDistance,
       dpr: undefined,
-      viewGridLength: configState.viewGridLength,
       initCameraPosition: configState.initCameraPosition,
-      octreeDepth: configState.octreeDepth,
       isDebug: true,
     });
     setNJCFile(_njcFile);
