@@ -5,7 +5,7 @@ import { Bloom, LUT, SSR, EffectComposer } from "@react-three/postprocessing";
 import { Texture } from "three";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
-export const MyEffects = () => {
+export const OMEffects = () => {
 
   const { oms } = useNinjaEngine();
   const effects = React.useMemo(() => {

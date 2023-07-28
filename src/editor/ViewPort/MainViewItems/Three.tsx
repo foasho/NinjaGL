@@ -9,19 +9,23 @@ import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
 import { EnableClickTrigger } from "@/commons/functional";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 
 export const ThreeObjects = () => {
-  const editor = useContext(NinjaEditorContext);
+  const { onOMsChanged, offOMsChanged, oms } = useNinjaEditor();
   const [threeOMs, setThreeOMs] = useState<IObjectManagement[]>([]);
   useEffect(() => {
     setThreeOMs(editor.getThreeObjects());
     const handleThreesChanged = () => {
-      setThreeOMs([...editor.getThreeObjects()]);
+      const _threes = oms.filter((om) => {
+        return om.type == "three";
+      });
+      setThreeOMs([..._threes]);
     }
-    editor.onThreeChanged(handleThreesChanged);
+    onOMsChanged(handleThreesChanged);
     return () => {
-      editor.offOMsChanged(handleThreesChanged);
+      offOMsChanged(handleThreesChanged);
     }
   }, []);
   return (

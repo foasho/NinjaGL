@@ -7,7 +7,7 @@ import { useNinjaEngine } from "../hooks/useNinjaEngine";
 /**
  * EnvironmentやLightformerなどの環境
  */
-export const MyEnvirments = () => {
+export const OMEnvirments = () => {
   const { oms } = useNinjaEngine();
   const environments = React.useMemo(() => {
     return oms.filter((om) => om.type === "environment");

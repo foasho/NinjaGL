@@ -1,23 +1,16 @@
 import * as React from "react";
 import { Euler, Vector3 } from "three";
-import { NinjaEngineContext } from "../utils/NinjaEngineManager";
 import { IObjectManagement } from "../utils/NinjaProps";
+import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
 export interface IStaticObjectsProps { }
 
 export const StaticObjects = () => {
-  const engine = React.useContext(NinjaEngineContext);
-  const [staticObjects, setStaticObjects] = React.useState<IObjectManagement[]>([]);
-  React.useEffect(() => {
-    if (!engine) return;
-    setStaticObjects(engine.getStaticObjects());
-    const handleObjectChanged = () => {
-      setStaticObjects(engine.getLights());
-    }
-    engine.onObjectChanged(handleObjectChanged);
-    return () => {
-      engine.onObjectChanged(handleObjectChanged);
-    }
+  const engine = useNinjaEngine();
+  const staticObjects = React.useMemo(() => {
+    if (!engine) return [];
+    const staticObjects = engine.oms.filter((o: IObjectManagement) => o.type === "object");
+    return staticObjects? staticObjects : [];
   }, [engine]);
   return (
     <>
@@ -43,7 +36,7 @@ const StaticObject = ({ om }) => {
   return (
     <>
       {om.object &&
-        <mesh
+        <group
           position={om.args.position ? om.args.position : new Vector3()}
           rotation={om.args.rotation ? om.args.rotation : new Euler()}
           scale={om.args.scale ? om.args.scale : new Vector3(1, 1, 1)}
@@ -52,7 +45,7 @@ const StaticObject = ({ om }) => {
           <primitive 
             object={om.object}
           />
-        </mesh>
+        </group>
       }
     </>
   )

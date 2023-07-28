@@ -1,11 +1,11 @@
 import { Environment, Float, Lightformer, useHelper } from "@react-three/drei";
-import { useContext, useEffect, useRef, useState } from "react";
-import { NinjaEditorContext } from "../../NinjaEditorManager";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { Euler, Vector3, BoxHelper, DoubleSide } from "three";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
 import { PivotControls } from "./PivoitControl";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**
  * Environment
@@ -13,21 +13,17 @@ import { PivotControls } from "./PivoitControl";
  */
 export const MyEnviroment = () => {
   const [degraded, degrade] = useState(false)
-  const editor = useContext(NinjaEditorContext);
-  const [environment, setEnvironment] = useState<IObjectManagement>();
-  const [lightformers, setLightformers] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
-    setEnvironment(editor.getEnvironment());
-    setLightformers(editor.getLightformers());
-    const handleEnvChanged = () => {
-      setEnvironment(editor.getEnvironment()?{...editor.getEnvironment()}: undefined);
-      setLightformers([...editor.getLightformers()]);
-    }
-    editor.onEnvChanged(handleEnvChanged);
-    return () => {
-      editor.offEnvChanged(handleEnvChanged);
-    }
-  }, [editor]);
+  const { oms } = useNinjaEditor();
+  const environment = useMemo(() => {
+    return oms.find((om) => {
+      return om.type == "environment";
+    });
+  }, [oms]);
+  const lightformers = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "lightformer";
+    });
+  }, [oms]);
 
   let enabled = false;
   if (environment) {
@@ -72,7 +68,7 @@ export const MyEnviroment = () => {
 }
 
 const LightFormerControl = ({ om }) => {
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const catchRef = useRef<any>();
   const state = useSnapshot(globalStore);
   const id = om.id;
@@ -132,22 +128,22 @@ const LightFormerControl = ({ om }) => {
 
 const LightFormer = ({ om }) => {
   const ref = useRef<any>();
-  const editor = useContext(NinjaEditorContext);
+  const editor = useNinjaEditor();
   const id = om.id;
   useEffect(() => {
-    // const init = () => {
-    //   if (ref.current) {
-    //     if (om.args.position) ref.current.position.copy(om.args.position.clone());
-    //     if (om.args.rotation) ref.current.rotation.copy(om.args.rotation.clone());
-    //     if (om.args.scale) ref.current.scale.copy(om.args.scale.clone());
-    //     // ref.current.update();
-    //   }
-    // }
-    // init();
-    // editor.onOMIdChanged(id, init);
-    // return () => {
-    //   editor.offOMIdChanged(id, init);
-    // }
+    const init = () => {
+      if (ref.current) {
+        if (om.args.position) ref.current.position.copy(om.args.position.clone());
+        if (om.args.rotation) ref.current.rotation.copy(om.args.rotation.clone());
+        if (om.args.scale) ref.current.scale.copy(om.args.scale.clone());
+        // ref.current.update();
+      }
+    }
+    init();
+    editor.onOMIdChanged(id, init);
+    return () => {
+      editor.offOMIdChanged(id, init);
+    }
   }, [om]);
   return (
     <>

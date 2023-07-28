@@ -21,24 +21,6 @@ export const Terrain = () => {
   const handleDrag = useRef<boolean>(false);
   const [helper, setHelper] = useState<boolean>(true)
 
-  const lineSegs: LineSegments[] = [];
-  if (object && helper){
-    object.traverse((node) => {
-      if (node instanceof Mesh) {
-        node.receiveShadow = true;
-        // nodeの回転率を戻す
-        node.updateMatrix();
-        node.geometry.applyMatrix4(node.matrix);
-        node.quaternion.copy(new Quaternion().setFromEuler(node.rotation));
-        node.rotation.set(0, 0, 0);
-        const wire = new WireframeGeometry(node.geometry);
-        const colorMat = new LineBasicMaterial({ color: editor.wireFrameColor });
-        const lineSeg = new LineSegments(wire, colorMat);
-        lineSegs.push(lineSeg);
-      }
-    });
-  }
-
   useEffect(() => {
     const newTerrain = editor.getTerrain();
     if (newTerrain !== terrain){
@@ -74,7 +56,7 @@ export const Terrain = () => {
   }
 
   return (
-    <>
+    <group>
       {object &&
         <>
             <PivotControls
@@ -96,13 +78,6 @@ export const Terrain = () => {
             />
         </>
       }
-      {helper &&
-        <>
-          {lineSegs.map((lineSeg, index) => {
-            return <primitive object={lineSeg} key={index} />
-          })}
-        </>
-      }
-    </>
+    </group>
   )
 }

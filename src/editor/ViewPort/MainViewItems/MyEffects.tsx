@@ -6,21 +6,15 @@ import { NinjaEditorContext } from '@/editor/NinjaEditorManager';
 import { IObjectManagement } from '@ninjagl/core';
 import { LUTCubeLoader } from 'postprocessing';
 import { CubeTextureLoader, Texture } from 'three';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const MyEffects = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [effects, setEffects] = useState<IObjectManagement[]>([]);
-
-  useEffect(() => {
-    const handleEffectsChanged = () => {
-      setEffects([...editor.getEffects()]);
-    };
-    handleEffectsChanged();
-    editor.onEffectChanged(handleEffectsChanged);
-    return () => {
-      editor.offEffectChanged(handleEffectsChanged);
-    };
-  }, [editor]);
+  const { oms } = useNinjaEditor();
+  const effects = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "effect";
+    });
+  }, [oms]); 
 
   return (
     <>

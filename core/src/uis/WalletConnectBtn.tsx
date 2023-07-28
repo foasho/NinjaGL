@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { NinjaEngineContext } from '../utils/NinjaEngineManager';
+import { useNinjaEngine } from 'hooks/useNinjaEngine';
 
 export const WalletConnectBtn = () => {
 
-  const engine = React.useContext(NinjaEngineContext);
+  const engine = useNinjaEngine();
 
   return (
     <div>

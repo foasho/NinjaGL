@@ -1,26 +1,20 @@
 import { IObjectManagement } from "@ninjagl/core";
 import { useHelper } from "@react-three/drei";
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { Color, DirectionalLightHelper, DoubleSide, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const MyLights = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [lights, setLights] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
-    setLights(editor.getLights());
-    const handleLightChanged = () => {
-      console.log('handleLightChanged');
-      setLights([...editor.getLights()]);
-    }
-    editor.onLightChanged(handleLightChanged);
-    return () => {
-      editor.offLightChanged(handleLightChanged);
-    }
-  }, [editor]);
+  const { oms } = useNinjaEditor();
+  const lights = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "light";
+    });
+  }, [oms]);
   return (
     <>
       {lights.map((om) => {
@@ -36,7 +30,7 @@ interface ILightProps {
 }
 export const MyLight = (prop: ILightProps) => {
   const state = useSnapshot(globalStore);
-  const editor = useContext(NinjaEditorContext);
+  const { setPosition, setRotation, setScale, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
   const catchRef = useRef<Mesh>(null);
   const ref = useRef<any>();
   const { om } = prop;
@@ -53,9 +47,9 @@ export const MyLight = (prop: ILightProps) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
+    setPosition(id, position);
+    setScale(id, scale);
+    setRotation(id, rotation);
   };
 
   useEffect(() => {
@@ -84,9 +78,9 @@ export const MyLight = (prop: ILightProps) => {
     const handleIdChanged = () => {
       init();
     }
-    editor.onOMIdChanged(id, handleIdChanged);
+    onOMIdChanged(id, handleIdChanged);
     return () => {
-      editor.offOMIdChanged(id, handleIdChanged);
+      offOMIdChanged(id, handleIdChanged);
     }
   }, [om]);
 

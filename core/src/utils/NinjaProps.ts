@@ -4,7 +4,7 @@ import { Object3D, Mesh, Group, Vector2, AnimationClip, AnimationMixer, Audio, V
  * NinjaGLの基本パラメータ
  */
 export interface IConfigParams {
-  physics: "none" | "octree" | "bvh";
+  physics: boolean; // 物理演算を有効にするか
   autoScale: boolean; // 自動スケールさせるか
   alpha: boolean; // 透過を有効にするか
   logarithmicDepthBuffer: boolean; // ログデプスバッファを有効にするか
@@ -14,9 +14,7 @@ export interface IConfigParams {
   layerGridNum: number; // レイヤーグリッド数
   lodDistance: number; // LODの切り替えStep距離
   dpr: undefined | number | [number, number]; // デバイスピクセル比※undefinedの場合は(window.devicePixelRatio || 1)を利用
-  viewGridLength: number; // ビューグリッドの長さ
   initCameraPosition?: Vector3; // カメラの初期位置
-  octreeDepth: number; // オクトリーツリーの深さ
   isDebug?: boolean; // デバッグモード
 }
 
@@ -47,12 +45,14 @@ export interface IObjectManagement {
   type: "three" | "object" | "lodobject" | "avatar" | "terrain" | "others" | "text" | "text3d"
     | "sky" | "light" | "fog" | "camera" | "effect" | "cloud" | "environment" | "lightformer";
   filePath?: string;
-  visibleType: "auto" | "force" | "none";
+  visibleType: "auto" | "force";
+  visible: boolean;
   layerNum?: number;
   args: any;
   rules?: any;
   object?: Object3D;
-  physics: "none" | "aabb" | "along" | "select";
+  physics: boolean;
+  phyType: "box"| "sphere" | "capsule" | "along";
   animations?: AnimationClip[];
   mixer?: AnimationMixer;
 }

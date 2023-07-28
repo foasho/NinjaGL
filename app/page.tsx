@@ -1,8 +1,8 @@
 'use client'
-import React, { useEffect } from 'react';
+import React from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/App.module.scss';
-import { NinjaEditorContext, NinjaEditorManager } from '@/editor/NinjaEditorManager';
+import { NinjaEditorProvider } from '@/hooks/useNinjaEditor';
 import { ToastContainer } from "react-toastify";
 
 const NinjaEditor = dynamic(() => import('@/editor/NinjaEditor').then((mod) => mod.NinjaEditor), { 
@@ -22,21 +22,11 @@ const NinjaEditor = dynamic(() => import('@/editor/NinjaEditor').then((mod) => m
  });
 
 const Page = () => {
-  const [editor, setEditor] = React.useState<NinjaEditorManager|null>(null);
-  useEffect(() => {
-    const _editor = new NinjaEditorManager();
-    if (!editor) setEditor(_editor);
-    return () => {
-      setEditor(null);
-    }
-  }, []);
   return (
     <div className={styles.main}>
-      {editor &&
-        <NinjaEditorContext.Provider value={editor}>
-          <NinjaEditor />
-        </NinjaEditorContext.Provider>
-      }
+      <NinjaEditorProvider>
+        <NinjaEditor />
+      </NinjaEditorProvider>
       <ToastContainer
         position="top-right"
         autoClose={5000}

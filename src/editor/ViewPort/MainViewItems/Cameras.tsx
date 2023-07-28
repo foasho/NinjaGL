@@ -1,7 +1,5 @@
-// @ts-nocheck
 import { IObjectManagement } from "@ninjagl/core";
-import { NinjaEditorContext } from "@/editor/NinjaEditorManager";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { PerspectiveCamera, useGLTF, useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
@@ -16,20 +14,16 @@ import {
   PerspectiveCamera as TPerspectiveCamera,
   Camera as ThreeCamera
 } from "three";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const Cameras = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [cameras, setCameras] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
-    setCameras(editor.getCameras());
-    const handleCameraChanged = () => {
-      setCameras([...editor.getCameras()]);
-    }
-    editor.onCameraChanged(handleCameraChanged);
-    return () => {
-      editor.offCameraChanged(handleCameraChanged);
-    }
-  }, [editor]);
+  const { oms } = useNinjaEditor();
+  const cameras = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "camera";
+    });
+  }, [oms]);
+
   return (
     <>
       {cameras.map((om) => {
@@ -44,12 +38,13 @@ interface ICamera {
 }
 const Camera = (props: ICamera) => {
   const id = props.om.id;
-  const editor = useContext(NinjaEditorContext);
-  const ref = useRef<TPerspectiveCamera>();
+  const editor = useNinjaEditor();
+  const ref = useRef<TPerspectiveCamera>(null);
   const catchRef = useRef<any>();
   const state = useSnapshot(globalStore);
   const { scene } = useGLTF("/fileicons/camera.glb");
 
+  // @ts-ignore
   useHelper(ref, CameraHelper);
   useHelper(catchRef, BoxHelper);
 
@@ -60,6 +55,8 @@ const Camera = (props: ICamera) => {
   }
 
   const onDrag = (e) => {
+    if (!ref.current || !catchRef.current) return;
+    if (!editor) return;
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
@@ -70,7 +67,7 @@ const Camera = (props: ICamera) => {
     globalStore.pivotControl = true;
     const cameraDirection = new Vector3();
     ref.current.getWorldDirection(cameraDirection);
-    editor.setCameraDirection(id, cameraDirection);
+    editor.setArg(id, "cameraDirection", cameraDirection);
   }
 
   useEffect(() => {

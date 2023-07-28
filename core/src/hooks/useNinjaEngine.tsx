@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { IConfigParams, IInputMovement, IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement } from '../utils/NinjaProps';
 import { InitMobileConfipParams } from '../utils/NinjaInit';
-import { NinjaEngineWorker } from '../utils/NinjaEngineWorker';
 import { NJCFile, loadNJCFileFromURL } from '../utils/NinjaFileControl';
 import { Camera, Group, Mesh, Object3D, Vector3 } from 'three';
 import { Canvas as NCanvas, useFrame as useNFrame } from '@react-three/fiber';
 import { useInputControl } from './useInputControl';
 import { Loading3D } from '../loaders/Loading3D';
 import { Loading2D } from '../loaders/Loading2D';
-import { MyEnvirments } from '../canvas-items/OMEnvironments';
-import { MyEffects } from '../canvas-items/OMEffects';
+import { OMEnvirments } from '../canvas-items/OMEnvironments';
+import { OMEffects } from '../canvas-items/OMEffects';
 import { OMObjects } from '../canvas-items/OMObject';
 import { Cameras } from '../canvas-items/OMCamera';
 import { NWorkerProp, useNinjaWorker } from './useNinjaWorker';
+import { OMPlayer } from '../canvas-items/OMPlayer';
 
 export enum EPhyWorldType {
   None = 0,
@@ -44,8 +44,11 @@ type NinjaEngineProp = {
   ums: IUIManagement[],
   tms: ITextureManagement[],
   setOMObjectById: (id: string, obj: Object3D) => void,
+  getOMById: (id: string) => IObjectManagement|null,
+  getOMByName: (name: string) => IObjectManagement|null,
+  getSMById: (id: string) => IScriptManagement|null,
 }
-const NinjaEngineContext = React.createContext<NinjaEngineProp>({
+export const NinjaEngineContext = React.createContext<NinjaEngineProp>({
   status: ENinjaStatus.Pause,
   phyWorldType: EPhyWorldType.None,
   player: React.createRef<Mesh>(),
@@ -74,6 +77,9 @@ const NinjaEngineContext = React.createContext<NinjaEngineProp>({
   ums: [],
   tms: [],
   setOMObjectById: () => { },
+  getOMById: () => null,
+  getOMByName: () => null,
+  getSMById: () => null,
 } as NinjaEngineProp);
 
 export const useNinjaEngine = () => React.useContext(NinjaEngineContext);
@@ -254,6 +260,9 @@ export const NinjaGL = ({
       ums,
       tms,
       setOMObjectById,
+      getOMById,
+      getOMByName,
+      getSMById,
     }}>
       {init && njcFile &&
         <>
@@ -293,11 +302,13 @@ export const NinjaCanvasItems = () => {
       {/** OMのID */}
       <OMObjects />
       {/** エフェクト */}
-      <MyEffects />
+      <OMEffects />
       {/** 環境 */}
-      <MyEnvirments />
+      <OMEnvirments />
       {/** カメラ */}
       <Cameras />
+      {/** Player */}
+      <OMPlayer />
       <group>
         <SystemFrame/>
       </group>

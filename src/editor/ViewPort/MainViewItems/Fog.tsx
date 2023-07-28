@@ -1,35 +1,28 @@
 import { useFrame } from "@react-three/fiber";
-import { use, useContext, useEffect, useRef, useState } from "react";
-import { NinjaEditorContext } from "../../NinjaEditorManager";
-import { IObjectManagement } from "@ninjagl/core";
+import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Fog } from "three";
-import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**
  * 霧のコンポーネント
  * @returns 
  */
 export const FogComponent = () => {
-    const state = useSnapshot(globalStore);
-    const ref = useRef<Fog>(null);
-    const editor = useContext(NinjaEditorContext);
-    const [fog, setFog] = useState<IObjectManagement>();
+  const ref = useRef<Fog>(null);
+  const { oms } = useNinjaEditor();
 
-    useEffect(() => {
-      setFog(editor.getFog());
-      const handleEnvChanged = () => {
-        const newFog = editor.getFog();
-        if (newFog!== undefined) setFog({...newFog});
-        else setFog(undefined);
+  const fog = useMemo(() => {
+    const _fog = oms.find((om) => {
+        return om.type == "fog";
+    });
+    return _fog;
+  }, [oms]);
+
+  return (
+    <>
+      {fog &&
+        <fog ref={ref}/>
       }
-    }, [editor]);
-
-    return (
-        <>
-            {fog &&
-                <fog ref={ref}/>
-            }
-        </>
-    )
+    </>
+  )
 }

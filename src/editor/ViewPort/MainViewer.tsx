@@ -30,6 +30,8 @@ import { MyEnviroment } from "./MainViewItems/MyEnvironment";
 import { MyTexts } from "./MainViewItems/MyTexts";
 import { MyEffects } from "./MainViewItems/MyEffects";
 import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { t } from "i18next";
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -47,7 +49,7 @@ export const MainViewer = () => {
   const worldGridSizeRef = useRef<HTMLInputElement>(null);
   const [worldGridSize, setWorldGridSize] = useState<number>(8);
   const [uiGridNum, setUIGridNum] = useState<8|16|24|32>(8);
-  const editor = useContext(NinjaEditorContext);
+  const { getAvatarOM, removeOM, addOM, onNJCChanged, offNJCChanged } = useNinjaEditor();
   // 水平グリッド
   const [isGrid, setIsGrid] = useState<boolean>(false);
   const [isWorldHelper, setIsWorldHelper] = useState<boolean>(true);
@@ -125,14 +127,15 @@ export const MainViewer = () => {
             if (type == "gltf") {
               if (userData.type && userData.type == "avatar"){
                 // すでにアバターがある場合には、削除する
-                if (editor.getAvatar()){
-                  editor.removeAvatar();
+                const oldAvatar = getAvatarOM();
+                if (oldAvatar){
+                  removeOM(oldAvatar.id);
                 }
+                // Objectからアニメーション取得
                 let animations = scene.animations;
                 if (animations.length === 0){
                   animations = gltf.animations;
                 }
-                console.log(animations);
                 let offsetParams;
                 if (userData.offsetParams){
                   if (userData.offsetParams.tp){
@@ -146,13 +149,15 @@ export const MainViewer = () => {
                   offsetParams = userData.offsetParams;
                 }
                 // Animationがあればセットする
-                editor.setOM({
+                addOM({
                   id: MathUtils.generateUUID(),
                   name: "*Avatar",
                   filePath: filePath,
                   type: "avatar",
-                  physics: "aabb",
+                  physics: false,
+                  phyType: "box",
                   visibleType: "force",
+                  visible: true,
                   args: {
                     animMapper: userData.animMapper? userData.animMapper: null,
                     offsetParams: offsetParams,
@@ -166,13 +171,15 @@ export const MainViewer = () => {
               }
               else {
                 // Animationがあればセットする
-                editor.setOM({
+                addOM({
                   id: MathUtils.generateUUID(),
                   filePath: filePath,
                   name: "*Object",
                   type: "object",
-                  physics: "aabb",
+                  physics: false,
+                  phyType: "box",
                   visibleType: "auto",
+                  visible: true,
                   args: {
                     position: new Vector3(0, 0, 0),
                     rotation: new Euler(0, 0, 0)
@@ -184,13 +191,16 @@ export const MainViewer = () => {
               }
             }
             if (type == "ter") {
-              editor.setOM({
+              // 地形データは、強制的に表示
+              addOM({
                 id: MathUtils.generateUUID(),
                 filePath: filePath,
                 name: "*Terrain",
                 type: "terrain",
-                physics: "along",
+                physics: false,
+                phyType: "along",
                 visibleType: "force",
+                visible: true,
                 args: {},
                 object: scene
               });
@@ -224,9 +234,9 @@ export const MainViewer = () => {
     const init = ( ) => {
       setRenderCount(renderCount + 1);
     }
-    editor.onNJCChanged(init);
+    onNJCChanged(init);
     return () => {
-      editor.offNJCChanged(init);
+      offNJCChanged(init);
     }
   }, []);
 
@@ -339,24 +349,15 @@ export const MainViewer = () => {
             >
               <div className={styles.select}>
                 <div className={styles.title}>
-                  {"物理エンジン"}
+                  {t("physics")}
                 </div>
-                <select
-                  value={configState.physics}
+                <input 
+                  type="checkbox" 
+                  checked={configState.physics} 
                   onChange={(e) => {
-                    if (
-                      e.target.value == "none" ||
-                      e.target.value == "octree" ||
-                      e.target.value == "bvh"
-                    ) {
-                      globalConfigStore.physics = e.target.value;
-                    }
-                  }}
-                >
-                  <option value="none">None</option>
-                  <option value="octree">Octree</option>
-                  <option value="bvh">BVH</option>
-                </select>
+                    globalConfigStore.autoScale = e.target.checked;
+                  }} 
+                />
               </div>
               <label>
                 <input 
@@ -368,33 +369,6 @@ export const MainViewer = () => {
                 />
                 AutoScaleの有効化
               </label>
-              {configState.physics != "none" &&
-                <label>
-                  ワールドの広さ
-                  <input 
-                    type="text"
-                    ref={worldSizeRef}
-                    placeholder={worldSize.toString()}
-                    onKeyDown={(e: any) => {
-                      if (e.key == "Enter" && worldSizeRef.current) {
-                        if (isNumber(worldSizeRef.current.value)) {
-                          const val = Number(worldSizeRef.current.value);
-                          if (val <= 4096){
-                            setWorldSize(val);
-                          }
-                          else {
-                            Swal.fire({
-                              title: "エラー",
-                              text: "4096以下の値を入力してください",
-                              icon: "error"
-                            });
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </label>
-              }
               {!configState.autoScale &&
               <>
                 <label>
@@ -488,22 +462,6 @@ export const MainViewer = () => {
                         if (isNumber(worldGridSizeRef.current.value)) {
                           const val = Number(worldGridSizeRef.current.value);
                           setWorldGridSize(val);
-                        }
-                      }
-                    }}
-                  />
-                </label>
-                <label>
-                  <span className={styles.name}>
-                    監視グリッド数
-                  </span>
-                  <input 
-                    type="text"
-                    value={configState.viewGridLength}
-                    onKeyDown={(e: any) => {
-                      if (e.key == "Enter") {
-                        if (isNumber(e.target.value)) {
-                          globalConfigStore.viewGridLength = Number(e.target.value);
                         }
                       }
                     }}

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { IObjectManagement } from "../utils/NinjaProps";
 import { Color, Object3D } from "three";
-import { MeshReflectorMaterial, Sky } from "@react-three/drei";
+import { Cloud, MeshReflectorMaterial, Sky, Text3D } from "@react-three/drei";
 import { useNinjaEngine } from "../hooks/useNinjaEngine";
 
 export const OMObjects = () => {
@@ -21,7 +21,6 @@ export const OMObjects = () => {
  * [0] 
  */
 export const OMObject = ({ om }: { om: IObjectManagement }) => {
-
   return (
     <>
       {/** 地形データ */}
@@ -37,6 +36,22 @@ export const OMObject = ({ om }: { om: IObjectManagement }) => {
       {/** Threeメッシュ */}
       {om.type === "three" && (
         <ThreeObject om={om} />
+      )}
+      {/** Sky */}
+      {om.type === "sky" && (
+        <SkyComponent om={om} />
+      )}
+      {/** Cloud */}
+      {om.type === "cloud" && (
+        <CloudComponent om={om} />
+      )}
+      {/** Text */}
+      {om.type === "text" && (
+        <OMText om={om} />
+      )}
+      {/** Text3D */}
+      {om.type === "text3d" && (
+        <OMText3D om={om} />
       )}
     </>
   )
@@ -224,8 +239,60 @@ const ThreeObject = ({ om }: { om: IObjectManagement }) => {
  * Text
  * -----
  */ 
-const Text = () => {}
+const OMText = ({ om }) => {
+  const ref = React.useRef<any>();
+  React.useEffect(() => {
+    if (ref.current) {
+      if (om.args.position) {
+        ref.current.position.copy(om.args.position);
+      }
+      if (om.args.rotation) {
+        ref.current.rotation.copy(om.args.rotation);
+      }
+      if (om.args.scale) {
+        ref.current.scale.copy(om.args.scale);
+      }
+    }
+  }, [])
+  return (
+    <>
+      {/** @ts-ignore */}
+      <Text font={""} ref={ref}>
+        {om.args.content as string}
+      </Text>
+    </>
+  )
+}
 
+/**
+ * ------
+ * Text3D
+ * ------
+ */
+const OMText3D = ({ om }) => {
+  const ref = React.useRef<any>();
+  React.useEffect(() => {
+    if (ref.current) {
+      if (om.args.position) {
+        ref.current.position.copy(om.args.position);
+      }
+      if (om.args.rotation) {
+        ref.current.rotation.copy(om.args.rotation);
+      }
+      if (om.args.scale) {
+        ref.current.scale.copy(om.args.scale);
+      }
+    }
+  }, [])
+  return (
+    <>
+      {/** @ts-ignore */}
+      <Text3D font={""} ref={ref}>
+        {om.args.content}
+      </Text3D>
+    </>
+  )
+}
 
 /**
  * ----
@@ -251,4 +318,14 @@ const SkyComponent = ({ om: sky }: { om: IObjectManagement }) => {
  * Cloud
  * ------
  */
-const CloudComponent = ({ om:cloud }: { om: IObjectManagement }) => {}
+const CloudComponent = ({ om:cloud }: { om: IObjectManagement }) => {
+  return (
+    <Cloud 
+      opacity={cloud.args.opacity ? cloud.args.opacity : 0.5}
+      speed={cloud.args.speed ? cloud.args.speed : 0.4}
+      width={cloud.args.width ? cloud.args.width : 10}
+      depth={cloud.args.depth ? cloud.args.depth : 1.5}
+      segments={cloud.args.segments ? cloud.args.segments : 20}
+    />
+  )
+}

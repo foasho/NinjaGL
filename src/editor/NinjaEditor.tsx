@@ -577,7 +577,6 @@ export const NinjaEditor = () => {
     };
     input.click();
   }
-
   
   /**
    * マルチプレイヤーの起動
@@ -585,7 +584,6 @@ export const NinjaEditor = () => {
   const onMultiPlayer = async () => {
     await showMultiPlayerDialog();
   }
-
 
   /**
    * プロジェクトが何もないときは、

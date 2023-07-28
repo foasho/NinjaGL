@@ -1,7 +1,7 @@
 import { RootState } from '@react-three/fiber';
 import * as React from 'react';
 import { IInputMovement, IScriptManagement } from 'utils';
-import { NinjaEngineContext } from 'utils/NinjaEngineManager';
+import { NinjaEngineContext } from './useNinjaEngine';
 
 interface NWorkerProps {
   ThreeJSVer: string;
@@ -140,11 +140,10 @@ export const useNinjaWorker = ({
    */
   const handleWorkerMessage = async (e: MessageEvent) => {
     if (!worker.current) return;
-    if (!engine) return;
     const { type, data, messageId } = e.data;
     if (type === "getPositionByName"){
       // 特定の名前のOMの位置を取得する
-      const { name } = data;
+      const { name } = data as { name: string };
       const om = engine.getOMByName(name);
       if (om && om.object) {
         worker.current.postMessage({ type: "response", data: om.object.position, messageId: messageId });

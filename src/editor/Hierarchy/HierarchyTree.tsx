@@ -9,25 +9,24 @@ import Swal from "sweetalert2";
 import { NinjaEditorContext } from "../NinjaEditorManager";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const HierarchyTree = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [oms, setOMs] = useState<IObjectManagement[]>([]);
+  const { oms, getOMById } = useNinjaEditor();
   const state = useSnapshot(globalStore);
   const id = state.currentId;
-  const selectOM = editor.getOMById(id!);
+  const [selectOM, setSelectOM] = useState<IObjectManagement>();
+  // const selectOM = getOMById(id!);
   const { t } = useTranslation();
-  
+
   useEffect(() => {
-    setOMs(editor.getOMs());
-    const handleOMsChanged = () => {
-      setOMs([...editor.getOMs()]);
+    if (id) {
+      const om = getOMById(id);
+      if (om) {
+        setSelectOM(om);
+      }
     }
-    editor.onOMsChanged(handleOMsChanged);
-    return () => {
-      editor.offOMsChanged(handleOMsChanged);
-    }
-  }, [editor]);
+  }, [id]);
 
   return (
     <>
@@ -59,8 +58,13 @@ interface ITreeItem {
 const TreeItem = (prop: ITreeItem) => {
   const state = useSnapshot(globalStore);
   const ref = useRef<HTMLDivElement>(null);
-  const editor = useContext(NinjaEditorContext);
-  const [visible, setVisible] = useState<boolean>(true);
+  const {
+    onOMIdChanged,
+    offOMIdChanged,
+    setName,
+    setVisible,
+  } = useContext(NinjaEditorContext);
+  const [visible, setLocalVisible] = useState<boolean>(true);
   const { t } = useTranslation();
   const { om } = prop;
   const id = om.id;
@@ -84,6 +88,10 @@ const TreeItem = (prop: ITreeItem) => {
     visibleIcon = (<AiFillEyeInvisible />);
   }
 
+  useEffect(() => {
+
+  }, []);
+
   /**
    * 名前を変更
    */
@@ -106,7 +114,7 @@ const TreeItem = (prop: ITreeItem) => {
       }
     }).then((result) => {
       if (result.value) {
-        editor.setName(id, result.value);
+        setName(id, result.value);
       }
     });
   }
@@ -125,8 +133,8 @@ const TreeItem = (prop: ITreeItem) => {
         globalStore.hiddenList.splice(index, 1);
       }
     }
-    editor.setVisible(id, !visible);
-    setVisible(!visible);
+    setVisible(id, !visible);
+    setLocalVisible(!visible);
   }
 
   /**

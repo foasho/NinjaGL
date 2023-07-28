@@ -2,7 +2,7 @@ import { MathUtils } from "three";
 import { IConfigParams, IScriptManagement } from "./NinjaProps";
 
 export const InitMobileConfipParams: IConfigParams = {
-  physics: "octree",
+  physics: true,
   logarithmicDepthBuffer: false,
   shadowResolution: 256,
   alpha: false,
@@ -12,12 +12,10 @@ export const InitMobileConfipParams: IConfigParams = {
   layerGridNum: 8,
   lodDistance: 25,
   dpr: 1,
-  octreeDepth: 5,
-  viewGridLength: 4,
 };
 
 export const InitTabletConfipParams: IConfigParams = {
-  physics: "octree",
+  physics: true,
   shadowResolution: 512,
   alpha: false,
   logarithmicDepthBuffer: false,
@@ -27,14 +25,12 @@ export const InitTabletConfipParams: IConfigParams = {
   layerGridNum: 32,
   lodDistance: 50,
   dpr: [1, 1.5],
-  octreeDepth: 6,
-  viewGridLength: 4,
 };
 
 const isBrowser = typeof window !== "undefined";
 const dpr = isBrowser ? window.devicePixelRatio : 1;
 export const InitDesktopConfipParams: IConfigParams = {
-  physics: "octree",
+  physics: true,
   shadowResolution: 1024,
   alpha: false,
   logarithmicDepthBuffer: true,
@@ -44,8 +40,6 @@ export const InitDesktopConfipParams: IConfigParams = {
   layerGridNum: 64,
   lodDistance: 100,
   dpr: dpr,
-  octreeDepth: 7,
-  viewGridLength: 4,
 };
 
 export const InitScriptManagement: IScriptManagement = {

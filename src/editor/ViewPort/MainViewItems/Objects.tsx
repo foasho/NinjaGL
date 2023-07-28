@@ -1,12 +1,13 @@
 import { IObjectManagement } from "@ninjagl/core";
 import { useFrame } from "@react-three/fiber";
-import { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Box3, BoxHelper, Color, Euler, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3, WireframeGeometry } from "three";
 import { NinjaEditorContext } from "../../NinjaEditorManager";
 import { useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
 import { globalStore } from "@/editor/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 
 /**
@@ -14,18 +15,12 @@ import { globalStore } from "@/editor/Store";
  * @returns 
  */
 export const StaticObjects = () => {
-  const editor = useContext(NinjaEditorContext);
-  const [staticOMs, setStaticOMs] = useState<IObjectManagement[]>([]);
-  useEffect(() => {
-    setStaticOMs(editor.getObjects());
-    const handleObjectChanged = () => {
-      setStaticOMs([...editor.getObjects()]);
-    }
-    editor.onObjectChanged(handleObjectChanged);
-    return () => {
-      editor.offObjectChanged(handleObjectChanged);
-    }
-  }, []);
+  const { oms } = useNinjaEditor();
+  const staticOMs = useMemo(() => {
+    return oms.filter((om) => {
+      return om.type == "object";
+    });
+  }, [oms]);
   return (
     <>
       {staticOMs.map((om) => {
@@ -56,7 +51,17 @@ const StaticObject = ({ om }) => {
     });
   }
   const ref = useRef<any>();
-  const editor = useContext(NinjaEditorContext);
+  const { 
+    setPosition, 
+    setRotation, 
+    setScale,
+    getPosition,
+    getRotation,
+    getScale,
+    getMaterialData,
+    onOMIdChanged,
+    offOMIdChanged,
+  } = useNinjaEditor();
   const id = om.id;
 
   // Get Size
@@ -85,19 +90,19 @@ const StaticObject = ({ om }) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
+    setPosition(id, position);
+    setScale(id, scale);
+    setRotation(id, rotation);
     globalStore.pivotControl = true;
   }
 
   useEffect(() => {
     const init = () => {
       if (ref.current) {
-        ref.current.position.copy(editor.getPosition(id));
-        ref.current.rotation.copy(editor.getRotation(id));
-        ref.current.scale.copy(editor.getScale(id));
-        const materialData = editor.getMaterialData(id);
+        ref.current.position.copy(getPosition(id));
+        ref.current.rotation.copy(getRotation(id));
+        ref.current.scale.copy(getScale(id));
+        const materialData = getMaterialData(id);
         if (materialData) {
           ref.current.traverse((node: any) => {
             if (node.isMesh && node instanceof Mesh) {
@@ -114,9 +119,9 @@ const StaticObject = ({ om }) => {
       }
     }
     init();
-    editor.onOMIdChanged(id, init);
+    onOMIdChanged(id, init);
     return () => {
-      editor.offOMIdChanged(id, init);
+      offOMIdChanged(id, init);
     }
   }, []);
 
