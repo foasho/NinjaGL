@@ -1,9 +1,10 @@
 import styles from "@/App.module.scss";
 import {
+  BsBoxFill,
   BsFileImage,
   BsFolder
 } from "react-icons/bs";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { reqApi } from "@/services/ServciceApi";
 import { DirectionalLight, LoadingManager, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 import { useTranslation } from "react-i18next";
@@ -162,14 +163,12 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           if (file.isDirectory){
             file.url = path + "/" + file.name;
           }
-          const imageUrl = await getGLTFImage(item.signedUrl, item.Key);
-          if (imageUrl){
-            file.imageUrl = imageUrl;
-          }
-          else {
-            if (isGLTF(item.Key)){
-              continue;
-            }
+          // const imageUrl = await getGLTFImage(item.signedUrl, item.Key);
+          // if (imageUrl){
+          //   file.imageUrl = imageUrl;
+          // }
+          if (isGLTF(item.Key)){
+            continue;
           }
           files.push(file);
         }
@@ -188,11 +187,12 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     return () => {}
   }, [path, offset, isPersonalDir]);
 
-  const onDoubleClick = (type: "directory" | "gltf" | "js" | "njc", path: string, name: string|null = null) => {
-    if (type == "directory" && path) {
+  const onDoubleClick = (type: "dir" | "gltf" | "js" | "njc", path: string, name: string|null = null) => {
+    if (type == "dir" && path) {
       setPath(path.replaceAll("//", "/"));
     }
     else if (type == "njc" && path && name) {
+      // NJCファイルをダブルクリックした場合は、エディタに読み込む
       props.changeProject(path, name);
     }
   }
@@ -272,6 +272,8 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const handleDragOver = (e) => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
+
+  console.log(files);
 
   return (
     <>
@@ -418,9 +420,9 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   const { t } = useTranslation();
 
   /**
- * 右クリックメニューの表示
- * @param event 
- */
+   * 右クリックメニューの表示
+   * @param event 
+   */
   const handleContextMenu = (event) => {
     event.preventDefault();
     setShowMenu(true);
@@ -431,7 +433,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     setShowMenu(false);
   };
 
-  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "njc" | null = null;
+  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "njc" | "dir" | null = null;
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
@@ -444,9 +446,9 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     else if (isGLTF(props.name)) {
       icon = (
         <>
-          <div className={styles.iconImg}>
-            <img src={`${props.imageUrl}`} className={styles.iconImg} />
-          </div>
+          <a className={styles.iconImg}>
+            <BsBoxFill />
+          </a>
         </>
       )
       contentsSelectType = "gltf";
@@ -505,6 +507,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         <BsFolder />
       </a>
     )
+    contentsSelectType = "dir";
   }
 
   const hideTooltip = () => {
@@ -546,7 +549,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   const onDoubleClick = async (type: string, name: string) => {
     if (props.isDirectory) {
       if (props.onDoubleClick) {
-        props.onDoubleClick("directory", props.url, name);
+        props.onDoubleClick("dir", props.url, name);
       }
     }
     else if (props.isFile && type == "js"){
@@ -621,7 +624,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       <div
         onContextMenu={handleContextMenu} 
         onClick={handleClick}
-        onDoubleClick={(e) => contentsSelectType && onDoubleClick(contentsSelectType, props.name)}
+        onDoubleClick={(e) => onDoubleClick(contentsSelectType!, props.name)}
         className={styles.itemCard}
         onDragStart={(e) => onDragStart()}
         onDragEnd={(e) => onDragEnd()}
@@ -654,12 +657,12 @@ export const ContentViewer = (props: IContenetViewerProps) => {
 }
 
 // const MANAGER = new LoadingManager();
-// const THREE_PATH = `https://unpkg.com/three@0.149.0`;
+// const THREE_PATH = `https://unpkg.com/three@0.154.0`;
 // export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
 // export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
 
 /**
- * 
+ * GLTFモデルの画像を生成して取得する
  * @param gltfUrl 
  * @returns 
  */
