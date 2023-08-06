@@ -129,12 +129,16 @@ const Camera = (props: ICamera) => {
             onDragEnd={() => onDragEnd()}
           />
         }
-        <primitive 
+        <group
           ref={catchRef}
-          object={scene}
           onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
           onPointerMissed={(e) => e.type === 'click' && (globalStore.currentId = null)}
-        />
+        >
+          <primitive 
+            object={scene}
+            position={[0, 0, 0.5]}
+          />
+        </group>
         <perspectiveCamera
           ref={ref}
           visible={false}

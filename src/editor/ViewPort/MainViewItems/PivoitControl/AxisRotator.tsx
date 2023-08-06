@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 import { Line } from '@react-three/drei'
 import { Html } from '@react-three/drei'
+// @ts-ignore
 import clamp from 'lodash.clamp'
 import { context } from './context'
 

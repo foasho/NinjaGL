@@ -16,47 +16,36 @@
 - NinjaCore: エディタで作成した3DコンテンツをReact上のコンポネント組み込めるCoreライブラリ
 
 ## 使い方(USAGE)
+### Editorごと使いたい時
 ```:commandline
 git clone https://github.com/foasho/NinjaGL.git
 cd NinjaGL
-npm i
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
-## 自分のプロダクトへ組み込み
+### Editorで作ったものを組み込みたいとき
 ```
 npm install @ninjagl/core
 ```
 
-Reactコンポネントへ
 ```tsx
 import { NinjaGL } from "@ninjagl/core";
 
 function App() {
   return (
     <div>
-      <NinjaGL njcPath={"<your-projects>"}/>
+      <NinjaGL njcPath={"/example.njc"}/>
     </div>
   )
 }
-```
-
-## エディタの実行
-```
-git clone https://github.com/foasho/NinjaGL.git
-npm install
-npm run dev
-```
-
-## ビルド
-```
-(調整中)
 ```
 
 
 ## 機能
 
 ### 直感的なメインビュー
+- UnrealEngineライクに作成しています。
 
 
 ### すぐに確認できるプレイビュー

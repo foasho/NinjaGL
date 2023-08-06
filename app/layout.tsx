@@ -12,7 +12,7 @@ const twitter = '@sakanosho'
 export const metadata: Metadata = {
   title: {
     default: title,
-    template: "%s - PrimeMeta",
+    template: "%s(β版)",
   },
   description: description,
   applicationName: title,
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: 'PrimeMeta-Demo',
+    title: 'NinjaGL',
   },
 };
 

@@ -30,6 +30,7 @@ import { MyEffects } from "./MainViewItems/MyEffects";
 import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { useTranslation } from "react-i18next";
+import { CameraPreview } from "../Inspector/CamraPreview";
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -282,6 +283,9 @@ export const MainViewer = () => {
       <div className={styles.uiCanvas} style={{ display: showUI? "block": "none" }}>
         <UICanvas gridNum={uiGridNum}/>
       </div>
+      {/** CameraPreview */}
+      <CameraPreview/>
+      {/** コントロール層 */}
       <div className={styles.control}>
         <a 
           className={styles.helperBtn}
@@ -621,7 +625,7 @@ const SystemHelper = (props: ISysytemHelper) => {
       }
       {props.isGizmo &&
       <GizmoHelper alignment="top-right" margin={[75, 75]}>
-          <GizmoViewport labelColor="white" axisHeadScale={1} />
+        <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
       }
       <Perf 
@@ -666,6 +670,7 @@ export const CameraControl = (props: ICameraControl) => {
       cameraRef.current.lookAt(0, 0, 0);
       camera.position.copy(initCameraPosition.clone());
       camera.lookAt(0, 0, 0);
+      targetFocusCamera("", initCameraPosition)
     }
   }, []);
 
@@ -680,8 +685,8 @@ export const CameraControl = (props: ICameraControl) => {
    * 選択中のオブジェクトにカメラをフォーカスする
    * @param id 
    */
-  const targetFocusCamera = (id: string) => {
-    const position = editor.getPosition(id);
+  const targetFocusCamera = (id: string, p: Vector3|null = null) => {
+    const position = p? p: editor.getPosition(id);
     if (position) {
       const target = new Vector3().copy(position.clone());
   

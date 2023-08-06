@@ -1,6 +1,6 @@
 import styles from "@/App.module.scss";
 import { useRef, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 
@@ -46,7 +46,7 @@ export const HelperDialog = (prop: IResponse) => {
         prop.response();
     }
     };
-    return ReactDOM.createPortal(
+    return (
         <div
           className={styles.selectNewObjectDialog}
           onClick={handleClickOutside}
@@ -93,8 +93,6 @@ export const HelperDialog = (prop: IResponse) => {
             </div>
           </div>
         </div>
-        ,
-        document.getElementById("myDialog") as HTMLElement
       );
 }
 
@@ -104,12 +102,14 @@ export const HelperDialog = (prop: IResponse) => {
  */
 export const showHelperDialog = async () => {
 return new Promise((resolve) => {
+    const dialogContainer = document.getElementById("myDialog") as HTMLElement;
+    const root = ReactDOM.createRoot(dialogContainer);
     const handleDialogClose = () => {
-    ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
+        root.unmount();
         resolve(null);
     };
-    ReactDOM.render(
-        <HelperDialog response={handleDialogClose} />, document.getElementById("myDialog")
+    root.render(
+        <HelperDialog response={handleDialogClose} />
     )
 });
 };

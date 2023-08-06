@@ -1,7 +1,7 @@
 
 import styles from "@/App.module.scss";
 import { useRef, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { useTranslation } from "react-i18next";
 
 interface IResponse {
@@ -17,7 +17,7 @@ export const MultiPlayerDialog = (prop: IResponse) => {
       prop.response();
     }
   };
-  return ReactDOM.createPortal(
+  return (
     <div
       className={styles.selectNewObjectDialog}
       onClick={handleClickOutside}
@@ -36,8 +36,6 @@ export const MultiPlayerDialog = (prop: IResponse) => {
         </div>
       </div>
     </div>
-    ,
-    document.getElementById("myDialog") as HTMLElement
   );
 }
 
@@ -47,12 +45,14 @@ export const MultiPlayerDialog = (prop: IResponse) => {
  */
 export const showMultiPlayerDialog = async () => {
   return new Promise((resolve) => {
+    const dialogContainer = document.getElementById("myDialog") as HTMLElement;
+    const root = ReactDOM.createRoot(dialogContainer);
     const handleDialogClose = () => {
-      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
+      root.unmount();
       resolve(null);
     };
-    ReactDOM.render(
-      <MultiPlayerDialog response={handleDialogClose} />, document.getElementById("myDialog")
+    root.render(
+      <MultiPlayerDialog response={handleDialogClose} />
     )
   });
 };

@@ -1,7 +1,7 @@
 
 import styles from "@/App.module.scss";
 import { Suspense, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { basename, dirname, extname } from "path";
@@ -35,7 +35,7 @@ const LoDViewDialog = (prop: IResponse) => {
   const midPath = `${dirName}/${fileName}-mid${ext}`.replace("//", "/");
   const { t } = useTranslation();
 
-  return ReactDOM.createPortal(
+  return (
     <div
       className={styles.lodViewDialog}
       onClick={handleClickOutside}
@@ -57,8 +57,6 @@ const LoDViewDialog = (prop: IResponse) => {
         </div>
       </div>
     </div>
-    ,
-    document.getElementById("myDialog") as HTMLElement
   );
 }
 
@@ -68,13 +66,15 @@ const LoDViewDialog = (prop: IResponse) => {
  */
 export const showLoDViewDialog = async (filePath: string) => {
   return new Promise((resolve) => {
+    const dialogContainer = document.getElementById("myDialog") as HTMLElement;
+    const root = ReactDOM.createRoot(dialogContainer);
     const handleDialogClose = () => {
-      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
+      root.unmount();
       resolve(null);
     };
 
-    ReactDOM.render(
-      <LoDViewDialog response={handleDialogClose} filePath={filePath} />, document.getElementById("myDialog")
+    root.render(
+      <LoDViewDialog response={handleDialogClose} filePath={filePath} />
     )
   });
 };

@@ -272,9 +272,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const handleDragOver = (e) => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
-
-  console.log(files);
-
+  
   return (
     <>
       <div 

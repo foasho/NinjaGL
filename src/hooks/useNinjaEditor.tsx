@@ -734,7 +734,7 @@ const InitSampleOMs = (): IObjectManagement[] => {
         position: new Vector3(0, .5, 0),
         materialData: {
           type: "phong",
-          value: "#137dcf",
+          value: "#43D9D9",
         },
         castShadow: true,
       },
@@ -847,6 +847,25 @@ const InitSampleOMs = (): IObjectManagement[] => {
         scale: new Vector3(3, 3, 3),
         lookAt: new Vector3(0, 0, 0),
         isFloat: true,
+      },
+      physics: false,
+      phyType: "box",
+      visibleType: "auto",
+      visible: true
+    },
+    {
+      id: MathUtils.generateUUID(),
+      name: "camera",
+      type: "camera",
+      args: {
+        type: "fixed",
+        default: true,
+        position: new Vector3(2, 1.7, 3),
+        rotation: new Euler(
+          MathUtils.degToRad(-27.8), 
+          MathUtils.degToRad(35.6), 
+          MathUtils.degToRad(17.1), 
+        ),
       },
       physics: false,
       phyType: "box",

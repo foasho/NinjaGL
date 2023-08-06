@@ -1,6 +1,6 @@
 import styles from "@/App.module.scss";
 import { useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import { AiOutlineCodeSandbox } from "react-icons/ai";
 import { BiCapsule, BiCylinder, BiRectangle } from "react-icons/bi";
@@ -33,9 +33,10 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectFog = (value: string) => {
     prop.response({ type: "fog", value: value });
   }
-  const selectCamera = (value: string) => {
-    prop.response({ type: "camera", value: value });
-  }
+  // カメラは１つしかつかえないようにする
+  // const selectCamera = (value: string) => {
+  //   prop.response({ type: "camera", value: value });
+  // }
   const selectLightFormer = (value: string) => {
     prop.response({ type: "lightformer", value: value });
   }
@@ -55,7 +56,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
     console.log("サウンドがアップロードされました");
     console.log(e);
   }
-  return ReactDOM.createPortal(
+  return (
     <div
       className={styles.selectNewObjectDialog}
       onClick={handleClickOutside}
@@ -115,14 +116,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 {t("ui")}
               </div>
             </div>
-            <div className={styles.card} onClick={() => {setSelectType("camera")}} >
+            {/* <div className={styles.card} onClick={() => {setSelectType("camera")}} >
               <div className={styles.icon}>
                 <img className={styles.img} src="fileicons/camera.png"/>
               </div>
               <div className={styles.name}>
                 {t("camera")}
               </div>
-            </div>
+            </div> */}
             <div className={styles.card} onClick={() => {setSelectType("environment")}} >
               <div className={styles.icon}>
                 <img className={styles.img} src="fileicons/environment.png"/>
@@ -284,8 +285,8 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           </>
           }
 
-
-          {selectType == "camera" &&
+        {/* カメラ機能の廃止 */}
+        {/* {selectType == "camera" &&
           <>
             <div className={styles.card} onClick={() => {selectCamera("fixed")}}>
               <div className={styles.icon}>
@@ -304,7 +305,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
             </div>
           </>
-        }
+        } */}
 
         {selectType == "cloud" &&
           <>
@@ -439,8 +440,6 @@ const SelectNewObjectDialog = (prop: IResponse) => {
         </div>
       </div>
     </div>
-    ,
-    document.getElementById("myDialog") as HTMLElement
   );
 }
 
@@ -455,13 +454,15 @@ interface ISelectNewObjectDialog {
  */
 export const showSelectNewObjectDialog = async ():Promise<ISelectNewObjectDialog> => {
   return new Promise((resolve) => {
+    const dialogContainer = document.getElementById("myDialog") as HTMLElement;
+    const root = ReactDOM.createRoot(dialogContainer);
     const handleDialogClose = (props: ISelectNewObjectDialog) => {
-      ReactDOM.unmountComponentAtNode(document.getElementById("myDialog") as HTMLElement);
+      root.unmount();
       resolve(props);
     };
 
-    ReactDOM.render(
-      <SelectNewObjectDialog response={handleDialogClose} />, document.getElementById("myDialog")
+    root.render(
+      <SelectNewObjectDialog response={handleDialogClose} />
     )
   });
 };
