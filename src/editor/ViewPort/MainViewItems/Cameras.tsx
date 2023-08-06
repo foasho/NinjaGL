@@ -43,10 +43,10 @@ const Camera = (props: ICamera) => {
   const catchRef = useRef<any>();
   const state = useSnapshot(globalStore);
   const { scene } = useGLTF("/fileicons/camera.glb");
+  // const cameraHelperRef = useRef<CameraHelper>(null);
 
   // @ts-ignore
   useHelper(ref, CameraHelper);
-  useHelper(catchRef, BoxHelper);
 
   const onDragStart = () => {
     globalStore.pivotControl = true;
@@ -143,6 +143,15 @@ const Camera = (props: ICamera) => {
           ref={ref}
           visible={false}
           frustumCulled={true}
+          fov={
+            (props.om.args.fov)? props.om.args.fov : 50
+          }
+          near={
+            (props.om.args.near)? props.om.args.near : 0.1
+          }
+          far={
+            (props.om.args.far)? props.om.args.far : 1000
+          }
         />
       </>
     }

@@ -295,9 +295,7 @@ interface IShaderViewer {
  * @returns 
  */
 const ShaderViewer = (props: IShaderViewer) => {
-  const ref = useRef<Mesh>();
   const CustomShaderMaterial = createShaderMaterial(props.vertexCode, props.fragmentCode);
-  const shaderRef = useRef<ShaderMaterial>(CustomShaderMaterial);
   
   let geometry;
   let obj;
@@ -330,13 +328,9 @@ const ShaderViewer = (props: IShaderViewer) => {
   }
 
   useFrame((state, delta) => {
-    // if (shaderRef.current){
-    //   shaderRef.current.uniforms.speed.value = 2.0;
-    //   shaderRef.current.uniforms.amplitude.value = 0.5;
-    //   shaderRef.current.uniforms.time.value = state.clock.getElapsedTime();
-    //   shaderRef.current.uniforms.direction.value = new Vector3(0, 1, 1); // 波の進行方向を横向きに変更する
-    //   shaderRef.current.needsUpdate = true;
-    // }
+    if (CustomShaderMaterial){
+      CustomShaderMaterial.uniforms.u_time.value = state.clock.getElapsedTime();
+    }
   })
 
   
@@ -425,7 +419,7 @@ const createShaderMaterial = (vertexShader: string, fragmentShader: string): Sha
   const vertexVariables = extractVariables(vertexShader);
   const fragmentVariables = extractVariables(fragmentShader);
 
-  let uniforms = { ...vertexVariables.uniforms, ...fragmentVariables.uniforms };
+  let uniforms = { ...vertexVariables.uniforms, ...fragmentVariables.uniforms, u_time: { value: 0.0 } };
   const material = new ShaderMaterial({
     vertexShader,
     fragmentShader,
@@ -449,7 +443,7 @@ void main() {
 // フラグメントシェーダーのサンプル
 const initCodeFragment = `
 varying vec2 vUv;
-uniform float time;
+uniform float u_time;
 
 void main() {
   vec2 uv = vUv;
@@ -459,7 +453,7 @@ void main() {
 
   // エフェクトの距離と強度を計算
   float dist = distance(uv, center);
-  float strength = 0.3 * sin(2.0 * 3.141592 * dist - time * 3.0) / dist;
+  float strength = 0.3 * sin(2.0 * 3.141592 * dist - u_time * 3.0) / dist;
 
   // 色を計算
   vec3 color = vec3(0.0, 0.0, 1.0) * strength + vec3(0.0, 0.0, 1.0);

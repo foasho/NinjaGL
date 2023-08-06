@@ -41,6 +41,10 @@ export const MainViewInspector = () => {
   const [luminanceThreshold, setLuminanceThreshold] = useState<number>(0.2);
   const [mipmapBlur, setMipmapBlur] = useState<boolean>(true);
   const [luminanceSmoothing, setLuminanceSmoothing] = useState<number>(0);
+  // カメラの設定
+  const [fov, setFov] = useState<number>(50);
+  const [near, setNear] = useState<number>(0.1);
+  const [far, setFar] = useState<number>(1000);
   const { t } = useTranslation();
 
   
@@ -391,24 +395,54 @@ export const MainViewInspector = () => {
       setLuminanceSmoothing(Number(targetValue));
     }
   }
+
+  /**
+   * Camera-Fovの変更
+   */
+  const changeCameraFov = (e) => {
+    const targetValue = e.target.value;
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "fov", Number(targetValue));
+      setFov(Number(targetValue));
+    }
+  }
+  /**
+   * Camera-Nearの変更
+   */
+  const changeCameraNear = (e) => {
+    const targetValue = e.target.value;
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "near", Number(targetValue));
+      setNear(Number(targetValue));
+    }
+  }
+  /**
+   * Camera-Farの変更
+   */
+  const changeCameraFar = (e) => {
+    const targetValue = e.target.value;
+    if (isNumber(targetValue) && id){
+      editor.setArg(id, "far", Number(targetValue));
+      setFar(Number(targetValue));
+    }
+  }
   
 
   return (
     <>
-    <div className={styles.mainInspector}>
-      {(
-        selectOM &&
-        (
-          selectOM.type == "object" ||
-          selectOM.type == "avatar" ||
-          selectOM.type == "light" || 
-          selectOM.type == "three" ||
-          selectOM.type == "terrain" ||
-          selectOM.type == "camera" ||
-          selectOM.type == "lightformer"
-        )
-      ) &&
-        
+      <div className={styles.mainInspector}>
+        {(
+          selectOM &&
+          (
+            selectOM.type == "object" ||
+            selectOM.type == "avatar" ||
+            selectOM.type == "light" || 
+            selectOM.type == "three" ||
+            selectOM.type == "terrain" ||
+            selectOM.type == "camera" ||
+            selectOM.type == "lightformer"
+          )
+        ) &&
         <>
           <div className={styles.position}>
             <div className={styles.title}>
@@ -761,293 +795,344 @@ export const MainViewInspector = () => {
       }
 
 
-      {selectOM && selectOM.type == "avatar" &&
-      <>
-        {/* オフセットは現在自動で設定されます。 */}
-        {/* <div className={styles.offset}>
-          <div className={styles.title}>
-            {t("offset")}
-          </div>
-          <div className={styles.name}>
-            <div>X</div>
-            <div>Y</div>
-            <div>Z</div>
-          </div>
-          <div className={styles.inputContainer}>
-            <input 
-              type="text" 
-              placeholder={offset?offset.x.toString(): "0"}
-              onKeyDown={(e: any) => {
-                if (e.key === 'Enter') {
-                  changeOffset(e, "x");
-                }
-              }}
-              onInput={(e: any) => {
-                if (isNumber(e.target.value)){
-                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
-                  newOffset.set(e.target.value, newOffset.y, newOffset.z);
-                  setOffset(newOffset);
-                }
-              }}
-              onFocus={() => globalStore.editorFocus = true}
-              onBlur={() => globalStore.editorFocus = false}
-              />
-            <input 
-              // value={scale?(scale.y).toFixed(1): ""}
-              type="text" 
-              placeholder={offset?offset.y.toString(): "0"}
-              onKeyDown={(e: any) => {
-                if (e.key === 'Enter') {
-                  changeOffset(e, "y");
-                }
-              }}
-              onInput={(e: any) => {
-                if (isNumber(e.target.value)){
-                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
-                  newOffset.set(newOffset.x, e.target.value, newOffset.z);
-                  setOffset(newOffset);
-                } 
-              }}
-              onFocus={() => globalStore.editorFocus = true}
-              onBlur={() => globalStore.editorFocus = false}
-            />
-            <input 
-              // value={scale?(scale.z).toFixed(1): ""}
-              type="text" 
-              placeholder={offset?offset.z.toString(): "0"}
-              onKeyDown={(e: any) => {
-                if (e.key === 'Enter') {
-                  changeOffset(e, "z");
-                }
-              }}
-              onInput={(e: any) => {
-                if (isNumber(e.target.value)){
-                  const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
-                  newOffset.set(newOffset.x, newOffset.y, e.target.value);
-                  setOffset(newOffset);
-                }
-              }}
-              onFocus={() => globalStore.editorFocus = true}
-              onBlur={() => globalStore.editorFocus = false}
-            />
-          </div>
-        </div> */}
-      </>
-      }
-
-      {(
-        selectOM && selectOM.type == "object"
-      ) && 
-      <>
-        <div className={styles.animations}>
-          {selectOM.animations && selectOM.animations.length > 0 &&
-            <>
-              <div className={styles.title}>
-                {t("animations")}
-                </div>
-              <div className={styles.input}>
-                <Select
-                  options={
-                    selectOM.animations.map((anim: AnimationClip) => {
-                      return {value: anim.name, label: anim.name}
-                    })
+        {selectOM && selectOM.type == "avatar" &&
+        <>
+          {/* オフセットは現在自動で設定されます。 */}
+          {/* <div className={styles.offset}>
+            <div className={styles.title}>
+              {t("offset")}
+            </div>
+            <div className={styles.name}>
+              <div>X</div>
+              <div>Y</div>
+              <div>Z</div>
+            </div>
+            <div className={styles.inputContainer}>
+              <input 
+                type="text" 
+                placeholder={offset?offset.x.toString(): "0"}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    changeOffset(e, "x");
                   }
-                  value={defalutAnim}
-                  onChange={(select) => changeDefaultAnimation(select)}
-                  styles={normalStyles}
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                    newOffset.set(e.target.value, newOffset.y, newOffset.z);
+                    setOffset(newOffset);
+                  }
+                }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
                 />
-              </div>
-            </>
-        }
-        </div>
-        <div className={styles.animLoop}>
-          <div className={styles.title}>
-              {t("animationLoop")}
-          </div>
-          <div className={styles.input}>
-            <input 
-              type="checkbox" 
-              className={styles.checkbox} 
-              checked={animLoop} 
-              onInput={() => onCheckAnimationLoop()}
-            />
-            <span className={styles.customCheckbox}></span>
-          </div>
-        </div>
-      </>
-      }
-
-      {selectOM && selectOM.type == "environment" &&
-      <>
-        <div className={styles.preset}>
-          <div className={styles.title}>
-            {t("preset")}
-          </div>
-          <div className={styles.input}>
-            <Select
-              options={environmentOptions}
-              value={environmentPreset}
-              onChange={(select) => changeEnvironmentPreset(select)}
-              styles={normalStyles}
+              <input 
+                // value={scale?(scale.y).toFixed(1): ""}
+                type="text" 
+                placeholder={offset?offset.y.toString(): "0"}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    changeOffset(e, "y");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                    newOffset.set(newOffset.x, e.target.value, newOffset.z);
+                    setOffset(newOffset);
+                  } 
+                }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
               />
-          </div>
-        </div>
-        <div className={styles.backgroud}>
-          <div className={styles.title}>
-              {t("background")}
-          </div>
-          <div className={styles.input}>
-            <input 
-              type="checkbox" 
-              className={styles.checkbox} 
-              checked={background} 
-              onInput={() => onCheckEnvironmentBackGround()}
-            />
-            <span className={styles.customCheckbox}></span>
-          </div>
-        </div>
-        <div className={styles.blur}>
-          <div className={styles.title}>
-            {t("blur")}: {blur}
-          </div>
-          <div className={styles.input}>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={blur}
-              onChange={(e) => changeEnvironmentBlur(e)}
-            />
-          </div>
-        </div>
-      </>
-      }
+              <input 
+                // value={scale?(scale.z).toFixed(1): ""}
+                type="text" 
+                placeholder={offset?offset.z.toString(): "0"}
+                onKeyDown={(e: any) => {
+                  if (e.key === 'Enter') {
+                    changeOffset(e, "z");
+                  }
+                }}
+                onInput={(e: any) => {
+                  if (isNumber(e.target.value)){
+                    const newOffset = offset?offset.clone(): new Vector3(1, 1, 1);
+                    newOffset.set(newOffset.x, newOffset.y, e.target.value);
+                    setOffset(newOffset);
+                  }
+                }}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
+              />
+            </div>
+          </div> */}
+        </>
+        }
 
-      {selectOM && selectOM.type == "lightformer" &&
-      <>
-        <div className={styles.form}>
-          <div className={styles.title}>
-            {t("form")}
+        {(
+          selectOM && selectOM.type == "object"
+        ) && 
+        <>
+          <div className={styles.animations}>
+            {selectOM.animations && selectOM.animations.length > 0 &&
+              <>
+                <div className={styles.title}>
+                  {t("animations")}
+                  </div>
+                <div className={styles.input}>
+                  <Select
+                    options={
+                      selectOM.animations.map((anim: AnimationClip) => {
+                        return {value: anim.name, label: anim.name}
+                      })
+                    }
+                    value={defalutAnim}
+                    onChange={(select) => changeDefaultAnimation(select)}
+                    styles={normalStyles}
+                  />
+                </div>
+              </>
+          }
           </div>
-          <div className={styles.input}>
-            <Select
-              options={formOptions}
-              value={form}
-              onChange={(select) => changeForm(select)}
-              styles={normalStyles}
-            />
+          <div className={styles.animLoop}>
+            <div className={styles.title}>
+                {t("animationLoop")}
+            </div>
+            <div className={styles.input}>
+              <input 
+                type="checkbox" 
+                className={styles.checkbox} 
+                checked={animLoop} 
+                onInput={() => onCheckAnimationLoop()}
+              />
+              <span className={styles.customCheckbox}></span>
+            </div>
           </div>
-        </div>
-      </>
-      }
+        </>
+        }
 
-      {selectOM && (
-        selectOM.type == "lightformer" ||
-        selectOM.type == "light"
+        {selectOM && selectOM.type == "environment" &&
+        <>
+          <div className={styles.preset}>
+            <div className={styles.title}>
+              {t("preset")}
+            </div>
+            <div className={styles.input}>
+              <Select
+                options={environmentOptions}
+                value={environmentPreset}
+                onChange={(select) => changeEnvironmentPreset(select)}
+                styles={normalStyles}
+                />
+            </div>
+          </div>
+          <div className={styles.backgroud}>
+            <div className={styles.title}>
+                {t("background")}
+            </div>
+            <div className={styles.input}>
+              <input 
+                type="checkbox" 
+                className={styles.checkbox} 
+                checked={background} 
+                onInput={() => onCheckEnvironmentBackGround()}
+              />
+              <span className={styles.customCheckbox}></span>
+            </div>
+          </div>
+          <div className={styles.blur}>
+            <div className={styles.title}>
+              {t("blur")}: {blur}
+            </div>
+            <div className={styles.input}>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={blur}
+                onChange={(e) => changeEnvironmentBlur(e)}
+              />
+            </div>
+          </div>
+        </>
+        }
+
+        {selectOM && selectOM.type == "lightformer" &&
+        <>
+          <div className={styles.form}>
+            <div className={styles.title}>
+              {t("form")}
+            </div>
+            <div className={styles.input}>
+              <Select
+                options={formOptions}
+                value={form}
+                onChange={(select) => changeForm(select)}
+                styles={normalStyles}
+              />
+            </div>
+          </div>
+        </>
+        }
+
+        {selectOM && (
+          selectOM.type == "lightformer" ||
+          selectOM.type == "light"
+          ) &&
+        <>
+          <div className={styles.color}>
+            <div className={styles.name}>
+              {t("color")}
+            </div>
+            <div className={styles.pallet}>
+              <input 
+                type={"color"} 
+                value={color} 
+                onChange={(e) => changeColor(e)}
+                onFocus={() => globalStore.editorFocus = true}
+                onBlur={() => globalStore.editorFocus = false}
+              />
+              <input type={"text"} value={color} />
+            </div>
+          </div>
+          <div className={styles.intensity}>
+            <div className={styles.name}>
+              {t("intensity")}: {intensity}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={5}
+                step={0.01}
+                value={intensity}
+                onChange={(e) => changeIntensity(e)}
+              />
+            </div>
+          </div>
+        </>
+        }
+
+        {selectOM && (
+          selectOM.type == "effect"
+          &&
+          selectOM.args.type == "bloom"
         ) &&
-      <>
-        <div className={styles.color}>
-          <div className={styles.name}>
-            {t("color")}
+        <>
+          <div className={styles.luminanceThreshold}>
+            <div className={styles.name}>
+              {t("luminanceThreshold")}: {luminanceThreshold}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={1}
+                step={0.01}
+                value={luminanceThreshold}
+                onChange={(e) => changeLuminanceThreshold(e)}
+              />
+            </div>
           </div>
-          <div className={styles.pallet}>
-            <input 
-              type={"color"} 
-              value={color} 
-              onChange={(e) => changeColor(e)}
-              onFocus={() => globalStore.editorFocus = true}
-              onBlur={() => globalStore.editorFocus = false}
-            />
-            <input type={"text"} value={color} />
+          <div className={styles.mipmapBlur}>
+            <div className={styles.name}>
+              {t("mipmapBlur")}: {mipmapBlur}
+            </div>
+            <div className={styles.input}>
+              <input
+                type="checkbox"
+                className={styles.checkbox}
+                checked={mipmapBlur}
+                onInput={() => onCheckMipmapBlur()}
+              />
+              <span className={styles.customCheckbox}></span>
+            </div>
           </div>
-        </div>
-        <div className={styles.intensity}>
-          <div className={styles.name}>
-            {t("intensity")}: {intensity}
+          <div className={styles.luminanceSmoothing}>
+            <div className={styles.name}>
+              {t("luminanceSmoothing")}: {luminanceSmoothing}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={1}
+                step={0.01}
+                value={luminanceSmoothing}
+                onChange={(e) => changeLuminanceSmoothing(e)}
+              />
+            </div>
           </div>
-          <div className={styles.range}>
-            <input
-              type={"range"}
-              min={0}
-              max={5}
-              step={0.01}
-              value={intensity}
-              onChange={(e) => changeIntensity(e)}
-            />
+          <div className={styles.intensity}>
+            <div className={styles.name}>
+              {t("intensity")}: {intensity}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={10}
+                step={0.01}
+                value={intensity}
+                onChange={(e) => changeIntensity(e)}
+              />
+            </div>
           </div>
-        </div>
-      </>
-      }
+        </>
+        }
 
-      {selectOM && (
-        selectOM.type == "effect"
-        &&
-        selectOM.args.type == "bloom"
-      ) &&
-      <>
-        <div className={styles.luminanceThreshold}>
-          <div className={styles.name}>
-            {t("luminanceThreshold")}: {luminanceThreshold}
+        {selectOM && (
+          selectOM.type == "camera"
+        ) &&
+        <>
+          <div className={styles.fov}>
+            <div className={styles.name}>
+              {t("fov")}: {fov}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={180}
+                step={0.01}
+                value={fov}
+                onChange={(e) => changeCameraFov(e)}
+              />
+            </div>
           </div>
-          <div className={styles.range}>
-            <input
-              type={"range"}
-              min={0}
-              max={1}
-              step={0.01}
-              value={luminanceThreshold}
-              onChange={(e) => changeLuminanceThreshold(e)}
-            />
+          <div className={styles.near}>
+            <div className={styles.name}>
+              {t("near")}: {near}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={10}
+                step={0.01}
+                value={near}
+                onChange={(e) => changeCameraNear(e)}
+              />
+            </div>
           </div>
-        </div>
-        <div className={styles.mipmapBlur}>
-          <div className={styles.name}>
-            {t("mipmapBlur")}: {mipmapBlur}
+          <div className={styles.far}>
+            <div className={styles.name}>
+              {t("far")}: {far}
+            </div>
+            <div className={styles.range}>
+              <input
+                type={"range"}
+                min={0}
+                max={100}
+                step={0.01}
+                value={far}
+                onChange={(e) => changeCameraFar(e)}
+              />
+            </div>
           </div>
-          <div className={styles.input}>
-            <input
-              type="checkbox"
-              className={styles.checkbox}
-              checked={mipmapBlur}
-              onInput={() => onCheckMipmapBlur()}
-            />
-            <span className={styles.customCheckbox}></span>
-          </div>
-        </div>
-        <div className={styles.luminanceSmoothing}>
-          <div className={styles.name}>
-            {t("luminanceSmoothing")}: {luminanceSmoothing}
-          </div>
-          <div className={styles.range}>
-            <input
-              type={"range"}
-              min={0}
-              max={1}
-              step={0.01}
-              value={luminanceSmoothing}
-              onChange={(e) => changeLuminanceSmoothing(e)}
-            />
-          </div>
-        </div>
-        <div className={styles.intensity}>
-          <div className={styles.name}>
-            {t("intensity")}: {intensity}
-          </div>
-          <div className={styles.range}>
-            <input
-              type={"range"}
-              min={0}
-              max={10}
-              step={0.01}
-              value={intensity}
-              onChange={(e) => changeIntensity(e)}
-            />
-          </div>
-        </div>
-      </>
-      }
-
+        </>
+        }
       </div>
     </>
   )

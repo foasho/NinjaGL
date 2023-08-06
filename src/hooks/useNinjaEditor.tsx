@@ -860,11 +860,11 @@ const InitSampleOMs = (): IObjectManagement[] => {
       args: {
         type: "fixed",
         default: true,
-        position: new Vector3(2, 1.7, 3),
+        position: new Vector3(1.92, 1.8, 1.8),
         rotation: new Euler(
-          MathUtils.degToRad(-27.8), 
-          MathUtils.degToRad(35.6), 
-          MathUtils.degToRad(17.1), 
+          MathUtils.degToRad(-31.2), 
+          MathUtils.degToRad(43.6), 
+          MathUtils.degToRad(23.3), 
         ),
       },
       physics: false,
