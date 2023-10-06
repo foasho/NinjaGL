@@ -21,8 +21,8 @@ const nextConfig = {
   //   styledComponents: true,
   // },
   experimental: {
-    reactRoot: 'concurrent',
-    appDir: true,
+    // reactRoot: 'concurrent',
+    // appDir: true,
   },
   images: {},
   webpack(config, { isServer }) {
