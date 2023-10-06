@@ -1,5 +1,8 @@
 import { IObjectManagement } from "@ninjagl/core";
-import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
+import { 
+  // MeshReflectorMaterial, 
+  useHelper 
+} from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { BoxHelper, Color, Euler, Group, Material, Matrix4, Mesh, MeshPhongMaterial, MeshStandardMaterial, MeshToonMaterial, Object3D, ShaderMaterial, Vector3 } from "three";
@@ -101,7 +104,9 @@ const ThreeObject = (props: IThreeObject) => {
             _material = (<meshToonMaterial color={color} />);
           }
           else if (om.args.materialData.type == "reflection"){
-            _material = (<MeshReflectorMaterial mirror={0} color={color} />);
+            // _material = (<MeshReflectorMaterial mirror={0} color={color} />);
+            // issue: https://github.com/pmndrs/drei/issues/1663
+            _material = (<meshStandardMaterial color={color} />);
           }
         }
         if (_material) setMaterial(_material);
