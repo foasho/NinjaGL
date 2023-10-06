@@ -36,7 +36,7 @@ import { useInputControl, convertObjectToBlob } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 import { globalTerrainStore, globalStore } from "../Store";
 import { Perf } from "r3f-perf";
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { TerrainInspector } from "../Inspector/TerrainInspector";
 import Swal from 'sweetalert2';
 import { Material } from "@gltf-transform/core";
@@ -492,16 +492,16 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
         angle={MathUtils.degToRad(45)}
         color={'#fadcb9'}
         volumetric={false} 
-        shadowCameraFov={undefined} 
-        shadowCameraLeft={undefined} 
-        shadowCameraRight={undefined} 
-        shadowCameraTop={undefined} 
-        shadowCameraBottom={undefined} 
-        shadowCameraNear={undefined} 
-        shadowCameraFar={undefined} 
-        shadowBias={undefined} 
-        shadowMapWidth={undefined} 
-        shadowMapHeight={undefined}
+        // shadowCameraFov={undefined} 
+        // shadowCameraLeft={undefined} 
+        // shadowCameraRight={undefined} 
+        // shadowCameraTop={undefined} 
+        // shadowCameraBottom={undefined} 
+        // shadowCameraNear={undefined} 
+        // shadowCameraFar={undefined} 
+        // shadowBias={undefined} 
+        // shadowMapWidth={undefined} 
+        // shadowMapHeight={undefined}
       />
       <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[terrainState.radius]} />
