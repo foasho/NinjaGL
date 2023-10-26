@@ -39,7 +39,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "app/api/storage/list"  ],
   "exclude": [
     "node_modules",
     "core/examples",

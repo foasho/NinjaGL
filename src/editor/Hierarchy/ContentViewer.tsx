@@ -39,7 +39,7 @@ export interface IFileProps {
 
 const getExtension = (filename: string): string => {
   if (filename === undefined) return "";
-  const name = filename.split('/').pop();
+  const name = filename.split('.').pop();
   return name!.toLowerCase();
 }
 
@@ -112,7 +112,6 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const [showContainerMenu, setShowContainerMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [containerPosition, setContainerPosition] = useState({ x: 0, y: 0 });
-  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [isPersonalDir, setIsPersonalDir] = useState(false);
   const [path, setPath] = useState("");
   const [offset, setOffset] = useState(0);
@@ -140,34 +139,25 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const MoveDirectory = async () => {
     if (!loadRef.current) return;
     loadRef.current.style.display = "block";
-    let prefix = (isPersonalDir && session) ? `users/${b64EncodeUnicode(session.user!.email as string)}/${path}`: path; 
-    // 最初に/を削除
-    if (prefix.charAt(0) == "/"){
-      prefix = prefix.slice(1);
-    }
+    let prefix = path;
+    // let prefix = (isPersonalDir && session) ? `users/${b64EncodeUnicode(session.user!.email as string)}/${path}`: path; 
     await reqApi({ route: "storage/list", queryObject: { 
       prefix: prefix.replaceAll("//", "/"), 
       offset: offset 
     } }).then(async (res) => {
       if (res.status == 200) {
         const files: IFileProps[] = [];
-        const items = res.data.items;
+        const items = res.data;
+        console.log("items: resS", res);
         for (const item of items){
           const file: IFileProps = {
-            url: item.signedUrl,
-            size: item.Size,
-            isFile: item.signedUrl ? true : false,
-            isDirectory: item.signedUrl ? false : true,
-            name: item.Key
+            url: item.url,
+            size: item.size,
+            isFile: item.isFile,
+            isDirectory: item.isDirectory,
+            name: item.filename
           }
-          if (file.isDirectory){
-            file.url = path + "/" + file.name;
-          }
-          // const imageUrl = await getGLTFImage(item.signedUrl, item.Key);
-          // if (imageUrl){
-          //   file.imageUrl = imageUrl;
-          // }
-          if (isGLTF(item.Key)){
+          if (isGLTF(file.name)){
             continue;
           }
           files.push(file);
@@ -180,7 +170,6 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     });
     loadRef.current.style.display = "none";
   }
-
 
   useEffect(() => {
     MoveDirectory();
@@ -229,7 +218,6 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const handleItemContainerMenu = (event) => {
     event.preventDefault();
     setShowContainerMenu(true);
-    console.log("OpenCheck");
     setContainerPosition({ x: event.clientX, y: event.clientY });
   };
 
@@ -307,15 +295,13 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
         {showContainerMenu && <AssetsContextMenu position={containerPosition} path={path} onUploadCallback={MoveDirectory} />}
         {files.map((file, index) => {
           return (
-            <>
-              <ContentViewer 
-                {...file} 
-                onDoubleClick={onDoubleClick}
-                changeScriptEditor={props.changeScriptEditor}
-                onDeleteCallback={MoveDirectory}
-                key={index}
-              />
-            </>
+            <ContentViewer 
+              {...file}
+              onDoubleClick={onDoubleClick}
+              changeScriptEditor={props.changeScriptEditor}
+              onDeleteCallback={MoveDirectory}
+              key={index}
+            />
           )
         })}
         {(session && !isPersonalDir) && 
@@ -496,6 +482,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     }
     // どれにも該当しない場合は表示しない
     else {
+      console.log("Test ")
       return (<></>)
     }
   }
@@ -616,6 +603,8 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     globalContentStore.currentType = null;
     globalContentStore.currentUrl = null;
   }
+
+  console.log("contentsSelectType: ", contentsSelectType)
 
   return (
     <>
