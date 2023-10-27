@@ -24,7 +24,17 @@ const nextConfig = {
     // reactRoot: 'concurrent',
     // appDir: true,
   },
-  images: {},
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        // Rewrite your self domain to your Vercel domain
+        hostname: '3u74cfblwta86vls.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   webpack(config, { isServer }) {
     // audio support
     config.module.rules.push({
@@ -103,7 +113,7 @@ module.exports = (_phase, { defaultConfig }) => {
       AWS_REGION: process.env.AWS_REGION,
       S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
       STORAGE_TYPE: process.env.STORAGE_TYPE, 
-    },
+    }
   }
   Object.keys(wConfig).forEach((key) => {
     if (!KEYS_TO_OMIT.includes(key)) {

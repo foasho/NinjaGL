@@ -24,6 +24,7 @@ import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { MdUploadFile } from "react-icons/md";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import Image from "next/image";
 
 export interface IFileProps {
   url: string;
@@ -178,7 +179,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
 
   const onDoubleClick = (type: "dir" | "gltf" | "js" | "njc", path: string, name: string|null = null) => {
     if (type == "dir" && path) {
-      setPath(path.replaceAll("//", "/"));
+      setPath(path);
     }
     else if (type == "njc" && path && name) {
       // NJCファイルをダブルクリックした場合は、エディタに読み込む
@@ -422,7 +423,13 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     if (isImage(props.name)) {
       icon = (
         <>
-          <img src={props.url} className={styles.iconImg} />
+          <Image 
+            src={props.url} 
+            className={styles.iconImg} 
+            width={35}
+            height={35}
+            alt="icon-image"
+          />
         </>
       )
       contentsSelectType = "image";
@@ -511,15 +518,13 @@ export const ContentViewer = (props: IContenetViewerProps) => {
 
   const onHover = (e) => {
     if (icon && tooltip.current) {
-      if (props.isFile) {
-        if (tooltipTimer) {
-          clearTimeout(tooltipTimer)
-        }
-        tooltip.current.style.left = e.clientX;
-        let top = e.clientY;
-        tooltip.current.style.top = `${top + 10}px`;
-        tooltipTimer = setTimeout(viewTooltip, 1500);
+      if (tooltipTimer) {
+        clearTimeout(tooltipTimer)
       }
+      tooltip.current.style.left = e.clientX;
+      let top = e.clientY;
+      tooltip.current.style.top = `${top + 10}px`;
+      tooltipTimer = setTimeout(viewTooltip, 1500);
     }
   }
 
@@ -603,8 +608,6 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     globalContentStore.currentType = null;
     globalContentStore.currentUrl = null;
   }
-
-  console.log("contentsSelectType: ", contentsSelectType)
 
   return (
     <>

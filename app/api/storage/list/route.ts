@@ -9,10 +9,13 @@ export const runtime = 'edge';
  * @returns 
  */
 const isFolder = (prefix: string, pathname: string) => {
-  let p = prefix.length > 0 ? prefix : '/';
+  let p = prefix.length > 0 ? prefix : '';
+  if (p.length > 0 && p[p.length - 1] !== '/') {
+    p = p + '/';
+  }
   const path = pathname.replace(p, '');
   const pathArray = path.split('/');
-  return pathArray.length >= 1;
+  return pathArray.length >= 2;
 }
  
 export async function GET(request: Request) {
@@ -21,7 +24,7 @@ export async function GET(request: Request) {
     token: process.env.BLOB_READ_WRITE_TOKEN,
   };
   // prefix: string, limit: number, offset: number
-  const prefix = searchParams.get('prefix') || null;
+  const prefix = searchParams.get('prefix') || "";
   const limit = Number(searchParams.get('limit')) || 100;
   const cursor = searchParams.get('cursor') as string || null;
   if (prefix) {
@@ -40,28 +43,36 @@ export async function GET(request: Request) {
   //   url: `https://...`;
   // }
   const { blobs } = await list(options);
+  const filteredBlobs: any[] = [];
   // pathnameが prifixに収まらないものは、フォルダデータとしてsize0のものに変換
-  const filteredBlobs = blobs.map(blob => {
+  blobs.forEach(blob => {
     const filename = blob.pathname.split('/').pop();
-    if (prefix && isFolder(prefix, blob.pathname)) {
+    if (isFolder(prefix, blob.pathname)) {
       // forlderまでのpathnameに変換
       const pathArray = blob.pathname.split('/');
       const folderPath = pathArray.slice(0, pathArray.length - 1).join('/');
-      return {
+      const folderName = folderPath.split('/').pop();
+      const p = {
         ...blob,
         size: 0,
         url: folderPath,
-        filename,
+        filename: folderName,
         isFile: false,
         isDirectory: true,
+      };
+      if (!filteredBlobs.find(b => b.url === p.url)) {
+        filteredBlobs.push(p);
       }
     }
-    return {
-      ...blob,
-      filename,
-      isFile: true,
-      isDirectory: false,
-    };
+    else {
+      const p = {
+        ...blob,
+        filename,
+        isFile: true,
+        isDirectory: false,
+      };
+      filteredBlobs.push(p);
+    }
   });
   return Response.json(filteredBlobs);
 }
