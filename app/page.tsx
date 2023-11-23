@@ -1,39 +1,69 @@
-'use client'
-import React from 'react';
-import dynamic from 'next/dynamic';
-import styles from '@/App.module.scss';
-import { NinjaEditorProvider } from '@/hooks/useNinjaEditor';
-import { ToastContainer } from "react-toastify";
+import { Suspense } from "react";
+import { HomeCanvas } from "./_components/HomeCanvas";
+import { Header } from "./_components/Header";
+import Link from "next/link";
 
-const NinjaEditor = dynamic(() => import('@/editor/NinjaEditor').then((mod) => mod.NinjaEditor), { 
-  ssr: false,
-  loading: () => (
-    <div style={{ display: 'flex', height: '24rem', width: '100%', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <svg style={{ marginLeft: '-0.25rem', marginRight: '0.75rem', height: '1.25rem', width: '1.25rem', animation: 'spin 1s linear infinite', color: 'black' }} fill='none' viewBox='0 0 24 24'>
-        <circle style={{ opacity: '0.25',  stroke: 'currentColor', strokeWidth: '4' }} />
-        <path
-          style={{ opacity: '0.75',  }}
-          fill='currentColor'
-          d='M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-        />
-      </svg>
-    </div>
-  ),
- });
+export default function HomePage() {
 
-const Page = () => {
   return (
-    <div className={styles.main}>
-      <NinjaEditorProvider>
-        <NinjaEditor />
-      </NinjaEditorProvider>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        style={{zIndex:99999}}
-      />
-    </div>
-  );
-}
+    <>
+      <Header />
+      <div className="h-screen w-screen relative z-0">
+        <div className="absolute top-0 left-0 z-20">
+          {/** Hero Content Text */}
+          <div className="absolute top-24 left-32 w-[50vw]">
+              {/* Hero文字やタイトル等 */}
+              <div className="px-4 md:pt-0 pt-[6.5rem] flex flex-col w-full justify-center text-gray-700 items-start text-center md:text-left select-none">
+                <div
+                  className="relative z-10 w-full text-center md:text-left pl-0 md:pl-6"
+                >
+                  <p className="uppercase tracking-loose w-full">
+                    Web First Game Engine
+                  </p>
+                  <h1 className="mb-6 mt-2 text-3xl md:text-5xl font-bold leading-tight">
+                    Let&apos;s Make <br />Third Person Game
+                  </h1>
+                  <p className="leading-normal md:text-xl text-sm mb-8">
+                    Your Game, Your World
+                    <br />
+                    Light Physics Engine
+                    <br />
+                    Easy to Use
+                    <br />
+                    Fast to Start
+                  </p>
+                </div>
 
-export default Page;
+                {/* ボタンエリア */}
+                <div className="flex flex-col md:flex-row w-full justify-center lg:justify-start pb-24 md:pb-0">
+                  <div className="flex justify-center w-full md:w-auto">
+                    <Link href="/editor">
+                      <button
+                        className="md:mx-2 hover:underline bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-bold rounded-full my-1 md:my-3 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                      >
+                        Get Started
+                      </button>
+                    </Link>
+                  </div>
+                  <div className="flex justify-center w-full md:w-auto">
+                    <Link href="/login">
+                      <button
+                        className="md:mx-2 hover:underline bg-white text-gray-800 bg-opacity-25 font-bold rounded-full my-1 md:my-3 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                      >
+                      Login
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div className="w-full h-[100vh] absolute z-10 top-0 left-0">
+          <Suspense>
+            <HomeCanvas />
+          </Suspense>
+        </div>
+      </div>
+    </>
+  )
+}

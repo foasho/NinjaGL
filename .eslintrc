@@ -1,8 +1,65 @@
 {
-  "extends": ["next", "prettier"],
+  "env": {
+    "node": true,
+    "es6": true,
+    "commonjs": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:tailwindcss/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "next/core-web-vitals",
+    // "plugin:storybook/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "import", "unused-imports"],
+  "root": true,
   "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "warn",
+    "semi": ["error", "always"],
+    "semi-spacing": ["error", { "after": true, "before": false }],
+    "semi-style": ["error", "last"],
+    "no-extra-semi": "error",
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error",
     "import/prefer-default-export": "off",
     "no-console": "warn",
-    "no-var": "warn"
+    "no-var": "error",
+    "no-html-link-for-pages": "off",
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin", // Node.jsの組み込みモジュール
+          "external", // node_modulesからのインポート
+          "internal", // 同じパッケージ内の他のモジュールからのインポート
+          "parent", // 現在のディレクトリの親ディレクトリからのインポート
+          "sibling", // 同じディレクトリ内の他のモジュールからのインポート
+          "index", // 現在のディレクトリのインデックスファイルからのインポート
+          "object", // オブジェクトのインポート
+          "type" // TypeScriptの型のインポート
+        ],
+        // それぞれのgroupsとの間は1行分空けます。
+        "newlines-between": "always",
+        // 特定のグループの import 文を除外するかどうかを指定します。
+        "pathGroupsExcludedImportTypes": ["builtin"],
+        // order オプションは、アルファベット順にします。
+        // caseInsensitive オプションは、大文字小文字を無視してアルファベット順に並べるかどうかを指定します。
+        "alphabetize": { "order": "asc", "caseInsensitive": true },
+        "pathGroups": [
+          {
+            "pattern": "{react,react-dom/**,react-router-dom}", // このパターンに一致するインポート
+            "group": "builtin", // 上記のインポートをbuiltinグループとして扱う。
+            "position": "before" // そのグループの前に配置
+          }
+        ]
+      }
+    ]
   }
 }

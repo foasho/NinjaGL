@@ -3,7 +3,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { PerspectiveCamera, useGLTF, useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { 
   CameraHelper, 
   Euler, 

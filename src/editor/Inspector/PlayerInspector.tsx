@@ -7,7 +7,7 @@ import { reqApi } from "@/services/ServciceApi";
 import { useTranslation } from "react-i18next";
 import { convertObjectToFile } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
-import { globalPlayerStore } from "../Store";
+import { globalPlayerStore } from "../Store/Store";
 import { useSession } from "next-auth/react";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { AnimationClip, MathUtils } from "three";

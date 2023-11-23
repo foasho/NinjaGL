@@ -8,7 +8,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { BoxHelper, Color, Euler, Group, Material, Matrix4, Mesh, MeshPhongMaterial, MeshStandardMaterial, MeshToonMaterial, Object3D, ShaderMaterial, Vector3 } from "three";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { EnableClickTrigger } from "@/commons/functional";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 

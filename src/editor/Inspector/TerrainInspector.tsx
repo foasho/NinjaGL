@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import { useTranslation } from "react-i18next";
 import { GiFlatPlatform, GiMountainCave, GiMountaintop, GiPaintBrush } from "react-icons/gi";
 import { useSnapshot } from "valtio";
-import { globalTerrainStore } from "../Store";
+import { globalTerrainStore } from "../Store/Store";
 import { isNumber } from "@/commons/functional";
 
 /**

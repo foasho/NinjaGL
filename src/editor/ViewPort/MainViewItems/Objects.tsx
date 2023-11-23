@@ -5,7 +5,7 @@ import { Box3, BoxHelper, Color, Euler, Group, LineBasicMaterial, LineSegments, 
 import { useHelper } from "@react-three/drei";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 

@@ -34,7 +34,7 @@ import {
 } from "three";
 import { useInputControl, convertObjectToBlob } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
-import { globalTerrainStore, globalStore } from "../Store";
+import { globalTerrainStore, globalStore } from "../Store/Store";
 import { Perf } from "r3f-perf";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { TerrainInspector } from "../Inspector/TerrainInspector";

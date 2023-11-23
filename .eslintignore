@@ -1,3 +1,8 @@
 .next
 dist
-node_modules/
+build/
+public/
+**/node_modules/
+**/*.min.js
+*.config.js
+.*lintrc.js

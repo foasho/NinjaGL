@@ -16,14 +16,8 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 const TerserPlugin = require("terser-webpack-plugin"); // 追加
 
 const nextConfig = {
-  // uncomment the following snippet if using styled components
-  // compiler: {
-  //   styledComponents: true,
-  // },
-  experimental: {
-    // reactRoot: 'concurrent',
-    // appDir: true,
-  },
+  reactStrictMode: true,
+  experimental: {},
   images: {
     remotePatterns: [
       {

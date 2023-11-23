@@ -1,7 +1,9 @@
-import '@/global.css';
+import './global.css';
 import { Metadata } from "next";
-import { Layout } from "@/editor/Layout";
 import RootProvider from "@/root.container";
+import { mplus } from '@/styles/font';
+import { Toast } from "./_components/Toast";
+import { Header } from './_components/Header';
 
 const title = 'NinjaGL'
 const url = 'https://ninjagl.vercel.app/'
@@ -36,12 +38,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ja" className='antialiased'>
       <head />
-      <body>
-      <RootProvider>
-        <Layout>
+      <body className={`${mplus.variable}`}>
+        <RootProvider>
           {children}
-        </Layout>
-      </RootProvider>
+          <Toast />
+        </RootProvider>
       </body>
     </html>
   )

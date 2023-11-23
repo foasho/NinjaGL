@@ -1,7 +1,7 @@
 import styles from "@/App.module.scss";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useSnapshot } from "valtio";
-import { globalStore } from "../Store";
+import { globalStore } from "../Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { MyLights } from "../ViewPort/MainViewItems/Lights";
 import { StaticObjects } from "../ViewPort/MainViewItems/Objects";

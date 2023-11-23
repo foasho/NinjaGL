@@ -3,6 +3,7 @@
 import React from "react";
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+import {NextUIProvider} from "@nextui-org/react";
 
 function RootProvider(
   { 
@@ -14,9 +15,11 @@ function RootProvider(
   }
   ) {
   return (
-    <SessionProvider session={session} refetchInterval={0}>
-      {children}
-    </SessionProvider>
+    <NextUIProvider>
+      <SessionProvider session={session} refetchInterval={0}>
+        {children}
+      </SessionProvider>
+    </NextUIProvider>
   )
 }
 

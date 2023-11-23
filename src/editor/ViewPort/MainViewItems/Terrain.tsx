@@ -6,7 +6,7 @@ import { GLTFLoader } from "three-stdlib";
 import { IObjectManagement } from "@ninjagl/core";
 import { EffectComposer, Selection, Select, Outline } from "@react-three/postprocessing";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**

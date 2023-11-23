@@ -6,7 +6,7 @@ import { Euler, Vector3, MathUtils, MeshStandardMaterial, AnimationClip } from "
 import { isNumber } from "@/commons/functional";
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const MainViewInspector = () => {

@@ -5,7 +5,7 @@ import { DragEventHandler, MutableRefObject, createContext, useContext, useEffec
 import { AnimationClip, AnimationMixer, Euler, Mesh, Object3D, Raycaster, Vector2, Vector3, MathUtils, BoxHelper, Scene, Box3 } from "three";
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
-import { globalContentStore, globalPlayerStore } from "../Store";
+import { globalContentStore, globalPlayerStore } from "../Store/Store";
 import { PlayerInspector } from "../Inspector/PlayerInspector";
 import { SkeletonUtils } from "three-stdlib";
 import Swal from "sweetalert2";

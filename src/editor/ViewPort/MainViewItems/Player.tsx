@@ -3,7 +3,7 @@ import { BoxHelper, Euler, Matrix4, Object3D, Vector3 } from "three";
 import { useState, useEffect, useContext, useRef } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { PivotControls } from "./PivoitControl";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { useSnapshot } from "valtio";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 

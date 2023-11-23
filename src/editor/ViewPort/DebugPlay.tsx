@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { SkeletonUtils } from "three-stdlib";
 import { NJCFile, IConfigParams, IObjectManagement, IUIManagement, ITextureManagement, IScriptManagement } from "@ninjagl/core"
-import { globalConfigStore } from "../Store";
+import { globalConfigStore } from "../Store/Store";
 import { useSnapshot } from "valtio";
 import dynamic from "next/dynamic";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";

@@ -3,7 +3,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { Euler, Vector3, BoxHelper, DoubleSide } from "three";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { PivotControls } from "./PivoitControl";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 

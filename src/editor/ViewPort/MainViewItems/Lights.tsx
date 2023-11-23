@@ -4,7 +4,7 @@ import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { Color, DirectionalLightHelper, DoubleSide, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
 import { PivotControls } from "./PivoitControl";
 import { useSnapshot } from "valtio";
-import { globalStore } from "@/editor/Store";
+import { globalStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const MyLights = () => {

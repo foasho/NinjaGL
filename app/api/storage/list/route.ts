@@ -21,7 +21,7 @@ const isFolder = (prefix: string, pathname: string) => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   let options: ListCommandOptions = {
-    token: process.env.BLOB_READ_WRITE_TOKEN,
+    token: process.env.SOLB_READ_WRITE_TOKEN,
   };
   // prefix: string, limit: number, offset: number
   const prefix = searchParams.get('prefix') || "";

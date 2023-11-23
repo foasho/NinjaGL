@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { useTranslation } from 'react-i18next';
 import { IScriptManagement } from '@ninjagl/core';
 import { useSnapshot } from 'valtio';
-import { globalScriptStore } from '../Store';
+import { globalScriptStore } from '../Store/Store';
 import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';
 import { useSession } from 'next-auth/react';
 import { b64EncodeUnicode } from '@/commons/functional';

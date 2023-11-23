@@ -1,111 +1,93 @@
-import "./Locale";
-import styles from "@/App.module.scss";
-import Swal from "sweetalert2";
-import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
-import { MainViewer } from "@/editor/ViewPort/MainViewer";
-import { useState, useEffect, useContext } from "react";
-import { Euler, MathUtils, Vector3 } from "three";
-import { ContentsBrowser } from "./Hierarchy/ContentViewer";
-import { ScriptEditor } from "./ViewPort/ScriptEditor";
-import { AiFillSave, AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from "react-icons/ai";
-import { TerrainMakerCanvas } from "./ViewPort/TerrainMaker";
-import { saveAs } from "file-saver";
-import { MainViewInspector } from "./Inspector/MainViewInspector";
-import { HierarchyTree } from "./Hierarchy/HierarchyTree";
-import { BsCheck, BsPerson, BsPlay, BsStop } from "react-icons/bs";
-import { FaPeopleArrows } from "react-icons/fa";
-import { showSelectNewObjectDialog } from "./Dialogs/SelectNewObjectDialog";
-import { ShaderEditor } from "./ViewPort/ShaderEditor";
-import { DebugPlay, ExportNjcFile } from "./ViewPort/DebugPlay";
-import { UINavigation } from "./Hierarchy/UINavigation";
-import { useTranslation } from "react-i18next";
-import { loadNJCFileFromURL, saveNJCBlob, loadNJCFile } from "@ninjagl/core";
-import { BiEditAlt } from "react-icons/bi";
-import { useSnapshot } from "valtio";
-import { globalConfigStore, globalStore } from "./Store";
-import { ScriptNavigation } from "./Hierarchy/ScriptNavigation";
-import { ShaderNavigation } from "./Hierarchy/ShaderNavigation";
-import { TextureNavigation } from "./Hierarchy/TextureNavigation";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { showHelperDialog } from "./Dialogs/HelperDialog";
-import { b64EncodeUnicode } from "@/commons/functional";
-import { showMultiPlayerDialog } from "./Dialogs/MultiPlayerSettingDialog";
-import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import './Locale';
+import clsx from 'clsx';
+import styles from '@/App.module.scss';
+import Swal from 'sweetalert2';
+import { PlayerEditor } from '@/editor/ViewPort/PlayerEditor';
+import { MainViewer } from '@/editor/ViewPort/MainViewer';
+import { MathUtils, Vector3 } from 'three';
+import { ContentsBrowser } from './Hierarchy/ContentViewer';
+import { ScriptEditor } from './ViewPort/ScriptEditor';
+import { AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai';
+import { TerrainMakerCanvas } from './ViewPort/TerrainMaker';
+import { MainViewInspector } from './Inspector/MainViewInspector';
+import { HierarchyTree } from './Hierarchy/HierarchyTree';
+import { showSelectNewObjectDialog } from './Dialogs/SelectNewObjectDialog';
+import { ShaderEditor } from './ViewPort/ShaderEditor';
+import { DebugPlay } from './ViewPort/DebugPlay';
+import { UINavigation } from './Hierarchy/UINavigation';
+import { useTranslation } from 'react-i18next';
+import { loadNJCFileFromURL } from '@ninjagl/core';
+import { useSnapshot } from 'valtio';
+import { globalStore } from './Store/Store';
+import { ScriptNavigation } from './Hierarchy/ScriptNavigation';
+import { ShaderNavigation } from './Hierarchy/ShaderNavigation';
+import { TextureNavigation } from './Hierarchy/TextureNavigation';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { globalEditorStore } from './Store/editor';
+import { AppBar, AppBarHeight } from './Common/AppBar';
+import { WindowdAnalyzer } from './Common/WindowAnalyzer';
 
 /**
  * NinjaEngineメインコンポネント
  */
 export const NinjaEditor = () => {
-  const { data: session } = useSession();
   const state = useSnapshot(globalStore);
+  const editorState = useSnapshot(globalEditorStore);
   const editor = useNinjaEditor();
-  const configState = useSnapshot(globalConfigStore);
-  const [project, setProject] = useState<{name: string; path: string}>();
-  const [viewSelect, setViewSelect] = useState<"mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor">("mainview");
-  const [selectSubNav, setSelectSubNav] = useState<"ui" | "shader" | "script" | "texture">("ui");
-  const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
-  const [showSubMenu, setShowSubMenu] = useState(false);
-  const [recentProgects, setRecentProjects] = useState<{name: string; path: string}[]>([]);
-  const [autoSave, setAutoSave] = useState<boolean>(false);
-  const { t, i18n } = useTranslation();
+  const { viewSelect, selectSubNav, appBar, isMd } = editorState;
+  const { t } = useTranslation();
 
   /**
    * ビューポートの切り替え
    */
-  const changeView = (viewType: "mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor") => {
-    if (viewSelect !== viewType) {
+  const changeView = (
+    viewType: 'mainview' | 'debugplay' | 'terrainmaker' | 'playereditor' | 'scripteditor' | 'shadereditor',
+  ) => {
+    if (editorState.viewSelect !== viewType) {
       // globalStore.init();
-      setViewSelect(viewType);
-      if (viewType == "scripteditor"){
-        setSelectSubNav("script");
-      }
-      else if (viewType == "shadereditor"){
-        setSelectSubNav("shader");
+      globalEditorStore.viewSelect = viewType;
+      if (viewType == 'scripteditor') {
+        globalEditorStore.selectSubNav = 'script';
+      } else if (viewType == 'shadereditor') {
+        globalEditorStore.selectSubNav = 'shader';
       }
     }
-  }
+  };
 
   /**
    * 新しいオブジェクトを追加する
    */
   const onClickNewObject = async () => {
     const data = await showSelectNewObjectDialog();
-    if (data.type == "light"){
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*${data.value}`,
-          type: "light",
-          args: {
-            type: data.value,
-            castShadow: true,
-            receiveShadow: false,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      )
-    }
-    else if (data.type == "sky"){
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*${data.value}`,
-          type: "sky",
-          args: {
-            type: data.value
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      )
-    }
-    else if (data.type == "sound"){
+    if (data.type == 'light') {
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: 'light',
+        args: {
+          type: data.value,
+          castShadow: true,
+          receiveShadow: false,
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'sky') {
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: 'sky',
+        args: {
+          type: data.value,
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'sound') {
       // editor.setObjectManagement(
       //   {
       //     id: generateUUID(),
@@ -118,78 +100,65 @@ export const NinjaEditor = () => {
       //     visibleType: "auto",
       //   }
       // )
-    }
-    else if (data.type == "three"){
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*${data.value}`,
-          type: "three",
-          args: {
-            type: data.value
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-    }
-    else if (data.type == "fog"){
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*${data.value}`,
-          type: "fog",
-          args: {
-            type: data.value
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      )
-    }
-    else if (data.type == "environment"){
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*${data.value}`,
-          type: "environment",
-          args: {
-            preset: data.value,
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-    }
-    else if (data.type == "lightformer"){
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*LF-(${data.value})`,
-          type: "lightformer",
-          args: {
-            form: data.value,
-            color: "#ffffff",
-            intensity: 1,
-            position: new Vector3(0, 1, 0),
-          },
-          physics: false,
-          phyType: "box",
-          visibleType: "auto",
-          visible: true
-        }
-      );
-    }
-    else if (data.type == "effect"){
+    } else if (data.type == 'three') {
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: 'three',
+        args: {
+          type: data.value,
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'fog') {
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: 'fog',
+        args: {
+          type: data.value,
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'environment') {
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*${data.value}`,
+        type: 'environment',
+        args: {
+          preset: data.value,
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'lightformer') {
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*LF-(${data.value})`,
+        type: 'lightformer',
+        args: {
+          form: data.value,
+          color: '#ffffff',
+          intensity: 1,
+          position: new Vector3(0, 1, 0),
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'effect') {
       let _args: any = { type: data.value };
-      if (data.value == "ssr"){
-        _args ={
+      if (data.value == 'ssr') {
+        _args = {
           type: data.value,
           enabled: true,
           temporalResolve: true,
@@ -220,89 +189,43 @@ export const NinjaEditor = () => {
           maxDepthDifference: { value: 5, min: 0, max: 10 },
           maxDepth: { value: 1, min: 0, max: 1 },
           thickness: { value: 3, min: 0, max: 10 },
-          ior: { value: 1.45, min: 0, max: 2 }
-        }
-      }
-      else if (data.value == "bloom"){
+          ior: { value: 1.45, min: 0, max: 2 },
+        };
+      } else if (data.value == 'bloom') {
         _args = {
           type: data.value,
-          luminanceThreshold:0.2,
+          luminanceThreshold: 0.2,
           mipmapBlur: true,
           luminanceSmoothing: 0,
           intensity: 1.25,
-        }
-      }
-      else if (data.value == "lut"){
+        };
+      } else if (data.value == 'lut') {
         _args = {
           type: data.value,
-          texture: "std.cube",
-        }
+          texture: 'std.cube',
+        };
       }
       editor.addOM({
         id: MathUtils.generateUUID(),
         name: `*${data.value}`,
-        type: "effect",
+        type: 'effect',
         args: _args,
         physics: false,
-        phyType: "box",
-        visibleType: "auto",
-        visible: true
-      })
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
+    } else if (data.type == 'xr') {
     }
-    else if (data.type == "xr"){
-      // editor.setUM({
-      //   id: MathUtils.generateUUID(),
-      //   name: `*${data.value}`,
-      //   type: "xr",
-      //   args: {
-      //     type: data.value,
-      //   },
-      //   visible: true,
-      // });
-    }
-  }
-
-  /**
-   * 言語選択
-   */
-  const onClickSelectLang = () => {
-    if (i18n.language == "ja"){
-      i18n.changeLanguage("en");
-    }
-    else if (i18n.language == "en"){
-      i18n.changeLanguage("ja");
-    }
-  }
-
-  /**
-   * テンプレート選択
-   */
-  const onClickSelectTemplate = () => {
-    Swal.fire(
-      t("attention").toString(), 
-      t("templatePrepare").toString()
-    );
-  }
-
-  /**
-   * デバッグプレイ
-   */
-  const onPlayStop = () => {
-    if (viewSelect == "debugplay"){
-      setViewSelect("mainview");
-    }
-    else {
-      setViewSelect("debugplay");
-    }
-  }
+  };
 
   /**
    * JSScriptで特定のスクリプトを開く
    */
   const changeScriptEditor = () => {
-    setViewSelect("scripteditor");
-    setSelectSubNav("script");
-  }
+    globalEditorStore.viewSelect = 'scripteditor';
+    globalEditorStore.selectSubNav = 'script';
+  };
 
   /**
    * プロジェクトの変更
@@ -318,508 +241,196 @@ export const NinjaEditor = () => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         const njcFile = await loadNJCFileFromURL(njcUrl);
-        console.log("### ロードしたnjcFileを確認 ###");
+        console.log('### ロードしたnjcFileを確認 ###');
         console.log(njcFile);
         editor.setNJCFile(njcFile);
         // setProject({...project, name: name});
       }
-    })
-  }
-
-  /**
-   * プロジェクト名を保存
-   */
-  const changeProjectName = () => {
-    Swal.fire({
-      title: t("changeProjectName").toString(),
-      input: 'text',
-      showCancelButton: true,
-      confirmButtonText: t("change").toString(),
-      showLoaderOnConfirm: true,
-      preConfirm: async (inputStr) => {
-        if (inputStr.length === 0) {
-          return Swal.showValidationMessage(t("leastInput"));
-        }
-        return inputStr;
-      },
-      allowOutsideClick: function () {
-        return !Swal.isLoading();
-      }
-    }).then((result) => {
-      if (result.value) {
-        // setProject({...project, name: result.value});
-      }
     });
   };
 
-  /**
-   * プロジェクト全体を保存
-   * ビルド処理
-   */
-  const onSave = async(completeAlert: boolean=true) => {
-    const njcFile = ExportNjcFile(
-      editor.oms,
-      editor.ums,
-      editor.tms,
-      editor.sms, 
-      {
-        physics: configState.physics,
-        autoScale: configState.autoScale,
-        alpha: configState.alpha,
-        logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
-        antialias: configState.antialias,
-        shadowResolution: configState.shadowResolution,
-        mapsize: configState.mapsize,
-        layerGridNum: configState.layerGridNum,
-        lodDistance: configState.lodDistance,
-        dpr: configState.dpr as number,
-        initCameraPosition: configState.initCameraPosition,
-        isDebug: true,
-      }
-    );
-    const blob = await saveNJCBlob(njcFile);
-    if (!project){
-      Swal.fire({
-        title: t("inputProjectName").toString(),
-        input: 'text',
-        showCancelButton: true,
-        confirmButtonText: t("change").toString(),
-        showLoaderOnConfirm: true,
-        preConfirm: async (inputStr: string) => {
-          //バリデーションを入れたりしても良い
-          if (inputStr.length == 0) {
-            return Swal.showValidationMessage(t("leastInput"));
-          }
-          return inputStr;
-        },
-        allowOutsideClick: function () {
-          return !Swal.isLoading();
-        }
-      }).then(async (result) => {
-        if (result.value) {
-          // もしログインしているのならクラウドに保存する
-          if (session){
-            const formData = new FormData();
-            formData.append("file", blob);
-            const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/savedata`;
-            const keyPath = (uploadPath + `/${result.value}.njc`).replaceAll("//", "/");
-            formData.append("filePath", keyPath);
-            try {
-              const response = await fetch("/api/storage/upload", {
-                method: "POST",
-                body: formData,
-              });
-              if (!response.ok) {
-                throw new Error("Error uploading file");
-              }
-              const res = await response.json();
-              // 成功したら、ローカルストレージの追加しておく
-              localStorage.setItem(
-                "recentprojects", 
-                JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: result.value, path: keyPath}])
-              );
-              setProject({name: result.value, path: keyPath});
-              if (completeAlert){
-                // @ts-ignore
-                Swal.fire({
-                  icon: 'success',
-                  title: t("success"),
-                  text: t("saveSuccess") + `\npersonal/savedata/${result.value}.njc`,
-                });
-              }
-            } 
-            catch (error) {
-              console.error("Error:", error.message);
-              // 失敗したらをローカルに保存
-              saveAs(blob, `${result.value}.njc`);
-              // setProject({name: result.value, path: undefined});
-            }
-          }
-          else {
-            // ZIPファイルをローカルに保存
-            saveAs(blob, `${result.value}.njc`);
-            // setProject({name: result.value, path: undefined});
-          }
-        }
-      });
-    }
-    else {
-      // もしログインしているのならクラウドに保存する
-      if (session){
-        const formData = new FormData();
-        formData.append("file", blob);
-        const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/savedata`;
-        const keyPath = (uploadPath + `/${project.name}`).replaceAll("//", "/");
-        formData.append("filePath", keyPath);
-        try {
-          const response = await fetch("/api/storage/upload", {
-            method: "POST",
-            body: formData,
-          });
-          if (!response.ok) {
-            throw new Error("Error uploading file");
-          }
-          const res = await response.json();
-          // 成功したら、ローカルストレージの追加しておく
-          localStorage.setItem(
-            "recentprojects", 
-            JSON.stringify([...JSON.parse(localStorage.getItem("recentprojects") || "[]"), {name: project.name, path: keyPath}])
-          );
-          setProject({name: project.name, path: keyPath});
-          // Success message
-          if (completeAlert){
-            // @ts-ignore
-            Swal.fire({
-              icon: 'success',
-              title: t("success"),
-              text: t("saveSuccess") + `\npersonal/savedata/${project.name}`,
-            });
-          }
-        } catch (error) {
-          console.error("Error:", error.message);
-          // 失敗したらをローカルに保存
-          saveAs(blob, `${project.name}`);
-          // setProject({name: project.name, path: undefined});
-        }
-      }
-      else {
-        // ZIPファイルをローカルに保存
-        saveAs(blob, `${project.name}`);
-        // setProject({name: project.name, path: undefined});
-      }
-    }
-  }
-
-  /**
-   * ファイルメニューを開く
-   */
-  const openFileMenu = () => {
-    setShowFileMenu(!showFileMenu);
-  }
-  const handleFileMenuLeave = () => {
-    setShowFileMenu(false);
-  };
-  const handleRecentProjectsHover = () => {
-    setShowSubMenu(true);
-  };
-  const handleSubMenuMouseLeave = () => {
-    setShowSubMenu(false);
-  };
-
-  /**
-   * プロジェクトを開く
-   */
-  const openProject = async () => {
-    const input: HTMLInputElement = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.njc'; // NJCの拡張子を指定
-    input.onchange = async (event) => {
-      const target = event.target as HTMLInputElement;
-      const files = target.files;
-      if (files && files.length > 0){
-        const file = (target.files as FileList)[0];
-        const njcFile = await loadNJCFile(file);
-        console.log("### ロードしたnjcFileを確認 ###");
-        console.log(njcFile);
-        editor.setNJCFile(njcFile);
-      }
-    };
-    input.click();
-  }
-  
-  /**
-   * マルチプレイヤーの起動
-   */
-  const onMultiPlayer = async () => {
-    await showMultiPlayerDialog();
-  }
-
-  /**
-   * プロジェクトが何もないときは、
-   * BoxとPlane, DirectionalLight, SpotLightを追加
-   * Environment(Sunset)を追加
-   */
-  useEffect(() => {
-    // 最近開いたプロジェクトを取得
-    const recentProjects = localStorage.getItem("recentProjects");
-    if (recentProjects){
-      setRecentProjects(JSON.parse(recentProjects));
-    }
-    // AutoSaveが有効かどうかを取得
-    const autoSave = localStorage.getItem("autoSave");
-    if (autoSave){
-      setAutoSave(autoSave == "true");
-    }
-  }
-  , []);
-
-  useEffect(() => {
-    // ※AutoSave調整中
-    // AutoSaveが有効なら、AutoSaveを開始
-    // let autoSaveInterval;
-    // if (autoSave && session){
-    //   autoSaveInterval = setInterval(() => {
-    //     onSave();
-    //   }, 900 * 1000);
-    // }
-    // return () => {
-    //   clearInterval(autoSaveInterval);
-    // }
-  }, [autoSave]);
-
-
-
   return (
     <>
-      <div className={styles.editor}>
-        <div className={styles.appBar}>
-          <ul className={styles.nav}>
-            <li className={`${styles.navItem} ${styles.left}`}>
-              <a onClick={() => openFileMenu()}>{t("file")}</a>
-            </li>
-            <li className={`${styles.navItem} ${styles.left}`}>
-              <a onClick={() => onClickSelectLang()}>{t("lang")}</a>
-            </li>
-            <li className={`${styles.navItem} ${styles.left}`}>
-              <a onClick={() => window.open("https://github.com/foasho/NinjaGL", "_blank")}>
-                Github
-              </a>
-            </li>
-            <li className={`${styles.navItem} ${styles.left}`}>
-              <a onClick={() => onClickSelectTemplate()}>{t("template")}</a>
-            </li>
-            <li className={`${styles.navCenter}`}>
-              <a className={styles.item}>
-                NinjaGL
-              </a>
-              <a className={styles.projectName} onClick={() => {changeProjectName()}}>
-                {project? project.name: <><BiEditAlt/>{t("nontitle")}</>}
-              </a>
-            </li>
-            <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.save} onClick={() => onSave()}>
-                <span className={styles.icon}>
-                  <AiFillSave />
-                </span>
-                Save
-              </a>
-            </li>
-            <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.play} onClick={() => onPlayStop()}>
-                <span className={styles.icon}>
-                  {viewSelect == "debugplay"? <><BsStop /></>: <><BsPlay /></>}
-                </span>
-                  {viewSelect == "debugplay"? <>Stop</>: <>Play</>}
-              </a>
-            </li>
-            <li className={`${styles.navItem} ${styles.right}`}>
-              <Link className={styles.isLoggedIn} href={"/login"}>
-                <span className={styles.icon}>
-                  {(session)? <><BsPerson /></>: <>LogIn</>}
-                </span>
-              </Link>
-            </li>
-            <li className={`${styles.navItem} ${styles.right}`}>
-              <a className={styles.multi} onClick={() => onMultiPlayer()}>
-                <span className={styles.icon}>
-                  <FaPeopleArrows/>
-                </span>
-              </a>
-            </li>
-          </ul>
-          {showFileMenu &&
-          <div className={styles.filemenu}>
-            <ul onMouseLeave={() => handleFileMenuLeave()}>
-              {/* <li><a>{t("newProject")}</a></li> ##WEBなので不要?  */}
-              <li><a onClick={() => openProject()}>{t("open")}</a></li>
-              <li onMouseEnter={() => handleRecentProjectsHover()} onMouseLeave={() => handleSubMenuMouseLeave()}>
-                <a>{t("recentProjects")}</a>
-                {showSubMenu &&
-                <ul className={styles.subMenu} onMouseLeave={() => handleSubMenuMouseLeave()}>
-                  {recentProgects.map(((pf, idx) => {
-                    return (
-                      <li key={idx}>
-                        <a>{pf.name}</a>
-                        <a>{pf.path}</a>
-                      </li>
-                    )
-                  }))}
-                  {recentProgects.length == 0 && 
-                    <li>
-                      <a>{t("noRecentData")}</a>
-                    </li>
-                  }
-                </ul>
-                }
-              </li>
-              <li>
-                <a onClick={() => setAutoSave(!autoSave)} >
-                  {autoSave?
-                    <BsCheck/>
-                    :
-                    <> </>
-                  }
-                  {t("autoSave")}
-                </a>
-              </li>
-              <li><a onClick={() => showHelperDialog()}>{t("help")}</a></li>
-            </ul>
-          </div>
-          }
-        </div>
-        <div className={styles.mainContents}>
-          <div className={styles.hierarchy}>
-            <div className={styles.hierarchyArea}>
-              <div className={styles.hierarchyTree}>
-                <HierarchyTree />
-              </div>
-            </div>
-            <div className={styles.subNavArea}>
-              <div className={styles.subSelect}>
-                <div className={`${styles.navItem} ${selectSubNav == "ui" && styles.active}`} onClick={() => setSelectSubNav("ui")}>
-                  <span className={styles.icon}>
-                    <AiOutlineAppstore />
-                  </span>
-                </div>
-                <div className={`${styles.navItem} ${selectSubNav == "script" && styles.active}`} onClick={() => setSelectSubNav("script")}>
-                  <span className={styles.icon}>
-                    <AiOutlineCode />
-                  </span>
-                </div>
-                <div className={`${styles.navItem} ${selectSubNav == "shader" && styles.active}`} onClick={() => setSelectSubNav("shader")}>
-                  <span className={styles.icon}>
-                    <AiOutlineHighlight />
-                  </span>
-                </div>
-                <div className={`${styles.navItem} ${selectSubNav == "texture" && styles.active}`} onClick={() => setSelectSubNav("texture")}>
-                  <span className={styles.icon}>
-                    <AiOutlinePicture />
-                  </span>
-                </div>
-              </div>
-              <div className={styles.subNav}>
-                {selectSubNav == "ui" &&
-                  <UINavigation />
-                }
-                {selectSubNav == "script" &&
-                  <ScriptNavigation/>
-                }
-                {selectSubNav == "shader" &&
-                  <ShaderNavigation/>
-                }
-                {selectSubNav == "texture" &&
-                  <TextureNavigation/>
-                }
-              </div>
-            </div>
-            <div className={styles.contentsbrowser}>
-              <ContentsBrowser 
-                changeScriptEditor={changeScriptEditor}
-                changeProject={changeProject}
-              />
-            </div>
-            <div className={styles.createObj} onClick={() => onClickNewObject()}>
-              <div className={styles.title}>
-                <span className={styles.icon}>
-                  <AiOutlinePlus />
-                </span>
-                <span className={styles.name}>
-                  {t("newObject")}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.contents}>
-            <div className={styles.viewselect}>
-              <div className={styles.select}>
-                <a
-                  onClick={() => changeView("mainview")}
-                  style={viewSelect == "mainview" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                  {t("mainView")}
-                </a>
-                <a
-                  onClick={() => changeView("terrainmaker")}
-                  style={viewSelect == "terrainmaker" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                  {t("terrainMaker")}
-                </a>
-                <a
-                  onClick={() => changeView("playereditor")}
-                  style={viewSelect == "playereditor" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                 {t("playerEditor")}
-                </a>
-                <a
-                  onClick={() => changeView("scripteditor")}
-                  style={viewSelect == "scripteditor" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                  {t("scriptEditor")}
-                </a>
-                <a
-                  onClick={() => changeView("shadereditor")}
-                  style={viewSelect == "shadereditor" ? { background: '#fff', color: "#838383" } : {}}
-                >
-                  {t("shaderEditor")}
-                </a>
-              </div>
-            </div>
-            <div className={styles.viewport}>
-              {viewSelect == "mainview" &&
-               <>
-                <MainViewer />
-               </>
-              }
-              {viewSelect == "debugplay" &&
+      <div className='w-auto'>
+        <AppBar />
+
+        <div
+          className={`m-0 left-0`}
+          style={{
+            height: '100vh',
+          }}
+        >
+          <div className={`relative grid grid-cols-6 gap-0 h-[calc(100vh-45px)] w-full`}>
+            {/** ヒエラルキービュー */}
+            <div
+              className={clsx(`pt-[2px] bg-primary`, isMd ? '' : 'absolute z-10')}
+              style={{
+                height: appBar ? `calc(100vh - ${AppBarHeight}px)` : '100vh',
+              }}
+            >
               <>
-                <DebugPlay />
+                <div className='px-[5px] py-[12px] min-h-[20%]'>
+                  <div className='m-0'>
+                    <HierarchyTree />
+                  </div>
+                </div>
+                <div className='px-[5px] py-[12px] min-h-[20%]'>
+                  <div className='text-center mb-2 p-0 h-[20px] text-white select-none'>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'ui')}
+                    >
+                      <span className='px-1 text-md border-r-1 border-white cursor-pointer'>
+                        <AiOutlineAppstore className='inline pb-1 text-xl text-white font-bold' />
+                      </span>
+                    </div>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'script' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'script')}
+                    >
+                      <span className='px-1 text-md border-r-1 border-white cursor-pointer'>
+                        <AiOutlineCode className='inline pb-1 text-xl text-white font-bold' />
+                      </span>
+                    </div>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'shader' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'shader')}
+                    >
+                      <span className='px-1 text-md border-r-1 border-white cursor-pointer'>
+                        <AiOutlineHighlight className='inline pb-1 text-xl text-white font-bold' />
+                      </span>
+                    </div>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'texture' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'texture')}
+                    >
+                      <span className='px-1 text-md'>
+                        <AiOutlinePicture className='inline pb-1 text-xl text-white font-bold' />
+                      </span>
+                    </div>
+                  </div>
+                  <div className='block m-0 text-white px-3 '>
+                    {selectSubNav == 'ui' && <UINavigation />}
+                    {selectSubNav == 'script' && <ScriptNavigation />}
+                    {selectSubNav == 'shader' && <ShaderNavigation />}
+                    {selectSubNav == 'texture' && <TextureNavigation />}
+                  </div>
+                </div>
+                <div
+                  className='text-white bg-primary p-4 max-h-[30vh] overflow-y-auto overflow-x-hidden'
+                  style={{ flex: 6 }}
+                >
+                  <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
+                </div>
+                <div className={styles.createObj} onClick={() => onClickNewObject()}>
+                  <div className={styles.title}>
+                    <span className={styles.icon}>
+                      <AiOutlinePlus />
+                    </span>
+                    <span className={styles.name}>{t('newObject')}</span>
+                  </div>
+                </div>
               </>
-              }
-              {viewSelect == "terrainmaker" &&
-                <TerrainMakerCanvas />
-              }
-              {viewSelect == "playereditor" &&
-                <>
-                  <PlayerEditor />
-                </>
-              }
-              {viewSelect == "scripteditor" &&
-                <>
-                  <ScriptEditor />
-                </>
-              }
-              {viewSelect == "shadereditor" &&
-                <>
-                  <ShaderEditor />
-                </>
-              }
             </div>
 
+            {/** コンテンツビュー */}
+            <div
+              className={clsx(`bg-primary relative`, isMd ? 'col-span-5' : 'w-screen')}
+              style={{
+                height: appBar ? `calc(100vh - ${AppBarHeight}px)` : '100vh',
+              }}
+            >
+              <div className='absolute top-0 left-0 z-10 m-0 w-full p-0 text-primary bg-cyber/50 select-none'>
+                <div className='inline-block'>
+                  <a
+                    onClick={() => changeView('mainview')}
+                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer rounded'
+                    style={viewSelect == 'mainview' ? { background: '#fff', color: '#838383' } : {}}
+                  >
+                    {t('mainView')}
+                  </a>
+                  <a
+                    onClick={() => changeView('terrainmaker')}
+                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer rounded'
+                    style={viewSelect == 'terrainmaker' ? { background: '#fff', color: '#838383' } : {}}
+                  >
+                    {t('terrainMaker')}
+                  </a>
+                  <a
+                    onClick={() => changeView('playereditor')}
+                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer'
+                    style={viewSelect == 'playereditor' ? { background: '#fff', color: '#838383' } : {}}
+                  >
+                    {t('playerEditor')}
+                  </a>
+                  <a
+                    onClick={() => changeView('scripteditor')}
+                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer'
+                    style={viewSelect == 'scripteditor' ? { background: '#fff', color: '#838383' } : {}}
+                  >
+                    {t('scriptEditor')}
+                  </a>
+                  <a
+                    onClick={() => changeView('shadereditor')}
+                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer'
+                    style={viewSelect == 'shadereditor' ? { background: '#fff', color: '#838383' } : {}}
+                  >
+                    {t('shaderEditor')}
+                  </a>
+                </div>
+              </div>
+              <div className='m-0 p-0 h-full bg-white'>
+                {viewSelect == 'mainview' && (
+                  <>
+                    <MainViewer />
+                  </>
+                )}
+                {viewSelect == 'debugplay' && (
+                  <>
+                    <DebugPlay />
+                  </>
+                )}
+                {viewSelect == 'terrainmaker' && <TerrainMakerCanvas />}
+                {viewSelect == 'playereditor' && (
+                  <>
+                    <PlayerEditor />
+                  </>
+                )}
+                {viewSelect == 'scripteditor' && (
+                  <>
+                    <ScriptEditor />
+                  </>
+                )}
+                {viewSelect == 'shadereditor' && (
+                  <>
+                    <ShaderEditor />
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <div 
-            className={styles.inspector}
+          <div
+            className='block fixed top-[80px] right-[10px] p-[10px] w-[200px] max-h-[calc(100vh-250px)] rounded-lg bg-secondary/75 text-white text-left overflow-y-auto'
             style={{
-              display: (
-                (viewSelect == "mainview" && state.currentId)
-                ||
-                (viewSelect == "terrainmaker")
-                ||
-                (viewSelect == "playereditor")
-              )?"block": "none",
+              display:
+                (viewSelect == 'mainview' && state.currentId) ||
+                viewSelect == 'terrainmaker' ||
+                viewSelect == 'playereditor'
+                  ? 'block'
+                  : 'none',
             }}
           >
-            {(viewSelect == "mainview") &&
+            {viewSelect == 'mainview' && (
               <>
                 <MainViewInspector />
               </>
-            }
+            )}
           </div>
         </div>
-        <div className={styles.userScript}>
 
-        </div>
-        <div id="myDialog"></div>
+        <div id='myDialog'></div>
+        <WindowdAnalyzer />
       </div>
     </>
-  )
-}
+  );
+};
