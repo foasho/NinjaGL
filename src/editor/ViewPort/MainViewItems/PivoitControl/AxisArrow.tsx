@@ -64,7 +64,7 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
   const onPointerDown = React.useCallback(
     (e: ThreeEvent<PointerEvent>) => {
       if (userData && userData.focus) return;
-      if (displayValues) {
+      if (displayValues && divRef.current) {
         divRef.current.innerText = `${translation.current[axis].toFixed(2)}`
         divRef.current.style.display = 'block'
       }
@@ -94,7 +94,7 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
         if (min !== undefined) offset = Math.max(offset, min - offset0.current)
         if (max !== undefined) offset = Math.min(offset, max - offset0.current)
         translation.current[axis] = offset0.current + offset
-        if (displayValues) divRef.current.innerText = `${translation.current[axis].toFixed(2)}`
+        if (displayValues && divRef.current) divRef.current.innerText = `${translation.current[axis].toFixed(2)}`
         offsetMatrix.makeTranslation(dir.x * offset, dir.y * offset, dir.z * offset)
         onDrag(offsetMatrix)
       }

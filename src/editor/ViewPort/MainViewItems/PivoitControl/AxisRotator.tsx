@@ -95,7 +95,7 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
 
   const onPointerDown = React.useCallback(
     (e: ThreeEvent<PointerEvent>) => {
-      if (displayValues) {
+      if (displayValues && divRef.current) {
         divRef.current.innerText = `${toDegrees(angle.current).toFixed(0)}º`
         divRef.current.style.display = 'block'
       }
@@ -146,7 +146,7 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
           angle.current = angle.current > Math.PI ? angle.current - 2 * Math.PI : angle.current
         }
 
-        if (displayValues) {
+        if (displayValues && divRef.current) {
           degrees = toDegrees(angle.current)
           divRef.current.innerText = `${degrees.toFixed(0)}º`
         }

@@ -1,31 +1,40 @@
 import './Locale';
-import clsx from 'clsx';
-import styles from '@/App.module.scss';
-import Swal from 'sweetalert2';
-import { PlayerEditor } from '@/editor/ViewPort/PlayerEditor';
-import { MainViewer } from '@/editor/ViewPort/MainViewer';
-import { MathUtils, Vector3 } from 'three';
-import { ContentsBrowser } from './Hierarchy/ContentViewer';
-import { ScriptEditor } from './ViewPort/ScriptEditor';
-import { AiOutlineAppstore, AiOutlineCode, AiOutlineHighlight, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai';
-import { TerrainMakerCanvas } from './ViewPort/TerrainMaker';
-import { MainViewInspector } from './Inspector/MainViewInspector';
-import { HierarchyTree } from './Hierarchy/HierarchyTree';
-import { showSelectNewObjectDialog } from './Dialogs/SelectNewObjectDialog';
-import { ShaderEditor } from './ViewPort/ShaderEditor';
-import { DebugPlay } from './ViewPort/DebugPlay';
-import { UINavigation } from './Hierarchy/UINavigation';
-import { useTranslation } from 'react-i18next';
 import { loadNJCFileFromURL } from '@ninjagl/core';
+import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
+import {
+  AiOutlineAppstore,
+  AiOutlineCode,
+  AiOutlineHighlight,
+  AiOutlinePicture,
+  AiOutlinePlus,
+  AiOutlineLeft,
+  AiOutlineRight,
+} from 'react-icons/ai';
+import Swal from 'sweetalert2';
+import { MathUtils, Vector3 } from 'three';
 import { useSnapshot } from 'valtio';
-import { globalStore } from './Store/Store';
+
+import { MainViewer } from '@/editor/ViewPort/MainViewer';
+import { PlayerEditor } from '@/editor/ViewPort/PlayerEditor';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+
+import { AppBar, AppBarHeight } from './Common/AppBar';
+import { WindowdAnalyzer } from './Common/WindowAnalyzer';
+import { showSelectNewObjectDialog } from './Dialogs/SelectNewObjectDialog';
+import { ContentsBrowser } from './Hierarchy/ContentViewer';
+import { HierarchyTree } from './Hierarchy/HierarchyTree';
 import { ScriptNavigation } from './Hierarchy/ScriptNavigation';
 import { ShaderNavigation } from './Hierarchy/ShaderNavigation';
 import { TextureNavigation } from './Hierarchy/TextureNavigation';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { UINavigation } from './Hierarchy/UINavigation';
+import { MainViewInspector } from './Inspector/MainViewInspector';
 import { globalEditorStore } from './Store/editor';
-import { AppBar, AppBarHeight } from './Common/AppBar';
-import { WindowdAnalyzer } from './Common/WindowAnalyzer';
+import { globalStore } from './Store/Store';
+import { DebugPlay } from './ViewPort/DebugPlay';
+import { ScriptEditor } from './ViewPort/ScriptEditor';
+import { ShaderEditor } from './ViewPort/ShaderEditor';
+import { TerrainMakerCanvas } from './ViewPort/TerrainMaker';
 
 /**
  * NinjaEngineメインコンポネント
@@ -34,7 +43,7 @@ export const NinjaEditor = () => {
   const state = useSnapshot(globalStore);
   const editorState = useSnapshot(globalEditorStore);
   const editor = useNinjaEditor();
-  const { viewSelect, selectSubNav, appBar, isMd } = editorState;
+  const { viewSelect, selectSubNav, appBar, sideBar } = editorState;
   const { t } = useTranslation();
 
   /**
@@ -215,7 +224,6 @@ export const NinjaEditor = () => {
         visibleType: 'auto',
         visible: true,
       });
-    } else if (data.type == 'xr') {
     }
   };
 
@@ -230,7 +238,7 @@ export const NinjaEditor = () => {
   /**
    * プロジェクトの変更
    */
-  const changeProject = async (njcUrl: string, name: string) => {
+  const changeProject = async (njcUrl: string) => {
     Swal.fire({
       title: 'Change Project?',
       showDenyButton: true,
@@ -255,131 +263,145 @@ export const NinjaEditor = () => {
         <AppBar />
 
         <div
-          className={`m-0 left-0`}
+          className={`left-0 m-0`}
           style={{
             height: '100vh',
           }}
         >
-          <div className={`relative grid grid-cols-6 gap-0 h-[calc(100vh-45px)] w-full`}>
+          <div className={`relative grid h-[calc(100vh-45px)] w-full grid-cols-6 gap-0`}>
             {/** ヒエラルキービュー */}
             <div
-              className={clsx(`pt-[2px] bg-primary`, isMd ? '' : 'absolute z-10')}
+              className={clsx(`absolute left-3 top-[12px] z-20 w-[180px] rounded-lg bg-primary pt-[2px]`)}
               style={{
-                height: appBar ? `calc(100vh - ${AppBarHeight}px)` : '100vh',
+                height: appBar ? `calc(100vh - ${AppBarHeight + 24}px)` : '100vh',
+                display: sideBar ? 'block' : 'none',
               }}
             >
-              <>
-                <div className='px-[5px] py-[12px] min-h-[20%]'>
-                  <div className='m-0'>
-                    <HierarchyTree />
-                  </div>
+              <div className='min-h-[20%] px-[5px] py-[12px]'>
+                <div className='m-0'>
+                  <HierarchyTree />
                 </div>
-                <div className='px-[5px] py-[12px] min-h-[20%]'>
-                  <div className='text-center mb-2 p-0 h-[20px] text-white select-none'>
-                    <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
-                      onClick={() => (globalEditorStore.selectSubNav = 'ui')}
-                    >
-                      <span className='px-1 text-md border-r-1 border-white cursor-pointer'>
-                        <AiOutlineAppstore className='inline pb-1 text-xl text-white font-bold' />
-                      </span>
-                    </div>
-                    <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'script' && 'bg-black'}`}
-                      onClick={() => (globalEditorStore.selectSubNav = 'script')}
-                    >
-                      <span className='px-1 text-md border-r-1 border-white cursor-pointer'>
-                        <AiOutlineCode className='inline pb-1 text-xl text-white font-bold' />
-                      </span>
-                    </div>
-                    <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'shader' && 'bg-black'}`}
-                      onClick={() => (globalEditorStore.selectSubNav = 'shader')}
-                    >
-                      <span className='px-1 text-md border-r-1 border-white cursor-pointer'>
-                        <AiOutlineHighlight className='inline pb-1 text-xl text-white font-bold' />
-                      </span>
-                    </div>
-                    <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'texture' && 'bg-black'}`}
-                      onClick={() => (globalEditorStore.selectSubNav = 'texture')}
-                    >
-                      <span className='px-1 text-md'>
-                        <AiOutlinePicture className='inline pb-1 text-xl text-white font-bold' />
-                      </span>
-                    </div>
-                  </div>
-                  <div className='block m-0 text-white px-3 '>
-                    {selectSubNav == 'ui' && <UINavigation />}
-                    {selectSubNav == 'script' && <ScriptNavigation />}
-                    {selectSubNav == 'shader' && <ShaderNavigation />}
-                    {selectSubNav == 'texture' && <TextureNavigation />}
-                  </div>
-                </div>
-                <div
-                  className='text-white bg-primary p-4 max-h-[30vh] overflow-y-auto overflow-x-hidden'
-                  style={{ flex: 6 }}
-                >
-                  <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
-                </div>
-                <div className={styles.createObj} onClick={() => onClickNewObject()}>
-                  <div className={styles.title}>
-                    <span className={styles.icon}>
-                      <AiOutlinePlus />
+              </div>
+              <div className='min-h-[20%] px-[5px] py-[12px]'>
+                <div className='mb-2 h-[20px] select-none p-0 text-center text-white'>
+                  <div
+                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
+                    onClick={() => (globalEditorStore.selectSubNav = 'ui')}
+                  >
+                    <span className='text-md cursor-pointer border-r-1 border-white px-1'>
+                      <AiOutlineAppstore className='inline pb-1 text-xl font-bold text-white' />
                     </span>
-                    <span className={styles.name}>{t('newObject')}</span>
+                  </div>
+                  <div
+                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'script' && 'bg-black'}`}
+                    onClick={() => (globalEditorStore.selectSubNav = 'script')}
+                  >
+                    <span className='text-md cursor-pointer border-r-1 border-white px-1'>
+                      <AiOutlineCode className='inline pb-1 text-xl font-bold text-white' />
+                    </span>
+                  </div>
+                  <div
+                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'shader' && 'bg-black'}`}
+                    onClick={() => (globalEditorStore.selectSubNav = 'shader')}
+                  >
+                    <span className='text-md cursor-pointer border-r-1 border-white px-1'>
+                      <AiOutlineHighlight className='inline pb-1 text-xl font-bold text-white' />
+                    </span>
+                  </div>
+                  <div
+                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'texture' && 'bg-black'}`}
+                    onClick={() => (globalEditorStore.selectSubNav = 'texture')}
+                  >
+                    <span className='text-md px-1'>
+                      <AiOutlinePicture className='inline pb-1 text-xl font-bold text-white' />
+                    </span>
                   </div>
                 </div>
-              </>
+                <div className='m-0 block px-3 text-white '>
+                  {selectSubNav == 'ui' && <UINavigation />}
+                  {selectSubNav == 'script' && <ScriptNavigation />}
+                  {selectSubNav == 'shader' && <ShaderNavigation />}
+                  {selectSubNav == 'texture' && <TextureNavigation />}
+                </div>
+              </div>
+              <div
+                className='max-h-[30vh] overflow-y-auto overflow-x-hidden bg-primary p-4 text-white'
+                style={{ flex: 6 }}
+              >
+                <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
+              </div>
+              <div
+                className={clsx('absolute bottom-0 w-full border-t-2 border-black')}
+                onClick={() => onClickNewObject()}
+              >
+                <div className='mb-2 cursor-pointer select-none rounded-md px-2.5 py-2 text-center text-lg font-bold text-white hover:bg-gray-700'>
+                  <span>
+                    <AiOutlinePlus className='inline' />
+                  </span>
+                  <span className='text-sm'>{t('newObject')}</span>
+                </div>
+              </div>
+            </div>
+            <div className={clsx('fixed bottom-8 z-20 ml-4', sideBar ? 'left-[180px]' : 'left-4')}>
+              <a
+                className='rounded-full bg-cyber/50 p-3 text-white hover:bg-cyber/75'
+                onClick={() => (globalEditorStore.sideBar = !sideBar)}
+              >
+                {sideBar ? (
+                  <AiOutlineLeft className='mx-0.5 inline h-4 w-4 pb-1' />
+                ) : (
+                  <AiOutlineRight className='mx-0.5 inline h-4 w-4 pb-1' />
+                )}
+              </a>
             </div>
 
             {/** コンテンツビュー */}
             <div
-              className={clsx(`bg-primary relative`, isMd ? 'col-span-5' : 'w-screen')}
+              className={clsx(`relative w-screen bg-primary`)}
               style={{
                 height: appBar ? `calc(100vh - ${AppBarHeight}px)` : '100vh',
               }}
             >
-              <div className='absolute top-0 left-0 z-10 m-0 w-full p-0 text-primary bg-cyber/50 select-none'>
+              <div className='absolute left-0 top-0 z-10 m-0 w-full select-none items-center bg-cyber/50 p-0 text-center text-primary'>
                 <div className='inline-block'>
                   <a
                     onClick={() => changeView('mainview')}
-                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer rounded'
+                    className='cursor-pointer rounded border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'mainview' ? { background: '#fff', color: '#838383' } : {}}
                   >
                     {t('mainView')}
                   </a>
                   <a
                     onClick={() => changeView('terrainmaker')}
-                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer rounded'
+                    className='cursor-pointer rounded border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'terrainmaker' ? { background: '#fff', color: '#838383' } : {}}
                   >
                     {t('terrainMaker')}
                   </a>
                   <a
                     onClick={() => changeView('playereditor')}
-                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer'
+                    className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'playereditor' ? { background: '#fff', color: '#838383' } : {}}
                   >
                     {t('playerEditor')}
                   </a>
                   <a
                     onClick={() => changeView('scripteditor')}
-                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer'
+                    className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'scripteditor' ? { background: '#fff', color: '#838383' } : {}}
                   >
                     {t('scriptEditor')}
                   </a>
                   <a
                     onClick={() => changeView('shadereditor')}
-                    className='px-2.5 text-xs border-r-2 border-black cursor-pointer'
+                    className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'shadereditor' ? { background: '#fff', color: '#838383' } : {}}
                   >
                     {t('shaderEditor')}
                   </a>
                 </div>
               </div>
-              <div className='m-0 p-0 h-full bg-white'>
+              <div className='m-0 h-full bg-white p-0'>
                 {viewSelect == 'mainview' && (
                   <>
                     <MainViewer />
@@ -410,7 +432,7 @@ export const NinjaEditor = () => {
             </div>
           </div>
           <div
-            className='block fixed top-[80px] right-[10px] p-[10px] w-[200px] max-h-[calc(100vh-250px)] rounded-lg bg-secondary/75 text-white text-left overflow-y-auto'
+            className='fixed right-[10px] top-[80px] block text-left text-white'
             style={{
               display:
                 (viewSelect == 'mainview' && state.currentId) ||
@@ -421,9 +443,14 @@ export const NinjaEditor = () => {
             }}
           >
             {viewSelect == 'mainview' && (
-              <>
+              <div
+                className='w-[230px] overflow-y-auto rounded-lg bg-secondary/75 px-[10px]'
+                style={{
+                  height: 'calc(100vh - 120px)',
+                }}
+              >
                 <MainViewInspector />
-              </>
+              </div>
             )}
           </div>
         </div>

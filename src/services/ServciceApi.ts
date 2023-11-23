@@ -1,5 +1,4 @@
 import axios from "axios";
-import { AxiosRequestConfig } from "axios";
 
 const BASE_URL = (process.env.REACT_APP_ENV == "prod") ? process.env.REACT_APP_ENDPOINT : "";
 

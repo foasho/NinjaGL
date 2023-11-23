@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import styles from "@/App.module.scss";
-import MonacoEditor, { Monaco } from "@monaco-editor/react";
-import type { languages } from 'monaco-editor'
-import { toast } from 'react-toastify';
-import { useTranslation } from 'react-i18next';
-import { DoubleSide, Mesh, ShaderMaterial, Matrix3, Matrix4, ShaderMaterialParameters, Uniform, Vector2, Vector3, Vector4 } from 'three';
-import { Canvas, useFrame, extend, useLoader } from '@react-three/fiber';
-import { Environment, OrbitControls, Sky, SoftShadows, shaderMaterial } from '@react-three/drei';
+
 import path from 'path';
-import { GLTFLoader } from 'three-stdlib';
+
+import MonacoEditor, { Monaco } from '@monaco-editor/react';
+import { Environment, OrbitControls, Sky, SoftShadows } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
+import { toast } from 'react-toastify';
+import { DoubleSide, ShaderMaterial, Matrix3, Matrix4, Vector2, Vector3, Vector4 } from 'three';
+
+import styles from '@/App.module.scss';
+
+import type { languages } from 'monaco-editor';
 
 interface IShaderEditor {
   shaderPath?: string;
@@ -17,93 +20,94 @@ interface IShaderEditor {
 export const ShaderEditor = (props: IShaderEditor) => {
   const fragmentRef = useRef<any>(null);
   const vertexRef = useRef<any>(null);
-  const [objectType, setObjectType] = useState<"box"|"plane"|"sphere"|"gltf">("box");
-  const [uploadModel, setUploadModel] = useState<string>("");
+  const [objectType, setObjectType] = useState<'box' | 'plane' | 'sphere' | 'gltf'>('box');
+  const [uploadModel, setUploadModel] = useState<string>('');
   const [fragmentCode, setFragmentCode] = useState<string>(initCodeFragment);
   const [vertexCode, setVertexCode] = useState<string>(initCodeVertex);
-  const [fileName, setFileName] = useState<string|null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const { t } = useTranslation();
-  const [mode, setMode] = useState<"Fragment"|"Vertex">("Fragment");
+  const [mode, setMode] = useState<'Fragment' | 'Vertex'>('Fragment');
   const [showPreview, setShowPreview] = useState<boolean>(true);
-  const [separate, setSeparate] = useState<{editorWidth: string, previewWidth: string}>({editorWidth: "50%", previewWidth: "50%"});
+  const [separate, setSeparate] = useState<{ editorWidth: string; previewWidth: string }>({
+    editorWidth: '50%',
+    previewWidth: '50%',
+  });
 
   const handleEditorWillMount = (monaco: Monaco) => {
-    monaco?.languages.register({ id: "glsl" });
-    monaco?.languages.setMonarchTokensProvider("glsl", glslLanguage);
-  }
+    monaco?.languages.register({ id: 'glsl' });
+    monaco?.languages.setMonarchTokensProvider('glsl', glslLanguage);
+  };
 
   const handleEditorDidMount = (editor, ref) => {
     ref.current = editor;
-  }
- 
+  };
+
   /**
    * ファイルを保存する
    */
-  const saveCodeFile = async() => {
-    if (!fileName){
+  const saveCodeFile = async () => {
+    if (!fileName) {
       // 新規作成の場合は、ファイル名を名付ける
     }
-  }
+  };
 
   /**
    * 保存
    */
   const onSave = () => {
-    toast(t("completeSave"), {
-      position: "top-right",
+    toast(t('completeSave'), {
+      position: 'top-right',
       autoClose: 1000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: false,
       draggable: true,
       progress: undefined,
-      theme: "light",
+      theme: 'light',
     });
-    if (fileName){
-    }
-    else {
-      
+    if (fileName) {
+    } else {
     }
     setFragmentCode(fragmentRef.current.getValue());
     setVertexCode(vertexRef.current.getValue());
-  }
+  };
 
   const onPreview = () => {
     setShowPreview(!showPreview);
-  }
+  };
 
   /**
    * モードチェンジ
    */
   const changeMode = () => {
-  let currentCode;
-  if (mode === "Fragment") {
-    if (fragmentRef.current) {
-      currentCode = fragmentRef.current.getValue();
+    let currentCode;
+    if (mode === 'Fragment') {
+      if (fragmentRef.current) {
+        currentCode = fragmentRef.current.getValue();
+      } else {
+        currentCode = initCodeFragment;
+      }
+      setFragmentCode(currentCode);
+      setMode('Vertex');
     } else {
-      currentCode = initCodeFragment;
+      if (vertexRef.current) {
+        currentCode = vertexRef.current.getValue();
+      } else {
+        currentCode = initCodeVertex;
+      }
+      setVertexCode(currentCode);
+      setMode('Fragment');
     }
-    setFragmentCode(currentCode);
-    setMode("Vertex");
-  } else {
-    if (vertexRef.current) {
-      currentCode = vertexRef.current.getValue();
-    } else {
-      currentCode = initCodeVertex;
-    }
-    setVertexCode(currentCode);
-    setMode("Fragment");
-  }
-};
+  };
 
   /**
    * リサイザーをつかむ
    */
   const onMouseDown = (e) => {
     e.preventDefault();
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-  }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
 
   const onMouseMove = (event) => {
     const separation = event.clientX;
@@ -111,19 +115,19 @@ export const ShaderEditor = (props: IShaderEditor) => {
     const newEditorWidth = `${(separation / totalWidth) * 100}%`;
     const newPreviewWidth = `${100 - (separation / totalWidth) * 100}%`;
     setSeparate({
-        editorWidth: newEditorWidth,
-        previewWidth: newPreviewWidth
+      editorWidth: newEditorWidth,
+      previewWidth: newPreviewWidth,
     });
   };
 
   const onMouseUp = () => {
-    document.removeEventListener("mousemove", onMouseMove);
-    document.removeEventListener("mouseup", onMouseUp);
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
   };
 
   /**
    * キーボードショートカット
-   * @param event 
+   * @param event
    */
   const handleKeyDown = (event) => {
     if (event.ctrlKey && event.key === 's') {
@@ -132,18 +136,17 @@ export const ShaderEditor = (props: IShaderEditor) => {
     }
   };
 
-
   /**
    * ファイル指定して起動する場合は、初期Codeはそのファイルを読み込む
    */
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (props.shaderPath){
+    if (props.shaderPath) {
       const fileName = path.basename(props.shaderPath);
-      let _mode: "Vertex"|"Fragment" = "Vertex";
-      if (fileName.includes(".frag")){
-        _mode = "Fragment";
+      let _mode: 'Vertex' | 'Fragment' = 'Vertex';
+      if (fileName.includes('.frag')) {
+        _mode = 'Fragment';
       }
       const fetchData = async () => {
         try {
@@ -153,11 +156,10 @@ export const ShaderEditor = (props: IShaderEditor) => {
             throw new Error('Network response was not ok');
           }
           const jsonData = await response.json();
-          if (_mode == "Fragment"){
+          if (_mode == 'Fragment') {
             setMode(_mode);
             setFragmentCode(jsonData);
-          }
-          else{
+          } else {
             setMode(_mode);
             setVertexCode(jsonData);
           }
@@ -177,21 +179,21 @@ export const ShaderEditor = (props: IShaderEditor) => {
     };
   }, [props.shaderPath]);
 
-  let filename = t("nonNameShader");
-  if (props.shaderPath){
+  let filename = t('nonNameShader');
+  if (props.shaderPath) {
     filename = path.basename(props.shaderPath);
   }
 
-  const options: { value: string, label: string }[] = [
-    { value: "box", label: "立方体" },
-    { value: "sphere", label: "球体" },
-    { value: "plane", label: "平面" },
-    { value: "gltf", label: "" }
+  const options: { value: string; label: string }[] = [
+    { value: 'box', label: '立方体' },
+    { value: 'sphere', label: '球体' },
+    { value: 'plane', label: '平面' },
+    { value: 'gltf', label: '' },
   ];
 
   const onChangeObjectType = (option) => {
     setObjectType(option.value);
-  }
+  };
 
   return (
     <div className={styles.shaderEditor}>
@@ -201,7 +203,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
         </div>
         <div className={`${styles.filename} ${styles.navItem}`}>
           {filename}
-          {mode == "Fragment"? ".frag": ".vertex"}
+          {mode == 'Fragment' ? '.frag' : '.vertex'}
         </div>
         <div className={`${styles.mode} ${styles.save}`} onClick={() => onSave()}>
           Save
@@ -211,23 +213,23 @@ export const ShaderEditor = (props: IShaderEditor) => {
         </div>
         <div className={`${styles.type} ${styles.navItem}`}>
           <Select
-              options={options}
-              value={options.find(op => op.value == objectType)}
-              onChange={onChangeObjectType}
-              styles={darkThemeStyles}
-            />
+            options={options}
+            value={options.find((op) => op.value == objectType)}
+            onChange={onChangeObjectType}
+            styles={darkThemeStyles}
+          />
         </div>
       </div>
       <div className={styles.editor}>
-        <div 
-          className={styles.monaco} 
-          style={{width: showPreview?separate.editorWidth: "100%"}}
+        <div
+          className={styles.monaco}
+          style={{ width: showPreview ? separate.editorWidth : '100%' }}
           onKeyDown={handleKeyDown}
         >
-          <div style={{ display: mode=="Fragment"?"block": "none", height: "100%" }}>
+          <div style={{ display: mode == 'Fragment' ? 'block' : 'none', height: '100%' }}>
             <MonacoEditor
-              language="glsl"
-              theme="vs-dark"
+              language='glsl'
+              theme='vs-dark'
               value={fragmentCode}
               beforeMount={(monaco) => handleEditorWillMount(monaco)}
               onMount={(editor) => handleEditorDidMount(editor, fragmentRef)}
@@ -240,10 +242,10 @@ export const ShaderEditor = (props: IShaderEditor) => {
               }}
             />
           </div>
-          <div style={{ display: mode=="Vertex"?"block": "none", height: "100%" }}>
+          <div style={{ display: mode == 'Vertex' ? 'block' : 'none', height: '100%' }}>
             <MonacoEditor
-              language="glsl"
-              theme="vs-dark"
+              language='glsl'
+              theme='vs-dark'
               value={vertexCode}
               beforeMount={(monaco) => handleEditorWillMount(monaco)}
               onMount={(editor) => handleEditorDidMount(editor, vertexRef)}
@@ -257,46 +259,48 @@ export const ShaderEditor = (props: IShaderEditor) => {
             />
           </div>
         </div>
-        {showPreview &&
+        {showPreview && (
           <>
-            <div 
-              className={styles.resizer} 
-              style={{ left: separate.editorWidth }}
-              onMouseDown={onMouseDown}
-            ></div>
+            <div className={styles.resizer} style={{ left: separate.editorWidth }} onMouseDown={onMouseDown}></div>
             <div className={styles.preview} style={{ width: separate.previewWidth }}>
               <Canvas shadows>
-                <SoftShadows/>
-                <mesh castShadow receiveShadow scale={[10, 10, 10]} rotation={[-Math.PI/2, 0, 0]} position={[0, -1, 0]}>
-                  <planeGeometry/>
+                <SoftShadows />
+                <mesh
+                  castShadow
+                  receiveShadow
+                  scale={[10, 10, 10]}
+                  rotation={[-Math.PI / 2, 0, 0]}
+                  position={[0, -1, 0]}
+                >
+                  <planeGeometry />
                   <meshStandardMaterial side={DoubleSide} color={0xf2f2f2} />
                 </mesh>
-                <ShaderViewer vertexCode={vertexCode} fragmentCode={fragmentCode} objectType={objectType}/>
+                <ShaderViewer vertexCode={vertexCode} fragmentCode={fragmentCode} objectType={objectType} />
                 <Environment preset='city' blur={0.7} />
-                <OrbitControls/>
-                <Sky/>
+                <OrbitControls />
+                <Sky />
               </Canvas>
             </div>
           </>
-        }
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface IShaderViewer {
-  objectType: "box" | "plane" | "sphere" | "gltf";
+  objectType: 'box' | 'plane' | 'sphere' | 'gltf';
   vertexCode: string;
   fragmentCode: string;
   url?: string;
 }
 /**
  * シェーダビューア
- * @returns 
+ * @returns
  */
 const ShaderViewer = (props: IShaderViewer) => {
   const CustomShaderMaterial = createShaderMaterial(props.vertexCode, props.fragmentCode);
-  
+
   let geometry;
   let obj;
   switch (props.objectType) {
@@ -312,8 +316,7 @@ const ShaderViewer = (props: IShaderViewer) => {
     case 'gltf':
       if (!props.url) {
         obj = <mesh></mesh>;
-      }
-      else {
+      } else {
         // 美しくないので後で直す
         // const gltf: any = useLoader(GLTFLoader, props.url);
         // obj = (
@@ -328,29 +331,26 @@ const ShaderViewer = (props: IShaderViewer) => {
   }
 
   useFrame((state, delta) => {
-    if (CustomShaderMaterial){
+    if (CustomShaderMaterial) {
       CustomShaderMaterial.uniforms.u_time.value = state.clock.getElapsedTime();
     }
-  })
+  });
 
-  
   return (
     <>
-        <mesh castShadow>
-          {(!obj)?
-            <>
-                {geometry}
-                <primitive object={CustomShaderMaterial} />
-            </>
-            :
-            <>
-              {obj}
-            </>
-          }
+      <mesh castShadow>
+        {!obj ? (
+          <>
+            {geometry}
+            <primitive object={CustomShaderMaterial} />
+          </>
+        ) : (
+          <>{obj}</>
+        )}
       </mesh>
     </>
-  )
-}
+  );
+};
 
 /**
  * 変数名から型を推定
@@ -377,13 +377,12 @@ const getDefaultInitialValue = (type: string) => {
     default:
       return undefined;
   }
-}
-
+};
 
 /**
  * シェーダコードからuniformを取得する
- * @param shaderCode 
- * @returns 
+ * @param shaderCode
+ * @returns
  */
 const extractVariables = (shaderCode, initialValues = {}) => {
   const regex = /(\w+)\s+(\w+)\s+(\w+);/g;
@@ -398,22 +397,19 @@ const extractVariables = (shaderCode, initialValues = {}) => {
     } else if (match[1] === 'uniform') {
       variables.uniforms[match[3]] = {
         type: match[2],
-        value:
-          initialValues.hasOwnProperty(match[3])
-            ? initialValues[match[3]]
-            : getDefaultInitialValue(match[2]),
+        value: initialValues.hasOwnProperty(match[3]) ? initialValues[match[3]] : getDefaultInitialValue(match[2]),
       };
     }
   }
 
   return variables;
-}
+};
 
 /**
  *  任意のシェーダマテリアル
- * @param vertexShader 
- * @param fragmentShader 
- * @returns 
+ * @param vertexShader
+ * @param fragmentShader
+ * @returns
  */
 const createShaderMaterial = (vertexShader: string, fragmentShader: string): ShaderMaterial => {
   const vertexVariables = extractVariables(vertexShader);
@@ -427,8 +423,7 @@ const createShaderMaterial = (vertexShader: string, fragmentShader: string): Sha
     uniforms: uniforms,
   });
   return material;
-}
-
+};
 
 // 頂点シェーダーのサンプル
 const initCodeVertex = `
@@ -438,7 +433,7 @@ void main() {
   vUv = uv;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-`
+`;
 
 // フラグメントシェーダーのサンプル
 const initCodeFragment = `
@@ -462,7 +457,6 @@ void main() {
 }
 `;
 
-
 /**
  * 選択肢のダークテーマスタイル
  */
@@ -471,7 +465,7 @@ const darkThemeStyles = {
     ...provided,
     color: '#43D9D9',
     fontSize: '10px',
-    paddingLeft: "15px"
+    paddingLeft: '15px',
   }),
   input: (styles) => ({
     ...styles,
@@ -498,12 +492,7 @@ const darkThemeStyles = {
   option: (styles, { isFocused, isSelected }) => {
     return {
       ...styles,
-      backgroundColor:
-        isSelected
-          ? '#555'
-          : isFocused
-            ? '#444'
-            : 'transparent',
+      backgroundColor: isSelected ? '#555' : isFocused ? '#444' : 'transparent',
       color: isSelected ? '#fff' : '#fff',
       height: 'auto',
       minHeight: '30px',
@@ -533,27 +522,199 @@ const glslLanguage: languages.IMonarchLanguage = {
   tokenPostfix: '.glsl',
 
   keywords: [
-    'void', 'bool', 'int', 'float', 'uint', 'double', 'vec2', 'vec3', 'vec4', 'bvec2', 'bvec3', 'bvec4', 'ivec2', 'ivec3', 'ivec4', 'uvec2', 'uvec3', 'uvec4', 'dvec2', 'dvec3', 'dvec4',
-    'mat2', 'mat3', 'mat4', 'mat2x2', 'mat2x3', 'mat2x4', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4x2', 'mat4x3', 'mat4x4', 'sampler1D', 'sampler2D', 'sampler3D', 'samplerCube', 'sampler1DShadow',
-    'sampler2DShadow', 'samplerCubeShadow', 'sampler1DArray', 'sampler2DArray', 'sampler1DArrayShadow', 'sampler2DArrayShadow', 'isampler1D', 'isampler2D', 'isampler3D', 'isamplerCube', 'isampler1DArray',
-    'isampler2DArray', 'usampler1D', 'usampler2D', 'usampler3D', 'usamplerCube', 'usampler1DArray', 'usampler2DArray', 'sampler2DRect', 'sampler2DRectShadow', 'isampler2DRect', 'usampler2DRect', 'samplerBuffer',
-    'isamplerBuffer', 'usamplerBuffer', 'sampler2DMS', 'isampler2DMS', 'usampler2DMS', 'sampler2DMSArray', 'isampler2DMSArray', 'usampler2DMSArray', 'struct', 'uniform', 'layout', 'in', 'out', 'inout',
-    'attribute', 'varying', 'const', 'if', 'else', 'switch', 'case', 'default', 'while', 'do', 'for', 'continue', 'break', 'return', 'discards', 'beginInvocationInterlock', 'endInvocationInterlock',
-    'subroutine', 'lowp', 'mediump', 'highp', 'precision', 'invariant', 'discard', 'mat2x2', 'mat3', 'mat3x3', 'mat4', 'mat4x4', 'dmat2', 'dmat2x2', 'dmat2x3', 'dmat2x4', 'dmat3', 'dmat3x2', 'dmat3x3', 
-    'dmat3x4', 'dmat4', 'dmat4x2', 'dmat4x3', 'dmat4x4', 'vec2', 'vec3', 'vec4', 'ivec2', 'ivec3', 'ivec4', 'uvec2', 'uvec3', 'uvec4', 'dvec2', 'dvec3', 'dvec4', 'bvec2', 'bvec3', 'bvec4', 'float', 'double',
-    'bool', 'int', 'uint', 'true', 'false', 'mix', 'step', 'smoothstep', 'length', 'distance', 'dot', 'cross', 'normalize', 'faceforward', 'reflect', 'refract', 'matrixCompMult', 'outerProduct', 'transpose',
+    'void',
+    'bool',
+    'int',
+    'float',
+    'uint',
+    'double',
+    'vec2',
+    'vec3',
+    'vec4',
+    'bvec2',
+    'bvec3',
+    'bvec4',
+    'ivec2',
+    'ivec3',
+    'ivec4',
+    'uvec2',
+    'uvec3',
+    'uvec4',
+    'dvec2',
+    'dvec3',
+    'dvec4',
+    'mat2',
+    'mat3',
+    'mat4',
+    'mat2x2',
+    'mat2x3',
+    'mat2x4',
+    'mat3x2',
+    'mat3x3',
+    'mat3x4',
+    'mat4x2',
+    'mat4x3',
+    'mat4x4',
+    'sampler1D',
+    'sampler2D',
+    'sampler3D',
+    'samplerCube',
+    'sampler1DShadow',
+    'sampler2DShadow',
+    'samplerCubeShadow',
+    'sampler1DArray',
+    'sampler2DArray',
+    'sampler1DArrayShadow',
+    'sampler2DArrayShadow',
+    'isampler1D',
+    'isampler2D',
+    'isampler3D',
+    'isamplerCube',
+    'isampler1DArray',
+    'isampler2DArray',
+    'usampler1D',
+    'usampler2D',
+    'usampler3D',
+    'usamplerCube',
+    'usampler1DArray',
+    'usampler2DArray',
+    'sampler2DRect',
+    'sampler2DRectShadow',
+    'isampler2DRect',
+    'usampler2DRect',
+    'samplerBuffer',
+    'isamplerBuffer',
+    'usamplerBuffer',
+    'sampler2DMS',
+    'isampler2DMS',
+    'usampler2DMS',
+    'sampler2DMSArray',
+    'isampler2DMSArray',
+    'usampler2DMSArray',
+    'struct',
+    'uniform',
+    'layout',
+    'in',
+    'out',
+    'inout',
+    'attribute',
+    'varying',
+    'const',
+    'if',
+    'else',
+    'switch',
+    'case',
+    'default',
+    'while',
+    'do',
+    'for',
+    'continue',
+    'break',
+    'return',
+    'discards',
+    'beginInvocationInterlock',
+    'endInvocationInterlock',
+    'subroutine',
+    'lowp',
+    'mediump',
+    'highp',
+    'precision',
+    'invariant',
+    'discard',
+    'mat2x2',
+    'mat3',
+    'mat3x3',
+    'mat4',
+    'mat4x4',
+    'dmat2',
+    'dmat2x2',
+    'dmat2x3',
+    'dmat2x4',
+    'dmat3',
+    'dmat3x2',
+    'dmat3x3',
+    'dmat3x4',
+    'dmat4',
+    'dmat4x2',
+    'dmat4x3',
+    'dmat4x4',
+    'vec2',
+    'vec3',
+    'vec4',
+    'ivec2',
+    'ivec3',
+    'ivec4',
+    'uvec2',
+    'uvec3',
+    'uvec4',
+    'dvec2',
+    'dvec3',
+    'dvec4',
+    'bvec2',
+    'bvec3',
+    'bvec4',
+    'float',
+    'double',
+    'bool',
+    'int',
+    'uint',
+    'true',
+    'false',
+    'mix',
+    'step',
+    'smoothstep',
+    'length',
+    'distance',
+    'dot',
+    'cross',
+    'normalize',
+    'faceforward',
+    'reflect',
+    'refract',
+    'matrixCompMult',
+    'outerProduct',
+    'transpose',
   ],
 
   operators: [
-    '=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '++', '--',
-    '+', '-', '*', '/', '%', '<', '>', '<=', '>=', '==', '!=', '&&', '||',
-    '!', '~', '&', '|', '^', '<<', '>>', '>>>',
+    '=',
+    '+=',
+    '-=',
+    '*=',
+    '/=',
+    '%=',
+    '&=',
+    '|=',
+    '^=',
+    '++',
+    '--',
+    '+',
+    '-',
+    '*',
+    '/',
+    '%',
+    '<',
+    '>',
+    '<=',
+    '>=',
+    '==',
+    '!=',
+    '&&',
+    '||',
+    '!',
+    '~',
+    '&',
+    '|',
+    '^',
+    '<<',
+    '>>',
+    '>>>',
   ],
 
   brackets: [
-    { open: '(', close: ')',token: 'delimiter.parenthesis' },
-    { open: '{', close: '}',token: 'delimiter.curly' },
-    { open: '[', close: ']',token: 'delimiter.square' },
+    { open: '(', close: ')', token: 'delimiter.parenthesis' },
+    { open: '{', close: '}', token: 'delimiter.curly' },
+    { open: '[', close: ']', token: 'delimiter.square' },
   ],
 
   // we include these common regular expressions
@@ -562,32 +723,38 @@ const glslLanguage: languages.IMonarchLanguage = {
   // C style block comments are supported
   comments: [
     ['\\/\\*', '\\*\\/', 'comment'],
-    ['\\/\\/', '$', 'comment']
+    ['\\/\\/', '$', 'comment'],
   ],
 
   // The main tokenizer for our languages
   tokenizer: {
     root: [
       // identifiers and keywords
-      [/[a-z_$][\w$]*/, {
-        cases: {
-          '@keywords': { token: 'keyword.$0' },
-          '@default': 'identifier',
-        }
-      }],
-      [/[A-Z][\w\$]*/, 'type.identifier'],  // to show class names nicely
+      [
+        /[a-z_$][\w$]*/,
+        {
+          cases: {
+            '@keywords': { token: 'keyword.$0' },
+            '@default': 'identifier',
+          },
+        },
+      ],
+      [/[A-Z][\w\$]*/, 'type.identifier'], // to show class names nicely
 
       // whitespace
       { include: '@whitespace' },
 
       // delimiters and operators
       [/[{}()\[\]]/, '@brackets'],
-      [/@symbols/, {
-        cases: {
-          '@operators': 'delimiter.operator',
-          '@default': ''
-        }
-      }],
+      [
+        /@symbols/,
+        {
+          cases: {
+            '@operators': 'delimiter.operator',
+            '@default': '',
+          },
+        },
+      ],
 
       // numbers
       [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
@@ -598,13 +765,13 @@ const glslLanguage: languages.IMonarchLanguage = {
       [/[;,.]/, 'delimiter'],
 
       // strings
-      [/"([^"\\]|\\.)*$/, 'string.invalid'],  // non-teminated string
+      [/"([^"\\]|\\.)*$/, 'string.invalid'], // non-teminated string
       [/"/, 'string', '@string'],
 
       // characters
       [/'[^\\']'/, 'string'],
       // [/(')(@escapes)(')/, ['string','string.escape','string']],
-      [/'/, 'string.invalid']
+      [/'/, 'string.invalid'],
     ],
 
     whitespace: [
@@ -616,14 +783,14 @@ const glslLanguage: languages.IMonarchLanguage = {
     comment: [
       [/[^\/*]+/, 'comment'],
       [/\*\//, 'comment', '@pop'],
-      [/[\/*]/, 'comment']
+      [/[\/*]/, 'comment'],
     ],
 
     string: [
-      [/[^\\"]+/,  'string'],
+      [/[^\\"]+/, 'string'],
       // [/@escapes/, 'string.escape'],
       // [/\\./,      'string.escape.invalid'],
-      [/"/,        'string', '@pop']
+      [/"/, 'string', '@pop'],
     ],
   },
 };

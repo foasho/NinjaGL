@@ -1,3 +1,6 @@
+import { useState, useEffect, useRef, useLayoutEffect, Suspense } from 'react';
+
+import { gltfLoader } from '@ninjagl/core';
 import {
   GizmoHelper,
   GizmoViewport,
@@ -6,37 +9,39 @@ import {
   Preload,
   Text,
 } from '@react-three/drei';
-import { AnimationMixer, Euler, Mesh, Object3D, Vector3, MathUtils, PerspectiveCamera, Color } from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useState, useEffect, useContext, useRef, useLayoutEffect, Suspense } from 'react';
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { MyLights } from './MainViewItems/Lights';
-import { StaticObjects } from './MainViewItems/Objects';
-import { Terrain } from './MainViewItems/Terrain';
-import { Avatar } from './MainViewItems/Player';
-import { MySky } from './MainViewItems/Sky';
+import clsx from 'clsx';
+import { useSession } from 'next-auth/react';
+import { Perf } from 'r3f-perf';
+import { useTranslation } from 'react-i18next';
+import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
+import { ImEarth } from 'react-icons/im';
 import { MdVideogameAsset, MdVideogameAssetOff } from 'react-icons/md';
 import { TiSpanner } from 'react-icons/ti';
-import { ImEarth } from 'react-icons/im';
-import { ThreeObjects } from './MainViewItems/Three';
-import { Perf } from 'r3f-perf';
-import { gltfLoader } from '@ninjagl/core';
-import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import { UICanvas } from './MainViewUIs/UICanvas';
-import { isNumber } from '@/commons/functional';
 import Swal from 'sweetalert2';
-import { Cameras } from './MainViewItems/Cameras';
-import { FogComponent } from './MainViewItems/Fog';
+import { AnimationMixer, Euler, Mesh, Object3D, Vector3, MathUtils, PerspectiveCamera, Color } from 'three';
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
-import { globalConfigStore, globalContentStore, globalStore } from '../Store/Store';
-import { useSession } from 'next-auth/react';
-import { MyEnviroment } from './MainViewItems/MyEnvironment';
-import { MyTexts } from './MainViewItems/MyTexts';
-import { MyEffects } from './MainViewItems/MyEffects';
+
+import { isNumber } from '@/commons/functional';
 import { EDeviceType, useInputControl } from '@/hooks/useInputControl';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { useTranslation } from 'react-i18next';
+
 import { CameraPreview } from '../Inspector/CamraPreview';
+import { globalConfigStore, globalContentStore, globalStore } from '../Store/Store';
+
+import { Cameras } from './MainViewItems/Cameras';
+import { FogComponent } from './MainViewItems/Fog';
+import { MyLights } from './MainViewItems/Lights';
+import { MyEffects } from './MainViewItems/MyEffects';
+import { MyEnviroment } from './MainViewItems/MyEnvironment';
+import { MyTexts } from './MainViewItems/MyTexts';
+import { StaticObjects } from './MainViewItems/Objects';
+import { Avatar } from './MainViewItems/Player';
+import { MySky } from './MainViewItems/Sky';
+import { Terrain } from './MainViewItems/Terrain';
+import { ThreeObjects } from './MainViewItems/Three';
+import { UICanvas } from './MainViewUIs/UICanvas';
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -45,14 +50,14 @@ export const MainViewer = () => {
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const [isConfHovered, setIsConfHovered] = useState(false);
-  const cameraSpeedRef = useRef<HTMLInputElement>();
+  // const cameraSpeedRef = useRef<HTMLInputElement>();
   const [cameraSpeed, setCameraSpeed] = useState<number>(1);
   const cameraFarRef = useRef<HTMLInputElement>(null);
   const [cameraFar, setCameraFar] = useState<number>(1000);
-  const worldSizeRef = useRef<HTMLInputElement>(null);
-  const [worldSize, setWorldSize] = useState<number>(64);
-  const worldGridSizeRef = useRef<HTMLInputElement>(null);
-  const [worldGridSize, setWorldGridSize] = useState<number>(8);
+  // const worldSizeRef = useRef<HTMLInputElement>(null);
+  const worldSize = 64;
+  // const worldGridSizeRef = useRef<HTMLInputElement>(null);
+  const worldGridSize = 8;
   const [uiGridNum, setUIGridNum] = useState<8 | 16 | 24 | 32>(8);
   const { getAvatarOM, removeOM, addOM, onNJCChanged, offNJCChanged } = useNinjaEditor();
   // 水平グリッド
@@ -206,7 +211,9 @@ export const MainViewer = () => {
               loadingRef.current.style.display = 'none';
             }
           },
-          (xhr) => {},
+          (xhr) => {
+            console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+          },
           async (err) => {
             console.log('モデル読み込みエラ―');
             console.log(err);
@@ -239,7 +246,7 @@ export const MainViewer = () => {
   const { t } = useTranslation();
 
   return (
-    <div className='h-full relative bg-[#e2e2e2]'>
+    <div className='relative h-full bg-[#e2e2e2]'>
       <Canvas
         key={renderCount}
         gl={{
@@ -278,7 +285,7 @@ export const MainViewer = () => {
         </Suspense>
       </Canvas>
       <div
-        className='bg-white bg-opacity-50 absolute z-50 w-full h-full top-0'
+        className='absolute top-0 z-50 h-full w-full bg-white bg-opacity-50'
         style={{ display: showUI ? 'block' : 'none' }}
       >
         <UICanvas gridNum={uiGridNum} />
@@ -286,15 +293,15 @@ export const MainViewer = () => {
       {/** CameraPreview */}
       <CameraPreview />
       {/** コントロール層 */}
-      <div className='absolute z-50 top-10 left-2.5'>
+      <div className={clsx('absolute left-1/2 top-10 z-50 -translate-x-1/2')}>
         <a
-          className='text-white cursor-pointer px-1.5 py-1 mr-1 bg-[#222] rounded-md relative'
+          className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
           onMouseLeave={() => setIsHovered(false)}
           onMouseOver={() => setIsHovered(true)}
         >
           <ImEarth className='inline' />
           {isHovered && (
-            <div className='block absolute z-10 top-full left-0 bg-primary rounded-md shadow-md p-3 w-48'>
+            <div className='absolute left-0 top-full z-10 block w-48 rounded-md bg-primary p-3 shadow-md'>
               <div className='mb-3'>
                 <label className='block'>
                   <input type='checkbox' checked={isGrid} onChange={() => setIsGrid(!isGrid)} />
@@ -309,7 +316,7 @@ export const MainViewer = () => {
                   Gizmo
                 </label>
               </div>
-              <div className='grid grid-cols-2 gap-1 mb-3'>
+              <div className='mb-3 grid grid-cols-2 gap-1'>
                 <label>
                   視野(far)
                   <input
@@ -339,13 +346,13 @@ export const MainViewer = () => {
           )}
         </a>
         <a
-          className='text-white cursor-pointer px-1.5 py-1 mr-1 bg-[#222] rounded-md relative'
+          className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
           onMouseLeave={() => setIsConfHovered(false)}
           onMouseOver={() => setIsConfHovered(true)}
         >
           <TiSpanner className='inline' />
           {isConfHovered && (
-            <div className='block absolute z-10 top-full left-0 bg-primary rounded-md shadow-md p-3 min-w-[200px]'>
+            <div className='absolute left-0 top-full z-10 block min-w-[200px] rounded-md bg-primary p-3 shadow-md'>
               <div>
                 <span className='mb-2 mr-3'>{t('physics')}</span>
                 <input
@@ -368,19 +375,19 @@ export const MainViewer = () => {
               setCameraSpeed(cameraSpeed + 1);
             }
           }}
-          className='text-white cursor-pointer px-1.5 py-1 mr-1 bg-[#222] rounded-md relative select-none'
+          className='relative mr-1 cursor-pointer select-none rounded-md bg-[#222] px-1.5 py-1 text-white'
         >
           <AiFillCamera className='inline' />
-          <span className='text-sm align-top'>{cameraSpeed}</span>
+          <span className='align-top text-sm'>{cameraSpeed}</span>
         </a>
         <a
-          className='text-white cursor-pointer px-1.5 py-1 mr-1 bg-[#222] rounded-md'
+          className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
           onClick={() => setShowCanvas(!showCanvas)}
         >
           {showCanvas ? <AiFillEye className='inline' /> : <AiFillEyeInvisible className='inline' />}
         </a>
         <a
-          className='text-white cursor-pointer px-1.5 py-1 mr-1 bg-[#222] rounded-md'
+          className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
           onClick={() => setShowUI(!showUI)}
         >
           {showUI ? <MdVideogameAsset className='inline' /> : <MdVideogameAssetOff className='inline' />}
@@ -399,7 +406,7 @@ export const MainViewer = () => {
                   setUIGridNum(8);
                 }
               }}
-              className='text-lg ml-0.5 text-white cursor-pointer px-2.5 py-1 mr-1.25 bg-[#222] rounded-md'
+              className='mr-1.25 ml-0.5 cursor-pointer rounded-md bg-[#222] px-2.5 py-1 text-lg text-white'
             >
               {uiGridNum}
             </a>
@@ -508,7 +515,9 @@ const SystemHelper = (props: ISysytemHelper) => {
       {props.isGrid && <gridHelper args={[gridHelperSize, gridHelperSize]} />}
       {props.isGizmo && (
         <GizmoHelper alignment='top-right' margin={[75, 75]}>
-          <GizmoViewport labelColor='white' axisHeadScale={1} />
+          <group scale={0.75}>
+            <GizmoViewport labelColor='white' axisHeadScale={1} />
+          </group>
         </GizmoHelper>
       )}
       <Perf

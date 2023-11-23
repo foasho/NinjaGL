@@ -1,5 +1,5 @@
-'use client'
-import { useEffect, useRef, useState } from "react";
+'use client';
+import { useEffect, useRef, useState } from 'react';
 
 interface SpeechRecognitionEvent {
   isTrusted?: boolean;
@@ -7,10 +7,10 @@ interface SpeechRecognitionEvent {
   results: {
     isFinal: boolean;
     [key: number]:
-    | undefined
-    | {
-      transcript: string;
-    };
+      | undefined
+      | {
+          transcript: string;
+        };
   }[];
 }
 
@@ -47,7 +47,7 @@ declare let webkitSpeechRecognition: any;
 
 interface IUseSpeechRecognition {
   enabled: boolean;
-  lang: "ja-JP" | "en-US";
+  lang: 'ja-JP' | 'en-US';
   continuous: boolean; // 連続的に音声認識
   interimResults: boolean; // 途中結果の出力
   threshold_volume?: number; // 音声認識の閾値
@@ -67,20 +67,20 @@ interface ISpeechRecognitionOutput {
 
 /**
  * 音声認識ReactHook
- * @param props 
- * @returns 
+ * @param props
+ * @returns
  */
 export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecognitionOutput => {
   const ref = useRef<ISpeechRecognitionResult>({
-    prevFinishText: "",
-    prevInterimText: "",
+    prevFinishText: '',
+    prevInterimText: '',
     finishText: '',
     interimText: '',
     pause: false,
   });
 
-  //　最終的なテキスト
-  const [finishText, setFinishText] = useState<string>("");
+  // 最終的なテキスト
+  const [finishText, setFinishText] = useState<string>('');
 
   let recognition: SpeechRecognition;
   if (typeof window !== 'undefined') {
@@ -93,7 +93,7 @@ export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecog
       if (props.enabled) {
         let interimTranscript = '';
         let finalTranscript = '';
-        
+
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (ref.current.pause) return;
           const transcript = event.results[i][0]!.transcript;
@@ -106,45 +106,33 @@ export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecog
             ref.current.interimText = interimTranscript;
           }
         }
-      }
-      else {
-        ref.current.interimText = "";
-        ref.current.finishText = "";
+      } else {
+        ref.current.interimText = '';
+        ref.current.finishText = '';
       }
     };
-    recognition.onerror = (() => {
-      console.error("エラーでました");
-    });
+    recognition.onerror = () => {
+      console.error('エラーでました');
+    };
   }
-
-  const getVolume = (analyser: AnalyserNode) => {
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    analyser.getByteFrequencyData(dataArray);
-  
-    let sum = 0;
-    for (let i = 0; i < bufferLength; i++) {
-      sum += dataArray[i];
-    }
-    const average = sum / bufferLength;
-    return average / 255;
-  };
 
   const startRecognition = () => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream: MediaStream) => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(() => {
         if (recognition) recognition.start();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
-  }
+  };
 
   const stopRecognition = () => {
     try {
       recognition.stop();
+    } catch (e) {
+      console.error(e);
     }
-    catch(e){}
   };
 
   useEffect(() => {
@@ -155,18 +143,17 @@ export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecog
         }
       };
       startRecognition();
-    }
-    else {
+    } else {
       recognition.onend = () => {};
       stopRecognition();
     }
-    return (() => {
+    return () => {
       recognition.onend = () => {};
       stopRecognition();
-    })
+    };
   }, [props.enabled, props.lang]);
 
   return {
-    finishText: finishText
+    finishText: finishText,
   };
-}
+};

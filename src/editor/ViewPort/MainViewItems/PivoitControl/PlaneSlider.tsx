@@ -66,7 +66,7 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
 
   const onPointerDown = React.useCallback(
     (e: ThreeEvent<PointerEvent>) => {
-      if (displayValues) {
+      if (displayValues && divRef.current) {
         divRef.current.innerText = `${translation.current[(axis + 1) % 3].toFixed(2)}, ${translation.current[(axis + 2) % 3].toFixed(2)}`
         divRef.current.style.display = 'block'
       }
@@ -120,7 +120,7 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
         }
         translation.current[(axis + 1) % 3] = offsetX0.current + offsetX
         translation.current[(axis + 2) % 3] = offsetY0.current + offsetY
-        if (displayValues) {
+        if (displayValues && divRef.current) {
           divRef.current.innerText = `${translation.current[(axis + 1) % 3].toFixed(2)}, ${translation.current[(axis + 2) % 3].toFixed(2)}`
         }
         offsetMatrix.makeTranslation(offsetX * e1.x + offsetY * e2.x, offsetX * e1.y + offsetY * e2.y, offsetX * e1.z + offsetY * e2.z)

@@ -18,5 +18,5 @@ export const globalEditorStore = proxy<IEditorStore>({
   selectSubNav: "ui",
   appBar: true,
   sideBar: true,
-  isMd: false,
+  isMd: true,
 });

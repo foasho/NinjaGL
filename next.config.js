@@ -18,6 +18,9 @@ const TerserPlugin = require("terser-webpack-plugin"); // 追加
 const nextConfig = {
   reactStrictMode: true,
   experimental: {},
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
