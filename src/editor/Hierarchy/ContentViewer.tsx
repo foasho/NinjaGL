@@ -1,26 +1,23 @@
-import { BsBoxFill, BsFileImage, BsFolder } from 'react-icons/bs';
 import { useEffect, useRef, useState } from 'react';
-import { reqApi } from '@/services/ServciceApi';
-import { DirectionalLight, LoadingManager, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from 'three';
-import { useTranslation } from 'react-i18next';
-import {
-  AiFillHome,
-  AiOutlineDoubleLeft,
-  AiOutlineDoubleRight,
-  AiOutlineLeft,
-  AiOutlineRight,
-  AiFillFolderOpen,
-} from 'react-icons/ai';
-import Swal from 'sweetalert2';
-import { gltfLoader, InitScriptManagement } from '@ninjagl/core';
-import { globalContentStore, globalScriptStore } from '../Store/Store';
-import { useSession } from 'next-auth/react';
-import { AssetsContextMenu } from '../Dialogs/AssetsContextMenu';
-import { b64EncodeUnicode } from '@/commons/functional';
-import { MdUploadFile } from 'react-icons/md';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import Image from 'next/image';
+
 import { Tooltip } from '@nextui-org/react';
+import { gltfLoader, InitScriptManagement } from '@ninjagl/core';
+import { PutBlobResult } from '@vercel/blob';
+import Image from 'next/image';
+import { useSession } from 'next-auth/react';
+import { useTranslation } from 'react-i18next';
+import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
+import { BsBoxFill, BsFolder } from 'react-icons/bs';
+import { MdUploadFile } from 'react-icons/md';
+import Swal from 'sweetalert2';
+import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from 'three';
+
+import { b64EncodeUnicode } from '@/commons/functional';
+import { MySwal } from '@/commons/Swal';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+
+import { AssetsContextMenu } from '../Dialogs/AssetsContextMenu';
+import { globalContentStore, globalScriptStore } from '../Store/Store';
 
 export interface IFileProps {
   url: string;
@@ -107,8 +104,8 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const { data: session } = useSession();
   const [showContainerMenu, setShowContainerMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [containerPosition, setContainerPosition] = useState({ x: 0, y: 0 });
-  const [isPersonalDir, setIsPersonalDir] = useState(false);
   const [path, setPath] = useState('');
   const [offset, setOffset] = useState(0);
   const [maxPages, setMaxPages] = useState(1);
@@ -133,47 +130,38 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
    * 表示するファイルを移動
    */
   const MoveDirectory = async () => {
-    if (!loadRef.current) return;
+    if (!loadRef.current || !session) return;
     loadRef.current.style.display = 'block';
-    let prefix = path;
-    // let prefix = (isPersonalDir && session) ? `users/${b64EncodeUnicode(session.user!.email as string)}/${path}`: path;
-    await reqApi({
-      route: 'storage/list',
-      queryObject: {
-        prefix: prefix.replaceAll('//', '/'),
-        offset: offset,
-      },
-    }).then(async (res) => {
-      if (res.status == 200) {
-        const files: IFileProps[] = [];
-        const items = res.data;
-        console.log('items: resS', res);
-        for (const item of items) {
-          const file: IFileProps = {
-            url: item.url,
-            size: item.size,
-            isFile: item.isFile,
-            isDirectory: item.isDirectory,
-            name: item.filename,
-          };
-          if (isGLTF(file.name)) {
-            continue;
-          }
-          files.push(file);
+    // 必ずUserDirectoryをつける
+    const prefix = path.includes(b64EncodeUnicode(session.user!.email as string))? path : `${b64EncodeUnicode(session.user!.email as string)}/${path}`;
+    try {
+      const response = await fetch(`/api/storage/list?prefix=${prefix.replaceAll('//', '/')}&offset=${offset}`);
+      const items = await response.json();
+      const files: IFileProps[] = [];
+      for (const item of items) {
+        const file: IFileProps = {
+          url: item.url,
+          size: item.size,
+          isFile: item.isFile,
+          isDirectory: item.isDirectory,
+          name: item.filename,
+        };
+        if (isGLTF(file.name)) {
+          continue;
         }
-        setFiles(files);
-        if (res.data.maxPages) {
-          setMaxPages(res.data.maxPages);
-        }
+        files.push(file);
       }
-    });
+      setFiles(files);
+    } catch (error) {
+      console.error('Error fetching file:', error);
+    }
     loadRef.current.style.display = 'none';
   };
 
   useEffect(() => {
     MoveDirectory();
     return () => {};
-  }, [path, offset, isPersonalDir]);
+  }, [path, offset]);
 
   const onDoubleClick = (type: 'dir' | 'gltf' | 'js' | 'njc', path: string, name: string | null = null) => {
     if (type == 'dir' && path) {
@@ -223,6 +211,37 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     setShowMenu(false);
   };
 
+  const uploadFile = async (file: File) => {
+    if (!session) return;
+    const filename = file.name;
+    // 4.5MB以上のファイルはアップロードできない
+    if (file.size > 4.5 * 1024 * 1024) {
+      MySwal.fire({
+        title: '4.5MB以上のファイルはアップロードできません',
+      });
+      return;
+    }
+    const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/${filename}`;
+    try {
+      const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
+        method: 'POST',
+        body: file,
+      });
+
+      const blob = (await response.json()) as PutBlobResult;
+
+      if (!blob.url) {
+        throw new Error('Error uploading file');
+      }
+      MySwal.fire({
+        title: 'アップロードに成功しました',
+      });
+      MoveDirectory(); //Directoryの更新
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+
   /**
    * 任意のファイルをアップロード
    */
@@ -233,26 +252,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     const files = e.dataTransfer.files;
     if (files.length > 0 && session) {
       const file = files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      let _path = path;
-      const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/${_path}`;
-      const keyPath = (uploadPath + '/' + file.name).replaceAll('//', '/');
-      formData.append('filePath', keyPath);
-      try {
-        const response = await fetch('/api/storage/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Error uploading file');
-        }
-        const result = await response.json();
-        MoveDirectory(); //Directoryの更新
-      } catch (error) {
-        console.error('Error:', error.message);
-      }
+      uploadFile(file);
     }
   };
   const handleDragOver = (e) => {
@@ -262,123 +262,134 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   return (
     <>
       <div className='select-none'>
-        <div className='inline-block text-sm font-bold pr-3'>
+        <div className='inline-block pb-1 pr-3 text-sm font-bold'>
           {t('contentsBrowser')}
           <span
-            className='p;-2 cursor-pointer align-middle'
+            className='cursor-pointer pl-2 text-lg'
             onClick={() => {
-              setIsPersonalDir(false);
               onMoveDic('');
             }}
           >
             <AiFillHome className='inline' />
           </span>
         </div>
-        {path.split('/').map((route, idx) => {
-          if (route.length == 0) {
-            return <></>;
-          }
-          return (
-            <span
-              className='cursor-pointer px-1 py-2 max-w-full hover:underline'
-              onClick={() => onMoveDic(route)}
-              key={idx}
-            >
-              /{route}
-            </span>
-          );
-        })}
+        <div className='pb-2'>
+          {path.split('/').map((route, idx) => {
+            if (route.length == 0) {
+              return <></>;
+            }
+            if (session && b64EncodeUnicode(session.user!.email as string) == route) {
+              return <></>;
+            }
+            return (
+              <span
+                className='max-w-full cursor-pointer px-1 py-2 hover:underline'
+                onClick={() => onMoveDic(route)}
+                key={idx}
+              >
+                /{route}
+              </span>
+            );
+          })}
+        </div>
       </div>
       <div
-        className='mx-auto flex flex-wrap justify-between relative bg-[#000000a2] p-0.75 rounded-sm'
+        className='relative min-h-[40px] rounded-sm bg-[#000000a2]'
         onContextMenu={handleItemContainerMenu}
         onClick={handleClick}
         onMouseLeave={() => setShowContainerMenu(false)}
       >
         {showContainerMenu && (
-          <AssetsContextMenu position={containerPosition} path={path} onUploadCallback={MoveDirectory} />
+          <AssetsContextMenu
+            position={containerPosition}
+            path={path}
+            onUploadCallback={MoveDirectory}
+            onDeleteCallback={MoveDirectory}
+          />
         )}
-        {files.map((file, index) => {
-          return (
-            <ContentViewer
-              {...file}
-              onDoubleClick={onDoubleClick}
-              changeScriptEditor={props.changeScriptEditor}
-              onDeleteCallback={MoveDirectory}
-              key={index}
-            />
-          );
-        })}
-        {session && !isPersonalDir && (
-          <>
-            {/* パーソナルディレクトリ */}
-            <div
-              className='box-border mb-1.25 justify-center items-center max-w-[50px] text-center inline-block p-0.5 relative'
-              onDoubleClick={() => {
-                setPath('');
-                setOffset(0);
-                setIsPersonalDir(true);
-              }}
-            >
-              <div className='rounded-md bg-[#413f3f] text-center h-12 w-full mx-auto'>
-                <a className='p-1.5 w-4/5 mx-auto max-h-10 text-4xl'>
-                  <AiFillFolderOpen className='inline' />
-                </a>
-              </div>
-              <div className='text-center text-xs pt-0.75 overflow-hidden whitespace-pre line-clamp-2'>Personal</div>
-            </div>
-          </>
-        )}
-        {isPersonalDir && (
-          <>
-            <div className='w-full p-2 bg-black rounded-md' onDrop={handleDrop} onDragOver={handleDragOver}>
-              <div className='rounded-md bg-[#413f3f] text-center h-12 w-full mx-auto'>
-                <a className='p-1.5 w-4/5 mx-auto max-h-10 text-4xl'>
-                  <MdUploadFile className='inline' />
-                </a>
-              </div>
-              <div className='text-center text-sm select-none pb-1'>Drag and Drop Here</div>
-            </div>
-          </>
-        )}
-        <div className='z-50 bg-[#000000b9] w-full h-full absolute hidden cursor-wait' ref={loadRef}>
-          <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white'>
+        <div className='grid max-h-[25vh] w-full grid-cols-3 gap-1  overflow-y-auto overflow-x-hidden'>
+          {files.map((file, index) => {
+            return (
+              <ContentViewer
+                {...file}
+                onDoubleClick={onDoubleClick}
+                changeScriptEditor={props.changeScriptEditor}
+                onDeleteCallback={MoveDirectory}
+                key={index}
+              />
+            );
+          })}
+        </div>
+        <div className='absolute z-50 hidden h-full w-full cursor-wait bg-[#000000b9]' ref={loadRef}>
+          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white'>
             {t('nowLoading')}
           </div>
         </div>
       </div>
+      {/** アップロード */}
+      <div
+        className='col-span-3 mt-2 w-full rounded-md bg-black p-2'
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onClick={() => {
+          // Inputをクリックしてファイルを選択
+          if (inputRef.current) {
+            inputRef.current.click();
+          }
+        }}
+      >
+        <input
+          ref={inputRef}
+          type='file'
+          className='hidden'
+          onChange={async (e) => {
+            if (!session) return;
+            const files = e.target.files;
+            if (files && files.length > 0) {
+              const file = files[0];
+              uploadFile(file);
+            }
+          }}
+        />
+        <div className='mx-auto h-10 w-full rounded-md bg-[#413f3f] text-center'>
+          <a className='mx-auto cursor-pointer'>
+            <MdUploadFile className='inline p-1.5 text-4xl' />
+            <span className='align-middle text-sm'>Upload</span>
+          </a>
+        </div>
+      </div>
       <>
         {maxPages > 1 && (
-          <div className='pt-1.25 relative flex justify-center items-center flex-row'>
+          <div className='relative flex flex-row items-center justify-center pt-1.5'>
             {offset > 0 && (
               <>
                 <div
-                  className='absolute flex justify-center items-center mx-0.75 px-1.25 py-0.75 rounded-md cursor-pointer transition-colors duration-200 left-0'
+                  className='absolute left-0 mx-0.5 flex cursor-pointer items-center justify-center rounded-md px-1.5 py-0.5 transition-colors duration-200'
                   onClick={() => changeOffset(0)}
                 >
                   <AiOutlineDoubleLeft className='inline' />
                 </div>
                 <div
-                  className='absolute flex justify-center items-center mx-0.75 px-1.25 py-0.75 rounded-md cursor-pointer transition-colors duration-200 left-[25px]'
+                  className='absolute left-[25px] mx-0.5 flex cursor-pointer items-center justify-center rounded-md px-1.5 py-0.5 transition-colors duration-200'
                   onClick={() => changeOffset(offset - 1)}
                 >
                   <AiOutlineLeft className='inline' />
                 </div>
               </>
             )}
-            <div className='text-sm cursor-pointer transition-colors duration-200'>
+            <div className='cursor-pointer text-sm transition-colors duration-200'>
               {offset + 1} / {maxPages}
             </div>
             {offset + 1 < maxPages && (
               <>
                 <div
-                  className='absolute flex justify-center items-center mx-0.75 px-1.25 py-0.75 rounded-md cursor-pointer transition-colors duration-200 right-[25px]'
+                  className='absolute right-[25px] mx-0.5 flex cursor-pointer items-center justify-center rounded-md px-1.5 py-0.5 transition-colors duration-200'
                   onClick={() => changeOffset(offset + 1)}
                 >
                   <AiOutlineRight className='inline' />
                 </div>
                 <div
-                  className='absolute flex justify-center items-center mx-0.75 px-1.25 py-0.75 rounded-md cursor-pointer transition-colors duration-200 right-0'
+                  className='absolute right-0 mx-0.5 flex cursor-pointer items-center justify-center rounded-md px-1.5 py-0.5 transition-colors duration-200'
                   onClick={() => changeOffset(maxPages - 1)}
                 >
                   <AiOutlineDoubleRight className='inline' />
@@ -394,15 +405,13 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
 
 interface IContenetViewerProps extends IFileProps {
   onDeleteCallback?: () => void;
+  onUploadCallback?: () => void;
 }
 
 export const ContentViewer = (props: IContenetViewerProps) => {
   let icon: JSX.Element | null = null;
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  let tooltipTimer: NodeJS.Timeout | null = null;
-  let tooltipHideTimer: NodeJS.Timeout | null = null;
-  let tooltip = useRef<HTMLDivElement>(null);
   const editor = useNinjaEditor();
   const { t } = useTranslation();
 
@@ -489,20 +498,6 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     contentsSelectType = 'dir';
   }
 
-  const hideTooltip = () => {
-    if (!tooltip.current) return;
-    tooltip.current.style.display = 'none';
-  };
-
-  const viewTooltip = () => {
-    if (!tooltip.current) return;
-    tooltip.current.style.display = 'block';
-    if (tooltipHideTimer) {
-      clearTimeout(tooltipHideTimer);
-    }
-    tooltipHideTimer = setTimeout(hideTooltip, 2000);
-  };
-
   const onDoubleClick = async (type: string, name: string) => {
     if (props.isDirectory) {
       if (props.onDoubleClick) {
@@ -534,8 +529,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         sm.name = props.name.split('/').pop() || '';
         const success = editor.addSM(sm);
         if (!success) {
-          // @ts-ignore
-          Swal.fire({
+          MySwal.fire({
             title: t('scriptError'),
             text: t('scriptErrorAlreadyText'),
             icon: 'error',
@@ -545,8 +539,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
           if (props.changeScriptEditor) props.changeScriptEditor();
         }
       } else {
-        // @ts-ignore
-        Swal.fire({
+        MySwal.fire({
           title: t('scriptError'),
           text: t('scriptErrorText'),
           icon: 'error',
@@ -575,30 +568,34 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         onContextMenu={handleContextMenu}
         onClick={handleClick}
         onDoubleClick={(e) => onDoubleClick(contentsSelectType!, props.name)}
-        className='box-border mb-1.25 justify-center items-center max-w-[50px] text-center inline-block p-0.5 relative'
+        className='relative mb-1.5 box-border inline-block max-w-[50px] items-center justify-center p-0.5 text-center'
         onDragStart={(e) => onDragStart()}
         onDragEnd={(e) => onDragEnd()}
         onMouseLeave={() => setShowMenu(false)}
       >
         {showMenu && (
-          <AssetsContextMenu position={menuPosition} file={props} onDeleteCallback={props.onDeleteCallback} />
+          <AssetsContextMenu
+            position={menuPosition}
+            file={props}
+            onDeleteCallback={props.onDeleteCallback}
+            onUploadCallback={props.onUploadCallback}
+          />
         )}
         <Tooltip
+          isDisabled={!props.isFile}
           content={
-            <>
-              <strong>{t('filename')}</strong>
-              <br />
+            <div className='text-left'>
+              <strong>{t('filename')}:&nbsp;</strong>
               {props.name}
               <br />
-              <strong>{t('size')}</strong>
-              <br />
+              <strong>{t('size')}:&nbsp;</strong>
               {formatBytes(props.size)}
-            </>
+            </div>
           }
         >
-          <div className='rounded-md bg-primary text-center h-[50px] w-full m-auto'>{icon}</div>
+          <div className='m-auto h-[50px] w-full rounded-md bg-primary text-center'>{icon}</div>
         </Tooltip>
-        <div className='text-center text-xs pt-0.75 overflow-hidden whitespace-pre line-clamp-2'>{props.name}</div>
+        <div className='line-clamp-2 overflow-hidden whitespace-pre pt-0.5 text-center text-xs'>{props.name}</div>
       </div>
     </>
   );

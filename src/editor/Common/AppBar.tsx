@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSnapshot } from 'valtio';
-import { globalEditorStore } from '../Store/editor';
-import { MySwal } from '@/commons/Swal';
-import { ExportNjcFile } from '../ViewPort/DebugPlay';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { globalConfigStore } from '../Store/Store';
+
 import { loadNJCFile, saveNJCBlob } from '@ninjagl/core';
-import { b64EncodeUnicode } from '@/commons/functional';
 import { useSession } from 'next-auth/react';
-import { BsCheck, BsPlay, BsStop } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
 import { AiFillSave } from 'react-icons/ai';
 import { BiEditAlt } from 'react-icons/bi';
-import { Button } from '@nextui-org/react';
+import { BsCheck, BsPlay, BsStop } from 'react-icons/bs';
+import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
+import { useSnapshot } from 'valtio';
+
+import { b64EncodeUnicode } from '@/commons/functional';
+import { MySwal } from '@/commons/Swal';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+
 import { showHelperDialog } from '../Dialogs/HelperDialog';
-import { FaAngleDown, FaAngleRight, FaAngleUp } from 'react-icons/fa';
+import { globalEditorStore } from '../Store/editor';
+import { globalConfigStore } from '../Store/Store';
+import { ExportNjcFile } from '../ViewPort/DebugPlay';
 
 export const AppBarHeight = 45;
 export const AppBar = () => {
@@ -229,41 +231,41 @@ export const AppBar = () => {
     <>
       {/** アプリNavヘッダー */}
       {appBar && (
-        <div className={`w-full h-[${AppBarHeight}px] flex relative bg-primary items-center justify-between text-sm`}>
-          <ul className='list-none my-0 mx-auto  py-0 pl-0 pr-12 overflow-hidden text-center w-full h-full relative'>
-            <li className='inline-block py-[10px] px-[3px] float-left'>
+        <div className={`relative flex w-full items-center justify-between bg-primary text-sm`}>
+          <ul className='relative mx-auto my-0  h-full w-full list-none overflow-hidden py-0 pl-0 pr-12 text-center'>
+            <li className='float-left inline-block px-[3px] py-[10px]'>
               <a
-                className='select-none px-[10px] py-[5px] rounded-sm text-white hover:text-cyber no-underline h-full'
+                className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
                 onClick={() => openFileMenu()}
               >
                 {t('file')}
               </a>
             </li>
-            <li className='inline-block py-[10px] px-[3px] float-left'>
+            <li className='float-left inline-block px-[3px] py-[10px]'>
               <a
-                className='select-none px-[10px] py-[5px] rounded-sm text-white hover:text-cyber no-underline h-full'
+                className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
                 onClick={() => onClickSelectLang()}
               >
                 {t('lang')}
               </a>
             </li>
-            <li className='md:inline-block py-[10px] px-[3px] float-left hidden'>
+            <li className='float-left hidden px-[3px] py-[10px] md:inline-block'>
               <a
-                className='select-none px-[10px] py-[5px] rounded-sm text-white hover:text-cyber no-underline h-full'
+                className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
                 onClick={() => window.open('https://github.com/foasho/NinjaGL', '_blank')}
               >
                 Github
               </a>
             </li>
-            <li className='inline-block py-[10px] px-[3px] float-left'>
+            <li className='float-left inline-block cursor-pointer px-[3px] py-[10px] text-white'>
               <a onClick={() => onClickSelectTemplate()}>{t('template')}</a>
             </li>
-            <li className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>
-              <span className='hidden md:inline-block text-md px-[10px] py-[5px] rounded-sm text-white hover:text-cyber no-underline h-full'>
+            <li className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
+              <span className='hidden h-full rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber md:inline-block'>
                 NinjaGL
               </span>
               <a
-                className='inline-block text-white cursor-pointer'
+                className='inline-block cursor-pointer text-white'
                 onClick={() => {
                   changeProjectName();
                 }}
@@ -279,30 +281,30 @@ export const AppBar = () => {
                 )}
               </a>
             </li>
-            <li className='inline-block pt-[12px] px-[3px] float-right'>
+            <li className='float-right inline-block px-[3px] pt-[12px]'>
               <a
-                className='p-2 rounded-lg text-primary cursor-pointer bg-cyber hover:bg-secondary hover:text-white'
+                className='cursor-pointer rounded-lg bg-cyber p-2 text-primary hover:bg-secondary hover:text-white'
                 onClick={() => onSave()}
               >
                 <span className='align-middle'>
-                  <AiFillSave className='inline pr-1 h-6 w-6' />
+                  <AiFillSave className='inline h-6 w-6 pr-1' />
                 </span>
                 <span className='hidden md:inline'>Save</span>
               </a>
             </li>
-            <li className='inline-block py-[12px] px-[3px] float-right'>
+            <li className='float-right inline-block px-[3px] py-[12px]'>
               <a
-                className='p-2 rounded-lg text-primary cursor-pointer bg-gray-300 hover:bg-gray-500'
+                className='cursor-pointer rounded-lg bg-gray-300 p-2 text-primary hover:bg-gray-500'
                 onClick={() => onPlayStop()}
               >
                 <span className='align-middle'>
                   {viewSelect == 'debugplay' ? (
                     <>
-                      <BsStop className='inline pr-1 h-6 w-6' />
+                      <BsStop className='inline h-6 w-6 pr-1' />
                     </>
                   ) : (
                     <>
-                      <BsPlay className='inline pr-1 h-6 w-6' />
+                      <BsPlay className='inline h-6 w-6 pr-1' />
                     </>
                   )}
                 </span>
@@ -312,11 +314,11 @@ export const AppBar = () => {
           </ul>
 
           {showFileMenu && (
-            <div className='absolute top-[45px] left-0 z-20 bg-primary text-white w-[160px] shadow-sm'>
-              <ul className='text-xs font-bold list-none m-0 p-0' onMouseLeave={() => handleFileMenuLeave()}>
+            <div className='absolute left-0 top-[45px] z-20 w-[160px] bg-primary text-white shadow-sm'>
+              <ul className='m-0 list-none p-0 text-xs font-bold' onMouseLeave={() => handleFileMenuLeave()}>
                 {/* <li><a>{t("newProject")}</a></li> ##WEBなので不要?  */}
                 <li className='relative'>
-                  <a className='block p-2 no-underline rounded-sm cursor-pointer' onClick={() => openProject()}>
+                  <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={() => openProject()}>
                     {t('open')}
                   </a>
                 </li>
@@ -325,17 +327,17 @@ export const AppBar = () => {
                   onMouseEnter={() => handleRecentProjectsHover()}
                   onMouseLeave={() => handleSubMenuMouseLeave()}
                 >
-                  <a className='block p-2 no-underline rounded-sm cursor-pointer'>{t('recentProjects')}</a>
+                  <a className='block cursor-pointer rounded-sm p-2 no-underline'>{t('recentProjects')}</a>
                   {showSubMenu && (
                     <ul
-                      className='absolute top-0 left-[160px] min-w-[160px] bg-primary shadow-sm z-10 whitespace-nowrap overflow-hidden'
+                      className='absolute left-[160px] top-0 z-10 min-w-[160px] overflow-hidden whitespace-nowrap bg-primary shadow-sm'
                       onMouseLeave={() => handleSubMenuMouseLeave()}
                     >
                       {recentProgects.map((pf, idx) => {
                         return (
                           <li key={idx} className='flex'>
-                            <a className='p-2 no-underline block cursor-pointer'>{pf.name}</a>
-                            <a className='p-2 no-underline block cursor-pointer'>{pf.path}</a>
+                            <a className='block cursor-pointer p-2 no-underline'>{pf.name}</a>
+                            <a className='block cursor-pointer p-2 no-underline'>{pf.path}</a>
                           </li>
                         );
                       })}
@@ -349,15 +351,15 @@ export const AppBar = () => {
                 </li>
                 <li className='relative'>
                   <a
-                    className='block p-2 no-underline rounded-sm cursor-pointer select-none'
+                    className='block cursor-pointer select-none rounded-sm p-2 no-underline'
                     onClick={() => (globalEditorStore.autoSave = !autoSave)}
                   >
-                    {autoSave ? <BsCheck className='pl-3 inline-block text-white' /> : <> </>}
+                    {autoSave ? <BsCheck className='inline-block pl-3 text-white' /> : <> </>}
                     {t('autoSave')}
                   </a>
                 </li>
                 <li className='relative'>
-                  <a className='block p-2 no-underline rounded-sm cursor-pointer' onClick={() => showHelperDialog()}>
+                  <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={() => showHelperDialog()}>
                     {t('help')}
                   </a>
                 </li>
@@ -370,13 +372,13 @@ export const AppBar = () => {
       {/** AppBarの開閉  */}
       <div className='fixed right-1.5 top-2.5 z-20'>
         <a
-          className='p-2 rounded-lg text-primary cursor-pointer bg-transparent hover:bg-cyber/50'
+          className='cursor-pointer rounded-lg bg-transparent p-2 text-primary hover:bg-cyber/50'
           onClick={() => (globalEditorStore.appBar = !appBar)}
         >
           {appBar ? (
-            <FaAngleUp className='inline text-lg text-white pb-1' />
+            <FaAngleUp className='inline pb-1 text-lg text-white' />
           ) : (
-            <FaAngleDown className='inline text-lg text-white pb-1' />
+            <FaAngleDown className='inline pb-1 text-lg text-white' />
           )}
         </a>
       </div>

@@ -83,6 +83,7 @@
     "three": "^0.157.0",
     "three-custom-shader-material": "^5.3.7",
     "three-stdlib": "^2.26.13",
+    "tunnel-rat": "^0.1.2",
     "valtio": "^1.10.4"
   },
   "devDependencies": {

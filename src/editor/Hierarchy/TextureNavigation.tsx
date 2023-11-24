@@ -1,6 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import { ITextureManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
+
 import styles from '@/App.module.scss';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -14,7 +16,6 @@ export const TextureNavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.title}>{t('textureNavigator')}</div>
         <div className={styles.tree}>
           {textures.map((texture, idx) => {
             return <TextureItem texture={texture} index={idx} key={idx} />;

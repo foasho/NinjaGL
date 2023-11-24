@@ -14,7 +14,6 @@ export const ShaderNavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.title}>{t('shaderNavigator')}</div>
         <div className={styles.tree}>
           {shaders.map((shader, idx) => {
             return <ShaderItem shader={shader} index={idx} key={idx} />;

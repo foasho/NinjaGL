@@ -24,6 +24,7 @@ import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
 import { isNumber } from '@/commons/functional';
+import { Loading2D } from '@/commons/Loading2D';
 import { EDeviceType, useInputControl } from '@/hooks/useInputControl';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -247,43 +248,45 @@ export const MainViewer = () => {
 
   return (
     <div className='relative h-full bg-[#e2e2e2]'>
-      <Canvas
-        key={renderCount}
-        gl={{
-          alpha: configState.alpha,
-          logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
-          antialias: configState.antialias,
-        }}
-        style={{ display: showCanvas ? 'block' : 'none' }}
-        id='mainviewcanvas'
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        shadows
-      >
-        <Suspense fallback={null}>
-          <MyLights />
-          <StaticObjects />
-          <Terrain />
-          <Avatar />
-          <MySky />
-          <ThreeObjects />
-          <Cameras />
-          <FogComponent />
-          <MyEnviroment />
-          <MyTexts />
-          <MyEffects />
-          <SystemHelper
-            isGizmo={isGizmo}
-            cameraFar={cameraFar}
-            cameraSpeed={cameraSpeed}
-            worldSize={worldSize}
-            isGrid={isGrid}
-            isWorldHelper={isWorldHelper}
-            worldGridSize={worldGridSize}
-          />
-          <Preload all />
-        </Suspense>
-      </Canvas>
+      <Suspense fallback={<Loading2D />}>
+        <Canvas
+          key={renderCount}
+          gl={{
+            alpha: configState.alpha,
+            logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
+            antialias: configState.antialias,
+          }}
+          style={{ display: showCanvas ? 'block' : 'none' }}
+          id='mainviewcanvas'
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          shadows
+        >
+          <Suspense fallback={null}>
+            <MyLights />
+            <StaticObjects />
+            <Terrain />
+            <Avatar />
+            <MySky />
+            <ThreeObjects />
+            <Cameras />
+            <FogComponent />
+            <MyEnviroment />
+            <MyTexts />
+            <MyEffects />
+            <SystemHelper
+              isGizmo={isGizmo}
+              cameraFar={cameraFar}
+              cameraSpeed={cameraSpeed}
+              worldSize={worldSize}
+              isGrid={isGrid}
+              isWorldHelper={isWorldHelper}
+              worldGridSize={worldGridSize}
+            />
+            <Preload all />
+          </Suspense>
+        </Canvas>
+      </Suspense>
       <div
         className='absolute top-0 z-50 h-full w-full bg-white bg-opacity-50'
         style={{ display: showUI ? 'block' : 'none' }}

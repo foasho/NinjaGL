@@ -21,7 +21,6 @@ export const ShaderEditor = (props: IShaderEditor) => {
   const fragmentRef = useRef<any>(null);
   const vertexRef = useRef<any>(null);
   const [objectType, setObjectType] = useState<'box' | 'plane' | 'sphere' | 'gltf'>('box');
-  const [uploadModel, setUploadModel] = useState<string>('');
   const [fragmentCode, setFragmentCode] = useState<string>(initCodeFragment);
   const [vertexCode, setVertexCode] = useState<string>(initCodeVertex);
   const [fileName, setFileName] = useState<string | null>(null);

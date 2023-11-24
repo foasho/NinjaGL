@@ -17,7 +17,6 @@ export const UINavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.title}>{t('uiNavigator')}</div>
         <div className={styles.tree}>
           {uis.map((ui, idx) => {
             return <UIItem ui={ui} index={idx} isSelect={false} key={idx} />;

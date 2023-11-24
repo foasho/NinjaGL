@@ -1,11 +1,12 @@
-import styles from '@/App.module.scss';
 import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
+
 import { useTranslation } from 'react-i18next';
 import { AiOutlineCodeSandbox } from 'react-icons/ai';
 import { BiCapsule, BiCylinder, BiRectangle } from 'react-icons/bi';
 import { ImSphere } from 'react-icons/im';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
+
+import styles from '@/App.module.scss';
 
 interface IResponse {
   response: (data: ISelectNewObjectDialog) => void;
@@ -345,28 +346,6 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
             </>
           )}
-
-          {/* カメラ機能の廃止 */}
-          {/* {selectType == "camera" &&
-          <>
-            <div className={styles.card} onClick={() => {selectCamera("fixed")}}>
-              <div className={styles.icon}>
-                <img className={styles.img} src="fileicons/fixed-camera.png"/>
-              </div>
-              <div className={styles.name}>
-                {t("fixedCamera")}
-              </div>
-            </div>
-            <div className={styles.card} onClick={() => {selectCamera("moveable")}}>
-              <div className={styles.icon}>
-                <img className={styles.img} src="fileicons/moveable-camera.png"/>
-              </div>
-              <div className={styles.name}>
-                {t("moveableCamera")}
-              </div>
-            </div>
-          </>
-        } */}
 
           {selectType == 'cloud' && (
             <>

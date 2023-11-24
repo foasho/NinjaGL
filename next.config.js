@@ -26,7 +26,7 @@ const nextConfig = {
       {
         protocol: 'https',
         // Rewrite your self domain to your Vercel domain
-        hostname: '3u74cfblwta86vls.public.blob.vercel-storage.com',
+        hostname: 'qhhiooxw225gfiet.public.blob.vercel-storage.com',
         port: '',
         pathname: '/**',
       },

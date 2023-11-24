@@ -106,7 +106,13 @@ const resources = {
       along: "Along Shape",
       camera: "Camera",
       fixedCamera: "Fixed Camera",
+      download: "Download",
       moveableCamera: "Moveable Camera by User",
+      newFolderName: "New Folder",
+      deleteFolder: "Delete Folder",
+      deleteFile: "Delete File",
+      copyUrl: "Copy URL",
+      leastSelectGLTF: "Please select GLTF",
     }
   },
   ja: {
@@ -218,6 +224,12 @@ const resources = {
       camera: "カメラ",
       fixedCamera: "固定カメラ",
       moveableCamera: "ユーザー操作可能カメラ",
+      download: "ダウンロード",
+      newFolderName: "新しいフォルダ",
+      deleteFolder: "フォルダを削除",
+      deleteFile: "ファイルを削除",
+      copyUrl: "URLをコピー",
+      leastSelectGLTF: "GLTFを選択してください",
     }
   }
 }

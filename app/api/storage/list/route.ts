@@ -13,9 +13,11 @@ const isFolder = (prefix: string, pathname: string) => {
   if (p.length > 0 && p[p.length - 1] !== '/') {
     p = p + '/';
   }
+  console.log("prefix: ", p);
   const path = pathname.replace(p, '');
   const pathArray = path.split('/');
-  return pathArray.length >= 2;
+  console.log("path: ", path);
+  return pathArray.length == 2;
 }
  
 export async function GET(request: Request) {

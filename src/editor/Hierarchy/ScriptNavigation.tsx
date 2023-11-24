@@ -81,9 +81,6 @@ export const ScriptNavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.title}>
-          {t("scriptNavigator")}
-        </div>
         <div 
           className={styles.tree}
           onDrop={handleDrop}

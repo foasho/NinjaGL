@@ -1,12 +1,13 @@
-// @ts-nocheck
-import React from "react";
-import styles from "@/App.module.scss";
-import { useSession } from "next-auth/react";
-import { reqApi } from "@/services/ServciceApi";
-import { IFileProps } from "@/editor/Hierarchy/ContentViewer";
-import { useTranslation } from "react-i18next";
-import { b64EncodeUnicode } from "@/commons/functional";
-import Swal from "sweetalert2";
+import React from 'react';
+
+import { PutBlobResult } from '@vercel/blob';
+import { useSession } from 'next-auth/react';
+import { useTranslation } from 'react-i18next';
+
+import styles from '@/App.module.scss';
+import { b64EncodeUnicode } from '@/commons/functional';
+import { MySwal } from '@/commons/Swal';
+import { IFileProps } from '@/editor/Hierarchy/ContentViewer';
 
 interface IAssetsContextMenuProps {
   position: {
@@ -27,56 +28,79 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
    * 新規フォルダを作成
    */
   const onCreateFolder = () => {
-    Swal.fire({
-      title: t("newFolderName").toString(),
+    MySwal.fire({
+      title: t('newFolderName').toString(),
       input: 'text',
       showCancelButton: true,
-      confirmButtonText: t("create").toString(),
+      confirmButtonText: t('create').toString(),
       showLoaderOnConfirm: true,
       preConfirm: async (inputStr) => {
         if (inputStr.length === 0) {
-          return Swal.showValidationMessage(t("leastInput"));
+          return MySwal.showValidationMessage(t('leastInput'));
         }
         return inputStr;
       },
       allowOutsideClick: function () {
-        return !Swal.isLoading();
-      }
-    }).then((result) => {
+        return !MySwal.isLoading();
+      },
+    }).then(async (result) => {
       if (result.value) {
-        let prefix = `users/${b64EncodeUnicode(session.user.email)}`;
-        if (props.path){
+        let prefix = props.path?.includes(b64EncodeUnicode((session!.user as any).email))
+          ? ''
+          : `${b64EncodeUnicode((session!.user as any).email)}`;
+        if (props.path) {
           let p = props.path;
           // 最後にスラッシュがついていれば外す
-          if (p.endsWith("/")) {
+          if (p.endsWith('/')) {
             p = p.slice(0, -1);
           }
           // 最初にスラッシュがついていれば外す
-          if (p.startsWith("/")) {
+          if (p.startsWith('/')) {
             p = p.slice(1);
           }
-          prefix += "/" + p;
+          prefix += '/' + p;
         }
-        prefix += "/" + result.value;
-        reqApi({ route: "storage/create-folder", data: { prefix: prefix } }).then(() => {
-          if (props.onUploadCallback) props.onUploadCallback();
+        // textファイルを作成
+        const textFile = new Blob([''], { type: 'text/plain' });
+        // ファイル名を設定
+        const fileName = result.value + '/.keep';
+        let uploadPath = prefix + '/' + fileName;
+        // 頭にスラッシュがついていれば外す
+        if (uploadPath.startsWith('/')) {
+          uploadPath = uploadPath.slice(1);
+        }
+        // 新しいフォルダを作成する
+        const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
+          method: 'POST',
+          body: textFile,
         });
+        const blob = (await response.json()) as PutBlobResult;
+        console.log(blob);
+        if (!blob.url) {
+          throw new Error('Error uploading file');
+        }
+        MySwal.fire({
+          title: 'フォルダを作成しました',
+        });
+        if (props.onUploadCallback) {
+          props.onUploadCallback();
+        }
       }
     });
-  }
-  
+  };
+
   /**
    * 特定のURLをダウンロードする
-   * @param url 
+   * @param url
    */
   const onDownload = async (url: string, filename: string) => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-  
-      const a = document.createElement("a");
+
+      const a = document.createElement('a');
       const objectUrl = URL.createObjectURL(blob);
-  
+
       a.href = objectUrl;
       a.download = filename;
       document.body.appendChild(a);
@@ -84,22 +108,33 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
       a.remove();
       URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      console.error("Error downloading file:", error);
+      console.error('Error downloading file:', error);
     }
-  }
+  };
 
   /**
    * 特定のURLを削除する
    */
-  const deleteFile = async (url: string, filename: string) => {
-    await reqApi({ route: "storage/delete", queryObject: { signedUrl: url } });
-    props.onDeleteCallback();
-  }
+  const deleteFile = async (url: string) => {
+    try {
+      const _url = `/api/storage/delete?url=${url}`;
+      const response = await fetch(_url, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error deleting file');
+      }
+      MySwal.fire({
+        title: '削除に成功しました',
+      });
+    } catch (error) {
+      throw error;
+    }
+    if (props.onDeleteCallback) {
+      props.onDeleteCallback();
+    }
+  };
 
-  /**
-   * 新しいフォルダを作成する
-   */
-  
   return (
     <>
       <div
@@ -109,32 +144,30 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
         }}
         className={styles.assetsContextMenu}
       >
-        {(file && file.isFile) && 
-        <>
-          {file.url &&
+        {file && file.isFile && (
           <>
-            <div className={styles.menuItem} onClick={() => onDownload(file.url, file.name)}>
-              ダウンロード
-            </div>
-            <div className={styles.menuItem}>
-              URLをコピー
-            </div>
-            {session &&
-            <div className={styles.menuItem} onClick={() => deleteFile(file.url, file.name)}>
-              ファイルを削除
-            </div>
-            }
+            {file.url && (
+              <>
+                <div className={styles.menuItem} onClick={() => onDownload(file.url, file.name)}>
+                  {t('download')}
+                </div>
+                <div className={styles.menuItem}>{t('copyUrl')}</div>
+                {session && (
+                  <div className={styles.menuItem} onClick={() => deleteFile(file.url)}>
+                    {t('deleteFile')}
+                  </div>
+                )}
+              </>
+            )}
           </>
-          }
-        </>
-      }
-      {!file && session &&
-      <>
-        <div className={styles.menuItem} onClick={() => onCreateFolder()}>
-          新しいフォルダ作成
-        </div>
-      </>
-      }
+        )}
+        {!file && session && (
+          <>
+            <div className={styles.menuItem} onClick={() => onCreateFolder()}>
+              {t('newFolderName')}
+            </div>
+          </>
+        )}
       </div>
     </>
   );

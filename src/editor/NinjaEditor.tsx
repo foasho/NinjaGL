@@ -271,7 +271,7 @@ export const NinjaEditor = () => {
           <div className={`relative grid h-[calc(100vh-45px)] w-full grid-cols-6 gap-0`}>
             {/** ヒエラルキービュー */}
             <div
-              className={clsx(`absolute left-3 top-[12px] z-20 w-[180px] rounded-lg bg-primary pt-[2px]`)}
+              className={clsx(`absolute left-3 top-[12px] z-20 w-[190px] rounded-lg bg-primary pt-[2px]`)}
               style={{
                 height: appBar ? `calc(100vh - ${AppBarHeight + 24}px)` : '100vh',
                 display: sideBar ? 'block' : 'none',
@@ -282,7 +282,7 @@ export const NinjaEditor = () => {
                   <HierarchyTree />
                 </div>
               </div>
-              <div className='min-h-[20%] px-[5px] py-[12px]'>
+              <div className='min-h-[15%] px-[5px] py-[12px]'>
                 <div className='mb-2 h-[20px] select-none p-0 text-center text-white'>
                   <div
                     className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
@@ -325,8 +325,7 @@ export const NinjaEditor = () => {
                 </div>
               </div>
               <div
-                className='max-h-[30vh] overflow-y-auto overflow-x-hidden bg-primary p-4 text-white'
-                style={{ flex: 6 }}
+                className='bg-primary p-4 text-white'
               >
                 <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
               </div>
