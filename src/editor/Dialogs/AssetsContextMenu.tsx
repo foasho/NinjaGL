@@ -1,13 +1,13 @@
-import React from 'react';
-
+'use client';
 import { PutBlobResult } from '@vercel/blob';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'react-i18next';
 
-import styles from '@/App.module.scss';
 import { b64EncodeUnicode } from '@/commons/functional';
+import { ModelViewer } from '@/commons/ModelViewer';
 import { MySwal } from '@/commons/Swal';
 import { IFileProps } from '@/editor/Hierarchy/ContentViewer';
+import { isGLTF } from '@/utils/files';
 
 interface IAssetsContextMenuProps {
   position: {
@@ -142,18 +142,26 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
           top: position.y,
           left: position.x,
         }}
-        className={styles.assetsContextMenu}
+        className='fixed z-20 rounded-md bg-white text-left shadow-lg'
       >
         {file && file.isFile && (
           <>
             {file.url && (
               <>
-                <div className={styles.menuItem} onClick={() => onDownload(file.url, file.name)}>
+                <div
+                  className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
+                  onClick={() => onDownload(file.url, file.name)}
+                >
                   {t('download')}
                 </div>
-                <div className={styles.menuItem}>{t('copyUrl')}</div>
+                <div className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'>
+                  {t('copyUrl')}
+                </div>
                 {session && (
-                  <div className={styles.menuItem} onClick={() => deleteFile(file.url)}>
+                  <div
+                    className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
+                    onClick={() => deleteFile(file.url)}
+                  >
                     {t('deleteFile')}
                   </div>
                 )}
@@ -163,8 +171,32 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
         )}
         {!file && session && (
           <>
-            <div className={styles.menuItem} onClick={() => onCreateFolder()}>
+            <div
+              className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
+              onClick={() => onCreateFolder()}
+            >
               {t('newFolderName')}
+            </div>
+          </>
+        )}
+        {/** モデル */}
+        {file && isGLTF(file.name) && (
+          <>
+            <div
+              className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
+              onClick={async () => {
+                MySwal.fire({
+                  title: t('showModelViewer'),
+                  width: '50vw',
+                  html: (
+                    <div className='relative h-96 w-[50vw]'>
+                      <ModelViewer url={file.url} />
+                    </div>
+                  ),
+                });
+              }}
+            >
+              {t('showModelViewer')}
             </div>
           </>
         )}

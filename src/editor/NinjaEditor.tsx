@@ -288,7 +288,7 @@ export const NinjaEditor = () => {
                     className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
                     onClick={() => (globalEditorStore.selectSubNav = 'ui')}
                   >
-                    <span className='text-md cursor-pointer border-r-1 border-white px-1'>
+                    <span className='cursor-pointer border-r-1 border-white px-1'>
                       <AiOutlineAppstore className='inline pb-1 text-xl font-bold text-white' />
                     </span>
                   </div>
@@ -296,7 +296,7 @@ export const NinjaEditor = () => {
                     className={`inline-block text-[#3b3b3b] ${selectSubNav == 'script' && 'bg-black'}`}
                     onClick={() => (globalEditorStore.selectSubNav = 'script')}
                   >
-                    <span className='text-md cursor-pointer border-r-1 border-white px-1'>
+                    <span className='cursor-pointer border-r-1 border-white px-1'>
                       <AiOutlineCode className='inline pb-1 text-xl font-bold text-white' />
                     </span>
                   </div>
@@ -304,7 +304,7 @@ export const NinjaEditor = () => {
                     className={`inline-block text-[#3b3b3b] ${selectSubNav == 'shader' && 'bg-black'}`}
                     onClick={() => (globalEditorStore.selectSubNav = 'shader')}
                   >
-                    <span className='text-md cursor-pointer border-r-1 border-white px-1'>
+                    <span className='cursor-pointer border-r-1 border-white px-1'>
                       <AiOutlineHighlight className='inline pb-1 text-xl font-bold text-white' />
                     </span>
                   </div>
@@ -312,7 +312,7 @@ export const NinjaEditor = () => {
                     className={`inline-block text-[#3b3b3b] ${selectSubNav == 'texture' && 'bg-black'}`}
                     onClick={() => (globalEditorStore.selectSubNav = 'texture')}
                   >
-                    <span className='text-md px-1'>
+                    <span className='px-1'>
                       <AiOutlinePicture className='inline pb-1 text-xl font-bold text-white' />
                     </span>
                   </div>
@@ -325,7 +325,7 @@ export const NinjaEditor = () => {
                 </div>
               </div>
               <div
-                className='bg-primary p-4 text-white'
+                className='bg-primary px-2 text-white'
               >
                 <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
               </div>
@@ -333,7 +333,7 @@ export const NinjaEditor = () => {
                 className={clsx('absolute bottom-0 w-full border-t-2 border-black')}
                 onClick={() => onClickNewObject()}
               >
-                <div className='mb-2 cursor-pointer select-none rounded-md px-2.5 py-2 text-center text-lg font-bold text-white hover:bg-gray-700'>
+                <div className='cursor-pointer select-none rounded-md px-2.5 py-2 text-center text-lg font-bold text-white hover:bg-gray-700'>
                   <span>
                     <AiOutlinePlus className='inline' />
                   </span>

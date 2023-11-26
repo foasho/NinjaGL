@@ -1,7 +1,8 @@
-import styles from '@/App.module.scss';
-import { useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
+
 import { useTranslation } from 'react-i18next';
+
+import styles from '@/App.module.scss';
 
 interface IResponse {
   response: () => void;

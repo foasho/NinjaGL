@@ -6,8 +6,6 @@ import { AiOutlineCodeSandbox } from 'react-icons/ai';
 import { BiCapsule, BiCylinder, BiRectangle } from 'react-icons/bi';
 import { ImSphere } from 'react-icons/im';
 
-import styles from '@/App.module.scss';
-
 interface IResponse {
   response: (data: ISelectNewObjectDialog) => void;
 }
@@ -15,9 +13,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const [selectType, setSelectType] = useState<string | null>(null);
   const { t } = useTranslation();
   const handleClickOutside = (event) => {
-    if (event.target.classList.contains(styles.selectNewObjectDialog)) {
-      prop.response({ type: null, value: null });
-    }
+    prop.response({ type: null, value: null });
   };
   const selectUI = (value: string) => {
     prop.response({ type: 'ui', value: value });
@@ -57,130 +53,121 @@ const SelectNewObjectDialog = (prop: IResponse) => {
     console.log('サウンドがアップロードされました');
     console.log(e);
   };
+
+  const cardStyle = 'm-2.5 border-2 border-primary/25 px-3 py-2 cursor-pointer rounded-2xl';
+  const iconStyle = 'text-center';
+  const nameStyle = 'text-center';
+  const imgStyle = 'w-6 h-6 m-auto';
+
   return (
-    <div className={styles.selectNewObjectDialog} onClick={handleClickOutside}>
-      <div className={styles.dialog}>
-        <div className={styles.title}>{t('addSelectObject')}</div>
-        <div className={styles.cards}>
+    <>
+      <div
+        className='fixed left-0 top-0 z-10 flex h-screen w-screen items-center justify-center bg-black/50'
+        onClick={handleClickOutside}
+      ></div>
+      <div className='fixed left-1/2 top-1/2 z-20 min-h-[200px] min-w-[300px] max-w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-5'>
+        <div className='p-2.5'>{t('addSelectObject')}</div>
+        <div className='grid max-h-[70vh] grid-cols-3 gap-4'>
           {selectType == null && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('light');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/light.png' />
+                <div className={nameStyle}>
+                  <img className={imgStyle} src='fileicons/light.png' />
                 </div>
-                <div className={styles.name}>{t('light')}</div>
+                <div className='text-center'>{t('light')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('sky');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/sky.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/sky.png' />
                 </div>
-                <div className={styles.name}>{t('sky')}</div>
+                <div className={nameStyle}>{t('sky')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('cloud');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/cloud.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/cloud.png' />
                 </div>
-                <div className={styles.name}>{t('cloud')}</div>
+                <div className={nameStyle}>{t('cloud')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('sound');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/sound.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/sound.png' />
                 </div>
-                <div className={styles.name}>{t('audio')}</div>
+                <div className={nameStyle}>{t('audio')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('three');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/object.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/object.png' />
                 </div>
-                <div className={styles.name}>{t('object3d')}</div>
+                <div className={nameStyle}>{t('object3d')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('ui');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/ui.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/ui.png' />
                 </div>
-                <div className={styles.name}>{t('ui')}</div>
+                <div className={nameStyle}>{t('ui')}</div>
               </div>
-              {/* <div className={styles.card} onClick={() => {setSelectType("camera")}} >
-              <div className={styles.icon}>
-                <img className={styles.img} src="fileicons/camera.png"/>
-              </div>
-              <div className={styles.name}>
-                {t("camera")}
-              </div>
-            </div> */}
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('environment');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/environment.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/environment.png' />
                 </div>
-                <div className={styles.name}>{t('environment')}</div>
+                <div className={nameStyle}>{t('environment')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('lightformer');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/lightformer.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/lightformer.png' />
                 </div>
-                <div className={styles.name}>{t('lightformer')}</div>
+                <div className={nameStyle}>{t('lightformer')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   setSelectType('effect');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/effect.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/effect.png' />
                 </div>
-                <div className={styles.name}>{t('effect')}</div>
-              </div>
-              <div
-                className={styles.card}
-                onClick={() => {
-                  setSelectType('xr');
-                }}
-              >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/xr.png' />
-                </div>
-                <div className={styles.name}>{t('XR')}</div>
+                <div className={nameStyle}>{t('effect')}</div>
               </div>
             </>
           )}
@@ -188,37 +175,37 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'light' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectLight('directional');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/directionlight.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/directionlight.png' />
                 </div>
-                <div className={styles.name}>Directional</div>
+                <div className={nameStyle}>Directional</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectLight('spot');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/spotlight.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/spotlight.png' />
                 </div>
-                <div className={styles.name}>Spot</div>
+                <div className={nameStyle}>Spot</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectLight('point');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/pointlight.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/pointlight.png' />
                 </div>
-                <div className={styles.name}>Point</div>
+                <div className={nameStyle}>Point</div>
               </div>
             </>
           )}
@@ -226,31 +213,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'sky' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectSky('blue');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/bluesky.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/bluesky.png' />
                 </div>
-                <div className={styles.name}>{t('blueSky')}</div>
-              </div>
-            </>
-          )}
-
-          {selectType == 'sound' && (
-            <>
-              <div
-                className={styles.dropCard}
-                onDrop={(e) => {
-                  uploadSound(e);
-                }}
-              >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/drag-and-drop.png' />
-                </div>
-                <div className={styles.name}>{t('uploadAudio')}</div>
+                <div className={nameStyle}>{t('blueSky')}</div>
               </div>
             </>
           )}
@@ -258,59 +229,59 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'three' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectThree('box');
                 }}
               >
-                <div className={styles.objicon}>
+                <div className={iconStyle}>
                   <AiOutlineCodeSandbox />
                 </div>
-                <div className={styles.name}>{t('box')}</div>
+                <div className={nameStyle}>{t('box')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectThree('sphere');
                 }}
               >
-                <div className={styles.objicon}>
+                <div className={iconStyle}>
                   <ImSphere />
                 </div>
-                <div className={styles.name}>{t('sphere')}</div>
+                <div className={nameStyle}>{t('sphere')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectThree('plane');
                 }}
               >
-                <div className={styles.objicon}>
+                <div className={iconStyle}>
                   <BiRectangle />
                 </div>
-                <div className={styles.name}>{t('plane')}</div>
+                <div className={nameStyle}>{t('plane')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectThree('cylinder');
                 }}
               >
-                <div className={styles.objicon}>
+                <div className={iconStyle}>
                   <BiCylinder />
                 </div>
-                <div className={styles.name}>{t('cylinder')}</div>
+                <div className={nameStyle}>{t('cylinder')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectThree('capsule');
                 }}
               >
-                <div className={styles.objicon}>
+                <div className={iconStyle}>
                   <BiCapsule />
                 </div>
-                <div className={styles.name}>{t('capsule')}</div>
+                <div className={nameStyle}>{t('capsule')}</div>
               </div>
             </>
           )}
@@ -318,15 +289,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'ui' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectUI('touchController');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/touchController.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/touchController.png' />
                 </div>
-                <div className={styles.name}>{t('touchController')}</div>
+                <div className={nameStyle}>{t('touchController')}</div>
               </div>
             </>
           )}
@@ -334,15 +305,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'fog' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectFog('fog');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/fog.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/fog.png' />
                 </div>
-                <div className={styles.name}>{t('fog')}</div>
+                <div className={nameStyle}>{t('fog')}</div>
               </div>
             </>
           )}
@@ -350,15 +321,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'cloud' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectCloud('cloud');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/cloud.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='fileicons/cloud.png' />
                 </div>
-                <div className={styles.name}>{t('cloud')}</div>
+                <div className={nameStyle}>{t('cloud')}</div>
               </div>
             </>
           )}
@@ -366,48 +337,48 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'environment' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectEnvironment('sunset');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/sunset.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/sunset.png' />
                 </div>
-                <div className={styles.name}>{t('sunset')}</div>
+                <div className={nameStyle}>{t('sunset')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectEnvironment('dawn');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/dawn.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/dawn.png' />
                 </div>
-                <div className={styles.name}>{t('dawn')}</div>
+                <div className={nameStyle}>{t('dawn')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectEnvironment('night');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/night.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/night.png' />
                 </div>
-                <div className={styles.name}>{t('night')}</div>
+                <div className={nameStyle}>{t('night')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectEnvironment('forest');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/forest.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/forest.png' />
                 </div>
-                <div className={styles.name}>{t('forest')}</div>
+                <div className={nameStyle}>{t('forest')}</div>
               </div>
             </>
           )}
@@ -415,37 +386,37 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'lightformer' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectLightFormer('circle');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/circle.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/circle.png' />
                 </div>
-                <div className={styles.name}>{t('circle')}</div>
+                <div className={nameStyle}>{t('circle')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectLightFormer('ring');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/ring.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/ring.png' />
                 </div>
-                <div className={styles.name}>{t('ring')}</div>
+                <div className={nameStyle}>{t('ring')}</div>
               </div>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectLightFormer('rect');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src='fileicons/rect.png' />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src='/fileicons/rect.png' />
                 </div>
-                <div className={styles.name}>{t('rect')}</div>
+                <div className={nameStyle}>{t('rect')}</div>
               </div>
             </>
           )}
@@ -453,15 +424,15 @@ const SelectNewObjectDialog = (prop: IResponse) => {
           {selectType == 'effect' && (
             <>
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectEffect('bloom');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src={'fileicons/bloom.png'} />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src={'fileicons/bloom.png'} />
                 </div>
-                <div className={styles.name}>{t('bloom')}</div>
+                <div className={nameStyle}>{t('bloom')}</div>
               </div>
               {/* SSRはバグ中 */}
               {/* <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
@@ -473,48 +444,21 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               </div>
             </div> */}
               <div
-                className={styles.card}
+                className={cardStyle}
                 onClick={() => {
                   selectEffect('lut');
                 }}
               >
-                <div className={styles.icon}>
-                  <img className={styles.img} src={'fileicons/lut.png'} />
+                <div className={iconStyle}>
+                  <img className={imgStyle} src={'fileicons/lut.png'} />
                 </div>
-                <div className={styles.name}>{t('lut')}</div>
-              </div>
-            </>
-          )}
-
-          {selectType == 'xr' && (
-            <>
-              <div
-                className={styles.card}
-                onClick={() => {
-                  selectXR('vr');
-                }}
-              >
-                <div className={styles.icon}>
-                  <img className={styles.img} src={'fileicons/vr.png'} />
-                </div>
-                <div className={styles.name}>{t('VR')}</div>
-              </div>
-              <div
-                className={styles.card}
-                onClick={() => {
-                  selectXR('ar');
-                }}
-              >
-                <div className={styles.icon}>
-                  <img className={styles.img} src={'fileicons/ar.png'} />
-                </div>
-                <div className={styles.name}>{t('XR')}</div>
+                <div className={nameStyle}>{t('lut')}</div>
               </div>
             </>
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

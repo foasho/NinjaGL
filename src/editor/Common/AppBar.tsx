@@ -314,7 +314,7 @@ export const AppBar = () => {
           </ul>
 
           {showFileMenu && (
-            <div className='absolute left-0 top-[45px] z-20 w-[160px] bg-primary text-white shadow-sm'>
+            <div className='fixed left-0 top-[45px] z-50 w-[160px] bg-primary text-white shadow-sm'>
               <ul className='m-0 list-none p-0 text-xs font-bold' onMouseLeave={() => handleFileMenuLeave()}>
                 {/* <li><a>{t("newProject")}</a></li> ##WEBなので不要?  */}
                 <li className='relative'>

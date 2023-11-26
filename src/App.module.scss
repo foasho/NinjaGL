@@ -15,19 +15,6 @@
     src: url("/fonts/MPLUS1-Light.ttf") format("truetype");
 }
 
-@import "./editor/NinjaEditor";
-@import "./editor/ViewPort/ScriptEditor";
-@import "./editor/ViewPort/ShaderEditor";
 @import "./editor/Inspector/TerrainInspector";
 @import "./editor/Inspector/PlayerInspector";
 @import "./editor/Inspector/MainViewInspector";
-@import "./editor/Inspector/CameraPreview";
-@import "./editor/Hierarchy/ContentViewer";
-@import "./editor/Hierarchy/Hierarchy";
-@import "./editor/Hierarchy/SubNavigation";
-@import "./editor/ViewPort/MainViewer";
-@import "./editor/ViewPort/MainViewUIs/UIItem";
-// @import "./editor/Common/AppBar";
-@import "./editor/Dialogs/SelectNewObjectDialog";
-@import "./editor/Dialogs/LoDViewDialog";
-@import "./editor/Dialogs/AssetsContextMenu";

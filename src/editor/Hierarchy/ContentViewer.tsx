@@ -15,6 +15,22 @@ import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGL
 import { b64EncodeUnicode } from '@/commons/functional';
 import { MySwal } from '@/commons/Swal';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import {
+  formatBytes,
+  glsl_icon,
+  gltf_icon,
+  isGLSL,
+  isGLTF,
+  isImage,
+  isJS,
+  isMP3,
+  isNJC,
+  isTerrain,
+  js_icon,
+  mp3_icon,
+  njc_icon,
+  terrain_icon,
+} from '@/utils/files';
 
 import { AssetsContextMenu } from '../Dialogs/AssetsContextMenu';
 import { globalContentStore, globalScriptStore } from '../Store/Store';
@@ -29,66 +45,6 @@ export interface IFileProps {
   onDoubleClick?: (type: string, value: string, name: string) => void;
   imageUrl?: string;
 }
-
-const getExtension = (filename: string): string => {
-  if (filename === undefined) return '';
-  const name = filename.split('.').pop();
-  return name!.toLowerCase();
-};
-
-const isImage = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
-};
-
-const gltf_icon = '/fileicons/gltf.png';
-const object_icon = '/fileicons/object.png';
-const isGLTF = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['glb', 'gltf'].includes(ext);
-};
-
-const mp3_icon = '/fileicons/mp3.png';
-const isMP3 = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['mp3'].includes(ext);
-};
-
-const glsl_icon = '/fileicons/glsl.png';
-const isGLSL = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['glsl'].includes(ext);
-};
-
-const js_icon = '/fileicons/js.png';
-const isJS = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['js'].includes(ext);
-};
-
-const njc_icon = '/fileicons/njc.png';
-const isNJC = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['njc'].includes(ext);
-};
-
-const terrain_icon = '/fileicons/terrain.png';
-const isTerrain = (filename: string): boolean => {
-  const ext = getExtension(filename);
-  return ['ter'].includes(ext);
-};
-
-const formatBytes = (bytes: number, decimals = 2): string => {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-};
 
 interface IContentsBrowser {
   changeScriptEditor: () => void;
@@ -280,7 +236,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
         </div>
       </div>
       <div
-        className='relative min-h-[40px] rounded-sm bg-[#000000a2]'
+        className='relative min-h-[40px] rounded-lg bg-[#000000a2]'
         onContextMenu={handleItemContainerMenu}
         onClick={handleClick}
         onMouseLeave={() => setShowContainerMenu(false)}
@@ -293,7 +249,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             onDeleteCallback={MoveDirectory}
           />
         )}
-        <div className='grid max-h-[25vh] w-full grid-cols-3 gap-1  overflow-y-auto overflow-x-hidden'>
+        <div className='grid max-h-[25vh] w-full grid-cols-3 gap-1 overflow-y-auto  overflow-x-hidden p-1'>
           {files.map((file, index) => {
             return (
               <ContentViewer

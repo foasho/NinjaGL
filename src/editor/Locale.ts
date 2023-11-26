@@ -116,6 +116,7 @@ const resources = {
       deleteFile: "Delete File",
       copyUrl: "Copy URL",
       leastSelectGLTF: "Please select GLTF",
+      showModelViewer: "Show ModelViewer",
     }
   },
   ja: {
@@ -236,6 +237,7 @@ const resources = {
       deleteFile: "ファイルを削除",
       copyUrl: "URLをコピー",
       leastSelectGLTF: "GLTFを選択してください",
+      showModelViewer: "モデルビューアを表示",
     }
   }
 }
