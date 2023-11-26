@@ -1,14 +1,9 @@
-
 type Loading2DProps = {
-  h?: number;
+  className?: string;
 };
-export const Loading2D = (
-  {
-    h = 96,
-  }: Loading2DProps
-) => {
+export const Loading2D = ({ className }: Loading2DProps) => {
   return (
-    <div className={`flex h-${h} w-full flex-col items-center justify-center`}>
+    <div className={`flex w-full flex-col items-center justify-center ${className}`}>
       <svg className='-ml-1 mr-3 h-5 w-5 animate-spin text-black' fill='none' viewBox='0 0 24 24'>
         <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
         <path
@@ -18,5 +13,5 @@ export const Loading2D = (
         />
       </svg>
     </div>
-  )
-}
+  );
+};

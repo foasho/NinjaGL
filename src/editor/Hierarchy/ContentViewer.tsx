@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'react-i18next';
 import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
-import { BsBoxFill, BsFolder } from 'react-icons/bs';
+import { BsFolder } from 'react-icons/bs';
 import { MdUploadFile } from 'react-icons/md';
 import Swal from 'sweetalert2';
 import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from 'three';
@@ -41,38 +41,38 @@ const isImage = (filename: string): boolean => {
   return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
 };
 
-const gltf_icon = 'fileicons/gltf.png';
-const object_icon = 'fileicons/object.png';
+const gltf_icon = '/fileicons/gltf.png';
+const object_icon = '/fileicons/object.png';
 const isGLTF = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['glb', 'gltf'].includes(ext);
 };
 
-const mp3_icon = 'fileicons/mp3.png';
+const mp3_icon = '/fileicons/mp3.png';
 const isMP3 = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['mp3'].includes(ext);
 };
 
-const glsl_icon = 'fileicons/glsl.png';
+const glsl_icon = '/fileicons/glsl.png';
 const isGLSL = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['glsl'].includes(ext);
 };
 
-const js_icon = 'fileicons/js.png';
+const js_icon = '/fileicons/js.png';
 const isJS = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['js'].includes(ext);
 };
 
-const njc_icon = 'fileicons/njc.png';
+const njc_icon = '/fileicons/njc.png';
 const isNJC = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['njc'].includes(ext);
 };
 
-const terrain_icon = 'fileicons/terrain.png';
+const terrain_icon = '/fileicons/terrain.png';
 const isTerrain = (filename: string): boolean => {
   const ext = getExtension(filename);
   return ['ter'].includes(ext);
@@ -114,26 +114,15 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const loadRef = useRef<HTMLDivElement>(null);
 
   /**
-   * GLTFの画像を取得する
-   * @param url
-   * @param name
-   * @returns
-   */
-  const getGLTFImage = async (url: string, name: string): Promise<string | null> => {
-    if (isGLTF(name)) {
-      return await CreateGLTFImage(url);
-    }
-    return null;
-  };
-
-  /**
    * 表示するファイルを移動
    */
   const MoveDirectory = async () => {
     if (!loadRef.current || !session) return;
     loadRef.current.style.display = 'block';
     // 必ずUserDirectoryをつける
-    const prefix = path.includes(b64EncodeUnicode(session.user!.email as string))? path : `${b64EncodeUnicode(session.user!.email as string)}/${path}`;
+    const prefix = path.includes(b64EncodeUnicode(session.user!.email as string))
+      ? path
+      : `${b64EncodeUnicode(session.user!.email as string)}/${path}`;
     try {
       const response = await fetch(`/api/storage/list?prefix=${prefix.replaceAll('//', '/')}&offset=${offset}`);
       const items = await response.json();
@@ -146,9 +135,6 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           isDirectory: item.isDirectory,
           name: item.filename,
         };
-        if (isGLTF(file.name)) {
-          continue;
-        }
         files.push(file);
       }
       setFiles(files);
@@ -430,12 +416,12 @@ export const ContentViewer = (props: IContenetViewerProps) => {
   };
 
   let contentsSelectType: 'gltf' | 'mp3' | 'js' | 'glsl' | 'image' | 'ter' | 'avt' | 'njc' | 'dir' | null = null;
-  const iconImgStyle = 'p-1.5 w-4/5 mx-auto max-h-10 text-4xl';
+  const iconImgStyle = 'p-1.5 w-4/5 mx-auto max-h-10 text-4xl select inline';
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
         <>
-          <Image src={props.url} className={iconImgStyle} width={35} height={35} alt='icon-image' />
+          <Image src={props.url} className={iconImgStyle} width={35} height={35} alt='icon-image' draggable={true} />
         </>
       );
       contentsSelectType = 'image';
@@ -443,7 +429,14 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       icon = (
         <>
           <a className={iconImgStyle}>
-            <BsBoxFill className='inline' />
+            <Image
+              src={gltf_icon}
+              className={iconImgStyle + ' cursor-grab'}
+              width={35}
+              height={35}
+              alt='icon-gltf'
+              draggable={true}
+            />
           </a>
         </>
       );
