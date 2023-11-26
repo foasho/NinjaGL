@@ -8,8 +8,8 @@ import {
   AiOutlineHighlight,
   AiOutlinePicture,
   AiOutlinePlus,
-  AiOutlineLeft,
-  AiOutlineRight,
+  AiOutlineDown,
+  AiOutlineUp,
 } from 'react-icons/ai';
 import Swal from 'sweetalert2';
 import { MathUtils, Vector3 } from 'three';
@@ -96,19 +96,6 @@ export const NinjaEditor = () => {
         visibleType: 'auto',
         visible: true,
       });
-    } else if (data.type == 'sound') {
-      // editor.setObjectManagement(
-      //   {
-      //     id: generateUUID(),
-      //     name: `*${data.value}`,
-      //     type: "sound",
-      //     args: {
-      //       type: data.value
-      //     },
-      //     physics: "none",
-      //     visibleType: "auto",
-      //   }
-      // )
     } else if (data.type == 'three') {
       editor.addOM({
         id: MathUtils.generateUUID(),
@@ -166,41 +153,7 @@ export const NinjaEditor = () => {
       });
     } else if (data.type == 'effect') {
       let _args: any = { type: data.value };
-      if (data.value == 'ssr') {
-        _args = {
-          type: data.value,
-          enabled: true,
-          temporalResolve: true,
-          STRETCH_MISSED_RAYS: true,
-          USE_MRT: true,
-          USE_NORMALMAP: true,
-          USE_ROUGHNESSMAP: true,
-          ENABLE_JITTERING: true,
-          ENABLE_BLUR: true,
-          DITHERING: false,
-          temporalResolveMix: { value: 0.9, min: 0, max: 1 },
-          temporalResolveCorrectionMix: { value: 0.4, min: 0, max: 1 },
-          maxSamples: { value: 0, min: 0, max: 1 },
-          resolutionScale: { value: 1, min: 0, max: 1 },
-          blurMix: { value: 0.2, min: 0, max: 1 },
-          blurKernelSize: { value: 8, min: 0, max: 8 },
-          BLUR_EXPONENT: { value: 10, min: 0, max: 20 },
-          rayStep: { value: 0.5, min: 0, max: 1 },
-          intensity: { value: 2.5, min: 0, max: 5 },
-          maxRoughness: { value: 1, min: 0, max: 1 },
-          jitter: { value: 0.3, min: 0, max: 5 },
-          jitterSpread: { value: 0.25, min: 0, max: 1 },
-          jitterRough: { value: 0.1, min: 0, max: 1 },
-          roughnessFadeOut: { value: 1, min: 0, max: 1 },
-          rayFadeOut: { value: 0, min: 0, max: 1 },
-          MAX_STEPS: { value: 20, min: 0, max: 20 },
-          NUM_BINARY_SEARCH_STEPS: { value: 6, min: 0, max: 10 },
-          maxDepthDifference: { value: 5, min: 0, max: 10 },
-          maxDepth: { value: 1, min: 0, max: 1 },
-          thickness: { value: 3, min: 0, max: 10 },
-          ior: { value: 1.45, min: 0, max: 2 },
-        };
-      } else if (data.value == 'bloom') {
+      if (data.value == 'bloom') {
         _args = {
           type: data.value,
           luminanceThreshold: 0.2,
@@ -271,87 +224,92 @@ export const NinjaEditor = () => {
           <div className={`relative grid h-[calc(100vh-45px)] w-full grid-cols-6 gap-0`}>
             {/** ヒエラルキービュー */}
             <div
-              className={clsx(`absolute left-3 top-[12px] z-20 w-[190px] rounded-lg bg-primary pt-[2px]`)}
-              style={{
-                height: appBar ? `calc(100vh - ${AppBarHeight + 24}px)` : '100vh',
-                display: sideBar ? 'block' : 'none',
-              }}
+              className={clsx(`absolute left-3 top-[12px] z-20 w-[190px] rounded-lg pt-[2px]`, sideBar && 'bg-primary')}
             >
-              <div className='min-h-[20%] px-[5px] py-[12px]'>
-                <div className='m-0'>
-                  <HierarchyTree />
-                </div>
-              </div>
-              <div className='min-h-[15%] px-[5px] py-[12px]'>
-                <div className='mb-2 h-[20px] select-none p-0 text-center text-white'>
-                  <div
-                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
-                    onClick={() => (globalEditorStore.selectSubNav = 'ui')}
-                  >
-                    <span className='cursor-pointer border-r-1 border-white px-1'>
-                      <AiOutlineAppstore className='inline pb-1 text-xl font-bold text-white' />
-                    </span>
-                  </div>
-                  <div
-                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'script' && 'bg-black'}`}
-                    onClick={() => (globalEditorStore.selectSubNav = 'script')}
-                  >
-                    <span className='cursor-pointer border-r-1 border-white px-1'>
-                      <AiOutlineCode className='inline pb-1 text-xl font-bold text-white' />
-                    </span>
-                  </div>
-                  <div
-                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'shader' && 'bg-black'}`}
-                    onClick={() => (globalEditorStore.selectSubNav = 'shader')}
-                  >
-                    <span className='cursor-pointer border-r-1 border-white px-1'>
-                      <AiOutlineHighlight className='inline pb-1 text-xl font-bold text-white' />
-                    </span>
-                  </div>
-                  <div
-                    className={`inline-block text-[#3b3b3b] ${selectSubNav == 'texture' && 'bg-black'}`}
-                    onClick={() => (globalEditorStore.selectSubNav = 'texture')}
-                  >
-                    <span className='px-1'>
-                      <AiOutlinePicture className='inline pb-1 text-xl font-bold text-white' />
-                    </span>
-                  </div>
-                </div>
-                <div className='m-0 block px-3 text-white '>
-                  {selectSubNav == 'ui' && <UINavigation />}
-                  {selectSubNav == 'script' && <ScriptNavigation />}
-                  {selectSubNav == 'shader' && <ShaderNavigation />}
-                  {selectSubNav == 'texture' && <TextureNavigation />}
-                </div>
+              <div className='relative'>
+                <a
+                  className={clsx(
+                    'absolute top-0 h-6 cursor-pointer rounded-lg bg-primary bg-primary/75 p-0.5 text-white',
+                    sideBar ? 'right-2' : 'left-2',
+                  )}
+                  onClick={() => (globalEditorStore.sideBar = !sideBar)}
+                >
+                  {sideBar ? (
+                    <AiOutlineDown className='mx-0.5 inline h-4 w-4 pb-1' />
+                  ) : (
+                    <AiOutlineUp className='mx-0.5 inline h-4 w-4 pb-1' />
+                  )}
+                </a>
               </div>
               <div
-                className='bg-primary px-2 text-white'
+                className='overflow-y-auto'
+                style={{
+                  height: `calc(100vh - ${AppBarHeight + 54}px)`,
+                  display: sideBar ? 'block' : 'none',
+                }}
               >
-                <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
-              </div>
-              <div
-                className={clsx('absolute bottom-0 w-full border-t-2 border-black')}
-                onClick={() => onClickNewObject()}
-              >
-                <div className='cursor-pointer select-none rounded-md px-2.5 py-2 text-center text-lg font-bold text-white hover:bg-gray-700'>
-                  <span>
-                    <AiOutlinePlus className='inline' />
-                  </span>
-                  <span className='text-sm'>{t('newObject')}</span>
+                <div className='min-h-[20%] px-[5px] py-[12px]'>
+                  <div className='m-0'>
+                    <HierarchyTree />
+                  </div>
+                </div>
+                <div className='min-h-[15%] px-[5px] py-[12px]'>
+                  <div className='mb-2 h-[20px] select-none p-0 text-center text-white'>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'ui' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'ui')}
+                    >
+                      <span className='cursor-pointer border-r-1 border-white px-1'>
+                        <AiOutlineAppstore className='inline pb-1 text-xl font-bold text-white' />
+                      </span>
+                    </div>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'script' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'script')}
+                    >
+                      <span className='cursor-pointer border-r-1 border-white px-1'>
+                        <AiOutlineCode className='inline pb-1 text-xl font-bold text-white' />
+                      </span>
+                    </div>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'shader' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'shader')}
+                    >
+                      <span className='cursor-pointer border-r-1 border-white px-1'>
+                        <AiOutlineHighlight className='inline pb-1 text-xl font-bold text-white' />
+                      </span>
+                    </div>
+                    <div
+                      className={`inline-block text-[#3b3b3b] ${selectSubNav == 'texture' && 'bg-black'}`}
+                      onClick={() => (globalEditorStore.selectSubNav = 'texture')}
+                    >
+                      <span className='px-1'>
+                        <AiOutlinePicture className='inline pb-1 text-xl font-bold text-white' />
+                      </span>
+                    </div>
+                  </div>
+                  <div className='m-0 block px-3 text-white '>
+                    {selectSubNav == 'ui' && <UINavigation />}
+                    {selectSubNav == 'script' && <ScriptNavigation />}
+                    {selectSubNav == 'shader' && <ShaderNavigation />}
+                    {selectSubNav == 'texture' && <TextureNavigation />}
+                  </div>
+                </div>
+                <div className='bg-primary px-2 pb-12 text-white'>
+                  <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
+                </div>
+                <div
+                  className='absolute bottom-0 w-full rounded-md border-t-2 border-black bg-primary'
+                  onClick={() => onClickNewObject()}
+                >
+                  <div className='cursor-pointer select-none rounded-md px-2.5 py-3 text-center text-lg font-bold text-white hover:bg-gray-700'>
+                    <span>
+                      <AiOutlinePlus className='inline' />
+                    </span>
+                    <span className='text-sm'>{t('newObject')}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className={clsx('fixed bottom-8 z-20 ml-4', sideBar ? 'left-[180px]' : 'left-4')}>
-              <a
-                className='rounded-full bg-cyber/50 p-3 text-white hover:bg-cyber/75'
-                onClick={() => (globalEditorStore.sideBar = !sideBar)}
-              >
-                {sideBar ? (
-                  <AiOutlineLeft className='mx-0.5 inline h-4 w-4 pb-1' />
-                ) : (
-                  <AiOutlineRight className='mx-0.5 inline h-4 w-4 pb-1' />
-                )}
-              </a>
             </div>
 
             {/** コンテンツビュー */}

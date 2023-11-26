@@ -14,6 +14,7 @@ import tunnel from 'tunnel-rat';
 import { b64EncodeUnicode } from '@/commons/functional';
 import { Loading2D } from '@/commons/Loading2D';
 import { MySwal } from '@/commons/Swal';
+import { globalEditorStore } from '../Store/editor';
 
 const dom = tunnel();
 
@@ -99,6 +100,7 @@ export const PlayerEditor = () => {
                 title: t('success'),
                 text: t('saveSuccess') + `\nCharacters/${inputStr}.glb`,
               });
+              globalEditorStore.viewSelect = 'mainview';
             } catch (error) {
               console.error('Error:', error.message);
             }
@@ -265,20 +267,20 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
   return (
     <>
       {/* <Center> */}
-        <group ref={grp}>
-          {/** @ts-ignore */}
-          <mesh ref={ref} scale={scale}>
-            <primitive object={scene} />
-          </mesh>
-          <ContactShadows />
-        </group>
+      <group ref={grp}>
+        {/** @ts-ignore */}
+        <mesh ref={ref} scale={scale}>
+          <primitive object={scene} />
+        </mesh>
+        <ContactShadows />
+      </group>
       {/* </Center> */}
       <group position={[0.5, 0, 0]}>
         <mesh position={[0, 2, 0]}>
           <boxGeometry args={[0.5, 0.03, 0.03]} />
           <meshStandardMaterial color='red' />
         </mesh>
-        <Text position={[0.5, 2, 0]} scale={0.25} color={"red"}>
+        <Text position={[0.5, 2, 0]} scale={0.25} color={'red'}>
           2m
         </Text>
         <mesh position={[0, 1.5, 0]}>
@@ -289,7 +291,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           <boxGeometry args={[0.5, 0.03, 0.03]} />
           <meshStandardMaterial color='red' />
         </mesh>
-        <Text position={[0.5, 1, 0]} scale={0.25} color={"red"}>
+        <Text position={[0.5, 1, 0]} scale={0.25} color={'red'}>
           1m
         </Text>
         <mesh position={[0, 0.5, 0]}>
@@ -305,7 +307,9 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
         <div>
           <div>
             <div className='pt-2 font-bold'>
-              <span>{t("scale")}: {scale.toFixed(1)}</span>
+              <span>
+                {t('scale')}: {scale.toFixed(1)}
+              </span>
             </div>
             <input
               type='range'
@@ -321,11 +325,11 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
         </div>
         <div>
           <div className='pt-2 font-bold'>
-            <span>{t("motionSelect")}</span>
+            <span>{t('motionSelect')}</span>
           </div>
           {/** Idle設定 */}
           <div className='pt-2'>
-            <div>{t("idle")}</div>
+            <div>{t('idle')}</div>
             <select className='rounded-sm' defaultValue={'Idle'} onChange={onSelectIdle}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
@@ -339,7 +343,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** 歩く設定 */}
           <div className='pt-2'>
-            <div>{t("walk")}</div>
+            <div>{t('walk')}</div>
             <select className='rounded-sm' defaultValue={'Walk'} onChange={onSelectWalk}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
@@ -353,7 +357,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** 走る設定 */}
           <div className='pt-2'>
-            <div>{t("run")}</div>
+            <div>{t('run')}</div>
             <select className='rounded-sm' defaultValue={'Run'} onChange={onSelectRun}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
@@ -367,7 +371,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** ジャンプ設定 */}
           <div className='pt-2'>
-            <div>{t("jump")}</div>
+            <div>{t('jump')}</div>
             <select className='rounded-sm' defaultValue={'Jump'} onChange={onSelectJump}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
@@ -381,7 +385,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** ウェポン設定 */}
           <div className='pt-2'>
-            <div>{t("weapon")}</div>
+            <div>{t('weapon')}</div>
             <select className='rounded-sm' defaultValue={'Weapon'} onChange={onSelectWeapon}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
@@ -395,7 +399,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** サブウェポン */}
           <div className='py-2'>
-            <div>{t("subWeapon")}</div>
+            <div>{t('subWeapon')}</div>
             <select className='rounded-sm' defaultValue={'SubWeapon'} onChange={onSelectSubWeapon}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {

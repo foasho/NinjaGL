@@ -435,7 +435,6 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     }
     // どれにも該当しない場合は表示しない
     else {
-      console.log('Test ');
       return <></>;
     }
   } else if (props.isDirectory) {
@@ -496,6 +495,25 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       }
     } else if (props.isFile && type == 'njc') {
       if (props.onDoubleClick) props.onDoubleClick('njc', props.url, name);
+    } else if (props.isFile && type == 'gltf') {
+      // モデルを配置
+      editor.addOM(
+        {
+          id: MathUtils.generateUUID(),
+          name: `*model`,
+          type: "object",
+          args: {
+            url: props.url,
+            castShadow: true,
+            receiveShadow: false,
+            distance: 25,
+          },
+          physics: false,
+          phyType: 'box',
+          visibleType: 'auto',
+          visible: true,
+        }
+      )
     }
   };
 

@@ -51,25 +51,22 @@ export const MainViewInspector = () => {
     <>
       {otype && (
         <div className={styles.mainInspector}>
-          {otype == 'object' ||
+          {(otype == 'object' ||
             otype == 'avatar' ||
             otype == 'light' ||
             otype == 'three' ||
             otype == 'terrain' ||
             otype == 'camera' ||
-            (otype == 'lightformer' && <Transforms />)}
+            otype == 'lightformer') && <Transforms />}
 
-          {otype == 'object' || (otype == 'three' && <Physics />)}
+          {(otype == 'object' || otype == 'three') && <Physics />}
 
-          {otype == 'light' ||
-            otype == 'three' ||
-            otype == 'object' ||
-            (otype == 'avatar' && (
-              <>
-                <Shadows />
-                <Visible />
-              </>
-            ))}
+          {(otype == 'light' || otype == 'three' || otype == 'object' || otype == 'avatar') && (
+            <>
+              <Shadows />
+              <Visible />
+            </>
+          )}
 
           {otype == 'object' && <Animation />}
           {otype == 'environment' && <EnvironmentParam />}
