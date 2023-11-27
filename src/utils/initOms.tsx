@@ -21,6 +21,46 @@ export const initThirdPersonTemplate = (): IObjectManagement[] => {
     },
     {
       id: MathUtils.generateUUID(),
+      name: 'box01',
+      type: 'three',
+      args: {
+        type: 'box',
+        position: new Vector3(-5, 0.5, 5),
+        scale: new Vector3(1, 1, 1),
+        materialData: {
+          type: 'standard',
+          value: '#4785FF',
+        },
+        castShadow: true,
+        receiveShadow: true,
+      },
+      physics: true,
+      phyType: 'box',
+      visibleType: 'auto',
+      visible: true,
+    },
+    {
+      id: MathUtils.generateUUID(),
+      name: 'wall01',
+      type: 'three',
+      args: {
+        type: 'box',
+        position: new Vector3(0, 2, 16),
+        scale: new Vector3(32, 4, 0.2),
+        materialData: {
+          type: 'standard',
+          value: '#111212',
+        },
+        castShadow: true,
+        receiveShadow: true,
+      },
+      physics: true,
+      phyType: 'box',
+      visibleType: 'auto',
+      visible: true,
+    },
+    {
+      id: MathUtils.generateUUID(),
       name: 'Directional1',
       type: 'light',
       args: {
@@ -60,7 +100,7 @@ export const initThirdPersonTemplate = (): IObjectManagement[] => {
     },
     {
       id: MathUtils.generateUUID(),
-      name: 'Plane',
+      name: 'floor',
       type: 'three',
       args: {
         type: 'plane',

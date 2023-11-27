@@ -71,7 +71,7 @@ export const MainViewInspector = () => {
           {(otype == 'object' || otype == 'avatar') && <Animation />}
           {otype == 'environment' && <EnvironmentParam />}
           {otype == 'lightformer' && <FormType />}
-          {otype == 'effect' && <Intensity />}
+          {(otype == 'effect' || otype == "light") && <Intensity />}
           {otype == 'camera' && <CameraParams />}
         </div>
       )}
