@@ -13,10 +13,8 @@ const isFolder = (prefix: string, pathname: string) => {
   if (p.length > 0 && p[p.length - 1] !== '/') {
     p = p + '/';
   }
-  console.log("prefix: ", p);
   const path = pathname.replace(p, '');
   const pathArray = path.split('/');
-  console.log("path: ", path);
   return pathArray.length == 2;
 }
  

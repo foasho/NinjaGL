@@ -94,6 +94,7 @@ const resources = {
       autoScaling: "AutoScaling",
       visibleNone: "None",
       visibleForce: "Force",
+      visibleDistance: "VisibleDistance",
       helper: "HelperLine",
       file: "File",
       newProject: "New Project",
@@ -117,6 +118,7 @@ const resources = {
       copyUrl: "Copy URL",
       leastSelectGLTF: "Please select GLTF",
       showModelViewer: "Show ModelViewer",
+      animationLoop: "Animation Play",
     }
   },
   ja: {
@@ -207,14 +209,15 @@ const resources = {
       cylinder: "円柱",
       capsule: "カプセル",
       nowLoading: "ロード中...",
-      castshadow: "CastShadow",
-      receiveshadow: "ReceiveShadow",
+      castshadow: "影を与える",
+      receiveshadow: "影を受ける",
       attention: "注意",
       templatePrepare: "現在ゲームテンプレート準備中",
       visibleType: "描画種別",
-      autoScaling: "オートスケール",
+      autoScaling: "オート表示",
       visibleNone: "表示しない",
       visibleForce: "強制表示",
+      visibleDistance: "表示される距離",
       helper: "補助線",
       file: "ファイル",
       newProject: "新しいプロジェクト",
@@ -238,6 +241,7 @@ const resources = {
       copyUrl: "URLをコピー",
       leastSelectGLTF: "GLTFを選択してください",
       showModelViewer: "モデルビューアを表示",
+      animationLoop: "アニメーション再生",
     }
   }
 }

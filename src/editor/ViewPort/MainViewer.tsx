@@ -47,7 +47,6 @@ import { UICanvas } from './MainViewUIs/UICanvas';
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
   const [renderCount, setRenderCount] = useState(0);
-  const loadingRef = useRef<HTMLDivElement>(null);
   const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const [isConfHovered, setIsConfHovered] = useState(false);
@@ -68,6 +67,7 @@ export const MainViewer = () => {
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
   const [showUI, setShowUI] = useState<boolean>(false);
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /**
    * Editorの設定に同期
@@ -107,9 +107,7 @@ export const MainViewer = () => {
     } else {
       const type = contentsState.currentType;
       if (type == 'gltf' || type == 'ter' || type == 'avt') {
-        if (loadingRef.current) {
-          loadingRef.current.style.display = 'block';
-        }
+        setIsLoading(true);
         const filePath = contentsState.currentUrl;
         gltfLoader.load(
           filePath,
@@ -208,9 +206,7 @@ export const MainViewer = () => {
                 object: scene,
               });
             }
-            if (loadingRef.current) {
-              loadingRef.current.style.display = 'none';
-            }
+            setIsLoading(false);
           },
           (xhr) => {
             console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
@@ -218,9 +214,7 @@ export const MainViewer = () => {
           async (err) => {
             console.log('モデル読み込みエラ―');
             console.log(err);
-            if (loadingRef.current) {
-              loadingRef.current.style.display = 'none';
-            }
+            setIsLoading(false);
           },
         );
       }
@@ -288,7 +282,7 @@ export const MainViewer = () => {
         </Canvas>
       </Suspense>
       <div
-        className='absolute top-0 z-50 h-full w-full bg-white bg-opacity-50'
+        className='absolute top-0 z-50 h-full w-full bg-white/50'
         style={{ display: showUI ? 'block' : 'none' }}
       >
         <UICanvas gridNum={uiGridNum} />
@@ -416,34 +410,35 @@ export const MainViewer = () => {
           </>
         )}
       </div>
-      <div
-        ref={loadingRef}
-        style={{
-          display: 'none',
-          background: '#12121266',
-          height: '100%',
-          width: '100%',
-          top: 0,
-          left: 0,
-          position: 'absolute',
-          zIndex: 1000000,
-        }}
-      >
+      {isLoading &&
         <div
           style={{
-            color: '#fff',
-            fontWeight: 'bold',
-            position: 'absolute',
+            display: 'none',
+            background: '#12121266',
+            height: '100%',
             width: '100%',
-            textAlign: 'center',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            top: 0,
+            left: 0,
+            position: 'absolute',
+            zIndex: 1000000,
           }}
         >
-          Loading...
+          <div
+            style={{
+              color: '#fff',
+              fontWeight: 'bold',
+              position: 'absolute',
+              width: '100%',
+              textAlign: 'center',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            Loading...
+          </div>
         </div>
-      </div>
+      }
     </div>
   );
 };
@@ -565,7 +560,7 @@ export const CameraControl = (props: ICameraControl) => {
       cameraRef.current.lookAt(0, 0, 0);
       camera.position.copy(initCameraPosition.clone());
       camera.lookAt(0, 0, 0);
-      targetFocusCamera('', initCameraPosition);
+      // targetFocusCamera('', initCameraPosition);
     }
   }, []);
 

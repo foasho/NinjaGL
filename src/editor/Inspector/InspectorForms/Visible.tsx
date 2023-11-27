@@ -15,7 +15,9 @@ export const Visible = () => {
   const editor = useNinjaEditor();
   const { t } = useTranslation();
   const om = editor.getOMById(id);
-  const [visibleType, setVisibleType] = useState<{ value: 'none' | 'auto' | 'force'; label: string }>();
+  const [visibleType, setVisibleType] = useState<{ value: 'none' | 'auto' | 'force'; label: string }>(
+    om?.args.visibleType ? { value: om.args.visibleType, label: om.args.visibleType } : { value: 'auto', label: t('autoScaling') }
+  );
   const [distance, setDistance] = useState(25);
 
   // 描画種別の選択肢
@@ -27,8 +29,10 @@ export const Visible = () => {
 
   useEffect(() => {
     if (om) {
-      if (om.args.visibleType !== undefined)
-        setVisibleType(visibleTypeOptions.find((option) => option.value == om.args.visibleType));
+      if (om.args.visibleType !== undefined){
+        const visibleType = visibleTypeOptions.find((option) => option.value == om.args.visibleType);
+        if (visibleType) setVisibleType(visibleType);
+      }
     }
   }, [om]);
 
@@ -40,8 +44,16 @@ export const Visible = () => {
     setVisibleType(selectVisibleType);
   };
 
+  /**
+   * オート表示の場合のみ設定可
+   */
+  const changeDistance = (e) => {
+    if (id) editor.setArg(id, 'distance', Number(e.target.value));
+    setDistance(Number(e.target.value));
+  };
+
   return (
-    <>
+    <div className='mb-16'>
       <div className={styles.visibleType}>
         <div className={styles.title}>{t('visibleType')}</div>
         <div className={styles.input}>
@@ -53,12 +65,18 @@ export const Visible = () => {
           />
         </div>
       </div>
-      <div className=''>
-        <div></div>
-        <div>
-          <input type='range' min={0} value={distance} max={150} step={1} />
+      {/** オート表示の場合のみ設定可 */}
+      {visibleType && visibleType.value == 'auto' && (
+        <div className='mb-2'>
+          <div>
+            {t('visibleDistance')}
+            <span className='pl-2'>{distance}</span>
+          </div>
+          <div>
+            <input type='range' min={0} value={distance} max={150} step={1} onChange={changeDistance} />
+          </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };

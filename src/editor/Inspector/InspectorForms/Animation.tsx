@@ -18,8 +18,10 @@ export const Animation = () => {
   const om = editor.getOMById(id);
 
   // Animationsの設定
-  const [defalutAnim, setDefalutAnim] = useState<{ value: string; label: string }>();
-  const [animLoop, setAnimLoop] = useState<boolean>(true);
+  const [defalutAnim, setDefalutAnim] = useState<{ value: string; label: string }>(
+    om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: '', label: '' }
+  );
+  const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop);
 
   useEffect(() => {
     if (om) {
@@ -47,12 +49,12 @@ export const Animation = () => {
   return (
     <>
       <div className={styles.animations}>
-        {om && om.animations && om.animations.length > 0 && (
+        {om && om.args.animations && om.args.animations.length > 0 && (
           <>
             <div className={styles.title}>{t('animations')}</div>
             <div className={styles.input}>
               <Select
-                options={om.animations.map((anim: AnimationClip) => {
+                options={om.args.animations.map((anim: AnimationClip) => {
                   return { value: anim.name, label: anim.name };
                 })}
                 value={defalutAnim}
@@ -64,7 +66,9 @@ export const Animation = () => {
         )}
       </div>
       <div className={styles.animLoop}>
-        <div className={styles.title}>{t('animationLoop')}</div>
+        <div className={styles.title}>
+          {t('animationLoop')}
+        </div>
         <div className={styles.input}>
           <input
             type='checkbox'

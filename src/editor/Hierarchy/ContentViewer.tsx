@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from 'three';
 
 import { b64EncodeUnicode } from '@/commons/functional';
+import { Loading2D } from '@/commons/Loading2D';
 import { MySwal } from '@/commons/Swal';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import {
@@ -68,13 +69,14 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState<IFileProps[]>([]);
   const loadRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * 表示するファイルを移動
    */
   const MoveDirectory = async () => {
-    if (!loadRef.current || !session) return;
-    loadRef.current.style.display = 'block';
+    if (isLoading || !session) return;
+    setIsLoading(true);
     // 必ずUserDirectoryをつける
     const prefix = path.includes(b64EncodeUnicode(session.user!.email as string))
       ? path
@@ -97,7 +99,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     } catch (error) {
       console.error('Error fetching file:', error);
     }
-    loadRef.current.style.display = 'none';
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -262,11 +264,13 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             );
           })}
         </div>
-        <div className='absolute z-50 hidden h-full w-full cursor-wait bg-[#000000b9]' ref={loadRef}>
-          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white'>
-            {t('nowLoading')}
+        {isLoading && (
+          <div className='absolute z-50 hidden h-full w-full cursor-wait bg-[#000000b9]'>
+            <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white'>
+              <Loading2D className='h-32' />
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {/** アップロード */}
       <div
@@ -497,23 +501,21 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       if (props.onDoubleClick) props.onDoubleClick('njc', props.url, name);
     } else if (props.isFile && type == 'gltf') {
       // モデルを配置
-      editor.addOM(
-        {
-          id: MathUtils.generateUUID(),
-          name: `*model`,
-          type: "object",
-          args: {
-            url: props.url,
-            castShadow: true,
-            receiveShadow: false,
-            distance: 25,
-          },
-          physics: false,
-          phyType: 'box',
-          visibleType: 'auto',
-          visible: true,
-        }
-      )
+      editor.addOM({
+        id: MathUtils.generateUUID(),
+        name: `*model`,
+        type: 'object',
+        args: {
+          url: props.url,
+          castShadow: true,
+          receiveShadow: false,
+          distance: 25,
+        },
+        physics: false,
+        phyType: 'box',
+        visibleType: 'auto',
+        visible: true,
+      });
     }
   };
 

@@ -1,41 +1,44 @@
-import { IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement, NJCFile } from "@ninjagl/core";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+
+import { IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement, NJCFile } from '@ninjagl/core';
+import { Euler, Group, Object3D, Vector3 } from 'three';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { Euler, Group, MathUtils, Object3D, Vector3 } from "three";
+
+import { initThirdPersonTemplate } from '@/utils/initOms';
 
 /**
  * コンテンツブラウザの操作モード
  */
 export enum ECBMode {
-  POSITION = "position",
-  ROTATION = "rotation",
-  SCALE = "scale",
+  POSITION = 'position',
+  ROTATION = 'rotation',
+  SCALE = 'scale',
 }
 
 /**
  * コンテンツブラウザのファイル種別
  */
 export enum ECBSelectType {
-  GLTF = "gltf",
-  MP3 = "mp3",
-  JS = "js",
-  GLSL = "glsl",
-  IMAGE = "image",
-  TER = "ter",
-  AVT = "avt",
-  CAMERA = "camera",
+  GLTF = 'gltf',
+  MP3 = 'mp3',
+  JS = 'js',
+  GLSL = 'glsl',
+  IMAGE = 'image',
+  TER = 'ter',
+  AVT = 'avt',
+  CAMERA = 'camera',
 }
 
 /**
  * プレイヤー
  */
 export interface IPlayerManager {
-  type: "avatar";
+  type: 'avatar';
   selectAnim: string;
   height: number;
-  animations: [],
+  animations: [];
   object: Group;
-  animMapper: {[key: string]: string};
+  animMapper: { [key: string]: string };
   sounds: any[];
   args: any;
 }
@@ -47,13 +50,13 @@ type NinjaEditorProp = {
   sms: IScriptManagement[];
   transformDecimal: number;
   mode: ECBMode;
-  gltfViewerObj: Object3D|null;
+  gltfViewerObj: Object3D | null;
   wireFrameColor: string;
   fileSelect: string;
   assetRoute: string;
   contentsSelect: boolean;
-  contentsSelectType: ECBSelectType|null;
-  contentsSelectPath: string|null;
+  contentsSelectType: ECBSelectType | null;
+  contentsSelectPath: string | null;
   ready: boolean;
   initialize: () => void;
   setCamera: (camera: OrbitControlsImpl) => void;
@@ -62,7 +65,7 @@ type NinjaEditorProp = {
   undo: () => void;
   redo: () => void;
   setName: (id: string, name: string) => void;
-  setVisibleType: (id: string, visibleType: "force" | "auto") => void;
+  setVisibleType: (id: string, visibleType: 'force' | 'auto') => void;
   setVisible: (id: string, visible: boolean) => void;
   setPosition: (id: string, position: Vector3) => void;
   getPosition: (id: string) => Vector3;
@@ -70,7 +73,7 @@ type NinjaEditorProp = {
   getRotation: (id: string) => Euler;
   setScale: (id: string, scale: Vector3) => void;
   getScale: (id: string) => Vector3;
-  setMaterialData: (id: string, mtype: "standard"|"phong"|"toon"|"shader"|"reflection", value: any) => void;
+  setMaterialData: (id: string, mtype: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection', value: any) => void;
   getMaterialData: (id: string) => any;
   setArg: (id: string, key: string, arg: any) => void;
   onOMIdChanged: (id: string, listener: () => void) => void;
@@ -85,7 +88,7 @@ type NinjaEditorProp = {
   addOM: (om: IObjectManagement) => void;
   removeOM: (id: string) => void;
   addSM: (sm: IScriptManagement) => boolean;
-  getOMById: (id: string|null) => IObjectManagement | undefined;
+  getOMById: (id: string | null) => IObjectManagement | undefined;
   getSMById: (id: string) => IScriptManagement | undefined;
   getAvatarOM: () => IObjectManagement | undefined;
   getLights: () => IObjectManagement[];
@@ -98,9 +101,9 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   transformDecimal: 2,
   mode: ECBMode.POSITION,
   gltfViewerObj: null,
-  wireFrameColor: "#ffffff",
-  fileSelect: "",
-  assetRoute: "",
+  wireFrameColor: '#ffffff',
+  fileSelect: '',
+  assetRoute: '',
   contentsSelect: false,
   contentsSelectType: null,
   contentsSelectPath: null,
@@ -144,8 +147,8 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
 export const useNinjaEditor = () => useContext(NinjaEditorContext);
 
 interface IHistory {
-  type: "add" | "remove" | "update";
-  objectType: "object" | "ui"; // 今のところobjectのみ
+  type: 'add' | 'remove' | 'update';
+  objectType: 'object' | 'ui'; // 今のところobjectのみ
   om?: IObjectManagement;
   um?: IUIManagement;
 }
@@ -158,23 +161,23 @@ export const NinjaEditorProvider = ({ children }) => {
   const [ums, setUMs] = useState<IUIManagement[]>([]);
   const [tms, setTMs] = useState<ITextureManagement[]>([]);
   const [sms, setSMs] = useState<IScriptManagement[]>([]);
-  const orbit = useRef<OrbitControlsImpl|null>(null);
+  const orbit = useRef<OrbitControlsImpl | null>(null);
   const transformDecimal = 2;
   // コンテンツブラウザで利用
   const mode = useRef<ECBMode>(ECBMode.POSITION);
-  const gltfViewerObj = useRef<Object3D|null>(null);
-  const wireFrameColor = useRef<string>("#ffffff");
-  const fileSelect = useRef<string>("");
-  const assetRoute = useRef<string>("");
+  const gltfViewerObj = useRef<Object3D | null>(null);
+  const wireFrameColor = useRef<string>('#ffffff');
+  const fileSelect = useRef<string>('');
+  const assetRoute = useRef<string>('');
   const contentsSelect = useRef<boolean>(false);
-  const contentsSelectType = useRef<ECBSelectType|null>(null);
-  const contentsSelectPath = useRef<string|null>(null);
+  const contentsSelectType = useRef<ECBSelectType | null>(null);
+  const contentsSelectPath = useRef<string | null>(null);
   // 操作履歴
-  const history = useRef<{ undo: IHistory[], redo: IHistory[] }>({ undo: [], redo: [] });
+  const history = useRef<{ undo: IHistory[]; redo: IHistory[] }>({ undo: [], redo: [] });
   // プレイヤーパラメータ
   const playerManager = useRef<IPlayerManager>({
-    type: "avatar",
-    selectAnim: "idle",
+    type: 'avatar',
+    selectAnim: 'idle',
     height: 1.7,
     animations: [],
     object: new Group(),
@@ -200,15 +203,15 @@ export const NinjaEditorProvider = ({ children }) => {
       gltfViewerObj.current.remove(...gltfViewerObj.current.children);
       gltfViewerObj.current = null;
     }
-    wireFrameColor.current = "#ffffff";
-    fileSelect.current = "";
-    assetRoute.current = "";
+    wireFrameColor.current = '#ffffff';
+    fileSelect.current = '';
+    assetRoute.current = '';
     contentsSelect.current = false;
     contentsSelectType.current = null;
     contentsSelectPath.current = null;
     playerManager.current = {
-      type: "avatar",
-      selectAnim: "idle",
+      type: 'avatar',
+      selectAnim: 'idle',
       height: 1.7,
       animations: [],
       object: new Group(),
@@ -216,8 +219,8 @@ export const NinjaEditorProvider = ({ children }) => {
       sounds: [],
       args: {},
     };
-  }
-  
+  };
+
   /**
    * 元に戻す
    */
@@ -229,43 +232,43 @@ export const NinjaEditorProvider = ({ children }) => {
     if (!last) {
       return;
     }
-    if (last.objectType === "object" && last.om !== undefined) {
-      if (last.type === "add") {
+    if (last.objectType === 'object' && last.om !== undefined) {
+      if (last.type === 'add') {
         // OMを削除
-        setOMs(oms.filter(om => om.id !== last.om!.id));
+        setOMs(oms.filter((om) => om.id !== last.om!.id));
         // historyに追加
-        addHistory("redo", {
-          type: "remove",
-          objectType: "object",
+        addHistory('redo', {
+          type: 'remove',
+          objectType: 'object',
           om: last.om,
         });
       }
-      if (last.type === "remove") {
+      if (last.type === 'remove') {
         // OMを追加
         setOMs([...oms, last.om]);
         // historyに追加
-        addHistory("redo", {
-          type: "add",
-          objectType: "object",
+        addHistory('redo', {
+          type: 'add',
+          objectType: 'object',
           om: last.om,
         });
       }
-      if (last.type === "update") {
+      if (last.type === 'update') {
         // OMを更新
-        const target = oms.find(om => om.id === last.om!.id);
+        const target = oms.find((om) => om.id === last.om!.id);
         if (!target) {
           return;
         }
         target.args = last.om.args;
         // historyに追加
-        addHistory("redo", {
-          type: "update",
-          objectType: "object",
+        addHistory('redo', {
+          type: 'update',
+          objectType: 'object',
           om: target,
         });
       }
     }
-  }
+  };
 
   /**
    * やり直し
@@ -278,73 +281,73 @@ export const NinjaEditorProvider = ({ children }) => {
     if (!last) {
       return;
     }
-    if (last.objectType === "object" && last.om !== undefined) {
-      if (last.type === "add") {
+    if (last.objectType === 'object' && last.om !== undefined) {
+      if (last.type === 'add') {
         // OMを追加
         setOMs([...oms, last.om]);
         // historyに追加
-        addHistory("undo", {
-          type: "add",
-          objectType: "object",
+        addHistory('undo', {
+          type: 'add',
+          objectType: 'object',
           om: last.om,
         });
       }
-      if (last.type === "remove") {
+      if (last.type === 'remove') {
         // OMを削除
-        setOMs(oms.filter(om => om.id !== last.om!.id));
+        setOMs(oms.filter((om) => om.id !== last.om!.id));
         // historyに追加
-        addHistory("undo", {
-          type: "remove",
-          objectType: "object",
+        addHistory('undo', {
+          type: 'remove',
+          objectType: 'object',
           om: last.om,
         });
       }
-      if (last.type === "update") {
+      if (last.type === 'update') {
         // OMを更新
-        const target = oms.find(om => om.id === last.om!.id);
+        const target = oms.find((om) => om.id === last.om!.id);
         if (!target) {
           return;
         }
         target.args = last.om.args;
         // historyに追加
-        addHistory("undo", {
-          type: "update",
-          objectType: "object",
+        addHistory('undo', {
+          type: 'update',
+          objectType: 'object',
           om: target,
         });
       }
     }
-  }
+  };
 
   /**
    * undo/redo用の履歴を追加
    */
-  const addHistory = (type: "undo"|"redo", newHistory: IHistory) => {
-    if (type === "undo") {
+  const addHistory = (type: 'undo' | 'redo', newHistory: IHistory) => {
+    if (type === 'undo') {
       history.current.undo.push(newHistory);
       if (history.current.undo.length > HISTORY_MAX) {
         history.current.undo.shift();
       }
     }
-    if (type === "redo") {
+    if (type === 'redo') {
       history.current.redo.push(newHistory);
       if (history.current.redo.length > HISTORY_MAX) {
         history.current.redo.shift();
       }
     }
-  }
+  };
 
   const setCamera = (camera: OrbitControlsImpl) => {
     orbit.current = camera;
-  }
+  };
 
   const setPlayerManager = (pm: IPlayerManager) => {
     playerManager.current = pm;
-  }
+  };
 
   const setSelectPlayerAnimation = (anim: string) => {
     playerManager.current.selectAnim = anim;
-  }
+  };
 
   /**
    * 特定のObjectの名前を変更
@@ -355,43 +358,43 @@ export const NinjaEditorProvider = ({ children }) => {
       target.name = name;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
 
   /**
    * 特定のObjectのVisibleTypeを変更
    */
-  const setVisibleType = (id: string, visibleType: "force" | "auto") => {
+  const setVisibleType = (id: string, visibleType: 'force' | 'auto') => {
     const target = oms.find((om) => om.id === id);
     if (target) {
       target.visibleType = visibleType;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
   const setVisible = (id: string, visible: boolean) => {
     const target = oms.find((om) => om.id === id);
     if (target) {
       target.visible = visible;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
 
   /**
    * 特定のObjectのPositionを変更
@@ -404,20 +407,20 @@ export const NinjaEditorProvider = ({ children }) => {
       target.args.position = position;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
   const getPosition = (id: string): Vector3 => {
-    const target = oms.find(om => om.id == id);
+    const target = oms.find((om) => om.id == id);
     if (!target || !target.args.position) {
       return new Vector3(0, 0, 0);
     }
     return target.args.position;
-  }
+  };
 
   /**
    * 特定のObjectのRotationを変更
@@ -430,20 +433,20 @@ export const NinjaEditorProvider = ({ children }) => {
       target.args.rotation = rotation;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
   const getRotation = (id: string): Euler => {
-    const target = oms.find(om => om.id == id);
+    const target = oms.find((om) => om.id == id);
     if (!target || !target.args.rotation) {
       return new Euler(0, 0, 0);
     }
     return target.args.rotation;
-  }
+  };
 
   /**
    * 特定のObjectのScaleを変更
@@ -456,100 +459,100 @@ export const NinjaEditorProvider = ({ children }) => {
       target.args.scale = scale;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
   const getScale = (id: string): Vector3 => {
-    const target = oms.find(om => om.id == id);
+    const target = oms.find((om) => om.id == id);
     if (!target || !target.args.scale) {
       return new Vector3(1, 1, 1);
     }
     return target.args.scale;
-  }
+  };
 
   /**
    * マテリアルの変更
-   * @param id 
+   * @param id
    * @param material Material
    */
-  const setMaterialData = (id: string, mtype: "standard"|"phong"|"toon"|"shader"|"reflection", value: any) => {
-    const target = oms.find(om => om.id == id);
-    if (target){
+  const setMaterialData = (id: string, mtype: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection', value: any) => {
+    const target = oms.find((om) => om.id == id);
+    if (target) {
       target.args.materialData = {
         type: mtype,
-        value: value
+        value: value,
       };
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
   const getMaterialData = (id: string): any => {
-    const target = oms.find(om => om.id == id);
+    const target = oms.find((om) => om.id == id);
     if (!target || !target.args.materialData) {
       return undefined;
     }
     return target.args.materialData;
-  }
+  };
 
   /**
    * argの変更
    * /CastShadow/Helper/Color/
    */
   const setArg = (id: string, key: string, arg: any) => {
-    const target = oms.find(om => om.id == id);
-    if (target){
+    const target = oms.find((om) => om.id == id);
+    if (target) {
       target.args[key] = arg;
       notifyOMIdChanged(id);
       // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
         om: target,
       });
     }
-  }
+  };
 
   /** -------- Control Select Object ------- */
   const addOM = (om: IObjectManagement) => {
     // historyに追加
-    addHistory("undo", {
-      type: "add",
-      objectType: "object",
+    addHistory('undo', {
+      type: 'add',
+      objectType: 'object',
       om: om,
     });
     setOMs([...oms, om]);
-  }
+  };
   const removeOM = (id: string) => {
     // historyに追加
-    addHistory("undo", {
-      type: "remove",
-      objectType: "object",
-      om: oms.find(om => om.id === id),
+    addHistory('undo', {
+      type: 'remove',
+      objectType: 'object',
+      om: oms.find((om) => om.id === id),
     });
-    const newOms = oms.filter(om => om.id !== id);
+    const newOms = oms.filter((om) => om.id !== id);
     setOMs([...newOms]);
-  }
+  };
   const getOMById = (id: string): IObjectManagement | undefined => {
-    return oms.find(om => om.id === id);
-  }
+    return oms.find((om) => om.id === id);
+  };
   const getSMById = (id: string): IScriptManagement | undefined => {
-    return sms.find(sm => sm.id === id);
-  }
+    return sms.find((sm) => sm.id === id);
+  };
   const getAvatarOM = () => {
-    return oms.find(om => om.type === "avatar");
-  }
+    return oms.find((om) => om.type === 'avatar');
+  };
   const getLights = () => {
-    return oms.filter(om => om.type === "light");
-  }
+    return oms.filter((om) => om.type === 'light');
+  };
   const addSM = (sm: IScriptManagement): boolean => {
     // historyに追加
     // addHistory("undo", {
@@ -558,15 +561,13 @@ export const NinjaEditorProvider = ({ children }) => {
     //   um: sm,
     // });
     // 同名のSMがある場合は追加しない
-    const target = sms.find(_sm => _sm.name === sm.name);
+    const target = sms.find((_sm) => _sm.name === sm.name);
     if (target) {
       return false;
     }
     setSMs([...sms, sm]);
     return true;
-  }
-
-
+  };
 
   /**---------  Listener  ---------- */
   /**
@@ -578,59 +579,57 @@ export const NinjaEditorProvider = ({ children }) => {
       objectManagementIdChangedListeners.current[id] = [];
     }
     objectManagementIdChangedListeners.current[id].push(listener);
-  }
+  };
   const offOMIdChanged = (id: string, listener: () => void) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
     }
-    objectManagementIdChangedListeners.current[id] = objectManagementIdChangedListeners.current[id].filter(l => l !== listener);
-  }
+    objectManagementIdChangedListeners.current[id] = objectManagementIdChangedListeners.current[id].filter(
+      (l) => l !== listener,
+    );
+  };
   // 特定のOM変更を通知する
   const notifyOMIdChanged = (id: string) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
     }
-    objectManagementIdChangedListeners.current[id].forEach(l => l());
-  }
+    objectManagementIdChangedListeners.current[id].forEach((l) => l());
+  };
   /**
    * OMの変更リスナー
    */
   const objectManagementChangedListeners = useRef<(() => void)[]>([]);
   const onOMsChanged = (listener: () => void) => {
     objectManagementChangedListeners.current.push(listener);
-  }
+  };
   const offOMsChanged = (listener: () => void) => {
-    objectManagementChangedListeners.current = objectManagementChangedListeners.current.filter(
-      l =>  l !== listener
-    );
-  }
+    objectManagementChangedListeners.current = objectManagementChangedListeners.current.filter((l) => l !== listener);
+  };
   // OMの変更を通知する
   const notifyOMsChanged = () => {
-    objectManagementChangedListeners.current.forEach(l => l());
-  }
+    objectManagementChangedListeners.current.forEach((l) => l());
+  };
   /**
    * SMの変更リスナー
    */
   const scriptManagementChangedListeners = useRef<(() => void)[]>([]);
   const onSMsChanged = (listener: () => void) => {
     scriptManagementChangedListeners.current.push(listener);
-  }
+  };
   const offSMsChanged = (listener: () => void) => {
-    scriptManagementChangedListeners.current = scriptManagementChangedListeners.current.filter(
-      l =>  l !== listener
-    );
-  }
+    scriptManagementChangedListeners.current = scriptManagementChangedListeners.current.filter((l) => l !== listener);
+  };
   // SMの変更を通知する
   const notifySMsChanged = () => {
-    scriptManagementChangedListeners.current.forEach(l => l());
-  }
+    scriptManagementChangedListeners.current.forEach((l) => l());
+  };
 
   /**
    * NJCの変更リスナー
    */
-    /**
+  /**
    * NJCファイルのロード
-   * @param njcFile 
+   * @param njcFile
    */
   const setNJCFile = (njcFile: NJCFile) => {
     initialize();
@@ -638,239 +637,85 @@ export const NinjaEditorProvider = ({ children }) => {
     setUMs(njcFile.ums);
     setTMs(njcFile.tms);
     setSMs(njcFile.sms);
-    console.log("<< Complete NJC File >>");
+    console.log('<< Complete NJC File >>');
     notifyNJCChanged();
     notifyOMsChanged();
     notifySMsChanged();
-  }
+  };
   const njcChangedListeners = useRef<(() => void)[]>([]);
   const onNJCChanged = (listener: () => void) => {
     njcChangedListeners.current.push(listener);
-  }
+  };
   const offNJCChanged = (listener: () => void) => {
-    njcChangedListeners.current = njcChangedListeners.current.filter(
-      l =>  l !== listener
-    );
-  }
+    njcChangedListeners.current = njcChangedListeners.current.filter((l) => l !== listener);
+  };
   // NJCの変更を通知する
   const notifyNJCChanged = () => {
-    njcChangedListeners.current.forEach(l => l());
-  }
+    njcChangedListeners.current.forEach((l) => l());
+  };
 
   // 初期設定
   useEffect(() => {
     initialize();
-    const initOms = InitSampleOMs();
+    const initOms = initThirdPersonTemplate();
     setOMs(initOms);
     setReady(true);
   }, []);
 
   return (
-    <NinjaEditorContext.Provider value={{
-      oms,
-      ums,
-      tms,
-      sms,
-      transformDecimal,
-      mode: mode.current,
-      gltfViewerObj: gltfViewerObj.current,
-      wireFrameColor: wireFrameColor.current,
-      fileSelect: fileSelect.current,
-      assetRoute: assetRoute.current,
-      contentsSelect: contentsSelect.current,
-      contentsSelectType: contentsSelectType.current,
-      contentsSelectPath: contentsSelectPath.current,
-      ready,
-      initialize,
-      setCamera,
-      setPlayerManager,
-      setSelectPlayerAnimation,
-      undo,
-      redo,
-      setName,
-      setVisibleType,
-      setVisible,
-      setPosition,
-      getPosition,
-      setRotation,
-      getRotation,
-      setScale,
-      getScale,
-      setMaterialData,
-      getMaterialData,
-      setArg,
-      onOMIdChanged,
-      offOMIdChanged,
-      onOMsChanged,
-      offOMsChanged,
-      onSMsChanged,
-      offSMsChanged,
-      setNJCFile,
-      onNJCChanged,
-      offNJCChanged,
-      addOM,
-      removeOM,
-      addSM,
-      getOMById,
-      getSMById,
-      getAvatarOM,
-      getLights,
-    }}>
-      {ready && <>
-        {children}
-      </>}
+    <NinjaEditorContext.Provider
+      value={{
+        oms,
+        ums,
+        tms,
+        sms,
+        transformDecimal,
+        mode: mode.current,
+        gltfViewerObj: gltfViewerObj.current,
+        wireFrameColor: wireFrameColor.current,
+        fileSelect: fileSelect.current,
+        assetRoute: assetRoute.current,
+        contentsSelect: contentsSelect.current,
+        contentsSelectType: contentsSelectType.current,
+        contentsSelectPath: contentsSelectPath.current,
+        ready,
+        initialize,
+        setCamera,
+        setPlayerManager,
+        setSelectPlayerAnimation,
+        undo,
+        redo,
+        setName,
+        setVisibleType,
+        setVisible,
+        setPosition,
+        getPosition,
+        setRotation,
+        getRotation,
+        setScale,
+        getScale,
+        setMaterialData,
+        getMaterialData,
+        setArg,
+        onOMIdChanged,
+        offOMIdChanged,
+        onOMsChanged,
+        offOMsChanged,
+        onSMsChanged,
+        offSMsChanged,
+        setNJCFile,
+        onNJCChanged,
+        offNJCChanged,
+        addOM,
+        removeOM,
+        addSM,
+        getOMById,
+        getSMById,
+        getAvatarOM,
+        getLights,
+      }}
+    >
+      {ready && <>{children}</>}
     </NinjaEditorContext.Provider>
-  )
-}
-
-const InitSampleOMs = (): IObjectManagement[] => {
-  return [
-    {
-      id: MathUtils.generateUUID(),
-      name: "movebox",
-      type: "three",
-      args: {
-        type: "box",
-        position: new Vector3(0, .5, 0),
-        materialData: {
-          type: "phong",
-          value: "#43D9D9",
-        },
-        castShadow: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "Directional1",
-      type: "light",
-      args: {
-        type: "directional",
-        position: new Vector3(14, 7, 8),
-        materialData: {
-          type: "standard",
-          value: "#e3dfcc",
-        },
-        intensity: 1,
-        castShadow: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "Spot1",
-      type: "light",
-      args: {
-        type: "spot",
-        position: new Vector3(-6, 10, -22),
-        materialData: {
-          type: "standard",
-          value: "#FDF1D9",
-        },
-        intensity: 1,
-        castShadow: true,
-        receiveShadow: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "Plane",
-      type: "three",
-      args: {
-        type: "plane",
-        position: new Vector3(0, 0, 0),
-        rotation: new Euler(-Math.PI / 2, 0, 0),
-        scale: new Vector3(32, 32, 32),
-        materialData: {
-          type: "reflection",
-          value: "#111212",
-        },
-        castShadow: true,
-        receiveShadow: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "Environment",
-      type: "environment",
-      args: {
-        preset: "sunset",
-        blur: 0.7,
-        background: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "*LF (rect)",
-      type: "lightformer",
-      args: {
-        form: "rect",
-        color: "#ffeb38",
-        intensity: 1,
-        position: new Vector3(-5, 5, -5),
-        scale: new Vector3(3, 3, 3),
-        lookAt: new Vector3(0, 0, 0),
-        isFloat: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "*LF (ring)",
-      type: "lightformer",
-      args: {
-        form: "ring",
-        color: "#e60b0b",
-        intensity: 10,
-        position: new Vector3(10, 5, 10),
-        scale: new Vector3(3, 3, 3),
-        lookAt: new Vector3(0, 0, 0),
-        isFloat: true,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: "camera",
-      type: "camera",
-      args: {
-        type: "fixed",
-        default: true,
-        position: new Vector3(1.92, 1.8, 1.8),
-        rotation: new Euler(
-          MathUtils.degToRad(-31.2), 
-          MathUtils.degToRad(43.6), 
-          MathUtils.degToRad(23.3), 
-        ),
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true
-    }
-  ]
-}
+  );
+};
