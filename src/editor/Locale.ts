@@ -119,6 +119,9 @@ const resources = {
       leastSelectGLTF: "Please select GLTF",
       showModelViewer: "Show ModelViewer",
       animationLoop: "Animation Play",
+      skyExistAlert: "Sky can only be created once",
+      fogExistAlert: "Fog can only be created once",
+      environmentExistAlert: "Environment can only be created once",
     }
   },
   ja: {
@@ -242,6 +245,9 @@ const resources = {
       leastSelectGLTF: "GLTFを選択してください",
       showModelViewer: "モデルビューアを表示",
       animationLoop: "アニメーション再生",
+      skyExistAlert: "空は1つしか作成できません",
+      fogExistAlert: "霧(Fog)は1つしか作成できません",
+      environmentExistAlert: "Environmentは1つしか作成できません",
     }
   }
 }

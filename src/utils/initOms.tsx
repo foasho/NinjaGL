@@ -114,7 +114,7 @@ export const initThirdPersonTemplate = (): IObjectManagement[] => {
         castShadow: true,
         receiveShadow: true,
       },
-      physics: false,
+      physics: true,
       phyType: 'box',
       visibleType: 'auto',
       visible: true,

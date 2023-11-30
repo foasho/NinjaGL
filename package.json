@@ -35,7 +35,7 @@
     "@monaco-editor/react": "^4.4.6",
     "@next/font": "^13.5.6",
     "@nextui-org/react": "^2.1.13",
-    "@ninjagl/core": "^1.0.69",
+    "@ninjagl/core": "^1.1.7",
     "@react-three/drei": "^9.88.7",
     "@react-three/fiber": "^8.14.5",
     "@react-three/postprocessing": "^2.15.8",

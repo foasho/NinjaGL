@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import { MathUtils, Vector3 } from 'three';
 import { useSnapshot } from 'valtio';
 
+import { MySwal } from '@/commons/Swal';
 import { MainViewer } from '@/editor/ViewPort/MainViewer';
 import { PlayerEditor } from '@/editor/ViewPort/PlayerEditor';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
@@ -84,6 +85,17 @@ export const NinjaEditor = () => {
         visible: true,
       });
     } else if (data.type == 'sky') {
+      // skyは１つしか作成できない
+      const sky = editor.oms.find((om) => om.type == 'sky');
+      if (sky) {
+        MySwal.fire({
+          text: t('skyExistAlert'),
+          icon: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
       editor.addOM({
         id: MathUtils.generateUUID(),
         name: `*${data.value}`,
@@ -110,6 +122,17 @@ export const NinjaEditor = () => {
         visible: true,
       });
     } else if (data.type == 'fog') {
+      // fogは１つしか作成できない
+      const fog = editor.oms.find((om) => om.type == 'fog');
+      if (fog) {
+        MySwal.fire({
+          text: t('fogExistAlert'),
+          icon: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
       editor.addOM({
         id: MathUtils.generateUUID(),
         name: `*${data.value}`,
@@ -123,6 +146,17 @@ export const NinjaEditor = () => {
         visible: true,
       });
     } else if (data.type == 'environment') {
+      //environmentは１つしか作成できない
+      const environment = editor.oms.find((om) => om.type == 'environment');
+      if (environment) {
+        MySwal.fire({
+          text: t('environmentExistAlert'),
+          icon: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
       editor.addOM({
         id: MathUtils.generateUUID(),
         name: `*${data.value}`,
