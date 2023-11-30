@@ -212,6 +212,8 @@ export const NinjaEditor = () => {
         visible: true,
       });
     }
+    // else if (data.type == "text") {}
+    // else if (data.type == "text3d") {}
   };
 
   /**

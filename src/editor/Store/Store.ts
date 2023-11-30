@@ -2,7 +2,7 @@ import { IConfigParams, IScriptManagement } from '@ninjagl/core';
 import { AnimationClip, Vector3 } from 'three';
 import { proxy } from 'valtio';
 
-export const HomeCameraPosition = new Vector3(0, 1.2, -6);
+export const HomeCameraPosition = new Vector3(5, 5, -5);
 
 /**
  * オブジェクト操作状態管理
