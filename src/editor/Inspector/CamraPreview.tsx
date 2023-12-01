@@ -7,7 +7,7 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { globalStore } from '../Store/Store';
 import { MyLights } from '../ViewPort/MainViewItems/Lights';
 import { MyEnviroment } from '../ViewPort/MainViewItems/MyEnvironment';
-import { MyTexts } from '../ViewPort/MainViewItems/MyTexts';
+import { MyTexts } from '../ViewPort/MainViewItems/MyText3Ds';
 import { StaticObjects } from '../ViewPort/MainViewItems/Objects';
 import { Avatar } from '../ViewPort/MainViewItems/Player';
 import { MySky } from '../ViewPort/MainViewItems/Sky';

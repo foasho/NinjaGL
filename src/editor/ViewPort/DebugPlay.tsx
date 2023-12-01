@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+"use client";
+import { Suspense, useEffect, useState } from 'react';
 
 import {
   NJCFile,
@@ -7,11 +8,12 @@ import {
   IUIManagement,
   ITextureManagement,
   IScriptManagement,
-  NinjaGL
+  NinjaGL,
 } from '@ninjagl/core';
 import { SkeletonUtils } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
+import { Loading2D } from '@/commons/Loading2D';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { globalConfigStore } from '../Store/Store';
@@ -72,19 +74,15 @@ export const DebugPlay = () => {
   useEffect(() => {
     const _njcFile = ExportNjcFile(editor.oms, editor.ums, editor.tms, editor.sms, {
       physics: configState.physics,
-      autoScale: configState.autoScale,
-      alpha: configState.alpha,
-      logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
-      antialias: configState.antialias,
-      shadowResolution: configState.shadowResolution,
-      mapsize: configState.mapsize,
-      layerGridNum: configState.layerGridNum,
-      lodDistance: configState.lodDistance,
       dpr: undefined,
-      initCameraPosition: configState.initCameraPosition,
+      multi: true,
+      isApi: true,
       isDebug: true,
     });
     setNJCFile(_njcFile);
+    setTimeout(() => {
+      setReady(true);
+    }, 1000);
     return () => {
       setReady(false);
     };
@@ -92,10 +90,10 @@ export const DebugPlay = () => {
 
   // omsだけ渡してProviderを作成する
   return (
-    <>
+    <Suspense fallback={<Loading2D />}>
       <div id='Ninjaviewer' style={{ height: '100%' }}>
-        {njcFile && <NinjaGL njc={njcFile}></NinjaGL>}
+        {ready && njcFile && <NinjaGL njc={njcFile} isSplashScreen={false}></NinjaGL>}
       </div>
-    </>
+    </Suspense>
   );
 };

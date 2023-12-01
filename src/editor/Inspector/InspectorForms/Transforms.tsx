@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { Euler, MathUtils, Vector3 } from 'three';
@@ -15,6 +15,18 @@ export const Transforms = () => {
   const editor = useNinjaEditor();
   const { t } = useTranslation();
   const om = editor.getOMById(id);
+  // --------------------------------------------------
+  // 位置/回転/拡大縮小
+  const inputXref = useRef<HTMLInputElement>(null);
+  const inputYref = useRef<HTMLInputElement>(null);
+  const inputZref = useRef<HTMLInputElement>(null);
+  const inputRXref = useRef<HTMLInputElement>(null);
+  const inputRYref = useRef<HTMLInputElement>(null);
+  const inputRZref = useRef<HTMLInputElement>(null);
+  const inputSXref = useRef<HTMLInputElement>(null);
+  const inputSYref = useRef<HTMLInputElement>(null);
+  const inputSZref = useRef<HTMLInputElement>(null);
+  // --------------------------------------------------
 
   const [position, setPosition] = useState<Vector3>(
     om && om.object ? om.object!.position.clone() : new Vector3(0, 0, 0),
@@ -31,6 +43,31 @@ export const Transforms = () => {
       if (om.args.helper !== undefined) setHelper(om.args.helper);
     }
   }, [om]);
+
+  useEffect(() => {
+    const update = () => {
+      if (id){
+        const pos = editor.getPosition(id);
+        const rot = editor.getRotation(id);
+        const sca = editor.getScale(id);
+        // 各InputRefのplaceholderを更新
+        if (inputXref.current) inputXref.current.placeholder = pos.x.toFixed(2);
+        if (inputYref.current) inputYref.current.placeholder = pos.y.toFixed(2);
+        if (inputZref.current) inputZref.current.placeholder = pos.z.toFixed(2);
+        if (inputRXref.current) inputRXref.current.placeholder = MathUtils.radToDeg(rot.x).toFixed(1);
+        if (inputRYref.current) inputRYref.current.placeholder = MathUtils.radToDeg(rot.y).toFixed(1);
+        if (inputRZref.current) inputRZref.current.placeholder = MathUtils.radToDeg(rot.z).toFixed(1);
+        if (inputSXref.current) inputSXref.current.placeholder = sca.x.toFixed(1);
+        if (inputSYref.current) inputSYref.current.placeholder = sca.y.toFixed(1);
+        if (inputSZref.current) inputSZref.current.placeholder = sca.z.toFixed(1);
+      }
+    };
+    update();
+    if (id) editor.onOMIdChanged(id, update);
+    return () => {
+      if (id) editor.offOMIdChanged(id, update);
+    };
+  }, [id]);
 
   /**
    * 位置変更 Inspector -> Object
@@ -118,6 +155,7 @@ export const Transforms = () => {
 
   return (
     <>
+      {/* Position */}
       <div className={styles.position}>
         <div className={styles.title}>{t('position')}</div>
         <div className={styles.name}>
@@ -128,6 +166,7 @@ export const Transforms = () => {
         <div className={styles.inputContainer}>
           <input
             type='text'
+            ref={inputXref}
             placeholder={position ? position.x.toFixed(2) : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -146,6 +185,7 @@ export const Transforms = () => {
           />
           <input
             type='text'
+            ref={inputYref}
             placeholder={position ? position.y.toFixed(2) : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -164,6 +204,7 @@ export const Transforms = () => {
           />
           <input
             type='text'
+            ref={inputZref}
             placeholder={position ? position.y.toFixed(2) : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -182,6 +223,7 @@ export const Transforms = () => {
           />
         </div>
       </div>
+      {/* Rotation */}
       <div className={styles.rotation}>
         <div className={styles.title}>{t('rotation')}</div>
         <div className={styles.name}>
@@ -192,6 +234,7 @@ export const Transforms = () => {
         <div className={styles.inputContainer}>
           <input
             type='text'
+            ref={inputRXref}
             placeholder={rotation ? MathUtils.radToDeg(rotation.x).toFixed(1) : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -211,6 +254,7 @@ export const Transforms = () => {
           <input
             // value={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): ""}
             type='text'
+            ref={inputRYref}
             placeholder={rotation ? MathUtils.radToDeg(rotation.y).toFixed(1) : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -230,6 +274,7 @@ export const Transforms = () => {
           <input
             // value={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): ""}
             type='text'
+            ref={inputRZref}
             placeholder={rotation ? MathUtils.radToDeg(rotation.z).toFixed(1) : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -248,6 +293,7 @@ export const Transforms = () => {
           />
         </div>
       </div>
+      {/* Scale */}
       <div className={styles.scale}>
         <div className={styles.title}>{t('scale')}</div>
         <div className={styles.name}>
@@ -258,6 +304,7 @@ export const Transforms = () => {
         <div className={styles.inputContainer}>
           <input
             // value={scale?(scale.x).toFixed(1): ""}
+            ref={inputSXref}
             type='text'
             placeholder={scale ? scale.x.toString() : '0'}
             onKeyDown={(e: any) => {
@@ -278,6 +325,7 @@ export const Transforms = () => {
           <input
             // value={scale?(scale.y).toFixed(1): ""}
             type='text'
+            ref={inputSYref}
             placeholder={scale ? scale.y.toString() : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {
@@ -297,6 +345,7 @@ export const Transforms = () => {
           <input
             // value={scale?(scale.z).toFixed(1): ""}
             type='text'
+            ref={inputSZref}
             placeholder={scale ? scale.z.toString() : '0'}
             onKeyDown={(e: any) => {
               if (e.key === 'Enter') {

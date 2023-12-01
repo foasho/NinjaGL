@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, MutableRefObject, useState, Suspense } from 'react';
-
+import {  } from "@ninjagl/core";
 import { useGLTF, useAnimations } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
@@ -11,6 +11,7 @@ import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { PivotControls } from './PivoitControl';
+import { AnimationHelper } from '@/helpers/AnimationHelper';
 
 /**
  * シーン上で構築される基本的なオブジェクト
@@ -75,16 +76,32 @@ const StaticObject = ({ om }) => {
   useEffect(() => {
     const init = () => {
       if (ref.current) {
-        ref.current.position.copy(getPosition(id));
-        ref.current.rotation.copy(getRotation(id));
-        ref.current.scale.copy(getScale(id));
-        const materialData = getMaterialData(id);
-        if (materialData) {
-          ref.current.traverse((node: any) => {
-            if (node.isMesh && node instanceof Mesh) {
-              node.material = materialData.material;
-            }
-          });
+        if (om.args.position) {
+          ref.current.position.copy(om.args.position);
+        }
+        if (om.args.rotation) {
+          ref.current.rotation.copy(om.args.rotation);
+        }
+        if (om.args.scale) {
+          ref.current.scale.copy(om.args.scale);
+        }
+        if (om.args.castShadow !== undefined) {
+          if (clone){
+            clone.traverse((node) => {
+              if (node instanceof Mesh) {
+                node.castShadow = om.args.castShadow;
+              }
+            });
+          }
+        }
+        if (om.args.receiveShadow !== undefined) {
+          if (clone){
+            clone.traverse((node) => {
+              if (node instanceof Mesh) {
+                node.receiveShadow = om.args.receiveShadow;
+              }
+            });
+          }
         }
       }
     };
@@ -93,7 +110,7 @@ const StaticObject = ({ om }) => {
     return () => {
       offOMIdChanged(id, init);
     };
-  }, []);
+  });
 
   useEffect(() => {
     if (scene) {
@@ -149,69 +166,4 @@ const StaticObject = ({ om }) => {
       )}
     </Suspense>
   );
-};
-
-type AnimationHelperProps = {
-  id: string;
-  object: Object3D;
-  visible?: boolean;
-  onClick?: (e: any) => void;
-  onPointerMissed?: (e: any) => void;
-};
-const AnimationHelper = ({
-  id,
-  object,
-  visible = true,
-  onClick = (e: any) => {},
-  onPointerMissed = (e: any) => {},
-}: AnimationHelperProps) => {
-  const animations = object.animations;
-  const { ref, actions } = useAnimations(animations);
-
-  const { getOMById, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
-  const [defaultAnimation, setDefaultAnimation] = useState<string>('Idle');
-  const [animationLoop, setAnimationLoop] = useState<boolean>(true);
-
-  const animationStop = () => {
-    if (actions && actions[defaultAnimation]) {
-      actions[defaultAnimation]!.stop();
-    }
-  };
-
-  const animationAllStop = () => {
-    if (actions) {
-      Object.keys(actions).forEach((key) => {
-        actions[key]!.stop();
-      });
-    }
-  };
-
-  useEffect(() => {
-    const init = () => {
-      const _om = getOMById(id);
-      if (_om) {
-        if (_om.args.defaultAnimation) {
-          setDefaultAnimation(_om.args.defaultAnimation);
-        }
-        setAnimationLoop(_om.args.animationLoop);
-      }
-    };
-    init();
-    onOMIdChanged(id, init);
-    return () => {
-      offOMIdChanged(id, init);
-    };
-  });
-
-  useEffect(() => {
-    if (actions && actions[defaultAnimation]) {
-      animationAllStop();
-      actions[defaultAnimation]!.play();
-    }
-    if (!animationLoop){
-      animationStop();
-    }
-  }, [actions, defaultAnimation, animationLoop]);
-
-  return <primitive ref={ref} visible={visible} onClick={onClick} onPointerMissed={onPointerMissed} object={object} />;
 };

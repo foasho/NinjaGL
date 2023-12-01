@@ -57,6 +57,8 @@ export const MainViewInspector = () => {
             otype == 'three' ||
             otype == 'terrain' ||
             otype == 'camera' ||
+            otype == 'text' ||
+            otype == 'text3d' ||
             otype == 'lightformer') && <Transforms />}
 
           {(otype == 'object' || otype == 'three') && <Physics />}

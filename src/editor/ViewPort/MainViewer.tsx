@@ -36,7 +36,7 @@ import { FogComponent } from './MainViewItems/Fog';
 import { MyLights } from './MainViewItems/Lights';
 import { MyEffects } from './MainViewItems/MyEffects';
 import { MyEnviroment } from './MainViewItems/MyEnvironment';
-import { MyTexts } from './MainViewItems/MyTexts';
+import { MyText3Ds } from './MainViewItems/MyText3Ds';
 import { StaticObjects } from './MainViewItems/Objects';
 import { Avatar } from './MainViewItems/Player';
 import { MySky } from './MainViewItems/Sky';
@@ -245,11 +245,6 @@ export const MainViewer = () => {
       <Suspense fallback={<Loading2D />}>
         <Canvas
           key={renderCount}
-          gl={{
-            alpha: configState.alpha,
-            logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
-            antialias: configState.antialias,
-          }}
           style={{ display: showCanvas ? 'block' : 'none' }}
           id='mainviewcanvas'
           onDrop={handleDrop}
@@ -266,7 +261,7 @@ export const MainViewer = () => {
             <Cameras />
             <FogComponent />
             <MyEnviroment />
-            <MyTexts />
+            <MyText3Ds />
             <MyEffects />
             <SystemHelper
               isGizmo={isGizmo}
@@ -357,7 +352,7 @@ export const MainViewer = () => {
                   className='inline'
                   checked={configState.physics}
                   onChange={(e) => {
-                    globalConfigStore.autoScale = e.target.checked;
+                    globalConfigStore.physics = e.target.checked;
                   }}
                 />
               </div>

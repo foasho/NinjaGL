@@ -5,15 +5,6 @@
     margin: 0;
     padding: 0;
 }
-// フォントをすべてMPlusRegularにする
-@font-face {
-    font-family: "MPLUSRegular";
-    src: url("/fonts/MPLUS1-Regular.ttf") format("truetype");
-}
-@font-face {
-    font-family: "MPLUSLighter";
-    src: url("/fonts/MPLUS1-Light.ttf") format("truetype");
-}
 
 @import "./editor/Inspector/TerrainInspector";
 @import "./editor/Inspector/PlayerInspector";
