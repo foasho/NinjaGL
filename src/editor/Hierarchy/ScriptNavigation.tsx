@@ -1,13 +1,13 @@
 import { IScriptManagement } from '@ninjagl/core';
 import { InitScriptManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
-import Swal from 'sweetalert2';
 import { MathUtils } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { globalScriptStore } from '../Store/Store';
+import { MySwal } from '@/commons/Swal';
 
 export const ScriptNavigation = () => {
   const { sms, contentsSelectType, contentsSelectPath, addSM } = useNinjaEditor();
@@ -37,7 +37,6 @@ export const ScriptNavigation = () => {
             }
           }
         } catch (error) {
-          console.error('Error fetching file:', error);
         }
         return false;
       };
@@ -46,16 +45,14 @@ export const ScriptNavigation = () => {
         sm.name = filePath.split('/').pop() || '';
         const success = addSM(sm);
         if (!success) {
-          // @ts-ignore
-          Swal.fire({
+          MySwal.fire({
             title: t('scriptError'),
             text: t('scriptErrorAlreadyText'),
             icon: 'error',
           });
         }
       } else {
-        // @ts-ignore
-        Swal.fire({
+        MySwal.fire({
           title: t('scriptError'),
           text: t('scriptErrorText'),
           icon: 'error',
@@ -70,7 +67,7 @@ export const ScriptNavigation = () => {
 
   return (
     <>
-      <div>
+      <div className="border-white border-1 rounded-sm px-1 py-1">
         <div onDrop={handleDrop} onDragOver={handleDragOver}>
           {sms.map((sm, idx) => {
             return <ScriptItem sm={sm} index={idx} key={idx} />;
@@ -83,10 +80,9 @@ export const ScriptNavigation = () => {
 
 const ScriptItem = (prop: { index: number; sm: IScriptManagement }) => {
   const scriptState = useSnapshot(globalScriptStore);
-  const { t } = useTranslation();
-  // let lineStyle = styles.lightLine;
+  let lineBgStyle = 'bg-[#797272]';
   if (prop.index % 2 !== 0) {
-    // lineStyle = styles.darkLine;
+    lineBgStyle = 'bg-[#4b4848]';
   }
   const selectStyle = scriptState.currentSM && scriptState.currentSM.id == prop.sm.id ? 'select' : '';
 
@@ -99,7 +95,7 @@ const ScriptItem = (prop: { index: number; sm: IScriptManagement }) => {
   };
 
   return (
-    <div className={' ' + selectStyle} onClick={onClickItem}>
+    <div className={`text-xs ${lineBgStyle} ` + selectStyle} onClick={onClickItem}>
       <div>
         <div>{prop.sm.name}</div>
       </div>

@@ -388,13 +388,14 @@ export const NinjaEditor = () => {
                   >
                     {t('scriptEditor')}
                   </a>
-                  <a
+                  {/** ShaderEditorは非表示にする */}
+                  {/* <a
                     onClick={() => changeView('shadereditor')}
                     className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'shadereditor' ? { background: '#fff', color: '#838383' } : {}}
                   >
                     {t('shaderEditor')}
-                  </a>
+                  </a> */}
                 </div>
               </div>
               <div className='m-0 h-full bg-white p-0'>
