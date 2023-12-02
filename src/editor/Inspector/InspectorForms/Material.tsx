@@ -55,11 +55,11 @@ export const Material = () => {
   };
 
   return (
-    <div className={styles.material}>
-      <div className={styles.title}>{t('materialConfig')}</div>
-      <div className={styles.type}>
-        <div className={styles.title}>{t('type')}</div>
-        <div className={styles.input}>
+    <div className="mx-4">
+      <div className="px-0.5 py-1.5 text-sm font-bold">{t('materialConfig')}</div>
+      <div >
+        <div className="px-0.5 py-1.5 text-sm font-bold">{t('type')}</div>
+        <div>
           <Select
             options={materialOptions}
             value={materialType}
@@ -69,17 +69,22 @@ export const Material = () => {
         </div>
       </div>
       {materialType && materialType.value !== 'shader' && (
-        <div className={styles.color}>
-          <div className={styles.name}>{t('color')}</div>
-          <div className={styles.pallet}>
+        <div className="mt-3">
+          <div className="text-sm font-bold">{t('color')}</div>
+          <div className="flex items-center pt-0.5 leading-[30px]">
             <input
               type={'color'}
               value={materialColor}
               onChange={(e) => changeMaterial(materialType.value, e.target.value)}
               onFocus={() => (globalStore.editorFocus = true)}
               onBlur={() => (globalStore.editorFocus = false)}
+              className="h-7 w-7 cursor-pointer rounded-full border-none bg-transparent p-0 shadow-lg outline-none"
             />
-            <input type={'text'} value={materialColor} />
+            <input 
+              type={'text'} 
+              value={materialColor} 
+              className="mx-auto w-3/4 rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-sm text-[#f2f2f2] shadow-lg outline-none"
+            />
           </div>
         </div>
       )}

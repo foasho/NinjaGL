@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -31,9 +30,9 @@ export const Color = () => {
   };
 
   return (
-    <div className={styles.color}>
-      <div className={styles.name}>{t('color')}</div>
-      <div className={styles.pallet}>
+    <div>
+      <div>{t('color')}</div>
+      <div>
         <input
           type={'color'}
           value={color}

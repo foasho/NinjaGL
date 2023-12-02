@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { normalStyles } from '@/utils/styles';
@@ -39,9 +38,9 @@ export const FormType = () => {
   };
 
   return (
-    <div className={styles.form}>
-      <div className={styles.title}>{t('form')}</div>
-      <div className={styles.input}>
+    <div>
+      <div>{t('form')}</div>
+      <div>
         <Select options={formOptions} value={form} onChange={(select) => changeForm(select)} styles={normalStyles} />
       </div>
     </div>

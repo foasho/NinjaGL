@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { isNumber } from '@/commons/functional';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
@@ -70,9 +69,9 @@ export const EnvironmentParam = () => {
 
   return (
     <>
-      <div className={styles.preset}>
-        <div className={styles.title}>{t('preset')}</div>
-        <div className={styles.input}>
+      <div>
+        <div>{t('preset')}</div>
+        <div>
           <Select
             options={environmentOptions}
             value={environmentPreset}
@@ -81,23 +80,17 @@ export const EnvironmentParam = () => {
           />
         </div>
       </div>
-      <div className={styles.backgroud}>
-        <div className={styles.title}>{t('background')}</div>
-        <div className={styles.input}>
-          <input
-            type='checkbox'
-            className={styles.checkbox}
-            checked={background}
-            onInput={() => onCheckEnvironmentBackGround()}
-          />
-          <span className={styles.customCheckbox}></span>
+      <div>
+        <div>{t('background')}</div>
+        <div>
+          <input type='checkbox' checked={background} onInput={() => onCheckEnvironmentBackGround()} />
         </div>
       </div>
-      <div className={styles.blur}>
-        <div className={styles.title}>
+      <div>
+        <div>
           {t('blur')}: {blur}
         </div>
-        <div className={styles.input}>
+        <div>
           <input type='range' min='0' max='1' step='0.01' value={blur} onChange={(e) => changeEnvironmentBlur(e)} />
         </div>
       </div>

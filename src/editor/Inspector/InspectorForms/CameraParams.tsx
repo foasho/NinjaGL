@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
+import { isNumber } from '@/commons/functional';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { normalStyles } from '@/utils/styles';
-import { isNumber } from '@/commons/functional';
 
 export const CameraParams = () => {
   const state = useSnapshot(globalStore);
@@ -62,27 +59,27 @@ export const CameraParams = () => {
 
   return (
     <>
-      <div className={styles.fov}>
-        <div className={styles.name}>
+      <div>
+        <div>
           {t('fov')}: {fov}
         </div>
-        <div className={styles.range}>
+        <div>
           <input type={'range'} min={0} max={180} step={0.01} value={fov} onChange={(e) => changeCameraFov(e)} />
         </div>
       </div>
-      <div className={styles.near}>
-        <div className={styles.name}>
+      <div>
+        <div>
           {t('near')}: {near}
         </div>
-        <div className={styles.range}>
+        <div>
           <input type={'range'} min={0} max={10} step={0.01} value={near} onChange={(e) => changeCameraNear(e)} />
         </div>
       </div>
-      <div className={styles.far}>
-        <div className={styles.name}>
+      <div>
+        <div>
           {t('far')}: {far}
         </div>
-        <div className={styles.range}>
+        <div>
           <input type={'range'} min={0} max={100} step={0.01} value={far} onChange={(e) => changeCameraFar(e)} />
         </div>
       </div>

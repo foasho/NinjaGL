@@ -28,7 +28,6 @@ import { Loading2D } from '@/commons/Loading2D';
 import { EDeviceType, useInputControl } from '@/hooks/useInputControl';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
-import { CameraPreview } from '../Inspector/CamraPreview';
 import { globalConfigStore, globalContentStore, globalStore } from '../Store/Store';
 
 import { Cameras } from './MainViewItems/Cameras';
@@ -276,14 +275,9 @@ export const MainViewer = () => {
           </Suspense>
         </Canvas>
       </Suspense>
-      <div
-        className='absolute top-0 z-50 h-full w-full bg-white/50'
-        style={{ display: showUI ? 'block' : 'none' }}
-      >
+      <div className='absolute top-0 z-50 h-full w-full bg-white/50' style={{ display: showUI ? 'block' : 'none' }}>
         <UICanvas gridNum={uiGridNum} />
       </div>
-      {/** CameraPreview */}
-      <CameraPreview />
       {/** コントロール層 */}
       <div className={clsx('absolute left-1/2 top-10 z-50 -translate-x-1/2')}>
         <a
@@ -405,7 +399,7 @@ export const MainViewer = () => {
           </>
         )}
       </div>
-      {isLoading &&
+      {isLoading && (
         <div
           style={{
             display: 'none',
@@ -433,7 +427,7 @@ export const MainViewer = () => {
             Loading...
           </div>
         </div>
-      }
+      )}
     </div>
   );
 };

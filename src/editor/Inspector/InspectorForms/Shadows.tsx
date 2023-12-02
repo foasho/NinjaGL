@@ -18,7 +18,7 @@ export const Shadows = () => {
   const [receiveShadow, setReceiveShadow] = useState<boolean>(false);
 
   useEffect(() => {
-    if (om){
+    if (om) {
       setCastShadow(om.args.castShadow);
       setReceiveShadow(om.args.receiveShadow);
     }
@@ -42,23 +42,26 @@ export const Shadows = () => {
 
   return (
     <>
-      <div className={styles.castShadow}>
-        <div className={styles.title}>{t('castshadow')}</div>
-        <div className={styles.input}>
-          <input type='checkbox' className={styles.checkbox} checked={castShadow} onInput={() => onCheckCastShadow()} />
-          <span className={styles.customCheckbox}></span>
-        </div>
-      </div>
-      <div className={styles.castShadow}>
-        <div className={styles.title}>{t('receiveshadow')}</div>
-        <div className={styles.input}>
+      <div className='mt-2'>
+        <div className='inline-block px-0.5 text-lg font-bold'>{t('castshadow')}</div>
+        <div className='inline-block pl-3'>
           <input
             type='checkbox'
-            className={styles.checkbox}
+            className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
+            checked={castShadow}
+            onInput={() => onCheckCastShadow()}
+          />
+        </div>
+      </div>
+      <div className='mt-2'>
+        <div className='inline-block px-0.5 text-lg font-bold'>{t('receiveshadow')}</div>
+        <div className='inline-block pl-3'>
+          <input
+            type='checkbox'
+            className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
             checked={receiveShadow}
             onInput={() => onCheckReceiveShadow()}
           />
-          <span className={styles.customCheckbox}></span>
         </div>
       </div>
     </>

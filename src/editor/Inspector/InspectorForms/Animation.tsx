@@ -5,7 +5,6 @@ import Select from 'react-select';
 import { AnimationClip } from 'three';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { normalStyles } from '@/utils/styles';
@@ -19,7 +18,7 @@ export const Animation = () => {
 
   // Animationsの設定
   const [defalutAnim, setDefalutAnim] = useState<{ value: string; label: string }>(
-    om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: '', label: '' }
+    om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: '', label: '' },
   );
   const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop);
 
@@ -48,11 +47,11 @@ export const Animation = () => {
 
   return (
     <>
-      <div className={styles.animations}>
+      <div>
         {om && om.args.animations && om.args.animations.length > 0 && (
           <>
-            <div className={styles.title}>{t('animations')}</div>
-            <div className={styles.input}>
+            <div>{t('animations')}</div>
+            <div>
               <Select
                 options={om.args.animations.map((anim: AnimationClip) => {
                   return { value: anim.name, label: anim.name };
@@ -65,18 +64,15 @@ export const Animation = () => {
           </>
         )}
       </div>
-      <div className={styles.animLoop}>
-        <div className={styles.title}>
-          {t('animationLoop')}
-        </div>
-        <div className={styles.input}>
+      <div className='mt-2'>
+        <div className='inline-block px-0.5 text-lg font-bold'>{t('animationLoop')}</div>
+        <div className='inline-block pl-3'>
           <input
             type='checkbox'
-            className={styles.checkbox}
             checked={animLoop}
             onInput={() => onCheckAnimationLoop()}
+            className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
           />
-          <span className={styles.customCheckbox}></span>
         </div>
       </div>
     </>

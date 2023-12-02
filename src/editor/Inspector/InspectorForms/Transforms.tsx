@@ -46,7 +46,7 @@ export const Transforms = () => {
 
   useEffect(() => {
     const update = () => {
-      if (id){
+      if (id) {
         const pos = editor.getPosition(id);
         const rot = editor.getRotation(id);
         const sca = editor.getScale(id);
@@ -156,14 +156,14 @@ export const Transforms = () => {
   return (
     <>
       {/* Position */}
-      <div className={styles.position}>
-        <div className={styles.title}>{t('position')}</div>
-        <div className={styles.name}>
+      <div className='w-full pt-4'>
+        <div className='text-sm font-bold'>{t('position')}</div>
+        <div className='grid grid-cols-3 gap-3 text-center text-xs'>
           <div>X</div>
           <div>Y</div>
           <div>Z</div>
         </div>
-        <div className={styles.inputContainer}>
+        <div className="flex w-full justify-between">
           <input
             type='text'
             ref={inputXref}
@@ -182,6 +182,7 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
           <input
             type='text'
@@ -201,6 +202,7 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
           <input
             type='text'
@@ -220,18 +222,19 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
         </div>
       </div>
       {/* Rotation */}
-      <div className={styles.rotation}>
-        <div className={styles.title}>{t('rotation')}</div>
-        <div className={styles.name}>
+      <div className='w-full pt-4'>
+        <div className='text-sm font-bold'>{t('rotation')}</div>
+        <div className='grid grid-cols-3 gap-3 text-center text-xs'>
           <div>X</div>
           <div>Y</div>
           <div>Z</div>
         </div>
-        <div className={styles.inputContainer}>
+        <div className="flex w-full justify-between">
           <input
             type='text'
             ref={inputRXref}
@@ -250,6 +253,7 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
           <input
             // value={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): ""}
@@ -270,6 +274,7 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
           <input
             // value={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): ""}
@@ -290,18 +295,19 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
         </div>
       </div>
       {/* Scale */}
-      <div className={styles.scale}>
-        <div className={styles.title}>{t('scale')}</div>
-        <div className={styles.name}>
+      <div className='w-full pt-4'>
+        <div className='text-sm font-bold'>{t('scale')}</div>
+        <div className='grid grid-cols-3 gap-3 text-center text-xs'>
           <div>X</div>
           <div>Y</div>
           <div>Z</div>
         </div>
-        <div className={styles.inputContainer}>
+        <div className="flex w-full justify-between">
           <input
             // value={scale?(scale.x).toFixed(1): ""}
             ref={inputSXref}
@@ -321,6 +327,7 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
           <input
             // value={scale?(scale.y).toFixed(1): ""}
@@ -341,6 +348,7 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
           <input
             // value={scale?(scale.z).toFixed(1): ""}
@@ -361,14 +369,14 @@ export const Transforms = () => {
             }}
             onFocus={() => (globalStore.editorFocus = true)}
             onBlur={() => (globalStore.editorFocus = false)}
+            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
           />
         </div>
       </div>
-      <div className={styles.helper}>
-        <div className={styles.title}>{t('helper')}</div>
-        <div className={styles.input}>
-          <input type='checkbox' className={styles.checkbox} checked={helper} onInput={() => onCheckHelper()} />
-          <span className={styles.customCheckbox}></span>
+      <div>
+        <div className="inline-block px-0.5 pt-2 text-lg font-bold">{t('helper')}</div>
+        <div className="inline-block pl-3">
+          <input type='checkbox' className="scale-125 cursor-pointer align-middle accent-[#43D9D9]" checked={helper} onInput={() => onCheckHelper()} />
         </div>
       </div>
     </>

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { isNumber } from '@/commons/functional';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
@@ -34,11 +33,11 @@ export const Intensity = () => {
 
   return (
     <>
-      <div className={styles.intensity}>
-        <div className={styles.name}>
+      <div>
+        <div>
           {t('intensity')}: {intensity}
         </div>
-        <div className={styles.range}>
+        <div>
           <input type={'range'} min={0} max={10} step={0.01} value={intensity} onChange={(e) => changeIntensity(e)} />
         </div>
       </div>

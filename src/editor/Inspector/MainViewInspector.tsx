@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -15,6 +14,7 @@ import { Physics } from './InspectorForms/Physics';
 import { Shadows } from './InspectorForms/Shadows';
 import { Transforms } from './InspectorForms/Transforms';
 import { Visible } from './InspectorForms/Visible';
+import { MySwal } from '@/commons/Swal';
 
 export const MainViewInspector = () => {
   const state = useSnapshot(globalStore);
@@ -36,7 +36,18 @@ export const MainViewInspector = () => {
 
   const onKeyDown = (e) => {
     if (e.key == 'Delete' && id) {
-      deleteObject(id);
+      const om = editor.getOMById(id);
+      if (om && om.type != "avatar") {
+        deleteObject(id);
+      }
+      else {
+        MySwal.fire({
+          title: 'Delete',
+          text: 'Delete is not allowed object type',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+        })
+      }
     }
   };
 
@@ -50,7 +61,7 @@ export const MainViewInspector = () => {
   return (
     <>
       {otype && (
-        <div className={styles.mainInspector}>
+        <div className='mb-16'>
           {(otype == 'object' ||
             otype == 'avatar' ||
             otype == 'light' ||
@@ -70,10 +81,10 @@ export const MainViewInspector = () => {
             </>
           )}
 
-          {(otype == 'object' || otype == 'avatar') && <Animation />}
+          {(otype == 'object') && <Animation />}
           {otype == 'environment' && <EnvironmentParam />}
           {otype == 'lightformer' && <FormType />}
-          {(otype == 'effect' || otype == "light") && <Intensity />}
+          {(otype == 'effect' || otype == 'light') && <Intensity />}
           {otype == 'camera' && <CameraParams />}
         </div>
       )}

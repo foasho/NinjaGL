@@ -29,9 +29,9 @@
                 border-radius: 5px;
                 box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
                 outline: none;
-                width: calc(33.33% - 20px); /* 幅を計算して指定する */
+                width: calc(33.33% - 10px);
                 text-align: right;
-                margin-right: 10px; /* 右側に10pxのマージンを追加 */
+                margin-right: 3px;
             }
             input[type="text"]:focus {
                 box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);

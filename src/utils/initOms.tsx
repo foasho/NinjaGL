@@ -269,24 +269,24 @@ export const initThirdPersonTemplate = (): IObjectManagement[] => {
       visibleType: "auto",
       visible: true,
     },
-    // // Audio
-    {
-      id: MathUtils.generateUUID(),
-      name: "audio",
-      type: "audio",
-      args: {
-        url: "/audios/planetarium_garden.mp3",
-        position: new Vector3(0, 0, 0),
-        distance: 16,
-        loop: true,
-        autoplay: true,
-        volume: 0.5,
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true,
-    },
+    // // Audio バグ調査中
+    // {
+    //   id: MathUtils.generateUUID(),
+    //   name: "audio",
+    //   type: "audio",
+    //   args: {
+    //     url: "/audios/planetarium_garden.mp3",
+    //     position: new Vector3(0, 0, 0),
+    //     distance: 16,
+    //     loop: true,
+    //     autoplay: true,
+    //     volume: 0.5,
+    //   },
+    //   physics: false,
+    //   phyType: "box",
+    //   visibleType: "auto",
+    //   visible: true,
+    // },
     // AnimationObject
     {
       id: MathUtils.generateUUID(),

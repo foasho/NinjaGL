@@ -221,6 +221,8 @@ export const NinjaEditorProvider = ({ children }) => {
     };
   };
 
+  console.log('oms length reload: ', oms.length);
+
   /**
    * 元に戻す
    */
@@ -234,24 +236,28 @@ export const NinjaEditorProvider = ({ children }) => {
     }
     if (last.objectType === 'object' && last.om !== undefined) {
       if (last.type === 'add') {
-        // OMを削除
-        setOMs(oms.filter((om) => om.id !== last.om!.id));
-        // historyに追加
-        addHistory('redo', {
-          type: 'remove',
-          objectType: 'object',
-          om: last.om,
-        });
+        // OMにidがあれば削除
+        if (oms.find((om) => om.id === last.om!.id)) {
+          setOMs(oms.filter((om) => om.id !== last.om!.id));
+          // historyに追加
+          addHistory('redo', {
+            type: 'remove',
+            objectType: 'object',
+            om: last.om,
+          });
+        }
       }
       if (last.type === 'remove') {
-        // OMを追加
-        setOMs([...oms, last.om]);
-        // historyに追加
-        addHistory('redo', {
-          type: 'add',
-          objectType: 'object',
-          om: last.om,
-        });
+        // すでに同じIDがなければOMを追加
+        if (!oms.find((om) => om.id === last.om!.id)) {
+          setOMs([...oms, last.om]);
+          // historyに追加
+          addHistory('redo', {
+            type: 'add',
+            objectType: 'object',
+            om: last.om,
+          });
+        }
       }
       if (last.type === 'update') {
         // OMを更新
@@ -283,24 +289,28 @@ export const NinjaEditorProvider = ({ children }) => {
     }
     if (last.objectType === 'object' && last.om !== undefined) {
       if (last.type === 'add') {
-        // OMを追加
-        setOMs([...oms, last.om]);
-        // historyに追加
-        addHistory('undo', {
-          type: 'add',
-          objectType: 'object',
-          om: last.om,
-        });
+        // すでに同じIDがなければOMを追加
+        if (!oms.find((om) => om.id === last.om!.id)) {
+          setOMs([...oms, last.om]);
+          // historyに追加
+          addHistory('undo', {
+            type: 'add',
+            objectType: 'object',
+            om: last.om,
+          });
+        }
       }
       if (last.type === 'remove') {
-        // OMを削除
-        setOMs(oms.filter((om) => om.id !== last.om!.id));
-        // historyに追加
-        addHistory('undo', {
-          type: 'remove',
-          objectType: 'object',
-          om: last.om,
-        });
+        // OMにIDがあれば削除
+        if (oms.find((om) => om.id === last.om!.id)) {
+          setOMs(oms.filter((om) => om.id !== last.om!.id));
+          // historyに追加
+          addHistory('undo', {
+            type: 'remove',
+            objectType: 'object',
+            om: last.om,
+          });
+        }
       }
       if (last.type === 'update') {
         // OMを更新
@@ -531,6 +541,14 @@ export const NinjaEditorProvider = ({ children }) => {
     });
     setOMs([...oms, om]);
   };
+  const updateOM = (om: IObjectManagement) => {
+    // historyに追加
+    addHistory('undo', {
+      type: 'update',
+      objectType: 'object',
+      om: om,
+    });
+  };
   const removeOM = (id: string) => {
     // historyに追加
     addHistory('undo', {
@@ -654,6 +672,14 @@ export const NinjaEditorProvider = ({ children }) => {
     njcChangedListeners.current.forEach((l) => l());
   };
 
+  const undoEvent = (e: KeyboardEvent) => {
+    if (e.ctrlKey && e.key === 'z') {
+      undo();
+    } else if (e.ctrlKey && e.key === 'y') {
+      redo();
+    }
+  };
+
   // 初期設定
   useEffect(() => {
     initialize();
@@ -661,6 +687,15 @@ export const NinjaEditorProvider = ({ children }) => {
     setOMs(initOms);
     setReady(true);
   }, []);
+
+  // Undo/Redoの履歴を初期化
+  useEffect(() => {
+    // Ctrl + Zでundo
+    document.addEventListener('keydown', undoEvent);
+    return () => {
+      document.removeEventListener('keydown', undoEvent);
+    };
+  }, [oms, sms, ums, tms]);
 
   return (
     <NinjaEditorContext.Provider

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { normalStyles } from '@/utils/styles';
@@ -40,16 +39,15 @@ export const Physics = () => {
 
   return (
     <>
-      <div className={styles.physics}>
-        <div className={styles.title}>{t('isPhysics')}</div>
-        <div className={styles.input}>
+      <div className='mt-2'>
+        <div className='inline-block px-0.5 py-1.5 text-lg font-bold'>{t('isPhysics')}</div>
+        <div className='inline-block pl-3'>
           <input
             type='checkbox'
-            className={styles.checkbox}
+            className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
             checked={isPhysics}
             onInput={() => setIsPhysics(!isPhysics)}
           />
-          <span className={styles.customCheckbox}></span>
         </div>
         {isPhysics && (
           <>
