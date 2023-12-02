@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 

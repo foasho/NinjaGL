@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import { IShaderManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
-import styles from '@/App.module.scss';
+
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const ShaderNavigation = () => {
@@ -14,7 +15,7 @@ export const ShaderNavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.tree}>
+        <div>
           {shaders.map((shader, idx) => {
             return <ShaderItem shader={shader} index={idx} key={idx} />;
           })}
@@ -26,15 +27,15 @@ export const ShaderNavigation = () => {
 
 const ShaderItem = (prop: { index: number; shader: IShaderManagement }) => {
   const { t } = useTranslation();
-  let lineStyle = styles.lightLine;
+  // let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
-    lineStyle = styles.darkLine;
+    // lineStyle = styles.darkLine;
   }
   return (
-    <div className={styles.treeItem}>
-      <div className={lineStyle}></div>
-      <div className={styles.item}>
-        <div className={styles.itemName}>{prop.shader.name}</div>
+    <div>
+      <div></div>
+      <div>
+        <div>{prop.shader.name}</div>
       </div>
     </div>
   );

@@ -36,7 +36,6 @@ import {
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { b64EncodeUnicode } from '@/commons/functional';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -594,7 +593,7 @@ export const TerrainMakerCanvas = () => {
             )}
             <Environment preset='dawn' background blur={0.7} resolution={512} />
           </Canvas>
-          <div className={styles.inspector}>
+          <div>
             <TerrainInspector onSave={onSave} />
           </div>
         </>

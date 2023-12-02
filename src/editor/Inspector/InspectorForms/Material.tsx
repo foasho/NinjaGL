@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { normalStyles } from '@/utils/styles';

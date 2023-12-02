@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Euler, MathUtils, Vector3 } from 'three';
 import { useSnapshot } from 'valtio';
 
-import styles from '@/App.module.scss';
 import { isNumber } from '@/commons/functional';
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';

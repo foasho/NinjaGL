@@ -10,8 +10,6 @@ import Select from 'react-select';
 import { toast } from 'react-toastify';
 import { DoubleSide, ShaderMaterial, Matrix3, Matrix4, Vector2, Vector3, Vector4 } from 'three';
 
-import styles from '@/App.module.scss';
-
 import type { languages } from 'monaco-editor';
 
 interface IShaderEditor {
@@ -195,22 +193,16 @@ export const ShaderEditor = (props: IShaderEditor) => {
   };
 
   return (
-    <div className={styles.shaderEditor}>
-      <div className={styles.navigation}>
-        <div className={`${styles.mode} ${styles.navItem}`} onClick={() => changeMode()}>
-          {mode}
-        </div>
-        <div className={`${styles.filename} ${styles.navItem}`}>
+    <div>
+      <div>
+        <div onClick={() => changeMode()}>{mode}</div>
+        <div>
           {filename}
           {mode == 'Fragment' ? '.frag' : '.vertex'}
         </div>
-        <div className={`${styles.mode} ${styles.save}`} onClick={() => onSave()}>
-          Save
-        </div>
-        <div className={`${styles.preview} ${styles.navItem}`} onClick={() => onPreview()}>
-          Preview
-        </div>
-        <div className={`${styles.type} ${styles.navItem}`}>
+        <div onClick={() => onSave()}>Save</div>
+        <div onClick={() => onPreview()}>Preview</div>
+        <div>
           <Select
             options={options}
             value={options.find((op) => op.value == objectType)}
@@ -219,12 +211,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
           />
         </div>
       </div>
-      <div className={styles.editor}>
-        <div
-          className={styles.monaco}
-          style={{ width: showPreview ? separate.editorWidth : '100%' }}
-          onKeyDown={handleKeyDown}
-        >
+      <div>
+        <div style={{ width: showPreview ? separate.editorWidth : '100%' }} onKeyDown={handleKeyDown}>
           <div style={{ display: mode == 'Fragment' ? 'block' : 'none', height: '100%' }}>
             <MonacoEditor
               language='glsl'
@@ -260,8 +248,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
         </div>
         {showPreview && (
           <>
-            <div className={styles.resizer} style={{ left: separate.editorWidth }} onMouseDown={onMouseDown}></div>
-            <div className={styles.preview} style={{ width: separate.previewWidth }}>
+            <div style={{ left: separate.editorWidth }} onMouseDown={onMouseDown}></div>
+            <div style={{ width: separate.previewWidth }}>
               <Canvas shadows>
                 <SoftShadows />
                 <mesh

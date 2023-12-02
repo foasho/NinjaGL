@@ -4,7 +4,6 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { ToastContainer } from 'react-toastify';
 
-import styles from '@/App.module.scss';
 import { NinjaEditorProvider } from '@/hooks/useNinjaEditor';
 
 const NinjaEditor = dynamic(() => import('@/editor/NinjaEditor').then((mod) => mod.NinjaEditor), {
@@ -45,7 +44,7 @@ const NinjaEditor = dynamic(() => import('@/editor/NinjaEditor').then((mod) => m
 
 const EditorPage = () => {
   return (
-    <div className={styles.main}>
+    <div>
       <NinjaEditorProvider>
         <NinjaEditor />
       </NinjaEditorProvider>

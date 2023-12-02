@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { ITextureManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
 
-import styles from '@/App.module.scss';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const TextureNavigation = () => {
@@ -16,7 +15,7 @@ export const TextureNavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.tree}>
+        <div>
           {textures.map((texture, idx) => {
             return <TextureItem texture={texture} index={idx} key={idx} />;
           })}
@@ -28,15 +27,15 @@ export const TextureNavigation = () => {
 
 const TextureItem = (prop: { index: number; texture: ITextureManagement }) => {
   const { t } = useTranslation();
-  let lineStyle = styles.lightLine;
+  // let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
-    lineStyle = styles.darkLine;
+    // lineStyle = styles.darkLine;
   }
   return (
-    <div className={styles.treeItem}>
-      <div className={lineStyle}></div>
-      <div className={styles.item}>
-        <div className={styles.itemName}>{prop.texture.name}</div>
+    <div>
+      <div></div>
+      <div>
+        <div>{prop.texture.name}</div>
       </div>
     </div>
   );

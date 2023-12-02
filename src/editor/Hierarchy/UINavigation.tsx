@@ -1,10 +1,11 @@
-import { IObjectManagement, IUIManagement } from '@ninjagl/core';
-import { useState, useRef, useContext, useEffect } from 'react';
-import styles from '@/App.module.scss';
-import { BsBox } from 'react-icons/bs';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import Swal from 'sweetalert2';
+import { useState, useRef, useEffect } from 'react';
+
+import { IUIManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
+import { AiFillEye } from 'react-icons/ai';
+import { BsBox } from 'react-icons/bs';
+import Swal from 'sweetalert2';
+
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 /**
@@ -17,7 +18,7 @@ export const UINavigation = () => {
   return (
     <>
       <div>
-        <div className={styles.tree}>
+        <div>
           {uis.map((ui, idx) => {
             return <UIItem ui={ui} index={idx} isSelect={false} key={idx} />;
           })}
@@ -36,9 +37,9 @@ const UIItem = (prop: IUIItem) => {
   const ref = useRef<HTMLDivElement>(null);
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  let lineStyle = styles.lightLine;
+  // let lineStyle = styles.lightLine;
   if (prop.index % 2 !== 0) {
-    lineStyle = styles.darkLine;
+    // lineStyle = styles.darkLine;
   }
   const [name, setName] = useState<string>(t('nonNameUI') as string);
   let typeIcon = <BsBox />; // デフォルトObject型
@@ -78,19 +79,17 @@ const UIItem = (prop: IUIItem) => {
     });
   };
 
-  let className = `${styles.treeNode} ${lineStyle}`;
+  // let className = `${styles.treeNode} ${lineStyle}`;
   if (prop.isSelect) {
-    className += ` ${styles.select}`;
+    // className += ` ${styles.select}`;
   }
 
   return (
     <>
-      <div className={className} ref={ref}>
-        <div className={styles.type}>{typeIcon}</div>
-        <div className={styles.name} onDoubleClick={changeName}>
-          {name}
-        </div>
-        <div className={styles.visible}>{visibleIcon}</div>
+      <div ref={ref}>
+        <div>{typeIcon}</div>
+        <div onDoubleClick={changeName}>{name}</div>
+        <div>{visibleIcon}</div>
       </div>
     </>
   );

@@ -2,8 +2,6 @@ import ReactDOM from 'react-dom/client';
 
 import { useTranslation } from 'react-i18next';
 
-import styles from '@/App.module.scss';
-
 interface IResponse {
   response: () => void;
 }
@@ -13,17 +11,17 @@ export const MultiPlayerDialog = (prop: IResponse) => {
     prop.response();
   };
   const handleClickOutside = (event) => {
-    if (event.target.classList.contains(styles.selectNewObjectDialog)) {
+    if (event.target.classList.contains('selectNewObjectDialog')) {
       prop.response();
     }
   };
   return (
-    <div className={styles.selectNewObjectDialog} onClick={handleClickOutside}>
-      <div className={styles.dialog}>
-        <div className={styles.title}>Multi Player Setting</div>
+    <div onClick={handleClickOutside}>
+      <div>
+        <div>Multi Player Setting</div>
         {t('nowDeveloping')}
-        <div className={styles.keyInput}>
-          <input className={styles.skywayKey} type='text' />
+        <div>
+          <input type='text' />
         </div>
       </div>
     </div>

@@ -1,12 +1,13 @@
-import styles from '@/App.module.scss';
-import { IObjectManagement } from '@ninjagl/core';
 import { useEffect, useRef, useState } from 'react';
+
+import { IObjectManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { BsBox, BsLightbulbFill, BsPersonFill } from 'react-icons/bs';
 import { MdTerrain } from 'react-icons/md';
 import Swal from 'sweetalert2';
 import { useSnapshot } from 'valtio';
+
 import { globalStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -30,8 +31,8 @@ export const HierarchyTree = () => {
   return (
     <>
       <div>
-        <div className='text-white text-sm font-bold pl-[10px] select-none'>{t('objects')}</div>
-        <div className='h-[25vh] m-0 overflow-x-hidden overflow-y-auto p-2 border-1 border-color-[#6e6b6b] rounded-sm min-h-[100px]'>
+        <div className='select-none pl-[10px] text-sm font-bold text-white'>{t('objects')}</div>
+        <div className='m-0 h-[25vh] min-h-[100px] overflow-y-auto overflow-x-hidden rounded-sm border-1 border-[#6e6b6b] p-2'>
           {oms.map((om, idx) => {
             let isSelect = false;
             if (selectOM && selectOM == om) {
@@ -130,7 +131,7 @@ const TreeItem = (prop: ITreeItem) => {
    * 選択/非選択を切り替える
    */
   const onSelectObject = () => {
-    if (ref.current!.classList.contains(styles.select)) {
+    if (ref.current!.classList.contains('select')) {
       state.init();
     } else {
       globalStore.currentId = prop.om.id;
@@ -140,15 +141,15 @@ const TreeItem = (prop: ITreeItem) => {
   return (
     <>
       <div className={className} ref={ref}>
-        <div className='inline-block pr-0.75 text-sm align-middle'>{typeIcon}</div>
+        <div className='pr-0.75 inline-block align-middle text-sm'>{typeIcon}</div>
         <div
-          className='inline-block cursor-pointer select-none pl-0.75'
+          className='pl-0.75 inline-block cursor-pointer select-none'
           onClick={onSelectObject}
           onDoubleClick={changeName}
         >
           {prop.om.name}
         </div>
-        <div className='inline-block float-right text-sm cursor-pointer align-middle' onClick={() => changeVisible()}>
+        <div className='float-right inline-block cursor-pointer align-middle text-sm' onClick={() => changeVisible()}>
           {visibleIcon}
         </div>
       </div>
