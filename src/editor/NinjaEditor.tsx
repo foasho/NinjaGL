@@ -261,6 +261,9 @@ export const NinjaEditor = () => {
             {/** ヒエラルキービュー */}
             <div
               className={clsx(`absolute left-3 top-[12px] z-20 w-[190px] rounded-lg pt-[2px]`, sideBar && 'bg-primary')}
+              style={{
+                display: viewSelect == 'mainview' ? 'block' : 'none',
+              }}
             >
               <div className='relative'>
                 <a

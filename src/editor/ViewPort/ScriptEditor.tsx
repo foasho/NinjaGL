@@ -1,17 +1,16 @@
-//@ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
 import { IScriptManagement } from '@ninjagl/core';
+import { PutBlobResult } from '@vercel/blob';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'react-i18next';
-import { AiOutlineCaretRight, AiOutlinePause, AiOutlineReload } from 'react-icons/ai';
 import { toast } from 'react-toastify';
-import Swal from 'sweetalert2';
 import { MathUtils } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { b64EncodeUnicode } from '@/commons/functional';
+import { MySwal } from '@/commons/Swal';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { globalScriptStore } from '../Store/Store';
@@ -51,15 +50,7 @@ export const ScriptEditor = () => {
         });
 
         const suggestions = [];
-        if (textUntilPosition.includes('Web3Instance.')) {
-          // @ts-ignore
-          suggestions.push({
-            label: 'getWalletAddress',
-            kind: monaco.languages.CompletionItemKind.Function,
-            documentation: 'Get Wallet Address',
-            insertText: 'getWalletAddress()',
-          });
-        } else if (textUntilPosition.includes('EngineInstance.')) {
+        if (textUntilPosition.includes('EngineInstance.')) {
           // @ts-ignore
           suggestions.push({
             label: 'getPositionByName',
@@ -68,25 +59,13 @@ export const ScriptEditor = () => {
             insertText: 'getPositionByName()',
           });
         } else {
-          // @ts-ignore
           suggestions.push(
+            // @ts-ignore
             {
               label: 'EngineInstance',
               kind: monaco.languages.CompletionItemKind.Module,
               documentation: 'EngineInstance',
               insertText: 'EngineInstance',
-            },
-            {
-              label: 'Web3Instance',
-              kind: monaco.languages.CompletionItemKind.Module,
-              documentation: 'Web3Instance',
-              insertText: 'Web3Instance',
-            },
-            {
-              label: 'Web3Instance.getWalletAddress()',
-              kind: monaco.languages.CompletionItemKind.Function,
-              documentation: 'Get Wallet Address',
-              insertText: 'Web3Instance.getWalletAddress()',
             },
             {
               label: 'userData',
@@ -126,58 +105,40 @@ export const ScriptEditor = () => {
   const saveCode = async (filename: string) => {
     if (session && code.current) {
       const file = await convertFile(code.current);
-      const formData = new FormData();
-      formData.append('file', file);
-      const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/scripts`;
-      const keyPath = (uploadPath + `/${filename}`).replaceAll('//', '/');
-      formData.append('filePath', keyPath);
-      const response = await fetch('/api/storage/upload', {
+      const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/Scripts/${filename}`;
+      const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
         method: 'POST',
-        body: formData,
+        body: file,
       });
-      if (!response.ok) {
+      const blob = (await response.json()) as PutBlobResult;
+
+      if (!blob.url) {
         throw new Error('Error uploading file');
       }
-      if (response.ok) {
-        if (scriptState.currentSM && globalScriptStore.currentSM) {
-          const sm = myeditor.getSMById(scriptState.currentSM.id);
-          if (sm) sm.script = code.current;
-          globalScriptStore.currentSM.script = code.current;
-        } else {
-          const newSM: IScriptManagement = {
-            id: scriptState.currentSM ? scriptState.currentSM.id : MathUtils.generateUUID(),
-            type: 'script',
-            name: filename,
-            script: code.current,
-          };
-          myeditor.addSM(newSM);
-          globalScriptStore.currentSM = newSM;
-        }
-        toast(t('completeSave'), {
-          position: 'top-right',
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: 'light',
-        });
-      }
-    } else {
-      // ログインしてなければ、SMに追加のみおこなう
-      if (scriptState.currentSM && code.current) {
-        globalScriptStore.currentSM!.script = code.current;
+      if (scriptState.currentSM && globalScriptStore.currentSM) {
+        const sm = myeditor.getSMById(scriptState.currentSM.id);
+        if (sm) sm.script = code.current;
+        globalScriptStore.currentSM.script = code.current;
       } else {
         const newSM: IScriptManagement = {
           id: scriptState.currentSM ? scriptState.currentSM.id : MathUtils.generateUUID(),
           type: 'script',
           name: filename,
-          script: code.current!,
+          script: code.current,
         };
         myeditor.addSM(newSM);
         globalScriptStore.currentSM = newSM;
       }
+      toast(t('completeSave'), {
+        position: 'top-right',
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
     }
   };
 
@@ -189,7 +150,7 @@ export const ScriptEditor = () => {
       const filename = scriptState.currentSM.name.replace('.js', '') + '.js';
       await saveCode(filename);
     } else {
-      Swal.fire({
+      MySwal.fire({
         title: 'ファイル名を決めてください',
         input: 'text',
         showCancelButton: true,
@@ -198,12 +159,12 @@ export const ScriptEditor = () => {
         preConfirm: async (inputStr: string) => {
           //バリデーションを入れたりしても良い
           if (inputStr.length == 0) {
-            return Swal.showValidationMessage('1文字以上いれてね');
+            return MySwal.showValidationMessage('1文字以上いれてね');
           }
           return inputStr.replace('.js', '');
         },
         allowOutsideClick: function () {
-          return !Swal.isLoading();
+          return !MySwal.isLoading();
         },
       }).then(async (result) => {
         if (result.value) {
@@ -225,7 +186,10 @@ export const ScriptEditor = () => {
    * プレビュー
    */
   const onPreview = () => {
-    setIsPreview(!isPreview);
+    MySwal.fire({
+      title: 'unimplemented',
+    });
+    // setIsPreview(!isPreview);
   };
 
   /**
@@ -248,25 +212,29 @@ export const ScriptEditor = () => {
 
   return (
     <>
-      <div className={styles.scriptEditor}>
-        <div className={styles.navigation}>
-          <div className={styles.filename}>{name ? name : '*Untitled.js'}</div>
-          <div className={styles.save} onClick={() => onSave()}>
+      <div className='h-full bg-primary'>
+        <div className='absolute bottom-8 right-8 z-20 rounded-lg bg-cyber/25 p-3'>
+          <div className='pb-2 text-center font-bold text-white'>{name ? name : '*Untitled.js'}</div>
+          <div
+            className='float-right inline-block cursor-pointer bg-cyber px-3.5 py-[5px] font-bold'
+            onClick={() => onSave()}
+          >
             Save
           </div>
-          <div className={styles.preview} onClick={() => onPreview()}>
+          <div className='float-right bg-[#494949] px-2.5 py-[5px] text-white' onClick={() => onPreview()}>
             Preview
           </div>
-          {isPreview && (
+          {/** Previewが未実装 */}
+          {/* {isPreview && (
             <>
-              <div className={styles.preview}>
-                <AiOutlineReload />
+              <div>
+                <AiOutlineReload className='inline' />
               </div>
-              <div className={styles.preview}>{pause ? <AiOutlinePause /> : <AiOutlineCaretRight />}</div>
+              <div>{pause ? <AiOutlinePause className='inline' /> : <AiOutlineCaretRight className='inline' />}</div>
             </>
-          )}
+          )} */}
         </div>
-        <div className={styles.editor}>
+        <div className='h-full w-full bg-[#838383] pt-6'>
           <MonacoEditor
             height='100%'
             width='100%'
