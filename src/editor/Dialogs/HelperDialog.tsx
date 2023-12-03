@@ -9,9 +9,9 @@ import { NinjaGL } from "@ninjagl/core";
 
 function App() {
 
-    return (
-        <NinjaGL njcPath={"<YourNjcFile>"} />
-    );
+  return (
+    <NinjaGL njcPath={"<YourNjcFile>"} />
+  );
 }
 `;
 
@@ -20,15 +20,15 @@ import { NinjaGL } from "@ninjagl/core";
 
 function App() {
 
-    return (
-        <NinjaGL njcPath={"<YourNjcFile>"} >
-            <!-- Your React Three Fiber Code -->
-            <mesh>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshStandardMaterial color="hotpink" />
-            </mesh>
-        </NinjaGL>
-    );
+  return (
+    <NinjaGL njcPath={"<YourNjcFile>"} >
+      <!-- Your React Three Fiber Code -->
+      <mesh>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="hotpink" />
+      </mesh>
+    </NinjaGL>
+  );
 }
 `;
 

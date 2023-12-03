@@ -1,4 +1,4 @@
-import { Preview } from './Preview';
+import { Preview } from '@/commons/Preview';
 
 const getMarkdown = async (mdName: string) => {
   const filePath = `${process.env.NEXTAUTH_URL}/docs/${mdName}.md`;

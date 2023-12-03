@@ -66,12 +66,12 @@ async function initialize() {
 }
 
 async function frameLoop(state, delta, input) {
-  const om = NW.getOMByName("<YourObjectName>");
-  const { x, y, z } = om.position;
+  const om = await getOMByName({name: "<YourObjectName>"});
+  const { x, y, z } = om.args.position;
   if (x + 0.01 < 10){
-    NW.setPosition(om.id, [x+0.01, y, z]);
+    await setPosition({id: om.id, position: [x+0.01, y, z]});
   }
-}
+}  
 ```
 
 ### Rotation操作サンプル
@@ -80,24 +80,26 @@ async function initialize() {
 }
 
 async function frameLoop(state, delta, input) {
-  const om = NW.getOMByName("<YourObjectName>");
-  const { x, y, z } = om.rotation;
+  const om = await getOMByName({name: "<YourObjectName>"});
+  const { x, y, z } = om.args.rotation;
   const time = state.elapsedTime;
   // Y軸を時間で回転
-  NW.setRotation(om.id, [x, Math.sin(time)* 2 * Math.PI, z]);
+  await setRotation({id: om.id, rotation: [x, Math.sin(time)* 2 * Math.PI, z]});
 }
 ```
 
 ### Scale操作サンプル
 ```js
 async function initialize() {
-  const om = NW.getOMByName("<YourObjectName>");
-  const { x, y, z } = om.scale;
-  // Y座標方向に1.2倍
-  NW.setScale(om.id, [x, y*1.2, z]);
 }
 
 async function frameLoop(state, delta, input) {
+    const om = await getOMByName({name: "<YourObjectName>"});
+  const { x, y, z } = om.args.scale;
+  const time = state.elapsedTime;
+  // 0.5 ~ 1.5 倍の拡縮
+  const s = 0.5 * Math.sin(time)
+  await setScale({id: om.id, rotation: [1 + s, 1 + s, 1 + s]});
 }
 ```
 
