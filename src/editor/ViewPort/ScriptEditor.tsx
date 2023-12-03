@@ -261,8 +261,7 @@ export const ScriptEditor = () => {
 const initCode = `
 /**
 * NinjaGL
-* -公式ドキュメント: https://www.example.com/
-* -公式サンプル    : https://www.example.com/
+* -公式ドキュメント: https://ninjagl.vercel.app/docs/scripts
 **/
 
 /**
@@ -275,8 +274,18 @@ async function initialize() {
 /**
  * 毎フレーム事の処理
  * @param state: { elapsedTime: 経過時間, mouse: { x, y } }
- * @param delta: 1フレーム時間(秒)
- * @param input: { forward, backward, left, right, jump, dash, action }
+ * @param delta: 1フレーム時間(秒) ex)0.016
+ * @param input: 
+ *  { 
+ *    forward: boolean, 
+ *    backward: boolean, 
+ *    left: boolean, 
+ *    right: boolean, 
+ *    jump: boolean, 
+ *    dash: boolean, 
+ *    actio: boolean, 
+ *    pressedKeys: [] 
+ * }
  */
 async function frameLoop(state, delta, input) {
   // your code

@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { MathUtils } from 'three';
 import { useSnapshot } from 'valtio';
 
+import { MySwal } from '@/commons/Swal';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { globalScriptStore } from '../Store/Store';
-import { MySwal } from '@/commons/Swal';
 
 export const ScriptNavigation = () => {
   const { sms, contentsSelectType, contentsSelectPath, addSM } = useNinjaEditor();
@@ -36,8 +36,7 @@ export const ScriptNavigation = () => {
               return true;
             }
           }
-        } catch (error) {
-        }
+        } catch (error) {}
         return false;
       };
       const result = await scriptCheck();
@@ -67,7 +66,7 @@ export const ScriptNavigation = () => {
 
   return (
     <>
-      <div className="border-white border-1 rounded-sm px-1 py-1">
+      <div className='rounded-sm border-1 border-white p-1'>
         <div onDrop={handleDrop} onDragOver={handleDragOver}>
           {sms.map((sm, idx) => {
             return <ScriptItem sm={sm} index={idx} key={idx} />;

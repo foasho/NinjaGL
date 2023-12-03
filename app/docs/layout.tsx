@@ -32,7 +32,9 @@ export default function DocsLayout({ children }) {
   return (
     <>
       <SideBar />
-      <div className='container mx-auto px-4 py-3'>{children}</div>
+      <div className='max-h-screen overflow-y-auto pb-16'>
+        <div className='container mx-auto px-4 py-3'>{children}</div>
+      </div>
     </>
   );
 }

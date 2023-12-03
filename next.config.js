@@ -59,6 +59,12 @@ const nextConfig = {
       use: ['raw-loader', 'glslify-loader'],
     });
 
+    // markdown support
+    config.module.rules.push({
+      test: /\.md$/,
+      use: 'raw-loader',
+    });
+
     // JSONの読めるようにする // 不要
     // config.module.rules.push(
     //   {
