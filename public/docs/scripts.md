@@ -66,7 +66,7 @@ async function initialize() {
 }
 
 async function frameLoop(state, delta, input) {
-  const om = await getOMByName({name: "<YourObjectName>"});
+  const om = await getOMByName({name: "movebox"});
   const { x, y, z } = om.args.position;
   if (x + 0.01 < 10){
     await setPosition({id: om.id, position: [x+0.01, y, z]});
@@ -80,7 +80,7 @@ async function initialize() {
 }
 
 async function frameLoop(state, delta, input) {
-  const om = await getOMByName({name: "<YourObjectName>"});
+  const om = await getOMByName({name: "movebox"});
   const { x, y, z } = om.args.rotation;
   const time = state.elapsedTime;
   // Y軸を時間で回転
@@ -94,7 +94,7 @@ async function initialize() {
 }
 
 async function frameLoop(state, delta, input) {
-    const om = await getOMByName({name: "<YourObjectName>"});
+    const om = await getOMByName({name: "movebox"});
   const { x, y, z } = om.args.scale;
   const time = state.elapsedTime;
   // 0.5 ~ 1.5 倍の拡縮
@@ -103,7 +103,7 @@ async function frameLoop(state, delta, input) {
 }
 ```
 
-### 新しいオブジェクト追加
+## 新しいオブジェクト追加
 
 ```js
 async function initialize() {
@@ -123,5 +123,35 @@ async function frameLoop(state, delta, input) {
       }
     });
   }
+}
+```
+
+## クリック時の操作
+クリック時に黄色に変える
+```js
+const onMyClick = (id) => {
+  setArg({ id: id, key: "materialData", value: { type: "standard", "value": "#F1D353" } })
+}
+async function initialize() {
+  const om = await getOMByName({name: "movebox"});
+  useClickEvent(om.id, () => onMyClick(om.id))
+}
+
+async function frameLoop(state, delta, input) {
+}
+```
+
+## ダブルクリック時の操作
+クリック時に黄色に変える
+```js
+const onMyDblclick = (id) => {
+  setArg({ id: id, key: "materialData", value: { type: "reflection", "value": "#43D9D9" } })
+}
+async function initialize() {
+  const om = await getOMByName({name: "movebox"});
+  useDblclickEvent(om.id, () => onMyDblclick(om.id))
+}
+
+async function frameLoop(state, delta, input) {
 }
 ```
