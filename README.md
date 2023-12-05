@@ -1,6 +1,6 @@
 
 <div align="center">
-<img src="https://storage.googleapis.com/zenn-user-upload/c7e16c8c0654-20231205.png" width="200" />
+<img src="https://storage.googleapis.com/zenn-user-upload/75400cb7f015-20231205.png" width="200" />
 
 # NinjaGL Web First GameEngine
 [デモ](https://ninjagl.vercel.app) | [ドキュメント](https://ninjagl.vercel.app/docs) | [チュートリアル](https://ninjagl.vercel.app/docs/tutorial)
@@ -9,6 +9,8 @@ NinjaGLは、[ReactThreeFiber](https://github.com/pmndrs/react-three-fiber)の�
 
 ## ショーケース
 (準備中)
+
+</div>
 
 ## 特徴
 * Reactに統合可能なゲームエンジン
@@ -54,5 +56,3 @@ images: {
     ],
   }
 ```
-
-</div>
