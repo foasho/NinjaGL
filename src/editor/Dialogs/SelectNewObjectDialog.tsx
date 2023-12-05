@@ -286,21 +286,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </>
           )}
 
-          {selectType == 'ui' && (
-            <>
-              <div
-                className={cardStyle}
-                onClick={() => {
-                  selectUI('touchController');
-                }}
-              >
-                <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/touchController.png' />
-                </div>
-                <div className={nameStyle}>{t('touchController')}</div>
-              </div>
-            </>
-          )}
+          {selectType == 'ui' && <>{/** 設計中 */}</>}
 
           {selectType == 'fog' && (
             <>

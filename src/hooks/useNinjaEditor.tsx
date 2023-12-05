@@ -1,10 +1,18 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
-import { IObjectManagement, IScriptManagement, ITextureManagement, IUIManagement, NJCFile } from '@ninjagl/core';
+import {
+  IObjectManagement,
+  IScriptManagement,
+  ITextureManagement,
+  IUIManagement,
+  NJCFile,
+  initTpSMs,
+} from '@ninjagl/core';
 import { Euler, Group, Object3D, Vector3 } from 'three';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-import { initThirdPersonTemplate } from '@/utils/initOms';
+import { globalEditorStore } from '@/editor/Store/editor';
+import { initTpOms, initTpUis } from '@/utils/initTpProjects';
 
 /**
  * コンテンツブラウザの操作モード
@@ -673,6 +681,8 @@ export const NinjaEditorProvider = ({ children }) => {
   };
 
   const undoEvent = (e: KeyboardEvent) => {
+    // mainviewのときのみ
+    if (globalEditorStore.viewSelect !== 'mainview') return;
     if (e.ctrlKey && e.key === 'z') {
       undo();
     } else if (e.ctrlKey && e.key === 'y') {
@@ -683,8 +693,12 @@ export const NinjaEditorProvider = ({ children }) => {
   // 初期設定
   useEffect(() => {
     initialize();
-    const initOms = initThirdPersonTemplate();
+    const initOms = initTpOms();
+    // const initSms = initTpSMs();
+    const initUis = initTpUis();
     setOMs(initOms);
+    // setSMs(initSms);
+    setUMs(initUis);
     setReady(true);
   }, []);
 

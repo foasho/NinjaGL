@@ -1,7 +1,7 @@
-import { IObjectManagement } from "@ninjagl/core";
+import { IObjectManagement, IScriptManagement, IUIManagement } from "@ninjagl/core";
 import { Euler, MathUtils, Vector3 } from "three";
 
-export const initThirdPersonTemplate = (): IObjectManagement[] => {
+export const initTpOms = (): IObjectManagement[] => {
   return [
     {
       id: MathUtils.generateUUID(),
@@ -327,5 +327,28 @@ export const initThirdPersonTemplate = (): IObjectManagement[] => {
       visibleType: "force",
       visible: true,
     },
+  ];
+}
+
+export const initTpSms = (): IScriptManagement[] => {
+  return [
+
+  ];
+}
+
+export const initTpUis = (): IUIManagement[] => {
+  return [
+    {
+      type: "controller",
+      id: MathUtils.generateUUID(),
+      name: "btn01",
+      position: {
+          x: 10,
+          y: 10,
+      },
+      styles: ``,
+      args: {},
+      visible: true,
+    }
   ];
 }

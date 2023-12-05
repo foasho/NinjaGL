@@ -6,6 +6,7 @@ const resources = {
     translation: {
       lang: "Lang(EN)",
       template: "Templates",
+      docs: "Docs",
       mainView: "MainView",
       debugPlay: "DebugPlay",
       terrainMaker: "TerrainMaker",
@@ -128,6 +129,7 @@ const resources = {
     translation: {
       lang: "言語(JP)",
       template: "テンプレート",
+      docs: "ドキュメント",
       mainView: "メインビュー",
       debugPlay: "デバッグプレイ",
       terrainMaker: "地形メーカー",

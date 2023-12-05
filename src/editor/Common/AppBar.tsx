@@ -17,6 +17,7 @@ import { showHelperDialog } from '../Dialogs/HelperDialog';
 import { globalEditorStore } from '../Store/editor';
 import { globalConfigStore } from '../Store/Store';
 import { ExportNjcFile } from '../ViewPort/DebugPlay';
+import Link from 'next/link';
 
 export const AppBarHeight = 45;
 export const AppBar = () => {
@@ -57,13 +58,6 @@ export const AppBar = () => {
     } else if (i18n.language == 'en') {
       i18n.changeLanguage('ja');
     }
-  };
-
-  /**
-   * テンプレート選択
-   */
-  const onClickSelectTemplate = () => {
-    MySwal.fire(t('attention').toString(), t('templatePrepare').toString());
   };
 
   /**
@@ -110,17 +104,10 @@ export const AppBar = () => {
   const onSave = async (completeAlert: boolean = true) => {
     const njcFile = ExportNjcFile(editor.oms, editor.ums, editor.tms, editor.sms, {
       physics: configState.physics,
-      autoScale: configState.autoScale,
-      alpha: configState.alpha,
-      logarithmicDepthBuffer: configState.logarithmicDepthBuffer,
-      antialias: configState.antialias,
-      shadowResolution: configState.shadowResolution,
-      mapsize: configState.mapsize,
-      layerGridNum: configState.layerGridNum,
-      lodDistance: configState.lodDistance,
       dpr: configState.dpr as number,
-      initCameraPosition: configState.initCameraPosition,
       isDebug: true,
+      multi: configState.multi,
+      isApi: configState.isApi,
     });
     const blob = await saveNJCBlob(njcFile);
     if (!projectName) {
@@ -250,15 +237,18 @@ export const AppBar = () => {
               </a>
             </li>
             <li className='float-left hidden px-[3px] py-[10px] md:inline-block'>
-              <a
+              <Link
                 className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
-                onClick={() => window.open('https://github.com/foasho/NinjaGL', '_blank')}
+                href="https://github.com/foasho/NinjaGL"
+                target="_blank"
               >
                 Github
-              </a>
+              </Link>
             </li>
             <li className='float-left inline-block cursor-pointer px-[3px] py-[10px] text-white'>
-              <a onClick={() => onClickSelectTemplate()}>{t('template')}</a>
+              <Link href='/docs' target='_blank'>
+                {t('docs')}
+              </Link>
             </li>
             <li className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
               <span className='hidden h-full rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber md:inline-block'>

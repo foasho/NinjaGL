@@ -2,10 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 
 import { IUIManagement } from '@ninjagl/core';
 import { useTranslation } from 'react-i18next';
-import { AiFillEye } from 'react-icons/ai';
-import { BsBox } from 'react-icons/bs';
+import { BsFiletypeCss } from 'react-icons/bs';
 import Swal from 'sweetalert2';
+import { useSnapshot } from 'valtio';
 
+import { globalUIStore } from '../Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 /**
@@ -13,13 +14,13 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
  * @returns
  */
 export const UINavigation = () => {
-  const [uis, setUIs] = useState<IUIManagement[]>([]);
+  const { ums } = useNinjaEditor();
   const { t } = useTranslation();
   return (
     <>
-      <div>
+      <div className='rounded-sm border-1 border-white p-1'>
         <div>
-          {uis.map((ui, idx) => {
+          {ums.map((ui, idx) => {
             return <UIItem ui={ui} index={idx} isSelect={false} key={idx} />;
           })}
         </div>
@@ -35,24 +36,28 @@ interface IUIItem {
 }
 const UIItem = (prop: IUIItem) => {
   const ref = useRef<HTMLDivElement>(null);
-  const editor = useNinjaEditor();
+  const uistore = useSnapshot(globalUIStore);
   const { t } = useTranslation();
-  // let lineStyle = styles.lightLine;
+  let lineBgStyle = 'bg-[#797272]';
   if (prop.index % 2 !== 0) {
-    // lineStyle = styles.darkLine;
+    lineBgStyle = 'bg-[#4b4848]';
   }
   const [name, setName] = useState<string>(t('nonNameUI') as string);
-  let typeIcon = <BsBox />; // デフォルトObject型
+  let typeIcon = <BsFiletypeCss />;
 
-  let visibleIcon = <AiFillEye />;
-  // if (prop.ui.visibleType == "none") {
-  //   visibleIcon = (<AiFillEyeInvisible />);
-  // }
   useEffect(() => {
     if (prop.ui.name) {
       setName(prop.ui.name);
     }
   }, []);
+
+  const onClickItem = () => {
+    if (uistore.currentId === prop.ui.id) {
+      globalUIStore.currentId = null;
+      return;
+    }
+    globalUIStore.currentId = prop.ui.id;
+  };
 
   const changeName = async () => {
     // @ts-ignore
@@ -79,17 +84,16 @@ const UIItem = (prop: IUIItem) => {
     });
   };
 
-  // let className = `${styles.treeNode} ${lineStyle}`;
-  if (prop.isSelect) {
-    // className += ` ${styles.select}`;
+  let selectStyle = '';
+  if (prop.ui.id === uistore.currentId) {
+    selectStyle = 'border-color-cyber border-1';
   }
 
   return (
     <>
-      <div ref={ref}>
+      <div ref={ref} className={`text-xs ${lineBgStyle} ` + selectStyle} onClick={onClickItem}>
         <div>{typeIcon}</div>
         <div onDoubleClick={changeName}>{name}</div>
-        <div>{visibleIcon}</div>
       </div>
     </>
   );
