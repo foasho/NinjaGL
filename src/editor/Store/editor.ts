@@ -7,6 +7,7 @@ interface IEditorStore {
   autoSave: boolean;
   viewSelect: ViewSelect;
   selectSubNav: SelectSubNav;
+  uiMode: boolean;
   appBar: boolean;
   sideBar: boolean;
   isMd: boolean;
@@ -16,6 +17,7 @@ export const globalEditorStore = proxy<IEditorStore>({
   autoSave: false,
   viewSelect: "mainview",
   selectSubNav: "ui",
+  uiMode: false,
   appBar: true,
   sideBar: true,
   isMd: true,

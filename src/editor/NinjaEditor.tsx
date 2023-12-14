@@ -30,6 +30,7 @@ import { ShaderNavigation } from './Hierarchy/ShaderNavigation';
 import { TextureNavigation } from './Hierarchy/TextureNavigation';
 import { UINavigation } from './Hierarchy/UINavigation';
 import { MainViewInspector } from './Inspector/MainViewInspector';
+import { UIInspector } from './Inspector/UIInstpector';
 import { globalEditorStore } from './Store/editor';
 import { globalStore } from './Store/Store';
 import { DebugPlay } from './ViewPort/DebugPlay';
@@ -260,7 +261,7 @@ export const NinjaEditor = () => {
           <div className={`relative grid h-[calc(100vh-45px)] w-full grid-cols-6 gap-0`}>
             {/** ヒエラルキービュー */}
             <div
-              className={clsx(`absolute left-3 top-[12px] z-20 w-[190px] rounded-lg pt-[2px]`, sideBar && 'bg-primary')}
+              className={clsx(`absolute left-3 top-[12px] z-30 w-[190px] rounded-lg pt-[2px]`, sideBar && 'bg-primary')}
               style={{
                 display: viewSelect == 'mainview' ? 'block' : 'none',
               }}
@@ -429,7 +430,7 @@ export const NinjaEditor = () => {
             </div>
           </div>
           <div
-            className='fixed right-[10px] top-[80px] block text-left text-white'
+            className='absolute right-[10px] top-[80px] z-30 block text-left text-white'
             style={{
               display:
                 (viewSelect == 'mainview' && state.currentId) ||
@@ -441,12 +442,13 @@ export const NinjaEditor = () => {
           >
             {viewSelect == 'mainview' && (
               <div
-                className='w-[230px] overflow-y-auto rounded-lg bg-secondary/75 px-[10px]'
+                className='overflow-y-auto rounded-lg bg-secondary/75 px-[10px]'
                 style={{
+                  width: editorState.uiMode ? '350px': '230px',
                   height: 'calc(100vh - 120px)',
                 }}
               >
-                <MainViewInspector />
+                {editorState.uiMode ? <UIInspector /> : <MainViewInspector />}
               </div>
             )}
           </div>

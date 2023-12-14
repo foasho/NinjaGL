@@ -1,43 +1,50 @@
-"use client";
-import { signOut, useSession } from "next-auth/react";
-import {
-  Navbar, 
-  NavbarBrand, 
-  NavbarContent, 
-  NavbarItem, 
-  Link, 
-  Button
-} from "@nextui-org/react";
+'use client';
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from '@nextui-org/react';
+import { signOut, useSession } from 'next-auth/react';
 
 export const Header = () => {
-
   const { data: session, status } = useSession();
 
   return (
     <>
-      <Navbar className="bg-primary text-white">
+      <Navbar className='fixed top-0 w-screen bg-transparent text-white'>
         <NavbarBrand>
           {/* <AcmeLogo /> */}
-          <p className="font-bold text-inherit cursor-pointer">
-            <Link href="/" className="text-white">
+          <p className='cursor-pointer font-bold text-inherit'>
+            <Link href='/' className='text-white'>
               NinjaGL
             </Link>
           </p>
         </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          <NavbarItem>
-            <Link color="foreground" href="#">
-              {/** Any */}
+        <NavbarContent justify='end'>
+          <NavbarItem className='lg:flex'>
+            <Link
+              href='/editor'
+              className='cursor-pointer rounded-full bg-cyber px-4 py-2 text-primary hover:bg-cyber/75 hover:text-white'
+            >
+              Start
             </Link>
           </NavbarItem>
-        </NavbarContent>
-        <NavbarContent justify="end">
-          <NavbarItem className="hidden lg:flex">
-            {!session && <Link href="/login" className="text-white">Login</Link>}
-            {session && <span className="text-white" onClick={() => signOut()}>Logout</span>}
+          <NavbarItem className='lg:flex'>
+            <Link href='/docs' className='text-white'>
+              Docs
+            </Link>
+          </NavbarItem>
+
+          <NavbarItem className='lg:flex'>
+            {!session && (
+              <Link href='/login' className='text-white'>
+                Login
+              </Link>
+            )}
+            {session && (
+              <span className='text-white' onClick={() => signOut()}>
+                Logout
+              </span>
+            )}
           </NavbarItem>
         </NavbarContent>
       </Navbar>
     </>
   );
-}
+};

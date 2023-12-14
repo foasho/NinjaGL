@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect, Suspense } from 'react';
 
-import { gltfLoader } from '@ninjagl/core';
 import {
   GizmoHelper,
   GizmoViewport,
@@ -11,7 +10,6 @@ import {
 } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import clsx from 'clsx';
-import { useSession } from 'next-auth/react';
 import { Perf } from 'r3f-perf';
 import { useTranslation } from 'react-i18next';
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
@@ -19,7 +17,7 @@ import { ImEarth } from 'react-icons/im';
 import { MdVideogameAsset, MdVideogameAssetOff } from 'react-icons/md';
 import { TiSpanner } from 'react-icons/ti';
 import Swal from 'sweetalert2';
-import { AnimationMixer, Euler, Mesh, Object3D, Vector3, MathUtils, PerspectiveCamera, Color } from 'three';
+import { Vector3, PerspectiveCamera, Color } from 'three';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
@@ -28,6 +26,7 @@ import { Loading2D } from '@/commons/Loading2D';
 import { EDeviceType, useInputControl } from '@/hooks/useInputControl';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
+import { globalEditorStore } from '../Store/editor';
 import { globalConfigStore, globalContentStore, globalStore } from '../Store/Store';
 
 import { Cameras } from './MainViewItems/Cameras';
@@ -45,27 +44,23 @@ import { UICanvas } from './MainViewUIs/UICanvas';
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
+  const editorState = useSnapshot(globalEditorStore);
   const [renderCount, setRenderCount] = useState(0);
-  const contentsState = useSnapshot(globalContentStore);
   const [isHovered, setIsHovered] = useState(false);
   const [isConfHovered, setIsConfHovered] = useState(false);
   // const cameraSpeedRef = useRef<HTMLInputElement>();
   const [cameraSpeed, setCameraSpeed] = useState<number>(1);
   const cameraFarRef = useRef<HTMLInputElement>(null);
   const [cameraFar, setCameraFar] = useState<number>(1000);
-  // const worldSizeRef = useRef<HTMLInputElement>(null);
   const worldSize = 64;
-  // const worldGridSizeRef = useRef<HTMLInputElement>(null);
   const worldGridSize = 8;
   const [uiGridNum, setUIGridNum] = useState<8 | 16 | 24 | 32>(8);
-  const { getAvatarOM, removeOM, addOM, onNJCChanged, offNJCChanged } = useNinjaEditor();
+  const { onNJCChanged, offNJCChanged } = useNinjaEditor();
   // 水平グリッド
   const [isGrid, setIsGrid] = useState<boolean>(false);
   const [isWorldHelper, setIsWorldHelper] = useState<boolean>(true);
   const [isGizmo, setIsGizmo] = useState<boolean>(true);
   const [showCanvas, setShowCanvas] = useState<boolean>(true);
-  const [showUI, setShowUI] = useState<boolean>(false);
-  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /**
@@ -90,12 +85,7 @@ export const MainViewer = () => {
   return (
     <div className='relative h-full bg-[#e2e2e2]'>
       <Suspense fallback={<Loading2D />}>
-        <Canvas
-          key={renderCount}
-          style={{ display: showCanvas ? 'block' : 'none' }}
-          id='mainviewcanvas'
-          shadows
-        >
+        <Canvas key={renderCount} style={{ display: showCanvas ? 'block' : 'none' }} id='mainviewcanvas' shadows>
           <Suspense fallback={null}>
             <MyLights />
             <StaticObjects />
@@ -121,7 +111,10 @@ export const MainViewer = () => {
           </Suspense>
         </Canvas>
       </Suspense>
-      <div className='absolute top-0 z-50 h-full w-full bg-white/50' style={{ display: showUI ? 'block' : 'none' }}>
+      <div
+        className='absolute top-0 z-20 h-full w-full bg-white/50'
+        style={{ display: editorState.uiMode ? 'block' : 'none' }}
+      >
         <UICanvas gridNum={uiGridNum} />
       </div>
       {/** コントロール層 */}
@@ -220,11 +213,11 @@ export const MainViewer = () => {
         </a>
         <a
           className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
-          onClick={() => setShowUI(!showUI)}
+          onClick={() => (globalEditorStore.uiMode = !editorState.uiMode)}
         >
-          {showUI ? <MdVideogameAsset className='inline' /> : <MdVideogameAssetOff className='inline' />}
+          {editorState.uiMode ? <MdVideogameAsset className='inline' /> : <MdVideogameAssetOff className='inline' />}
         </a>
-        {showUI && (
+        {editorState.uiMode && (
           <>
             <a
               onClick={() => {
@@ -238,7 +231,7 @@ export const MainViewer = () => {
                   setUIGridNum(8);
                 }
               }}
-              className='mr-1.25 ml-0.5 cursor-pointer rounded-md bg-[#222] px-2.5 py-1 text-lg text-white'
+              className='ml-0.5 mr-1.5 cursor-pointer rounded-md bg-[#222] px-2.5 py-1 text-lg text-white'
             >
               {uiGridNum}
             </a>

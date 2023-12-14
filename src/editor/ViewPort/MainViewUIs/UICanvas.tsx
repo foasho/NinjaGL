@@ -1,14 +1,19 @@
-import { globalUIStore } from '@/editor/Store/Store';
 import { useEffect, useState } from 'react';
 
 import Moveable from 'react-moveable';
 import { useSnapshot } from 'valtio';
+
+import { globalUIStore } from '@/editor/Store/Store';
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+
+import { UIViewer } from './UIView';
 
 interface IUICanvas {
   gridNum: number;
 }
 export const UICanvas = (props: IUICanvas) => {
   const uistore = useSnapshot(globalUIStore);
+  const { ums } = useNinjaEditor();
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const [elementGuidelines, setElementGuideliens] = useState<HTMLElement[]>([]);
   useEffect(() => {
@@ -41,6 +46,9 @@ export const UICanvas = (props: IUICanvas) => {
       >
         Test
       </div> */}
+      {ums.map((um, idx) => {
+        return <UIViewer um={um} key={`UIItem-${idx}`} />;
+      })}
       {/** 補助線 */}
       <UICanvasHelper gridNum={props.gridNum} />
       <Moveable

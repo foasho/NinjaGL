@@ -6,8 +6,9 @@ import { BsFiletypeCss } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import { useSnapshot } from 'valtio';
 
-import { globalUIStore } from '../Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+
+import { globalUIStore } from '../Store/Store';
 
 /**
  * UI表示コンポネント
@@ -42,14 +43,8 @@ const UIItem = (prop: IUIItem) => {
   if (prop.index % 2 !== 0) {
     lineBgStyle = 'bg-[#4b4848]';
   }
-  const [name, setName] = useState<string>(t('nonNameUI') as string);
-  let typeIcon = <BsFiletypeCss />;
-
-  useEffect(() => {
-    if (prop.ui.name) {
-      setName(prop.ui.name);
-    }
-  }, []);
+  const [name, setName] = useState<string>(prop.ui.name || t('nonNameUI') as string);
+  let typeIcon = <BsFiletypeCss className='mx-1 inline' />;
 
   const onClickItem = () => {
     if (uistore.currentId === prop.ui.id) {
@@ -79,6 +74,7 @@ const UIItem = (prop: IUIItem) => {
       },
     }).then((result) => {
       if (result.value) {
+        prop.ui.name = result.value;
         setName(result.value);
       }
     });
@@ -92,8 +88,10 @@ const UIItem = (prop: IUIItem) => {
   return (
     <>
       <div ref={ref} className={`text-xs ${lineBgStyle} ` + selectStyle} onClick={onClickItem}>
-        <div>{typeIcon}</div>
-        <div onDoubleClick={changeName}>{name}</div>
+        <div onDoubleClick={changeName}>
+          {typeIcon}
+          {name}
+        </div>
       </div>
     </>
   );

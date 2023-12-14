@@ -1,14 +1,32 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 
-import MonacoEditor from '@monaco-editor/react';
 import { IUIManagement } from '@ninjagl/core';
+import CodeEditor from '@uiw/react-textarea-code-editor';
+import { useSnapshot } from 'valtio';
 
-export const UIInspector = ({ um }: { um: IUIManagement }) => {
+import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+
+import { globalUIStore } from '../Store/Store';
+
+export const UIInspector = () => {
+  const { currentId } = useSnapshot(globalUIStore);
+  const { ums } = useNinjaEditor();
+
+  console.log('currentId', currentId);
+
+  const selectUI = currentId ? ums.find((um) => um.id === currentId) : null;
+
+  return <>{selectUI && <UIInspectorItem um={selectUI} />}</>;
+};
+
+const UIInspectorItem = ({ um }: { um: IUIManagement }) => {
+  console.log(um);
+
   return (
     <div>
       {/** Top */}
       <div className='mt-2'>
-        <input 
+        <input
           type='text'
           className='w-full'
           placeholder='Search'
@@ -17,7 +35,7 @@ export const UIInspector = ({ um }: { um: IUIManagement }) => {
       </div>
       {/** Left */}
       <div className='mt-2'>
-        <input 
+        <input
           type='text'
           className='w-full'
           placeholder='Search'
@@ -25,7 +43,7 @@ export const UIInspector = ({ um }: { um: IUIManagement }) => {
         />
       </div>
       {/** Style */}
-      <div className='my-2 h-96'>
+      <div className='relative my-2 h-96'>
         <StyleEditor />
       </div>
     </div>
@@ -33,26 +51,17 @@ export const UIInspector = ({ um }: { um: IUIManagement }) => {
 };
 
 const StyleEditor = () => {
-  const code = useRef<string>('');
-  const handleEditorChange = (value: string) => {
-    if (code.current) code.current = value;
-  };
+  const [code, setCode] = useState<string>('');
   return (
-    <MonacoEditor
-      height='100%'
-      width='100%'
+    <CodeEditor
+      value={code}
       language='css'
-      theme='vs-dark'
-      value={code.current}
-      onChange={(value: any) => handleEditorChange(value)}
-      // onMount={(editor, monaco) => handleEditorDidMount(monaco, editor)}
-      options={{
-        selectOnLineNumbers: true,
-        roundedSelection: false,
-        readOnly: false,
-        cursorStyle: 'line',
-        automaticLayout: true,
-        tabSize: 2,
+      placeholder='Please enter JS code.'
+      onChange={(evn) => setCode(evn.target.value)}
+      padding={15}
+      style={{
+        backgroundColor: '#f5f5f5',
+        fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
       }}
     />
   );
