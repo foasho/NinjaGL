@@ -16,7 +16,7 @@ export const HomeCanvas = () => {
       <Rigs />
       <Suspense fallback={null}>
         <Effects />
-        {/* <CenterRapier /> */}
+        <CenterRapier />
       </Suspense>
       <Environment preset='dawn' blur={0.8} />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]} receiveShadow castShadow>
