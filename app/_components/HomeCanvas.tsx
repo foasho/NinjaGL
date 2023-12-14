@@ -13,7 +13,6 @@ export const HomeCanvas = () => {
   return (
     <Canvas shadows>
       <Lighting />
-      <Rigs />
       <Suspense fallback={null}>
         <Effects />
         <CenterRapier />

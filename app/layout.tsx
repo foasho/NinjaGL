@@ -38,7 +38,7 @@ export default function RootLayout({ children }) {
     <html lang='ja' className='antialiased'>
       <head />
       <body className={`${mplus.variable}`}>
-        <NextTopLoader showSpinner={false} />
+        <NextTopLoader showSpinner={false} color='#43D9D9' />
         <RootProvider>
           {children}
           <Toast />
