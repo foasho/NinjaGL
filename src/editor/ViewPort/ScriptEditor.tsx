@@ -22,7 +22,7 @@ export const ScriptEditor = () => {
   const [name, setName] = useState<string>();
   const [pause, setPause] = useState<boolean>(true);
   const [isPreview, setIsPreview] = useState<boolean>(false);
-  const code = useRef<string>('');
+  const code = useRef<string>(initCode);
   const { t } = useTranslation();
 
   /**
@@ -200,7 +200,6 @@ export const ScriptEditor = () => {
       code.current = scriptState.currentSM.script;
       setName(scriptState.currentSM.name);
     } else {
-      code.current = initCode;
       setName(undefined);
     }
     // 保存をオーバーライド
