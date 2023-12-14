@@ -5,7 +5,7 @@ import { HomeCanvas } from './_components/HomeCanvas';
 
 export default function HomePage() {
   return (
-    <>
+    <div className="bg-[#504F56]">
       <Header />
       <div className='relative z-0 h-screen w-screen'>
         {/** HTML */}
@@ -29,6 +29,6 @@ export default function HomePage() {
           </Suspense>
         </div>
       </div>
-    </>
+    </div>
   );
 }

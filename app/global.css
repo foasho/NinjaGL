@@ -28,7 +28,6 @@
     font-family: var(--font-hannari), sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #504F56;
   }
 
 
@@ -59,7 +58,7 @@
 
   /* 水平方向のスクロールバー */
   ::-webkit-scrollbar-horizontal {
-    height: 20px;
+    height: 10px;
     /* 水平方向のスクロールバーの高さを調整 */
   }
 
