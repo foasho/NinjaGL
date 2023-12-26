@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useRef, MutableRefObject, useState, Suspense } from 'react';
+
 import {  } from "@ninjagl/core";
-import { useGLTF, useAnimations } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
 import { GLTF, SkeletonUtils } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
 import { Loading3D } from '@/commons/Loading3D';
 import { globalStore } from '@/editor/Store/Store';
+import { AnimationHelper } from '@/helpers/AnimationHelper';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { PivotControls } from './PivoitControl';
-import { AnimationHelper } from '@/helpers/AnimationHelper';
 
 /**
  * シーン上で構築される基本的なオブジェクト
@@ -49,10 +49,6 @@ const StaticObject = ({ om }) => {
     setPosition,
     setRotation,
     setScale,
-    getPosition,
-    getRotation,
-    getScale,
-    getMaterialData,
     setArg,
     onOMIdChanged,
     offOMIdChanged,
