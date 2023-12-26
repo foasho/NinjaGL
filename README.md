@@ -1,6 +1,6 @@
 
 <div align="center">
-<img src="https://storage.googleapis.com/zenn-user-upload/75400cb7f015-20231205.png" width="200" />
+<img src="https://github.com/foasho/NinjaGL/assets/57359515/e7d4f979-c2af-4f2b-8bf4-53a8e9696a43" width="200" />
 
 # NinjaGL Web First GameEngine
 [デモ](https://ninjagl.vercel.app) | [ドキュメント](https://ninjagl.vercel.app/docs) | [チュートリアル](https://ninjagl.vercel.app/docs/tutorial)
