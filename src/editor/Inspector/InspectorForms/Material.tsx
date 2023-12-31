@@ -8,7 +8,7 @@ import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { normalStyles } from '@/utils/styles';
 
-export const Material = () => {
+export const MaterialForm = () => {
   const state = useSnapshot(editorStore);
   const editor = useNinjaEditor();
   const { t } = useTranslation();
@@ -38,7 +38,7 @@ export const Material = () => {
     { value: 'standard', label: t('StandardMaterial') },
     { value: 'phong', label: t('PhongMaterial') },
     { value: 'toon', label: t('ToonMaterial') },
-    { value: 'shader', label: t('ShaderMaterial') },
+    // { value: 'shader', label: t('ShaderMaterial') },
     { value: 'reflection', label: t('reflection') },
   ];
 
@@ -82,6 +82,12 @@ export const Material = () => {
             <input
               type={'text'}
               value={materialColor}
+              onChange={(e) => {
+                // HEXのみを許可
+                if (e.target.value.match(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/)) {
+                  changeMaterial(materialType.value, e.target.value);
+                }
+              }}
               className='mx-auto w-3/4 rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-sm text-[#f2f2f2] shadow-lg outline-none'
             />
           </div>

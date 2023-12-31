@@ -6,6 +6,7 @@ import {
   ITextureManagement,
   IUIManagement,
   NJCFile,
+  OMPhysicsType,
   initTpSMs,
 } from '@ninjagl/core';
 import { Euler, Group, Object3D, Vector3 } from 'three';
@@ -84,6 +85,9 @@ type NinjaEditorProp = {
   setMaterialData: (id: string, mtype: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection', value: any) => void;
   getMaterialData: (id: string) => any;
   setArg: (id: string, key: string, arg: any) => void;
+  setPhysics: (id: string, physics: boolean) => void;
+  setPhyType: (id: string, phyType: OMPhysicsType) => void;
+  setMoveable: (id: string, moveable: boolean) => void;
   onOMIdChanged: (id: string, listener: () => void) => void;
   offOMIdChanged: (id: string, listener: () => void) => void;
   onOMsChanged: (listener: () => void) => void;
@@ -134,6 +138,9 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   setMaterialData: () => {},
   getMaterialData: () => {},
   setArg: () => {},
+  setPhysics: () => {},
+  setPhyType: () => {},
+  setMoveable: () => {},
   onOMIdChanged: () => {},
   offOMIdChanged: () => {},
   onOMsChanged: () => {},
@@ -181,6 +188,7 @@ export const NinjaEditorProvider = ({ children }) => {
   const contentsSelectType = useRef<ECBSelectType | null>(null);
   const contentsSelectPath = useRef<string | null>(null);
   // 操作履歴
+  const updateTimeOut = useRef<NodeJS.Timeout | null>(null);
   const history = useRef<{ undo: IHistory[]; redo: IHistory[] }>({ undo: [], redo: [] });
   // プレイヤーパラメータ
   const playerManager = useRef<IPlayerManager>({
@@ -229,8 +237,6 @@ export const NinjaEditorProvider = ({ children }) => {
     };
   };
 
-  console.log('oms length reload: ', oms.length);
-
   /**
    * 元に戻す
    */
@@ -273,7 +279,10 @@ export const NinjaEditorProvider = ({ children }) => {
         if (!target) {
           return;
         }
-        target.args = last.om.args;
+        // console.log('prev args', target.args);
+        target.args = { ...last.om!.args };
+        // console.log('next args', target.args);
+        notifyOMIdChanged(target.id);
         // historyに追加
         addHistory('redo', {
           type: 'update',
@@ -375,12 +384,7 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.name = name;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
 
@@ -392,12 +396,7 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.visibleType = visibleType;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
   const setVisible = (id: string, visible: boolean) => {
@@ -405,12 +404,7 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.visible = visible;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
 
@@ -424,12 +418,7 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.args.position = position;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
   const getPosition = (id: string): Vector3 => {
@@ -450,12 +439,7 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.args.rotation = rotation;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
   const getRotation = (id: string): Euler => {
@@ -476,12 +460,7 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.args.scale = scale;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
   const getScale = (id: string): Vector3 => {
@@ -505,12 +484,7 @@ export const NinjaEditorProvider = ({ children }) => {
         value: value,
       };
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
     }
   };
   const getMaterialData = (id: string): any => {
@@ -530,12 +504,37 @@ export const NinjaEditorProvider = ({ children }) => {
     if (target) {
       target.args[key] = arg;
       notifyOMIdChanged(id);
-      // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
-        om: target,
-      });
+      updateOM(target);
+    }
+  };
+
+  /**
+   * physicsの設定
+   */
+  const setPhysics = (id: string, physics: boolean) => {
+    const target = oms.find((om) => om.id == id);
+    if (target) {
+      target.physics = physics;
+    }
+  };
+
+  /**
+   * phyTypeの設定
+   */
+  const setPhyType = (id: string, phyType: OMPhysicsType) => {
+    const target = oms.find((om) => om.id == id);
+    if (target) {
+      target.phyType = phyType;
+    }
+  };
+
+  /**
+   * moveable(physics)の設定
+   */
+  const setMoveable = (id: string, moveable: boolean) => {
+    const target = oms.find((om) => om.id == id);
+    if (target) {
+      target.moveable = moveable;
     }
   };
 
@@ -550,12 +549,18 @@ export const NinjaEditorProvider = ({ children }) => {
     setOMs([...oms, om]);
   };
   const updateOM = (om: IObjectManagement) => {
-    // historyに追加
-    addHistory('undo', {
-      type: 'update',
-      objectType: 'object',
-      om: om,
-    });
+    // timeOutで1秒内の連続更新はされないようにする
+    if (updateTimeOut.current) {
+      clearTimeout(updateTimeOut.current);
+    }
+    updateTimeOut.current = setTimeout(() => {
+      // historyに追加
+      addHistory('undo', {
+        type: 'update',
+        objectType: 'object',
+        om: om,
+      });
+    }, 1000);
   };
   const removeOM = (id: string) => {
     // historyに追加
@@ -746,6 +751,9 @@ export const NinjaEditorProvider = ({ children }) => {
         setMaterialData,
         getMaterialData,
         setArg,
+        setPhysics,
+        setPhyType,
+        setMoveable,
         onOMIdChanged,
         offOMIdChanged,
         onOMsChanged,

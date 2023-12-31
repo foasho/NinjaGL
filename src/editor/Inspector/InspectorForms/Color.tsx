@@ -39,6 +39,7 @@ export const Color = () => {
           onChange={(e) => changeColor(e)}
           onFocus={() => (editorStore.editorFocus = true)}
           onBlur={() => (editorStore.editorFocus = false)}
+          defaultValue={'#ffffff'}
         />
         <input type={'text'} value={color} />
       </div>

@@ -179,4 +179,5 @@ export const globalConfigStore = proxy<IConfigParams>({
   multi: true, // マルチプレイヤーの有無
   isApi: true, // API(サーバーサイド)の有無
   isDebug: true, // デバッグモードかどうか // デバックプレイ時の補助線等
+  projectName: 'NinjaGL', // プロジェクト名
 });

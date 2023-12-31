@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, memo } from 'react';
 
 import { GizmoHelper, GizmoViewport, Preload, Text } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import clsx from 'clsx';
 import { Perf } from 'r3f-perf';
 import { useTranslation } from 'react-i18next';
@@ -10,17 +10,20 @@ import { ImEarth } from 'react-icons/im';
 import { MdVideogameAsset, MdVideogameAssetOff } from 'react-icons/md';
 import { TiSpanner } from 'react-icons/ti';
 import Swal from 'sweetalert2';
-import { Vector3, Color } from 'three';
+import { Vector3, Color, Raycaster } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { isNumber } from '@/commons/functional';
 import { Loading2D } from '@/commons/Loading2D';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { addInitOM } from '@/utils/omControls';
 
 import { MoveableCameraControl } from '../Common/MoveableCamera';
+import { showSelectNewObjectDialog } from '../Dialogs/SelectNewObjectDialog';
 import { globalEditorStore } from '../Store/editor';
 import { globalConfigStore } from '../Store/Store';
 
+import { MemoLandScapeMaker } from './LandScapeMaker';
 import { Cameras } from './MainViewItems/Cameras';
 import { FogComponent } from './MainViewItems/Fog';
 import { MyLights } from './MainViewItems/Lights';
@@ -32,7 +35,6 @@ import { Avatar } from './MainViewItems/Player';
 import { MySky } from './MainViewItems/Sky';
 import { ThreeObjects } from './MainViewItems/Three';
 import { UICanvas } from './MainViewUIs/UICanvas';
-import { MemoLandScapeMaker } from './LandScapeMaker';
 
 export const MainViewer = () => {
   const configState = useSnapshot(globalConfigStore);
@@ -99,6 +101,7 @@ export const MainViewer = () => {
               isWorldHelper={isWorldHelper}
               worldGridSize={worldGridSize}
             />
+            <MemoContextHelper />
             <Preload all />
           </Suspense>
         </Canvas>
@@ -351,3 +354,74 @@ const SystemHelper = (props: ISysytemHelper) => {
     </>
   );
 };
+
+const ray = new Raycaster();
+ray.firstHitOnly = true;
+// Memo化
+const ContextHelper = () => {
+  const { camera, pointer, scene } = useThree();
+  const editorState = useSnapshot(globalEditorStore);
+  const { oms, addOM } = useNinjaEditor();
+  // const pointer = useRef(new Vector2());
+  const point = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const onCreateMenu = async () => {
+      // 最初に位置を決定する
+      let position: Vector3 | undefined;
+      // raycastでx,yの位置からpositionを計算
+      ray.setFromCamera(pointer, camera);
+      const intersects = ray.intersectObjects(scene.children, true);
+      if (intersects.length > 0) {
+        const pos = intersects[0].point;
+        position = new Vector3(pos.x, pos.y, pos.z);
+      }
+      const data = await showSelectNewObjectDialog({
+        x: point.current.x,
+        y: point.current.y,
+      });
+      if (data && data.type) {
+        const _om = addInitOM(oms, data.type, data.value);
+        if (_om) {
+          if (position) {
+            _om.args.position = position;
+          }
+          addOM(_om);
+        }
+      }
+    };
+    const canvas = document.getElementById('mainviewcanvas');
+    if (canvas && editorState.viewSelect === 'mainview') {
+      document.addEventListener('keydown', (e) => {
+        // SHIFT + A
+        if (e.shiftKey && e.key === 'A') {
+          // 押された時のpointerの位置を取得
+          // -1 ~ +1の範囲
+          onCreateMenu();
+        }
+      });
+      // MouseMove
+      canvas.addEventListener('mousemove', (e) => {
+        point.current.x = e.clientX;
+        point.current.y = e.clientY;
+      });
+      // TouchMove
+      canvas.addEventListener('touchmove', (e) => {
+        point.current.x = e.touches[0].clientX;
+        point.current.y = e.touches[0].clientY;
+      });
+    }
+    return () => {
+      if (canvas) {
+        document.removeEventListener('keydown', () => {});
+        canvas.removeEventListener('mousemove', () => {});
+        canvas.removeEventListener('touchmove', () => {});
+      }
+    };
+  }, [oms, editorState.viewSelect]);
+
+  return <></>;
+};
+
+// Memo化
+const MemoContextHelper = memo(ContextHelper);

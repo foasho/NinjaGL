@@ -11,14 +11,13 @@ import {
   AiOutlineDown,
   AiOutlineUp,
 } from 'react-icons/ai';
-import Swal from 'sweetalert2';
-import { MathUtils, Vector3 } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { MySwal } from '@/commons/Swal';
 import { MainViewer } from '@/editor/ViewPort/MainViewer';
 import { PlayerEditor } from '@/editor/ViewPort/PlayerEditor';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { addInitOM } from '@/utils/omControls';
 
 import { AppBar, AppBarHeight } from './Common/AppBar';
 import { WindowdAnalyzer } from './Common/WindowAnalyzer';
@@ -65,152 +64,11 @@ export const NinjaEditor = () => {
    * 新しいオブジェクトを追加する
    */
   const onClickNewObject = async () => {
-    const data = await showSelectNewObjectDialog();
-    if (data.type == 'light') {
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: 'light',
-        args: {
-          type: data.value,
-          castShadow: true,
-          receiveShadow: false,
-        },
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
-    } else if (data.type == 'sky') {
-      // skyは１つしか作成できない
-      const sky = editor.oms.find((om) => om.type == 'sky');
-      if (sky) {
-        MySwal.fire({
-          text: t('skyExistAlert'),
-          icon: 'warning',
-          showCancelButton: false,
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: 'sky',
-        args: {
-          type: data.value,
-        },
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
-    } else if (data.type == 'three') {
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: 'three',
-        args: {
-          type: data.value,
-        },
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
-    } else if (data.type == 'fog') {
-      // fogは１つしか作成できない
-      const fog = editor.oms.find((om) => om.type == 'fog');
-      if (fog) {
-        MySwal.fire({
-          text: t('fogExistAlert'),
-          icon: 'warning',
-          showCancelButton: false,
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: 'fog',
-        args: {
-          type: data.value,
-        },
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
-    } else if (data.type == 'environment') {
-      //environmentは１つしか作成できない
-      const environment = editor.oms.find((om) => om.type == 'environment');
-      if (environment) {
-        MySwal.fire({
-          text: t('environmentExistAlert'),
-          icon: 'warning',
-          showCancelButton: false,
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: 'environment',
-        args: {
-          preset: data.value,
-        },
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
-    } else if (data.type == 'lightformer') {
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*LF-(${data.value})`,
-        type: 'lightformer',
-        args: {
-          form: data.value,
-          color: '#ffffff',
-          intensity: 1,
-          position: new Vector3(0, 1, 0),
-        },
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
-    } else if (data.type == 'effect') {
-      let _args: any = { type: data.value };
-      if (data.value == 'bloom') {
-        _args = {
-          type: data.value,
-          luminanceThreshold: 0.2,
-          mipmapBlur: true,
-          luminanceSmoothing: 0,
-          intensity: 1.25,
-        };
-      } else if (data.value == 'lut') {
-        _args = {
-          type: data.value,
-          texture: 'std.cube',
-        };
-      }
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*${data.value}`,
-        type: 'effect',
-        args: _args,
-        physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
-        visible: true,
-      });
+    const data = await showSelectNewObjectDialog({});
+    if (data && data.type) {
+      const _om = addInitOM(editor.oms, data.type, data.value);
+      if (_om) editor.addOM(_om);
     }
-    // else if (data.type == "text") {}
-    // else if (data.type == "text3d") {}
   };
 
   /**
@@ -225,7 +83,7 @@ export const NinjaEditor = () => {
    * プロジェクトの変更
    */
   const changeProject = async (njcUrl: string) => {
-    Swal.fire({
+    MySwal.fire({
       title: 'Change Project?',
       showDenyButton: true,
       showCancelButton: true,

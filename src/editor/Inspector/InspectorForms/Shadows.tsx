@@ -48,7 +48,7 @@ export const Shadows = () => {
             type='checkbox'
             className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
             checked={castShadow}
-            onInput={() => onCheckCastShadow()}
+            onChange={() => onCheckCastShadow()}
           />
         </div>
       </div>
@@ -59,7 +59,7 @@ export const Shadows = () => {
             type='checkbox'
             className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
             checked={receiveShadow}
-            onInput={() => onCheckReceiveShadow()}
+            onChange={() => onCheckReceiveShadow()}
           />
         </div>
       </div>

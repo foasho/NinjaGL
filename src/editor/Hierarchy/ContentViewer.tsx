@@ -220,10 +220,10 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
         <div className='pb-2'>
           {path.split('/').map((route, idx) => {
             if (route.length == 0) {
-              return <></>;
+              return null;
             }
             if (session && b64EncodeUnicode(session.user!.email as string) == route) {
-              return <></>;
+              return null;
             }
             return (
               <span

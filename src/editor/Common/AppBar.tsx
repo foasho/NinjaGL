@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
+import { Spinner } from '@nextui-org/react';
 import { loadNJCFile, saveNJCBlob } from '@ninjagl/core';
+import { PutBlobResult } from '@vercel/blob';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'react-i18next';
 import { AiFillSave } from 'react-icons/ai';
@@ -17,7 +20,6 @@ import { showHelperDialog } from '../Dialogs/HelperDialog';
 import { globalEditorStore } from '../Store/editor';
 import { globalConfigStore } from '../Store/Store';
 import { ExportNjcFile } from '../ViewPort/DebugPlay';
-import Link from 'next/link';
 
 export const AppBarHeight = 45;
 export const AppBar = () => {
@@ -29,7 +31,8 @@ export const AppBar = () => {
   const configState = useSnapshot(globalConfigStore);
   const editorState = useSnapshot(globalEditorStore);
   const { projectName, autoSave, viewSelect, appBar } = editorState;
-  const editor = useNinjaEditor();
+  const { oms, ums, tms, sms, setNJCFile } = useNinjaEditor();
+  const [loading, setLoading] = useState(false);
 
   /**
    * プロジェクトが何もないときは、
@@ -74,8 +77,8 @@ export const AppBar = () => {
   /**
    * プロジェクト名を保存
    */
-  const changeProjectName = () => {
-    MySwal.fire({
+  const changeProjectName = async (): Promise<string | null> => {
+    return await MySwal.fire({
       title: t('changeProjectName').toString(),
       input: 'text',
       showCancelButton: true,
@@ -93,7 +96,9 @@ export const AppBar = () => {
     }).then((result) => {
       if (result.value) {
         globalEditorStore.projectName = result.value;
+        return result.value;
       }
+      return null;
     });
   };
 
@@ -102,65 +107,70 @@ export const AppBar = () => {
    * ビルド処理
    */
   const onSave = async (completeAlert: boolean = true) => {
-    const njcFile = ExportNjcFile(editor.oms, editor.ums, editor.tms, editor.sms, {
+    // Loadingでblobにまとめる
+    if (!session) return;
+    setLoading(true);
+    let name = projectName;
+    if (!name) {
+      const _name = await changeProjectName();
+      if (!_name) {
+        setLoading(false);
+        return;
+      }
+      name = _name;
+    }
+    const njcFile = ExportNjcFile(oms, ums, tms, sms, {
       physics: configState.physics,
       dpr: configState.dpr as number,
       isDebug: true,
       multi: configState.multi,
       isApi: configState.isApi,
+      projectName: name,
     });
     const blob = await saveNJCBlob(njcFile);
-    if (!projectName) {
-      MySwal.fire({
-        title: t('inputProjectName').toString(),
-        input: 'text',
-        showCancelButton: true,
-        confirmButtonText: t('change').toString(),
-        showLoaderOnConfirm: true,
-        preConfirm: async (inputStr: string) => {
-          //バリデーションを入れたりしても良い
-          if (inputStr.length == 0) {
-            return MySwal.showValidationMessage(t('leastInput'));
-          }
-          return inputStr;
-        },
-        allowOutsideClick: function () {
-          return !MySwal.isLoading();
-        },
-      }).then(async (result) => {
-        if (result.value) {
-          globalEditorStore.projectName = result.value;
-        }
-      });
-      return;
-    }
-
-    if (!session) return;
 
     // Save to Storage
     const formData = new FormData();
     formData.append('file', blob);
-    const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/savedata`;
-    const filePath = (uploadPath + `/${projectName}.njc`).replaceAll('//', '/');
+    const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/SaveData`;
+    const filePath = (uploadPath + `/${name}.njc`).replaceAll('//', '/');
     formData.append('filePath', filePath);
 
-    const response = await fetch('/api/storage/upload', {
+    // サーバーに保存
+    const response = await fetch(`/api/storage/upload?filename=${filePath}`, {
       method: 'POST',
-      body: formData,
+      body: blob,
     });
-    if (!response.ok) {
+    const resResult = (await response.json()) as PutBlobResult;
+    if (!resResult.url) {
+      setLoading(false);
       throw new Error('Error uploading file');
     }
-    const res = await response.json();
     // 成功したら、ローカルストレージの追加しておく
-    localStorage.setItem('recentproject', JSON.stringify({ name: projectName, path: filePath }));
+    localStorage.setItem('recentproject', JSON.stringify({ name: name, path: filePath }));
     if (completeAlert) {
-      MySwal.fire({
+      const download = await MySwal.fire({
         icon: 'success',
         title: t('success'),
-        text: t('saveSuccess') + `savedata/${projectName}.njc`,
+        text: t('saveSuccess') + `SaveData/${name}.njc`,
+        showCancelButton: true,
+        confirmButtonText: t('download'),
+      }).then((result) => {
+        if (result.isConfirmed) {
+          return true;
+        }
+        return false;
       });
+      // fileをDownload
+      if (download) {
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.download = `${name}.njc`;
+        a.click();
+        a.remove();
+      }
     }
+    setLoading(false);
   };
 
   /**
@@ -190,11 +200,13 @@ export const AppBar = () => {
       const target = event.target as HTMLInputElement;
       const files = target.files;
       if (files && files.length > 0) {
+        setLoading(true);
         const file = (target.files as FileList)[0];
         const njcFile = await loadNJCFile(file);
         console.log('### ロードしたnjcFileを確認 ###');
         console.log(njcFile);
-        editor.setNJCFile(njcFile);
+        setNJCFile(njcFile);
+        setLoading(false);
       }
     };
     input.click();
@@ -203,16 +215,16 @@ export const AppBar = () => {
   useEffect(() => {
     // ※AutoSave調整中
     // AutoSaveが有効なら、AutoSaveを開始
-    // let autoSaveInterval;
-    // if (autoSave && session){
-    //   autoSaveInterval = setInterval(() => {
-    //     onSave();
-    //   }, 900 * 1000);
-    // }
-    // return () => {
-    //   clearInterval(autoSaveInterval);
-    // }
-  }, [autoSave]);
+    let autoSaveInterval;
+    if (autoSave && session) {
+      autoSaveInterval = setInterval(() => {
+        onSave(false);
+      }, 900 * 1000);
+    }
+    return () => {
+      if (autoSaveInterval) clearInterval(autoSaveInterval);
+    };
+  }, [autoSave, oms, ums, tms, sms, configState]);
 
   return (
     <>
@@ -220,36 +232,38 @@ export const AppBar = () => {
       {appBar && (
         <div className={`relative flex w-full items-center justify-between bg-primary text-sm`}>
           <ul className='relative mx-auto my-0  h-full w-full list-none overflow-hidden py-0 pl-0 pr-12 text-center'>
-            <li className='float-left inline-block px-[3px] py-[10px]'>
-              <a
-                className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
+            {/** Left */}
+            <li className='float-left inline-block px-[3px] pt-[14px]'>
+              <span
+                className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 onClick={() => openFileMenu()}
               >
                 {t('file')}
-              </a>
+              </span>
             </li>
-            <li className='float-left inline-block px-[3px] py-[10px]'>
+            <li className='float-left inline-block px-[3px] pt-[14px]'>
               <a
-                className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
+                className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 onClick={() => onClickSelectLang()}
               >
                 {t('lang')}
               </a>
             </li>
-            <li className='float-left hidden px-[3px] py-[10px] md:inline-block'>
+            <li className='float-left hidden px-[3px] pt-[14px] md:inline-block'>
               <Link
-                className='h-full select-none rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber'
-                href="https://github.com/foasho/NinjaGL"
-                target="_blank"
+                className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
+                href='https://github.com/foasho/NinjaGL'
+                target='_blank'
               >
                 Github
               </Link>
             </li>
-            <li className='float-left inline-block cursor-pointer px-[3px] py-[10px] text-white'>
+            <li className='float-left inline-block cursor-pointer px-[3px] pt-[14px] text-white'>
               <Link href='/docs' target='_blank'>
                 {t('docs')}
               </Link>
             </li>
+            {/** Center */}
             <li className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
               <span className='hidden h-full rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber md:inline-block'>
                 NinjaGL
@@ -271,16 +285,20 @@ export const AppBar = () => {
                 )}
               </a>
             </li>
-            <li className='float-right inline-block px-[3px] pt-[12px]'>
-              <a
-                className='cursor-pointer rounded-lg bg-cyber p-2 text-primary hover:bg-secondary hover:text-white'
+            {/** Right */}
+            <li className='float-right inline-block px-[3px] pt-[6px]'>
+              <button
+                className='flex cursor-pointer rounded-lg bg-cyber p-2 text-primary outline-none hover:bg-secondary hover:text-white'
+                disabled={loading}
                 onClick={() => onSave()}
               >
-                <span className='align-middle'>
-                  <AiFillSave className='inline h-6 w-6 pr-1' />
-                </span>
+                {loading ? (
+                  <Spinner className='inline pr-2' size='sm' />
+                ) : (
+                  <AiFillSave className='inline h-5 w-5 pr-1' />
+                )}
                 <span className='hidden md:inline'>Save</span>
-              </a>
+              </button>
             </li>
             <li className='float-right inline-block px-[3px] py-[12px]'>
               <a

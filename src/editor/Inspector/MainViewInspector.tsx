@@ -15,6 +15,7 @@ import { Physics } from './InspectorForms/Physics';
 import { Shadows } from './InspectorForms/Shadows';
 import { Transforms } from './InspectorForms/Transforms';
 import { Visible } from './InspectorForms/Visible';
+import { MaterialForm } from './InspectorForms/Material';
 
 export const MainViewInspector = () => {
   const state = useSnapshot(editorStore);
@@ -70,6 +71,8 @@ export const MainViewInspector = () => {
             otype == 'text' ||
             otype == 'text3d' ||
             otype == 'lightformer') && <Transforms />}
+
+          {(otype == "three") && <MaterialForm />}
 
           {(otype == 'object' || otype == 'three') && <Physics />}
 

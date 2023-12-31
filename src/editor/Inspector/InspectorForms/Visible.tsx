@@ -74,7 +74,14 @@ export const Visible = () => {
             <span className='pl-2'>{distance}</span>
           </div>
           <div>
-            <input type='range' min={0} value={distance} max={150} step={1} onChange={changeDistance} />
+            <input
+              type='range'
+              min={0}
+              value={distance}
+              max={150}
+              step={1}
+              onChange={changeDistance}
+            />
           </div>
         </div>
       )}

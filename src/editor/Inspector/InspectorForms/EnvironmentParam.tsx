@@ -91,7 +91,7 @@ export const EnvironmentParam = () => {
           {t('blur')}: {blur}
         </div>
         <div>
-          <input type='range' min='0' max='1' step='0.01' value={blur} onChange={(e) => changeEnvironmentBlur(e)} />
+          <input type='range' min='0' max='1' step='0.01' value={blur} defaultValue={0.5} onChange={(e) => changeEnvironmentBlur(e)} />
         </div>
       </div>
     </>

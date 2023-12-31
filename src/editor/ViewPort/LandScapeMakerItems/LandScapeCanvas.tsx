@@ -30,7 +30,6 @@ import { useSnapshot } from 'valtio';
 import { b64EncodeUnicode } from '@/commons/functional';
 import { TerrainInspector } from '@/editor/Inspector/TerrainInspector';
 import { landScapeStore, editorStore } from '@/editor/Store/Store';
-import { TerrainDomTunnel } from '@/helpers/LandScapeTunnel';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 const TerrainMakeCanvas = ({ meshRef, object }) => {
@@ -452,7 +451,7 @@ export const TerrainMakerCanvas = () => {
     <>
       {ready && (
         <>
-          <Canvas shadows>
+          {/* <Canvas shadows>
             {landScapeStore.type == 'create' && <TerrainMakeCanvas meshRef={meshRef} object={undefined} />}
             {landScapeStore.type == 'edit' && (
               <TerrainMakeCanvas
@@ -463,9 +462,8 @@ export const TerrainMakerCanvas = () => {
             <Environment preset='dawn' background blur={0.7} resolution={512} />
           </Canvas>
           <div>
-            <TerrainDomTunnel.Out />
             <TerrainInspector onSave={onSave} />
-          </div>
+          </div> */}
         </>
       )}
     </>

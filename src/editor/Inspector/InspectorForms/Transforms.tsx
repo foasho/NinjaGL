@@ -28,10 +28,10 @@ export const Transforms = () => {
   // --------------------------------------------------
 
   const [position, setPosition] = useState<Vector3>(
-    om && om.object ? om.object!.position.clone() : new Vector3(0, 0, 0),
+    om && om.args.position ? om.args.position.clone() : new Vector3(0, 0, 0),
   );
-  const [rotation, setRotation] = useState<Euler>(om && om.object ? om?.object!.rotation : new Euler(0, 0, 0));
-  const [scale, setScale] = useState<Vector3>(om && om.object ? om?.object!.scale : new Vector3(1, 1, 1));
+  const [rotation, setRotation] = useState<Euler>(om && om.args.rotation ? om.args.rotation : new Euler(0, 0, 0));
+  const [scale, setScale] = useState<Vector3>(om && om.args.scale ? om.args.scale : new Vector3(1, 1, 1));
   const [helper, setHelper] = useState<boolean>(false);
 
   useEffect(() => {
@@ -179,6 +179,7 @@ export const Transforms = () => {
                 setPosition(newPosition);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -199,6 +200,7 @@ export const Transforms = () => {
                 setPosition(newPosition);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -219,6 +221,7 @@ export const Transforms = () => {
                 setPosition(newPosition);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -250,6 +253,7 @@ export const Transforms = () => {
                 setRotation(newRotation);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -271,6 +275,7 @@ export const Transforms = () => {
                 setRotation(newRotation);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -292,6 +297,7 @@ export const Transforms = () => {
                 setRotation(newRotation);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -324,6 +330,7 @@ export const Transforms = () => {
                 setScale(newScale);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -345,6 +352,7 @@ export const Transforms = () => {
                 setScale(newScale);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -366,6 +374,7 @@ export const Transforms = () => {
                 setScale(newScale);
               }
             }}
+            onChange={() => {}}
             onFocus={() => (editorStore.editorFocus = true)}
             onBlur={() => (editorStore.editorFocus = false)}
             className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
@@ -379,7 +388,7 @@ export const Transforms = () => {
             type='checkbox'
             className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
             checked={helper}
-            onInput={() => onCheckHelper()}
+            onChange={() => onCheckHelper()}
           />
         </div>
       </div>

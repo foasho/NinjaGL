@@ -72,6 +72,7 @@ export const Animation = () => {
             checked={animLoop}
             onInput={() => onCheckAnimationLoop()}
             className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
+            defaultChecked={false}
           />
         </div>
       </div>

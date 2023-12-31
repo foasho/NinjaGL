@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { OMType } from '@ninjagl/core';
+import clsx from 'clsx';
+import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { AiOutlineCodeSandbox } from 'react-icons/ai';
 import { BiCapsule, BiCylinder, BiRectangle } from 'react-icons/bi';
 import { ImSphere } from 'react-icons/im';
+import { MdArrowLeft } from 'react-icons/md';
 
 interface IResponse {
+  x?: number;
+  y?: number;
   response: (data: ISelectNewObjectDialog) => void;
 }
 const SelectNewObjectDialog = (prop: IResponse) => {
   const [selectType, setSelectType] = useState<string | null>(null);
   const { t } = useTranslation();
-  const handleClickOutside = (event) => {
+  const handleClickOutside = () => {
     prop.response({ type: null, value: null });
-  };
-  const selectUI = (value: string) => {
-    prop.response({ type: 'ui', value: value });
   };
   const selectLight = (value: string) => {
     prop.response({ type: 'light', value: value });
@@ -30,10 +33,6 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectFog = (value: string) => {
     prop.response({ type: 'fog', value: value });
   };
-  // カメラは１つしかつかえないようにする
-  // const selectCamera = (value: string) => {
-  //   prop.response({ type: "camera", value: value });
-  // }
   const selectLightFormer = (value: string) => {
     prop.response({ type: 'lightformer', value: value });
   };
@@ -46,28 +45,58 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectEffect = (value: string) => {
     prop.response({ type: 'effect', value: value });
   };
-  const selectXR = (value: string) => {
-    prop.response({ type: 'xr', value: value });
+  const selectText = (value: string) => {
+    prop.response({ type: 'text', value: value });
   };
-  const uploadSound = (e) => {
-    console.log('サウンドがアップロードされました');
-    console.log(e);
+  const selectText3D = (value: string) => {
+    prop.response({ type: 'text3d', value: value });
   };
 
-  const cardStyle = 'm-2.5 border-2 border-primary/25 px-3 py-2 cursor-pointer rounded-2xl';
+  const cardStyle = 'm-1 border-2 border-primary/25 hover:bg-cyber/25 px-3 py-2 cursor-pointer rounded-lg';
   const iconStyle = 'text-center';
   const nameStyle = 'text-center';
   const imgStyle = 'w-6 h-6 m-auto';
 
+  const styles: React.CSSProperties = { zIndex: 50 };
+  if (prop.x) {
+    // windowの幅よりxが大きい場合は、rightを指定する
+    if (prop.x > window.innerWidth / 2) {
+      styles.right = window.innerWidth - prop.x;
+    } else {
+      styles.left = prop.x;
+    }
+  }
+  if (prop.y) {
+    // windowの高さよりyが大きい場合は、bottomを指定する
+    if (prop.y > window.innerHeight / 2) {
+      styles.bottom = window.innerHeight - prop.y;
+    } else {
+      styles.top = prop.y;
+    }
+  }
+
   return (
     <>
       <div
-        className='fixed left-0 top-0 z-10 flex h-screen w-screen items-center justify-center bg-black/50'
+        className='fixed left-0 top-0 z-10 flex h-screen w-screen items-center justify-center bg-transparent'
         onClick={handleClickOutside}
       ></div>
-      <div className='fixed left-1/2 top-1/2 z-20 min-h-[200px] min-w-[300px] max-w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-5'>
-        <div className='p-2.5'>{t('addSelectObject')}</div>
-        <div className='grid max-h-[70vh] grid-cols-3 gap-4'>
+      <div
+        className={clsx(
+          'fixed z-20 min-h-[200px] min-w-[300px] max-w-[80vw] rounded-lg bg-white p-5',
+          !prop.x && 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
+        )}
+        style={styles}
+      >
+        <div className='p-2.5'>
+          {selectType && (
+            <span style={{ paddingRight: "12px" }} onClick={() => setSelectType(null)}>
+              <MdArrowLeft style={{ display: 'inline', fontSize: "2rem" }} />
+            </span>
+          )}
+          {t('addSelectObject')}
+        </div>
+        <div className='grid max-h-[50vh] grid-cols-1 gap-1 overflow-y-auto lg:grid-cols-3'>
           {selectType == null && (
             <>
               <div
@@ -77,7 +106,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={nameStyle}>
-                  <img className={imgStyle} src='fileicons/light.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/light.png' />
                 </div>
                 <div className='text-center'>{t('light')}</div>
               </div>
@@ -88,7 +117,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/sky.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/sky.png' />
                 </div>
                 <div className={nameStyle}>{t('sky')}</div>
               </div>
@@ -99,7 +128,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/cloud.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/cloud.png' />
                 </div>
                 <div className={nameStyle}>{t('cloud')}</div>
               </div>
@@ -110,7 +139,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/sound.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/sound.png' />
                 </div>
                 <div className={nameStyle}>{t('audio')}</div>
               </div>
@@ -121,20 +150,20 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/object.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/object.png' />
                 </div>
                 <div className={nameStyle}>{t('object3d')}</div>
               </div>
               <div
                 className={cardStyle}
                 onClick={() => {
-                  setSelectType('ui');
+                  setSelectType('text');
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/ui.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/text.png' />
                 </div>
-                <div className={nameStyle}>{t('ui')}</div>
+                <div className={nameStyle}>{t('text')}</div>
               </div>
               <div
                 className={cardStyle}
@@ -143,7 +172,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/environment.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/environment.png' />
                 </div>
                 <div className={nameStyle}>{t('environment')}</div>
               </div>
@@ -154,7 +183,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/lightformer.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/lightformer.png' />
                 </div>
                 <div className={nameStyle}>{t('lightformer')}</div>
               </div>
@@ -165,7 +194,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/effect.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/effect.png' />
                 </div>
                 <div className={nameStyle}>{t('effect')}</div>
               </div>
@@ -181,7 +210,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/directionlight.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/directionlight.png' />
                 </div>
                 <div className={nameStyle}>Directional</div>
               </div>
@@ -192,7 +221,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/spotlight.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/spotlight.png' />
                 </div>
                 <div className={nameStyle}>Spot</div>
               </div>
@@ -203,7 +232,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/pointlight.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/pointlight.png' />
                 </div>
                 <div className={nameStyle}>Point</div>
               </div>
@@ -219,7 +248,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/bluesky.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/bluesky.png' />
                 </div>
                 <div className={nameStyle}>{t('blueSky')}</div>
               </div>
@@ -286,7 +315,32 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </>
           )}
 
-          {selectType == 'ui' && <>{/** 設計中 */}</>}
+          {selectType == 'text' && (
+            <>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectText('text');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/text.png' />
+                </div>
+                <div className={nameStyle}>{t('text')}</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectText3D('text3d');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/text3d.png' />
+                </div>
+                <div className={nameStyle}>{t('text3d')}</div>
+              </div>
+            </>
+          )}
 
           {selectType == 'fog' && (
             <>
@@ -297,7 +351,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/fog.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/fog.png' />
                 </div>
                 <div className={nameStyle}>{t('fog')}</div>
               </div>
@@ -313,7 +367,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='fileicons/cloud.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/cloud.png' />
                 </div>
                 <div className={nameStyle}>{t('cloud')}</div>
               </div>
@@ -329,7 +383,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/sunset.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/sunset.png' />
                 </div>
                 <div className={nameStyle}>{t('sunset')}</div>
               </div>
@@ -340,7 +394,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/dawn.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/dawn.png' />
                 </div>
                 <div className={nameStyle}>{t('dawn')}</div>
               </div>
@@ -351,7 +405,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/night.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/night.png' />
                 </div>
                 <div className={nameStyle}>{t('night')}</div>
               </div>
@@ -362,7 +416,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/forest.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/forest.png' />
                 </div>
                 <div className={nameStyle}>{t('forest')}</div>
               </div>
@@ -378,7 +432,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/circle.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/circle.png' />
                 </div>
                 <div className={nameStyle}>{t('circle')}</div>
               </div>
@@ -389,7 +443,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/ring.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/ring.png' />
                 </div>
                 <div className={nameStyle}>{t('ring')}</div>
               </div>
@@ -400,7 +454,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src='/fileicons/rect.png' />
+                  <Image alt='' width={32} height={32} className={imgStyle} src='/fileicons/rect.png' />
                 </div>
                 <div className={nameStyle}>{t('rect')}</div>
               </div>
@@ -416,14 +470,14 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src={'fileicons/bloom.png'} />
+                  <Image alt='' width={32} height={32} className={imgStyle} src={'fileicons/bloom.png'} />
                 </div>
                 <div className={nameStyle}>{t('bloom')}</div>
               </div>
               {/* SSRはバグ中 */}
               {/* <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
               <div className={styles.icon}>
-                <img className={styles.img} src={"fileicons/ssr.png"} />
+                <Image alt="" className={styles.img} src={"fileicons/ssr.png"} />
               </div>
               <div className={styles.name}>
                 {t("ssr")}
@@ -436,7 +490,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <img className={imgStyle} src={'fileicons/lut.png'} />
+                  <Image alt='' width={32} height={32} className={imgStyle} src={'fileicons/lut.png'} />
                 </div>
                 <div className={nameStyle}>{t('lut')}</div>
               </div>
@@ -449,28 +503,21 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 };
 
 interface ISelectNewObjectDialog {
-  type:
-    | 'light'
-    | 'sky'
-    | 'sound'
-    | 'object'
-    | 'three'
-    | 'xr'
-    | 'ui'
-    | 'camera'
-    | 'fog'
-    | 'cloud'
-    | 'environment'
-    | 'lightformer'
-    | 'effect'
-    | null;
+  type: OMType | null;
   value: string | null;
 }
 /**
  * 新しいオブジェクトの選択ダイアログ表示
  * @returns
  */
-export const showSelectNewObjectDialog = async (): Promise<ISelectNewObjectDialog> => {
+type NewObjectDialogProps = {
+  x?: number;
+  y?: number;
+};
+export const showSelectNewObjectDialog = async ({
+  x = undefined,
+  y = undefined,
+}: NewObjectDialogProps): Promise<ISelectNewObjectDialog> => {
   return new Promise((resolve) => {
     const dialogContainer = document.getElementById('myDialog') as HTMLElement;
     const root = ReactDOM.createRoot(dialogContainer);
@@ -479,6 +526,6 @@ export const showSelectNewObjectDialog = async (): Promise<ISelectNewObjectDialo
       resolve(props);
     };
 
-    root.render(<SelectNewObjectDialog response={handleDialogClose} />);
+    root.render(<SelectNewObjectDialog x={x} y={y} response={handleDialogClose} />);
   });
 };

@@ -36,7 +36,7 @@
     "@next/font": "^13.5.6",
     "@nextui-org/react": "^2.1.13",
     "@ninjagl/api": "^1.0.2",
-    "@ninjagl/core": "^1.1.30",
+    "@ninjagl/core": "^1.1.32",
     "@react-three/drei": "^9.88.7",
     "@react-three/fiber": "^8.14.5",
     "@react-three/postprocessing": "^2.15.8",
