@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const Color = () => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const om = editor.getOMById(id);
@@ -37,8 +37,8 @@ export const Color = () => {
           type={'color'}
           value={color}
           onChange={(e) => changeColor(e)}
-          onFocus={() => (globalStore.editorFocus = true)}
-          onBlur={() => (globalStore.editorFocus = false)}
+          onFocus={() => (editorStore.editorFocus = true)}
+          onBlur={() => (editorStore.editorFocus = false)}
         />
         <input type={'text'} value={color} />
       </div>

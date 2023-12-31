@@ -5,24 +5,26 @@ import { proxy } from 'valtio';
 export const HomeCameraPosition = new Vector3(5, 5, -5);
 
 /**
- * オブジェクト操作状態管理
+ * Editor操作状態管理
  */
-interface IGlobalStore {
+interface IEditorStore {
+  mode: 'select' | 'landscape';
   currentId: string | null;
   editorFocus: boolean;
   pivotControl: boolean;
   hiddenList: string[];
   init: () => void;
 }
-export const globalStore = proxy<IGlobalStore>({
+export const editorStore = proxy<IEditorStore>({
+  mode: 'select',
   currentId: null,
   editorFocus: false,
   pivotControl: false,
   hiddenList: [],
   init: () => {
-    globalStore.currentId = null;
-    globalStore.editorFocus = false;
-    globalStore.pivotControl = false;
+    editorStore.currentId = null;
+    editorStore.editorFocus = false;
+    editorStore.pivotControl = false;
   },
 });
 
@@ -105,12 +107,14 @@ export const globalAddonStore = proxy<IGlobalAddonStore>({
 /**
  * 地形メーカー操作状態管理
  */
-interface IGlobalTerrainStore {
+interface ILandScapeStore {
   type: 'create' | 'edit';
   mode: 'edit' | 'view';
   brush: 'normal' | 'flat' | 'paint';
   color: string;
-  isMouseDown: boolean;
+  active: {
+    current: boolean;
+  };
   mapSize: number;
   mapResolution: number;
   power: number;
@@ -118,28 +122,28 @@ interface IGlobalTerrainStore {
   radius: number;
   init: () => void;
 }
-export const globalTerrainStore = proxy<IGlobalTerrainStore>({
+export const landScapeStore = proxy<ILandScapeStore>({
   mode: 'view',
   type: 'create',
   brush: 'normal',
   color: '#00ff00',
-  isMouseDown: false,
+  active: { current: false },
   mapSize: 128,
   mapResolution: 128,
   power: 0.1,
   wireFrame: false,
   radius: 10,
   init: () => {
-    globalTerrainStore.mode = 'view';
-    globalTerrainStore.type = 'create';
-    globalTerrainStore.brush = 'normal';
-    globalTerrainStore.color = '#00ff00';
-    globalTerrainStore.isMouseDown = false;
-    globalTerrainStore.mapSize = 128;
-    globalTerrainStore.mapResolution = 128;
-    globalTerrainStore.power = 0.1;
-    globalTerrainStore.wireFrame = false;
-    globalTerrainStore.radius = 10;
+    landScapeStore.mode = 'view';
+    landScapeStore.type = 'create';
+    landScapeStore.brush = 'normal';
+    landScapeStore.color = '#00ff00';
+    landScapeStore.active = { current: false };
+    landScapeStore.mapSize = 128;
+    landScapeStore.mapResolution = 128;
+    landScapeStore.power = 0.1;
+    landScapeStore.wireFrame = false;
+    landScapeStore.radius = 10;
   },
 });
 
@@ -167,12 +171,12 @@ export const globalPlayerStore = proxy<IGlobalPlayerStore>({
 });
 
 /**
- * Engine内設定
+ * Engine内Config設定
  */
 export const globalConfigStore = proxy<IConfigParams>({
-  physics: true, // 物理エンジンの種類("octree" | "bvh" | "none")
+  physics: true, // 物理エンジンの有無
   dpr: undefined, // デバイスピクセル比
-  multi: true,
-  isApi: true,
-  isDebug: true,
+  multi: true, // マルチプレイヤーの有無
+  isApi: true, // API(サーバーサイド)の有無
+  isDebug: true, // デバッグモードかどうか // デバックプレイ時の補助線等
 });

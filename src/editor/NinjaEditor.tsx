@@ -32,17 +32,15 @@ import { UINavigation } from './Hierarchy/UINavigation';
 import { MainViewInspector } from './Inspector/MainViewInspector';
 import { UIInspector } from './Inspector/UIInstpector';
 import { globalEditorStore } from './Store/editor';
-import { globalStore } from './Store/Store';
+import { editorStore } from './Store/Store';
 import { DebugPlay } from './ViewPort/DebugPlay';
 import { ScriptEditor } from './ViewPort/ScriptEditor';
 import { ShaderEditor } from './ViewPort/ShaderEditor';
-import { TerrainMakerCanvas } from './ViewPort/TerrainMaker';
-
 /**
  * NinjaEngineメインコンポネント
  */
 export const NinjaEditor = () => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const editorState = useSnapshot(globalEditorStore);
   const editor = useNinjaEditor();
   const { viewSelect, selectSubNav, appBar, sideBar } = editorState;
@@ -51,11 +49,9 @@ export const NinjaEditor = () => {
   /**
    * ビューポートの切り替え
    */
-  const changeView = (
-    viewType: 'mainview' | 'debugplay' | 'terrainmaker' | 'playereditor' | 'scripteditor' | 'shadereditor',
-  ) => {
+  const changeView = (viewType: 'mainview' | 'debugplay' | 'playereditor' | 'scripteditor' | 'shadereditor') => {
     if (editorState.viewSelect !== viewType) {
-      // globalStore.init();
+      // editorStore.init();
       globalEditorStore.viewSelect = viewType;
       if (viewType == 'scripteditor') {
         globalEditorStore.selectSubNav = 'script';
@@ -369,13 +365,6 @@ export const NinjaEditor = () => {
                     {t('mainView')}
                   </a>
                   <a
-                    onClick={() => changeView('terrainmaker')}
-                    className='cursor-pointer rounded border-r-2 border-black px-2.5 text-xs'
-                    style={viewSelect == 'terrainmaker' ? { background: '#fff', color: '#838383' } : {}}
-                  >
-                    {t('terrainMaker')}
-                  </a>
-                  <a
                     onClick={() => changeView('playereditor')}
                     className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
                     style={viewSelect == 'playereditor' ? { background: '#fff', color: '#838383' } : {}}
@@ -410,7 +399,6 @@ export const NinjaEditor = () => {
                     <DebugPlay />
                   </>
                 )}
-                {viewSelect == 'terrainmaker' && <TerrainMakerCanvas />}
                 {viewSelect == 'playereditor' && (
                   <>
                     <PlayerEditor />
@@ -432,19 +420,14 @@ export const NinjaEditor = () => {
           <div
             className='absolute right-[10px] top-[80px] z-30 block text-left text-white'
             style={{
-              display:
-                (viewSelect == 'mainview' && state.currentId) ||
-                viewSelect == 'terrainmaker' ||
-                viewSelect == 'playereditor'
-                  ? 'block'
-                  : 'none',
+              display: (viewSelect == 'mainview' && state.currentId) || viewSelect == 'playereditor' ? 'block' : 'none',
             }}
           >
             {viewSelect == 'mainview' && (
               <div
                 className='overflow-y-auto rounded-lg bg-secondary/75 px-[10px]'
                 style={{
-                  width: editorState.uiMode ? '350px': '230px',
+                  width: editorState.uiMode ? '350px' : '230px',
                   height: 'calc(100vh - 120px)',
                 }}
               >

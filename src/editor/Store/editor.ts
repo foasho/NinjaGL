@@ -1,6 +1,6 @@
 import { proxy } from 'valtio';
 
-type ViewSelect = "mainview" | "debugplay" | "terrainmaker" | "playereditor" | "scripteditor" | "shadereditor";
+type ViewSelect = "mainview" | "debugplay" | "playereditor" | "scripteditor" | "shadereditor";
 type SelectSubNav = "ui" | "shader" | "script" | "texture";
 interface IEditorStore {
   projectName: string | null;

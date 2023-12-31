@@ -1,20 +1,11 @@
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 
 import { Material } from '@gltf-transform/core';
-import { useInputControl, convertObjectToBlob } from '@ninjagl/core';
-import {
-  Environment,
-  GizmoHelper,
-  GizmoViewport,
-  OrbitControls,
-  PerspectiveCamera as DPerspectiveCamera,
-  SpotLight,
-} from '@react-three/drei';
+import { useInputControl } from '@ninjagl/core';
+import { Environment, GizmoHelper, GizmoViewport, SpotLight } from '@react-three/drei';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { useSession } from 'next-auth/react';
-import { Perf } from 'r3f-perf';
 import { useTranslation } from 'react-i18next';
-import Swal from 'sweetalert2';
 import {
   Mesh,
   MeshStandardMaterial,
@@ -37,14 +28,14 @@ import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
 import { b64EncodeUnicode } from '@/commons/functional';
+import { TerrainInspector } from '@/editor/Inspector/TerrainInspector';
+import { landScapeStore, editorStore } from '@/editor/Store/Store';
+import { TerrainDomTunnel } from '@/helpers/LandScapeTunnel';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
-import { TerrainInspector } from '../Inspector/TerrainInspector';
-import { globalTerrainStore, globalStore } from '../Store/Store';
-
-const TerrainMakeComponent = ({ meshRef, object }) => {
+const TerrainMakeCanvas = ({ meshRef, object }) => {
   const [isMounted, setIsMounted] = useState(false);
-  const terrainState = useSnapshot(globalTerrainStore);
+  const terrainState = useSnapshot(landScapeStore);
   /**
    * 初期値
    */
@@ -72,9 +63,9 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
   const keyDown = (event: KeyboardEvent) => {
     if (event.code.toString() == 'KeyE') {
       if (terrainState.mode == 'view') {
-        globalTerrainStore.mode = 'edit';
+        landScapeStore.mode = 'edit';
       } else {
-        globalTerrainStore.mode = 'view';
+        landScapeStore.mode = 'view';
       }
     }
     if (
@@ -344,13 +335,6 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
     isMouseDown.current = false;
   };
 
-  const calculateNewTarget = (camera, currentTarget, distance) => {
-    const direction = new Vector3();
-    camera.getWorldDirection(direction);
-    const newPosition = new Vector3().addVectors(camera.position, direction.multiplyScalar(distance));
-    return newPosition;
-  };
-
   useFrame((_, delta) => {
     if (meshRef.current && matRef.current && lightRef.current) {
       lightRef.current.position.set(-terrainState.mapSize / 1.6, terrainState.mapSize / 1.6, -terrainState.mapSize / 2);
@@ -368,62 +352,10 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
         matRef.current.wireframe = terrainState.wireFrame;
       }
     }
-
-    // カメラ処理
-    if (input.dash && (input.forward || input.backward || input.right || input.left) && cameraRef.current) {
-      const st = (terrainState.mapSize / 2) * delta;
-      const cameraDirection = new Vector3();
-      cameraRef.current.getWorldDirection(cameraDirection);
-      const cameraPosition = cameraRef.current.position.clone();
-
-      if (input.forward) {
-        cameraPosition.add(cameraDirection.clone().multiplyScalar(st));
-      }
-      if (input.backward) {
-        cameraPosition.sub(cameraDirection.clone().multiplyScalar(st));
-      }
-      if (input.right) {
-        const cameraRight = new Vector3();
-        cameraRight.crossVectors(cameraDirection, cameraRef.current.up).normalize();
-        cameraPosition.add(cameraRight.multiplyScalar(st));
-      }
-      if (input.left) {
-        const cameraLeft = new Vector3();
-        cameraLeft.crossVectors(cameraDirection, cameraRef.current.up).normalize();
-        cameraPosition.sub(cameraLeft.multiplyScalar(st));
-      }
-
-      cameraRef.current.position.copy(cameraPosition);
-      if (ref.current) {
-        ref.current.target.copy(cameraPosition.add(cameraDirection));
-      }
-    } else {
-      if (ref.current && cameraRef.current) {
-        cameraRef.current.position.copy(ref.current.object.position);
-        cameraRef.current.rotation.copy(ref.current.object.rotation);
-        cameraRef.current.lookAt(ref.current.target);
-
-        // 新しいターゲット位置を計算して更新します
-        const cameraSpeed = 5;
-        const distance = cameraSpeed * 10; // カメラとターゲットの一定距離を指定
-        const newTarget = calculateNewTarget(cameraRef.current, ref.current.target, distance);
-        ref.current.target.copy(newTarget);
-      }
-    }
   });
 
   return (
     <>
-      <DPerspectiveCamera makeDefault ref={cameraRef} />
-      {isMounted && (
-        <OrbitControls
-          ref={ref}
-          args={[cameraRef.current!, gl.domElement]}
-          camera={cameraRef.current!}
-          makeDefault={true}
-          enabled={terrainState.mode === 'view'}
-        />
-      )}
       <axesHelper />
       <gridHelper ref={gridRef} args={[terrainState.mapSize * 2, Number(terrainState.mapResolution / 2)]} />
       {terrainState.type == 'create' ? (
@@ -452,35 +384,19 @@ const TerrainMakeComponent = ({ meshRef, object }) => {
       <GizmoHelper alignment='top-right' margin={[75, 75]}>
         <GizmoViewport labelColor='white' axisHeadScale={1} />
       </GizmoHelper>
-      <SpotLight
-        ref={lightRef}
-        angle={MathUtils.degToRad(45)}
-        color={'#fadcb9'}
-        volumetric={false}
-        // shadowCameraFov={undefined}
-        // shadowCameraLeft={undefined}
-        // shadowCameraRight={undefined}
-        // shadowCameraTop={undefined}
-        // shadowCameraBottom={undefined}
-        // shadowCameraNear={undefined}
-        // shadowCameraFar={undefined}
-        // shadowBias={undefined}
-        // shadowMapWidth={undefined}
-        // shadowMapHeight={undefined}
-      />
+      <SpotLight ref={lightRef} angle={MathUtils.degToRad(45)} color={'#fadcb9'} volumetric={false} />
       <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[terrainState.radius]} />
         <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
       </mesh>
-      <Perf position={'bottom-right'} />
     </>
   );
 };
 
 export const TerrainMakerCanvas = () => {
-  const terrainState = useSnapshot(globalTerrainStore);
+  const terrainState = useSnapshot(landScapeStore);
   const [ready, setReady] = useState(false);
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const editor = useNinjaEditor();
   const meshRef = useRef<Mesh>();
   // const [type, setType] = useState<"create" | "edit">("create");
@@ -508,12 +424,12 @@ export const TerrainMakerCanvas = () => {
           }
           meshRef.current = undefined;
         }
-        globalTerrainStore.type = 'edit';
+        landScapeStore.type = 'edit';
       }
     } else {
       if (terrainState.type == 'edit') {
         meshRef.current = undefined;
-        globalTerrainStore.type = 'create';
+        landScapeStore.type = 'create';
       }
     }
     setReady(true);
@@ -528,55 +444,8 @@ export const TerrainMakerCanvas = () => {
    */
   const onSave = async () => {
     if (!meshRef.current) return;
-    const obj3d = new Object3D();
-    obj3d.add(meshRef.current.clone());
-    const blob = await convertObjectToBlob(obj3d);
-    // @ts-ignore
-    Swal.fire({
-      title: t('inputFileName'),
-      input: 'text',
-      showCancelButton: true,
-      confirmButtonText: '実行',
-      showLoaderOnConfirm: true,
-      preConfirm: async (inputStr: string) => {
-        //バリデーションを入れたりしても良い
-        if (inputStr.length == 0) {
-          return Swal.showValidationMessage(t('leastInput'));
-        }
-        if (session) {
-          const formData = new FormData();
-          formData.append('file', blob);
-          const keyPath = `users/${b64EncodeUnicode(session.user!.email as string)}/terrains/${inputStr}.ter`;
-          formData.append('filePath', keyPath);
-          try {
-            const response = await fetch('/api/storage/upload', {
-              method: 'POST',
-              body: formData,
-            });
-
-            if (!response.ok) {
-              throw new Error('Error uploading file');
-            }
-            // @ts-ignore
-            Swal.fire({
-              title: t('completeSave'),
-              text: t('saveSuccess') + `\npersonal/terrains/${inputStr}.ter`,
-            });
-          } catch (error) {
-            console.error('Error:', error.message);
-          }
-        } else {
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = `${inputStr}.ter`;
-          link.click();
-          link.remove();
-        }
-      },
-      allowOutsideClick: function () {
-        return !Swal.isLoading();
-      },
-    });
+    if (!session) return;
+    const saveDir = `users/${b64EncodeUnicode(session.user!.email as string)}/terrains`;
   };
 
   return (
@@ -584,9 +453,9 @@ export const TerrainMakerCanvas = () => {
       {ready && (
         <>
           <Canvas shadows>
-            {globalTerrainStore.type == 'create' && <TerrainMakeComponent meshRef={meshRef} object={undefined} />}
-            {globalTerrainStore.type == 'edit' && (
-              <TerrainMakeComponent
+            {landScapeStore.type == 'create' && <TerrainMakeCanvas meshRef={meshRef} object={undefined} />}
+            {landScapeStore.type == 'edit' && (
+              <TerrainMakeCanvas
                 meshRef={meshRef}
                 object={state.currentId ? editor.getOMById(state.currentId)!.object : undefined}
               />
@@ -594,6 +463,7 @@ export const TerrainMakerCanvas = () => {
             <Environment preset='dawn' background blur={0.7} resolution={512} />
           </Canvas>
           <div>
+            <TerrainDomTunnel.Out />
             <TerrainInspector onSave={onSave} />
           </div>
         </>

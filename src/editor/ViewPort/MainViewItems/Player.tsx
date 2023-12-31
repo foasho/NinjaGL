@@ -6,7 +6,7 @@ import { GLTF, SkeletonUtils } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
 import { Loading3D } from '@/commons/Loading3D';
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { PivotControls } from './PivoitControl';
@@ -22,7 +22,7 @@ export const Avatar = () => {
  * アバターデータ
  */
 export const Player = ({ om }) => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const { scene, animations } = useGLTF(om.args.url) as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const ref = useRef<Group>(null);
@@ -40,7 +40,7 @@ export const Player = ({ om }) => {
   } = useNinjaEditor();
   const id = om.id;
   const onDragStart = () => {
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
   const onDragEnd = () => {};
   const onDrag = (e: Matrix4) => {
@@ -51,7 +51,7 @@ export const Player = ({ om }) => {
     setPosition(id, position);
     setScale(id, scale);
     setRotation(id, rotation);
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
 
   useEffect(() => {
@@ -123,8 +123,8 @@ export const Player = ({ om }) => {
           <AnimationHelper
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
-            onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
-            onPointerMissed={(e) => e.type === 'click' && globalStore.init()}
+            onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
+            onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
             object={clone}
           />
         </group>

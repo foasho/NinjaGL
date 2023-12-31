@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { useSnapshot } from 'valtio';
 
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { normalStyles } from '@/utils/styles';
 
 export const FormType = () => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();

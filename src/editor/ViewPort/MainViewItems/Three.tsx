@@ -7,7 +7,7 @@ import { BoxHelper, Color, Euler, Matrix4, Mesh, Vector3 } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { EnableClickTrigger } from '@/commons/functional';
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { PivotControls } from './PivoitControl';
@@ -34,7 +34,7 @@ interface IThreeObject {
 const ThreeObject = (props: IThreeObject) => {
   const { om } = props;
   const { camera } = useThree();
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const ref = useRef<Mesh>(null);
   const editor = useNinjaEditor();
   const [helper, setHelper] = useState<boolean>(false);
@@ -56,7 +56,7 @@ const ThreeObject = (props: IThreeObject) => {
 
   // 操作系
   const onDragStart = () => {
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
 
   const onDrag = (e: Matrix4) => {
@@ -67,7 +67,7 @@ const ThreeObject = (props: IThreeObject) => {
     editor.setPosition(id, position);
     editor.setScale(id, scale);
     editor.setRotation(id, rotation);
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
 
   useEffect(() => {
@@ -138,12 +138,12 @@ const ThreeObject = (props: IThreeObject) => {
             onClick={(e) => {
               e.stopPropagation();
               if (EnableClickTrigger(camera.position.clone(), ref.current!)) {
-                globalStore.currentId = id;
+                editorStore.currentId = id;
               }
             }}
             castShadow={true}
             receiveShadow={true}
-            onPointerMissed={(e) => e.type === 'click' && globalStore.init()}
+            onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
           >
             {geometry}
             {material}

@@ -5,7 +5,7 @@ import { useSnapshot } from 'valtio';
 
 import { isNumber } from '@/commons/functional';
 
-import { globalTerrainStore } from '../Store/Store';
+import { landScapeStore } from '../Store/Store';
 
 /**
  * 入力イベント / 入力の型
@@ -17,26 +17,26 @@ interface HTMLElementEvent<T extends HTMLElement> extends Event {
 }
 
 export const TerrainInspector = ({ onSave }) => {
-  const terrainState = useSnapshot(globalTerrainStore);
+  const terrainState = useSnapshot(landScapeStore);
   const { t } = useTranslation();
 
   const changeWF = () => {
-    globalTerrainStore.wireFrame = !terrainState.wireFrame;
+    landScapeStore.wireFrame = !terrainState.wireFrame;
   };
 
   const changePower = (e: any) => {
     if (isNumber(e.target.value)) {
-      globalTerrainStore.power = Number(e.target.value);
+      landScapeStore.power = Number(e.target.value);
     }
   };
 
   const changeRadius = (e: any) => {
-    if (isNumber(e.target.value)) globalTerrainStore.radius = Number(e.target.value);
+    if (isNumber(e.target.value)) landScapeStore.radius = Number(e.target.value);
   };
 
   const changeMapSize = (e) => {
     if (e.target.value && Number(e.target.value) > 0 && e.target.value && Number(e.target.value) < 4096) {
-      if (isNumber(e.target.value)) globalTerrainStore.mapSize = Number(e.target.value);
+      if (isNumber(e.target.value)) landScapeStore.mapSize = Number(e.target.value);
     } else if (e.target.value && Number(e.target.value) >= 4096) {
       // @ts-ignore
       Swal.fire({
@@ -48,7 +48,7 @@ export const TerrainInspector = ({ onSave }) => {
 
   const changeMapResolution = (e) => {
     if (e.target.value && Number(e.target.value) > 0 && e.target.value && Number(e.target.value) < 4096) {
-      if (isNumber(e.target.value)) globalTerrainStore.mapResolution = Number(e.target.value);
+      if (isNumber(e.target.value)) landScapeStore.mapResolution = Number(e.target.value);
     } else if (e.target.value && Number(e.target.value) >= 4096) {
       // @ts-ignore
       Swal.fire({
@@ -59,15 +59,15 @@ export const TerrainInspector = ({ onSave }) => {
   };
 
   const changeMode = (mode: 'view' | 'edit') => {
-    globalTerrainStore.mode = mode;
+    landScapeStore.mode = mode;
   };
 
   const changeColor = (e) => {
-    globalTerrainStore.color = e.target.value;
+    landScapeStore.color = e.target.value;
   };
 
   const changeBrush = (brushType: 'normal' | 'flat' | 'paint') => {
-    globalTerrainStore.brush = brushType;
+    landScapeStore.brush = brushType;
   };
 
   return (
@@ -75,16 +75,10 @@ export const TerrainInspector = ({ onSave }) => {
       <div>
         <div>{t('mode')}</div>
         <div>
-          <span
-            className={terrainState.mode == 'view' ? "" : ""}
-            onClick={() => changeMode('view')}
-          >
+          <span className={terrainState.mode == 'view' ? '' : ''} onClick={() => changeMode('view')}>
             {t('view')}
           </span>
-          <span
-            className={terrainState.mode == 'edit' ? "" : ""}
-            onClick={() => changeMode('edit')}
-          >
+          <span className={terrainState.mode == 'edit' ? '' : ''} onClick={() => changeMode('edit')}>
             {t('edit')}
           </span>
         </div>
@@ -92,28 +86,19 @@ export const TerrainInspector = ({ onSave }) => {
       <div>
         <div>{t('brushType')}</div>
         <div>
-          <div
-            className={(terrainState.brush == 'normal' ? "" : "") + ` `}
-            onClick={() => changeBrush('normal')}
-          >
+          <div className={(terrainState.brush == 'normal' ? '' : '') + ` `} onClick={() => changeBrush('normal')}>
             <div>
               <GiMountaintop />
             </div>
             <div>{t('brushNormal')}</div>
           </div>
-          <div
-            className={(terrainState.brush == 'flat' ? "" : "") + ` `}
-            onClick={() => changeBrush('flat')}
-          >
+          <div className={(terrainState.brush == 'flat' ? '' : '') + ` `} onClick={() => changeBrush('flat')}>
             <div>
               <GiFlatPlatform />
             </div>
             <div>{t('brushFlat')}</div>
           </div>
-          <div
-            className={(terrainState.brush == 'paint' ? "" : "") + ` `}
-            onClick={() => changeBrush('paint')}
-          >
+          <div className={(terrainState.brush == 'paint' ? '' : '') + ` `} onClick={() => changeBrush('paint')}>
             <div>
               <GiPaintBrush />
             </div>
@@ -194,9 +179,7 @@ export const TerrainInspector = ({ onSave }) => {
         </div>
       </div>
       <div>
-        <a onClick={() => onSave()}>
-          {t('saveTerrain')}
-        </a>
+        <a onClick={() => onSave()}>{t('saveTerrain')}</a>
       </div>
     </div>
   );

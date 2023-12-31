@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 
 import { MySwal } from '@/commons/Swal';
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { Animation } from './InspectorForms/Animation';
@@ -17,7 +17,7 @@ import { Transforms } from './InspectorForms/Transforms';
 import { Visible } from './InspectorForms/Visible';
 
 export const MainViewInspector = () => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
 
@@ -30,7 +30,7 @@ export const MainViewInspector = () => {
    */
   const deleteObject = (id: string) => {
     const did = id;
-    globalStore.currentId = null;
+    editorStore.currentId = null;
     editor.removeOM(did);
   };
 

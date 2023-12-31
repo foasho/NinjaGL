@@ -8,12 +8,12 @@ import { MdTerrain } from 'react-icons/md';
 import Swal from 'sweetalert2';
 import { useSnapshot } from 'valtio';
 
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const HierarchyTree = () => {
   const { oms, getOMById } = useNinjaEditor();
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const id = state.currentId;
   const [selectOM, setSelectOM] = useState<IObjectManagement | null>(null);
 
@@ -52,7 +52,7 @@ interface ITreeItem {
   isSelect: boolean;
 }
 const TreeItem = (prop: ITreeItem) => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const ref = useRef<HTMLDivElement>(null);
   const { onOMIdChanged, offOMIdChanged, setName, setVisible } = useNinjaEditor();
   const [visible, setLocalVisible] = useState<boolean>(true);
@@ -116,11 +116,11 @@ const TreeItem = (prop: ITreeItem) => {
   const changeVisible = () => {
     const changeVisible = !visible;
     if (!changeVisible) {
-      state.hiddenList.includes(id) ? null : globalStore.hiddenList.push(id);
+      state.hiddenList.includes(id) ? null : editorStore.hiddenList.push(id);
     } else {
       const index = state.hiddenList.indexOf(id);
       if (index !== -1) {
-        globalStore.hiddenList.splice(index, 1);
+        editorStore.hiddenList.splice(index, 1);
       }
     }
     setVisible(id, !visible);
@@ -134,7 +134,7 @@ const TreeItem = (prop: ITreeItem) => {
     if (ref.current!.classList.contains('select')) {
       state.init();
     } else {
-      globalStore.currentId = prop.om.id;
+      editorStore.currentId = prop.om.id;
     }
   };
 

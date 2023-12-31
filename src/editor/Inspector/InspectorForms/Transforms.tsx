@@ -5,11 +5,11 @@ import { Euler, MathUtils, Vector3 } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { isNumber } from '@/commons/functional';
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const Transforms = () => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
@@ -162,7 +162,7 @@ export const Transforms = () => {
           <div>Y</div>
           <div>Z</div>
         </div>
-        <div className="flex w-full justify-between">
+        <div className='flex w-full justify-between'>
           <input
             type='text'
             ref={inputXref}
@@ -179,9 +179,9 @@ export const Transforms = () => {
                 setPosition(newPosition);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
           <input
             type='text'
@@ -199,9 +199,9 @@ export const Transforms = () => {
                 setPosition(newPosition);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
           <input
             type='text'
@@ -219,9 +219,9 @@ export const Transforms = () => {
                 setPosition(newPosition);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
         </div>
       </div>
@@ -233,7 +233,7 @@ export const Transforms = () => {
           <div>Y</div>
           <div>Z</div>
         </div>
-        <div className="flex w-full justify-between">
+        <div className='flex w-full justify-between'>
           <input
             type='text'
             ref={inputRXref}
@@ -250,9 +250,9 @@ export const Transforms = () => {
                 setRotation(newRotation);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
           <input
             // value={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): ""}
@@ -271,9 +271,9 @@ export const Transforms = () => {
                 setRotation(newRotation);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
           <input
             // value={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): ""}
@@ -292,9 +292,9 @@ export const Transforms = () => {
                 setRotation(newRotation);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
         </div>
       </div>
@@ -306,7 +306,7 @@ export const Transforms = () => {
           <div>Y</div>
           <div>Z</div>
         </div>
-        <div className="flex w-full justify-between">
+        <div className='flex w-full justify-between'>
           <input
             // value={scale?(scale.x).toFixed(1): ""}
             ref={inputSXref}
@@ -324,9 +324,9 @@ export const Transforms = () => {
                 setScale(newScale);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
           <input
             // value={scale?(scale.y).toFixed(1): ""}
@@ -345,9 +345,9 @@ export const Transforms = () => {
                 setScale(newScale);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
           <input
             // value={scale?(scale.z).toFixed(1): ""}
@@ -366,16 +366,21 @@ export const Transforms = () => {
                 setScale(newScale);
               }
             }}
-            onFocus={() => (globalStore.editorFocus = true)}
-            onBlur={() => (globalStore.editorFocus = false)}
-            className="mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none"
+            onFocus={() => (editorStore.editorFocus = true)}
+            onBlur={() => (editorStore.editorFocus = false)}
+            className='mr-0.5 w-[calc(33.33%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
           />
         </div>
       </div>
       <div>
-        <div className="inline-block px-0.5 pt-2 text-lg font-bold">{t('helper')}</div>
-        <div className="inline-block pl-3">
-          <input type='checkbox' className="scale-125 cursor-pointer align-middle accent-[#43D9D9]" checked={helper} onInput={() => onCheckHelper()} />
+        <div className='inline-block px-0.5 pt-2 text-lg font-bold'>{t('helper')}</div>
+        <div className='inline-block pl-3'>
+          <input
+            type='checkbox'
+            className='scale-125 cursor-pointer align-middle accent-[#43D9D9]'
+            checked={helper}
+            onInput={() => onCheckHelper()}
+          />
         </div>
       </div>
     </>

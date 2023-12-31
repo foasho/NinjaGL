@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, MutableRefObject, useState, Suspense } from 'react';
 
-import {  } from "@ninjagl/core";
+import {} from '@ninjagl/core';
 import { useGLTF } from '@react-three/drei';
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
 import { GLTF, SkeletonUtils } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
 import { Loading3D } from '@/commons/Loading3D';
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { AnimationHelper } from '@/helpers/AnimationHelper';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
@@ -41,21 +41,14 @@ export const StaticObjects = () => {
  * @returns
  */
 const StaticObject = ({ om }) => {
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const { scene, animations } = useGLTF(om.args.url) as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const ref = useRef<Group>(null);
-  const {
-    setPosition,
-    setRotation,
-    setScale,
-    setArg,
-    onOMIdChanged,
-    offOMIdChanged,
-  } = useNinjaEditor();
+  const { setPosition, setRotation, setScale, setArg, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
   const id = om.id;
   const onDragStart = () => {
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
   const onDragEnd = () => {};
   const onDrag = (e: Matrix4) => {
@@ -66,7 +59,7 @@ const StaticObject = ({ om }) => {
     setPosition(id, position);
     setScale(id, scale);
     setRotation(id, rotation);
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
 
   useEffect(() => {
@@ -82,7 +75,7 @@ const StaticObject = ({ om }) => {
           ref.current.scale.copy(om.args.scale);
         }
         if (om.args.castShadow !== undefined) {
-          if (clone){
+          if (clone) {
             clone.traverse((node) => {
               if (node instanceof Mesh) {
                 node.castShadow = om.args.castShadow;
@@ -91,7 +84,7 @@ const StaticObject = ({ om }) => {
           }
         }
         if (om.args.receiveShadow !== undefined) {
-          if (clone){
+          if (clone) {
             clone.traverse((node) => {
               if (node instanceof Mesh) {
                 node.receiveShadow = om.args.receiveShadow;
@@ -154,8 +147,8 @@ const StaticObject = ({ om }) => {
           <AnimationHelper
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
-            onClick={(e) => (e.stopPropagation(), (globalStore.currentId = id))}
-            onPointerMissed={(e) => e.type === 'click' && globalStore.init()}
+            onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
+            onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
             object={clone}
           />
         </group>

@@ -6,7 +6,7 @@ import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from 'three'
 import { useSnapshot } from 'valtio';
 
 import { EnableClickTrigger } from '@/commons/functional';
-import { globalStore } from '@/editor/Store/Store';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { PivotControls } from './PivoitControl';
@@ -32,7 +32,7 @@ const Text3d = ({ om }) => {
   const ref = useRef<any>();
   const { camera } = useThree();
   const font = useFont('/fonts/MPLUS.json');
-  const state = useSnapshot(globalStore);
+  const state = useSnapshot(editorStore);
   const matRef = useRef<MeshStandardMaterial>(null);
   const editor = useNinjaEditor();
   const [helper, setHelper] = useState<boolean>(false);
@@ -40,7 +40,7 @@ const Text3d = ({ om }) => {
 
   // 操作系
   const onDragStart = () => {
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
 
   const onDrag = (e: Matrix4) => {
@@ -51,7 +51,7 @@ const Text3d = ({ om }) => {
     editor.setPosition(id, position);
     editor.setScale(id, scale);
     editor.setRotation(id, rotation);
-    globalStore.pivotControl = true;
+    editorStore.pivotControl = true;
   };
 
   useEffect(() => {
@@ -103,10 +103,10 @@ const Text3d = ({ om }) => {
         onClick={(e) => {
           e.stopPropagation();
           if (EnableClickTrigger(camera.position.clone(), ref.current!)) {
-            globalStore.currentId = id;
+            editorStore.currentId = id;
           }
         }}
-        onPointerMissed={(e) => e.type === 'click' && globalStore.init()}
+        onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
       >
         {om.args.content}
         <meshStandardMaterial ref={matRef} color={om.args.color || '#43D9D9'} />
