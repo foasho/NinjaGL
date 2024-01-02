@@ -27,8 +27,8 @@ export default function HomePage() {
         <div className='absolute bottom-12 left-1/2 z-20 -translate-x-1/2'>
           <div className='flex grid-cols-3 gap-4 text-center font-bold text-cyber'>
             <div>
-              <Link href='/examples' className='cursor-pointer border-cyber py-2 hover:border-b-1'>
-                ゲームサンプル
+              <Link href='/docs/tutorial' className='cursor-pointer border-cyber py-2 hover:border-b-1'>
+                チュートリアル
               </Link>
             </div>
             <div>

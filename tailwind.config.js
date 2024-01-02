@@ -1,11 +1,11 @@
-const { nextui } = require("@nextui-org/react");
+const { nextui } = require('@nextui-org/react');
 
 module.exports = {
   mode: 'jit',
   content: [
-    './app/**/*.{js,ts,jsx,tsx}', 
+    './app/**/*.{js,ts,jsx,tsx}',
     './src/**/*.{js,ts,jsx,tsx}',
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   darkMode: 'class', // or 'media' or 'class'
   theme: {
@@ -24,29 +24,35 @@ module.exports = {
   variants: {
     extend: {},
   },
-  darkMode: "class",
+  darkMode: 'class',
   plugins: [
     nextui({
       themes: {
         light: {
           colors: {
-            primary: "#222121",
-            cyber: "#49D9D9",
-            main: "#BA68C8",
-            accent: "#FFBD4D",
+            primary: {
+              foreground: "#FFFFFF",
+              DEFAULT: "#222121",
+            },
+            cyber: '#49D9D9',
+            main: '#BA68C8',
+            accent: '#FFBD4D',
           },
         },
         dark: {
           colors: {
-            primary: "#222121",
-            cyber: "#49D9D9",
-            main: "#BA68C8",
-            accent: "#FFBD4D",
+            primary: {
+              foreground: "#FFFFFF",
+              DEFAULT: "#222121",
+            },
+            cyber: '#49D9D9',
+            main: '#BA68C8',
+            accent: '#FFBD4D',
           },
         },
       },
     }),
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       const newUtilities = {
         '.vertical-rl': {
           writingMode: 'vertical-rl',
@@ -56,9 +62,10 @@ module.exports = {
         },
         '.horizontal-tb': {
           writingMode: 'horizontal-tb',
-        }
-      }
-      addUtilities(newUtilities)
+        },
+      };
+      addUtilities(newUtilities);
     },
+    require('@tailwindcss/typography'),
   ],
-}
+};

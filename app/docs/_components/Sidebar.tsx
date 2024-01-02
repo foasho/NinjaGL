@@ -1,7 +1,13 @@
-import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link } from '@nextui-org/react';
+import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link, Dropdown, DropdownMenu, DropdownItem, Button, DropdownTrigger } from '@nextui-org/react';
 import { AiOutlineSearch } from 'react-icons/ai';
 
+import { StartedBtn } from './StartedBtn';
+import { TutorialMenu } from './TutorialMenu';
+
 export const SideBar = () => {
+
+
+
   return (
     <Navbar className='shadow'>
       <NavbarBrand>
@@ -11,17 +17,13 @@ export const SideBar = () => {
       <NavbarContent className='hidden gap-4 sm:flex' justify='center'>
         <NavbarItem>
           <Link color='foreground' href='#'>
-            Usages
+            インストール
           </Link>
         </NavbarItem>
         <NavbarItem>
           <Link href='/docs/scripts'>Scripts</Link>
         </NavbarItem>
-        <NavbarItem>
-          <Link color='foreground' href='#'>
-            Tutorial
-          </Link>
-        </NavbarItem>
+        <TutorialMenu />
       </NavbarContent>
       <NavbarContent justify='end'>
         <Input
@@ -31,11 +33,12 @@ export const SideBar = () => {
             input: 'text-small',
             inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
           }}
-          placeholder='Type to search...'
+          placeholder='検索...'
           size='sm'
           startContent={<AiOutlineSearch className='inline ' />}
           type='search'
         />
+        <StartedBtn />
       </NavbarContent>
     </Navbar>
   );

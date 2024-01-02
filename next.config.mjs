@@ -1,19 +1,31 @@
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+import nextPWA from '@ducanh2912/next-pwa';
+import nextBundleAnalyzer from '@next/bundle-analyzer';
+import nextMDX from '@next/mdx';
+import remarkGfm from 'remark-gfm';
+import rehypePrism from "@mapbox/rehype-prism";
+import urlLoader from 'url-loader';
+import fileLoader from 'file-loader';
+// import TerserPlugin from 'terser-webpack-plugin';
+
+const withBundleAnalyzer = nextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-// const withTM = require('next-transpile-modules')(['three'])
+const withMDX = nextMDX({
+  options: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [rehypePrism],
+  },
+});
 
 /**
  * A fork of 'next-pwa' that has app directory support
  * @see https://github.com/shadowwalker/next-pwa/issues/424#issuecomment-1332258575
  */
-const withPWA = require('@ducanh2912/next-pwa').default({
+const withPWA = nextPWA({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
 });
-
-const TerserPlugin = require("terser-webpack-plugin"); // 追加
 
 const nextConfig = {
   reactStrictMode: true,
@@ -21,6 +33,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // mdxを読み込めるようにする
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   images: {
     remotePatterns: [
       {
@@ -39,10 +53,10 @@ const nextConfig = {
       exclude: config.exclude,
       use: [
         {
-          loader: require.resolve('url-loader'),
+          loader: 'url-loader',
           options: {
             limit: config.inlineImageLimit,
-            fallback: require.resolve('file-loader'),
+            fallback: 'file-loader',
             publicPath: `${config.assetPrefix}/_next/static/images/`,
             outputPath: `${isServer ? '../' : ''}static/images/`,
             name: '[name]-[hash].[ext]',
@@ -50,7 +64,7 @@ const nextConfig = {
           },
         },
       ],
-    })
+    });
 
     // shader support
     config.module.rules.push({
@@ -74,40 +88,28 @@ const nextConfig = {
     //   }
     // );
 
-    // InstanceAPIのクラス名と変数名を変更しないように設定
-    if (!isServer) {
-      const terserIndex = config.optimization.minimizer.findIndex(
-        (item) => item instanceof TerserPlugin
-      );
-
-      if (terserIndex > -1) {
-        const options = config.optimization.minimizer[terserIndex].options;
-
-        // クラス名と変数名の変更を防ぐための設定を追加
-        options.terserOptions.keep_classnames = /Web3Instance|EngineInstance|AxiosInstance/;
-        options.terserOptions.keep_fnames = /Web3Instance|EngineInstance|AxiosInstance/;
-
-        config.optimization.minimizer[terserIndex] = new TerserPlugin(options);
-      }
-    }
-
-    return config
+    return config;
   },
-}
+};
 
-const KEYS_TO_OMIT = ['webpackDevMiddleware', 'configOrigin', 'target', 'analyticsId', 'webpack5', 'amp', 'assetPrefix']
+const KEYS_TO_OMIT = [
+  'webpackDevMiddleware',
+  'configOrigin',
+  'target',
+  'analyticsId',
+  'webpack5',
+  'amp',
+  'assetPrefix',
+];
 
-module.exports = (_phase, { defaultConfig }) => {
-  const plugins = [
-    [withPWA], 
-    [withBundleAnalyzer, {}], 
-    // [withTM, {}]
-  ]
+// eslint-disable-next-line import/no-anonymous-default-export
+export default (_phase, { defaultConfig }) => {
+  const plugins = [[withPWA], [withBundleAnalyzer, {}], [withMDX]];
 
   const wConfig = plugins.reduce((acc, [plugin, config]) => plugin({ ...acc, ...config }), {
     ...defaultConfig,
     ...nextConfig,
-  })
+  });
 
   const finalConfig = {
     env: {
@@ -115,13 +117,13 @@ module.exports = (_phase, { defaultConfig }) => {
       AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
       AWS_REGION: process.env.AWS_REGION,
       S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
-      STORAGE_TYPE: process.env.STORAGE_TYPE, 
-    }
-  }
+      STORAGE_TYPE: process.env.STORAGE_TYPE,
+    },
+  };
   Object.keys(wConfig).forEach((key) => {
     if (!KEYS_TO_OMIT.includes(key)) {
-      finalConfig[key] = wConfig[key]
+      finalConfig[key] = wConfig[key];
     }
   });
-  return finalConfig
-}
+  return finalConfig;
+};

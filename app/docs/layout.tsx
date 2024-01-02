@@ -33,7 +33,11 @@ export default function DocsLayout({ children }) {
     <>
       <SideBar />
       <div className='max-h-screen overflow-y-auto pb-16'>
-        <div className='container mx-auto px-4 py-3'>{children}</div>
+        <link
+          href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism-tomorrow.min.css"
+          rel="stylesheet"
+        />
+        <article className='container prose prose-xl mx-auto p-5'>{children}</article>;
       </div>
     </>
   );

@@ -1,0 +1,41 @@
+# インストール
+
+```bash
+$ npm install @ninjagl/core
+// or
+$ yarn add @ninjagl/core
+// or
+$ pnpm add @ninjagl/core
+```
+
+# 使い方
+
+## 最もシンプルな例
+
+```tsx
+import { NinjaGL } from '@ninjagl/core';
+
+function App() {
+  return (
+    <NinjaGL njcPath={"<YourNjcFile>"} />
+  );
+}
+```
+
+## R3Fを拡張した例
+
+```tsx
+import { NinjaGL } from '@ninjagl/core';
+
+function App() {
+  return (
+    <NinjaGL njcPath={"<YourNjcFile>"}>
+      {/** childrenにR3Fのコンポーネントを書く */} 
+      <mesh>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="hotpink" />
+      </mesh>
+    </NinjaGL>
+  );
+}
+```

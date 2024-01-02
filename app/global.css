@@ -33,7 +33,7 @@
 
   /* スクロールバーの幅 */
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 2.5px;
     /* スクロールバーの幅を調整 */
   }
 
@@ -58,7 +58,7 @@
 
   /* 水平方向のスクロールバー */
   ::-webkit-scrollbar-horizontal {
-    height: 10px;
+    height: 2.5px;
     /* 水平方向のスクロールバーの高さを調整 */
   }
 
