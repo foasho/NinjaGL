@@ -16,7 +16,6 @@ import { b64EncodeUnicode } from '@/commons/functional';
 import { MySwal } from '@/commons/Swal';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
-import { showHelperDialog } from '../Dialogs/HelperDialog';
 import { globalEditorStore } from '../Store/editor';
 import { globalConfigStore } from '../Store/Store';
 import { ExportNjcFile } from '../ViewPort/DebugPlay';
@@ -119,7 +118,7 @@ export const AppBar = () => {
       }
       name = _name;
     }
-    const njcFile = ExportNjcFile(oms, ums, tms, sms, {
+    const njcFile = ExportNjcFile(oms.current, ums.current, tms.current, sms.current, {
       physics: configState.physics,
       dpr: configState.dpr as number,
       isDebug: true,
@@ -367,9 +366,9 @@ export const AppBar = () => {
                   </a>
                 </li>
                 <li className='relative'>
-                  <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={() => showHelperDialog()}>
+                  <Link href='/docs/help' className='block cursor-pointer rounded-sm p-2 no-underline'>
                     {t('help')}
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

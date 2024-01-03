@@ -6,12 +6,19 @@ import { useContext, useEffect, useMemo, useState } from "react"
 
 
 export const MySky = () => {
-  const { oms } = useNinjaEditor();
-  const sky = useMemo(() => {
-    return oms.find((om) => {
-      return om.type == "sky";
-    });
-  }, [oms]);
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [sky, setSky] = useState<IObjectManagement>(null);
+  useEffect(() => {
+    const update = () => {
+      const _sky = oms.current.find((om) => om.type == 'sky');
+      setSky(_sky);
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
   return (<>
     {sky &&
       <Sky

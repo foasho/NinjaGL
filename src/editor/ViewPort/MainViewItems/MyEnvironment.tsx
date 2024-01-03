@@ -15,17 +15,22 @@ import { PivotControls } from './PivoitControl';
  */
 export const MyEnviroment = () => {
   const [degraded, degrade] = useState(false);
-  const { oms } = useNinjaEditor();
-  const environment = useMemo(() => {
-    return oms.find((om) => {
-      return om.type == 'environment';
-    });
-  }, [oms]);
-  const lightformers = useMemo(() => {
-    return oms.filter((om) => {
-      return om.type == 'lightformer';
-    });
-  }, [oms]);
+  const [environment, setEnvironment] = useState<any>();
+  const [lightformers, setLightformers] = useState<any[]>([]);
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  useEffect(() => {
+    const update = () => {
+      const _envs = oms.current.find((om) => om.type == 'environment');
+      const _lfs = oms.current.filter((om) => om.type == 'lightformer');
+      setEnvironment(_envs);
+      setLightformers(_lfs);
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
 
   let enabled = false;
   if (environment) {

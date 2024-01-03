@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { IObjectManagement } from '@ninjagl/core';
 import { Text3D, useFont, useHelper } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from 'three';
@@ -12,16 +13,23 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { PivotControls } from './PivoitControl';
 
 export const MyText3Ds = () => {
-  const { oms } = useNinjaEditor();
-  const texts = useMemo(() => {
-    return oms.filter((om) => {
-      return om.type == 'text3d';
-    });
-  }, [oms]);
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [text3ds, setText3ds] = useState<IObjectManagement[]>([]);
+  useEffect(() => {
+    const update = () => {
+      const _oms = oms.current.filter((om) => om.type == 'text3d');
+      setText3ds(_oms);
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
 
   return (
     <>
-      {texts.map((om) => {
+      {text3ds.map((om) => {
         return <Text3d om={om} key={om.id} />;
       })}
     </>

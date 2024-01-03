@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, MutableRefObject, useState, Suspense } from 'react';
 
-import {} from '@ninjagl/core';
+import { IObjectManagement } from '@ninjagl/core';
 import { useGLTF } from '@react-three/drei';
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
 import { GLTF, SkeletonUtils } from 'three-stdlib';
@@ -18,12 +18,19 @@ import { PivotControls } from './PivoitControl';
  * @returns
  */
 export const StaticObjects = () => {
-  const { oms } = useNinjaEditor();
-  const staticOMs = useMemo(() => {
-    return oms.filter((om) => {
-      return om.type == 'object';
-    });
-  }, [oms]);
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [staticOMs, setStaticOMs] = useState<IObjectManagement[]>([]);
+  useEffect(() => {
+    const update = () => {
+      const _oms = oms.current.filter((om) => om.type == 'object');
+      setStaticOMs(_oms);
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
   return (
     <>
       {staticOMs.map((om) => {

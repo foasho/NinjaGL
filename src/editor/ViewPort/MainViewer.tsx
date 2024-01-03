@@ -24,7 +24,6 @@ import { globalEditorStore } from '../Store/editor';
 import { globalConfigStore } from '../Store/Store';
 
 import { MemoLandScapeMaker } from './LandScapeMaker';
-import { Cameras } from './MainViewItems/Cameras';
 import { FogComponent } from './MainViewItems/Fog';
 import { MyLights } from './MainViewItems/Lights';
 import { MyEffects } from './MainViewItems/MyEffects';
@@ -86,7 +85,6 @@ export const MainViewer = () => {
             <Avatar />
             <MySky />
             <ThreeObjects />
-            <Cameras />
             <FogComponent />
             <MyEnviroment />
             <MyText3Ds />

@@ -9,11 +9,12 @@ import {
   OMPhysicsType,
   initTpSMs,
 } from '@ninjagl/core';
-import { Euler, Group, Object3D, Vector3 } from 'three';
+import { Euler, Group, MathUtils, Object3D, Vector3 } from 'three';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 import { globalEditorStore } from '@/editor/Store/editor';
 import { initTpOms, initTpUis } from '@/utils/initTpProjects';
+import { MySwal } from '@/commons/Swal';
 
 /**
  * コンテンツブラウザの操作モード
@@ -53,10 +54,10 @@ export interface IPlayerManager {
 }
 
 type NinjaEditorProp = {
-  oms: IObjectManagement[];
-  ums: IUIManagement[];
-  tms: ITextureManagement[];
-  sms: IScriptManagement[];
+  oms: React.MutableRefObject<IObjectManagement[]>;
+  ums: React.MutableRefObject<IUIManagement[]>;
+  tms: React.MutableRefObject<ITextureManagement[]>;
+  sms: React.MutableRefObject<IScriptManagement[]>;
   transformDecimal: number;
   mode: ECBMode;
   gltfViewerObj: Object3D | null;
@@ -90,6 +91,7 @@ type NinjaEditorProp = {
   setMoveable: (id: string, moveable: boolean) => void;
   onOMIdChanged: (id: string, listener: () => void) => void;
   offOMIdChanged: (id: string, listener: () => void) => void;
+  notifyOMIdChanged: (id: string) => void;
   onOMsChanged: (listener: () => void) => void;
   offOMsChanged: (listener: () => void) => void;
   onSMsChanged: (listener: () => void) => void;
@@ -99,6 +101,8 @@ type NinjaEditorProp = {
   offNJCChanged: (listener: () => void) => void;
   addOM: (om: IObjectManagement) => void;
   removeOM: (id: string) => void;
+  copyOM: (om: IObjectManagement) => void;
+  getCopyOM: () => IObjectManagement | null;
   addSM: (sm: IScriptManagement) => boolean;
   getOMById: (id: string | null) => IObjectManagement | undefined;
   getSMById: (id: string) => IScriptManagement | undefined;
@@ -106,10 +110,14 @@ type NinjaEditorProp = {
   getLights: () => IObjectManagement[];
 };
 const NinjaEditorContext = createContext<NinjaEditorProp>({
-  oms: [],
-  ums: [],
-  tms: [],
-  sms: [],
+  // oms: [],
+  // ums: [],
+  // tms: [],
+  // sms: [],
+  oms: { current: [] },
+  ums: { current: [] },
+  tms: { current: [] },
+  sms: { current: [] },
   transformDecimal: 2,
   mode: ECBMode.POSITION,
   gltfViewerObj: null,
@@ -143,6 +151,7 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   setMoveable: () => {},
   onOMIdChanged: () => {},
   offOMIdChanged: () => {},
+  notifyOMIdChanged: () => {},
   onOMsChanged: () => {},
   offOMsChanged: () => {},
   onSMsChanged: () => {},
@@ -152,6 +161,8 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   offNJCChanged: () => {},
   addOM: () => {},
   removeOM: () => {},
+  copyOM: () => {},
+  getCopyOM: () => null,
   addSM: () => false,
   getOMById: () => undefined,
   getSMById: () => undefined,
@@ -172,10 +183,15 @@ const HISTORY_MAX = 30; // 履歴の最大数
 export const NinjaEditorProvider = ({ children }) => {
   const [ready, setReady] = useState<boolean>(false); // 初期化完了フラグ
   // コンテンツ管理
-  const [oms, setOMs] = useState<IObjectManagement[]>([]);
-  const [ums, setUMs] = useState<IUIManagement[]>([]);
-  const [tms, setTMs] = useState<ITextureManagement[]>([]);
-  const [sms, setSMs] = useState<IScriptManagement[]>([]);
+  // const [oms, setOMs] = useState<IObjectManagement[]>([]);
+  // const [ums, setUMs] = useState<IUIManagement[]>([]);
+  // const [tms, setTMs] = useState<ITextureManagement[]>([]);
+  // const [sms, setSMs] = useState<IScriptManagement[]>([]);
+  // refに変更
+  const oms = useRef<IObjectManagement[]>([]);
+  const ums = useRef<IUIManagement[]>([]);
+  const tms = useRef<ITextureManagement[]>([]);
+  const sms = useRef<IScriptManagement[]>([]);
   const orbit = useRef<OrbitControlsImpl | null>(null);
   const transformDecimal = 2;
   // コンテンツブラウザで利用
@@ -201,16 +217,18 @@ export const NinjaEditorProvider = ({ children }) => {
     sounds: [],
     args: {},
   });
+  // Copy/Paste用
+  const copyOMRef = useRef<IObjectManagement | null>(null);
 
   /**
    * 初期化関数
    */
   const initialize = () => {
     // OM, UM, TM, SMを初期化
-    setOMs([]);
-    setUMs([]);
-    setTMs([]);
-    setSMs([]);
+    oms.current = [];
+    ums.current = [];
+    tms.current = [];
+    sms.current = [];
     if (orbit.current) {
       orbit.current.reset();
     }
@@ -251,8 +269,8 @@ export const NinjaEditorProvider = ({ children }) => {
     if (last.objectType === 'object' && last.om !== undefined) {
       if (last.type === 'add') {
         // OMにidがあれば削除
-        if (oms.find((om) => om.id === last.om!.id)) {
-          setOMs(oms.filter((om) => om.id !== last.om!.id));
+        if (oms.current.find((om) => om.id === last.om!.id)) {
+          oms.current = oms.current.filter((om) => om.id !== last.om!.id);
           // historyに追加
           addHistory('redo', {
             type: 'remove',
@@ -263,8 +281,9 @@ export const NinjaEditorProvider = ({ children }) => {
       }
       if (last.type === 'remove') {
         // すでに同じIDがなければOMを追加
-        if (!oms.find((om) => om.id === last.om!.id)) {
-          setOMs([...oms, last.om]);
+        if (!oms.current.find((om) => om.id === last.om!.id)) {
+          // setOMs([...oms, last.om]);
+          oms.current = [...oms.current, last.om];
           // historyに追加
           addHistory('redo', {
             type: 'add',
@@ -275,7 +294,7 @@ export const NinjaEditorProvider = ({ children }) => {
       }
       if (last.type === 'update') {
         // OMを更新
-        const target = oms.find((om) => om.id === last.om!.id);
+        const target = oms.current.find((om) => om.id === last.om!.id);
         if (!target) {
           return;
         }
@@ -307,8 +326,8 @@ export const NinjaEditorProvider = ({ children }) => {
     if (last.objectType === 'object' && last.om !== undefined) {
       if (last.type === 'add') {
         // すでに同じIDがなければOMを追加
-        if (!oms.find((om) => om.id === last.om!.id)) {
-          setOMs([...oms, last.om]);
+        if (!oms.current.find((om) => om.id === last.om!.id)) {
+          oms.current = [...oms.current, last.om];
           // historyに追加
           addHistory('undo', {
             type: 'add',
@@ -319,8 +338,8 @@ export const NinjaEditorProvider = ({ children }) => {
       }
       if (last.type === 'remove') {
         // OMにIDがあれば削除
-        if (oms.find((om) => om.id === last.om!.id)) {
-          setOMs(oms.filter((om) => om.id !== last.om!.id));
+        if (oms.current.find((om) => om.id === last.om!.id)) {
+          oms.current = oms.current.filter((om) => om.id !== last.om!.id);
           // historyに追加
           addHistory('undo', {
             type: 'remove',
@@ -331,7 +350,7 @@ export const NinjaEditorProvider = ({ children }) => {
       }
       if (last.type === 'update') {
         // OMを更新
-        const target = oms.find((om) => om.id === last.om!.id);
+        const target = oms.current.find((om) => om.id === last.om!.id);
         if (!target) {
           return;
         }
@@ -380,7 +399,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * 特定のObjectの名前を変更
    */
   const setName = (id: string, name: string) => {
-    const target = oms.find((om) => om.id === id);
+    const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.name = name;
       notifyOMIdChanged(id);
@@ -392,7 +411,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * 特定のObjectのVisibleTypeを変更
    */
   const setVisibleType = (id: string, visibleType: 'force' | 'auto') => {
-    const target = oms.find((om) => om.id === id);
+    const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.visibleType = visibleType;
       notifyOMIdChanged(id);
@@ -400,7 +419,7 @@ export const NinjaEditorProvider = ({ children }) => {
     }
   };
   const setVisible = (id: string, visible: boolean) => {
-    const target = oms.find((om) => om.id === id);
+    const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.visible = visible;
       notifyOMIdChanged(id);
@@ -414,7 +433,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param position
    */
   const setPosition = (id: string, position: Vector3) => {
-    const target = oms.find((om) => om.id === id);
+    const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.args.position = position;
       notifyOMIdChanged(id);
@@ -422,7 +441,7 @@ export const NinjaEditorProvider = ({ children }) => {
     }
   };
   const getPosition = (id: string): Vector3 => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (!target || !target.args.position) {
       return new Vector3(0, 0, 0);
     }
@@ -435,7 +454,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param rotation
    */
   const setRotation = (id: string, rotation: Euler) => {
-    const target = oms.find((om) => om.id === id);
+    const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.args.rotation = rotation;
       notifyOMIdChanged(id);
@@ -443,7 +462,7 @@ export const NinjaEditorProvider = ({ children }) => {
     }
   };
   const getRotation = (id: string): Euler => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (!target || !target.args.rotation) {
       return new Euler(0, 0, 0);
     }
@@ -456,7 +475,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param scale
    */
   const setScale = (id: string, scale: Vector3) => {
-    const target = oms.find((om) => om.id === id);
+    const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.args.scale = scale;
       notifyOMIdChanged(id);
@@ -464,7 +483,7 @@ export const NinjaEditorProvider = ({ children }) => {
     }
   };
   const getScale = (id: string): Vector3 => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (!target || !target.args.scale) {
       return new Vector3(1, 1, 1);
     }
@@ -477,7 +496,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param material Material
    */
   const setMaterialData = (id: string, mtype: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection', value: any) => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args.materialData = {
         type: mtype,
@@ -488,7 +507,7 @@ export const NinjaEditorProvider = ({ children }) => {
     }
   };
   const getMaterialData = (id: string): any => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (!target || !target.args.materialData) {
       return undefined;
     }
@@ -500,7 +519,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * /CastShadow/Helper/Color/
    */
   const setArg = (id: string, key: string, arg: any) => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args[key] = arg;
       notifyOMIdChanged(id);
@@ -512,7 +531,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * physicsの設定
    */
   const setPhysics = (id: string, physics: boolean) => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.physics = physics;
     }
@@ -522,7 +541,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * phyTypeの設定
    */
   const setPhyType = (id: string, phyType: OMPhysicsType) => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.phyType = phyType;
     }
@@ -532,7 +551,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * moveable(physics)の設定
    */
   const setMoveable = (id: string, moveable: boolean) => {
-    const target = oms.find((om) => om.id == id);
+    const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.moveable = moveable;
     }
@@ -546,7 +565,9 @@ export const NinjaEditorProvider = ({ children }) => {
       objectType: 'object',
       om: om,
     });
-    setOMs([...oms, om]);
+    oms.current = [...oms.current, om];
+    // 更新
+    notifyOMsChanged();
   };
   const updateOM = (om: IObjectManagement) => {
     // timeOutで1秒内の連続更新はされないようにする
@@ -567,22 +588,45 @@ export const NinjaEditorProvider = ({ children }) => {
     addHistory('undo', {
       type: 'remove',
       objectType: 'object',
-      om: oms.find((om) => om.id === id),
+      om: oms.current.find((om) => om.id === id),
     });
-    const newOms = oms.filter((om) => om.id !== id);
-    setOMs([...newOms]);
+    const newOms = oms.current.filter((om) => om.id !== id);
+    oms.current = newOms;
+  };
+  const copyOM = (om: IObjectManagement) => {
+    // typeがEnvironment/Sky/Player/Effect/LandScape以外のときのみ
+    if (
+      om.type === 'environment' ||
+      om.type === 'sky' ||
+      om.type === 'avatar' ||
+      om.type === 'effect' ||
+      om.type === 'landscape'
+    ) {
+      MySwal.fire({
+        title: 'Copy',
+        text: 'Copy is not allowed object type',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+    // Copyしたオブジェクトがわかりやすいように少し移動させる
+    const newPosition = om.args.position ? om.args.position.clone() : new Vector3(0, 0, 0);
+    newPosition.add(new Vector3(0.5, 0.5, 0.5));
+    const newOMArgs = { ...om.args, position: newPosition };
+    copyOMRef.current = { ...om, args: newOMArgs, id: MathUtils.generateUUID() };
   };
   const getOMById = (id: string): IObjectManagement | undefined => {
-    return oms.find((om) => om.id === id);
+    return oms.current.find((om) => om.id === id);
   };
   const getSMById = (id: string): IScriptManagement | undefined => {
-    return sms.find((sm) => sm.id === id);
+    return sms.current.find((sm) => sm.id === id);
   };
   const getAvatarOM = () => {
-    return oms.find((om) => om.type === 'avatar');
+    return oms.current.find((om) => om.type === 'avatar');
   };
   const getLights = () => {
-    return oms.filter((om) => om.type === 'light');
+    return oms.current.filter((om) => om.type === 'light');
   };
   const addSM = (sm: IScriptManagement): boolean => {
     // historyに追加
@@ -592,11 +636,11 @@ export const NinjaEditorProvider = ({ children }) => {
     //   um: sm,
     // });
     // 同名のSMがある場合は追加しない
-    const target = sms.find((_sm) => _sm.name === sm.name);
+    const target = sms.current.find((_sm) => _sm.name === sm.name);
     if (target) {
       return false;
     }
-    setSMs([...sms, sm]);
+    sms.current = [...sms.current, sm];
     return true;
   };
 
@@ -664,10 +708,10 @@ export const NinjaEditorProvider = ({ children }) => {
    */
   const setNJCFile = (njcFile: NJCFile) => {
     initialize();
-    setOMs(njcFile.oms);
-    setUMs(njcFile.ums);
-    setTMs(njcFile.tms);
-    setSMs(njcFile.sms);
+    oms.current = njcFile.oms;
+    ums.current = njcFile.ums;
+    tms.current = njcFile.tms;
+    sms.current = njcFile.sms;
     console.log('<< Complete NJC File >>');
     notifyNJCChanged();
     notifyOMsChanged();
@@ -701,9 +745,9 @@ export const NinjaEditorProvider = ({ children }) => {
     const initOms = initTpOms();
     // const initSms = initTpSMs();
     const initUis = initTpUis();
-    setOMs(initOms);
+    oms.current = initOms;
     // setSMs(initSms);
-    setUMs(initUis);
+    ums.current = initUis;
     setReady(true);
   }, []);
 
@@ -756,6 +800,7 @@ export const NinjaEditorProvider = ({ children }) => {
         setMoveable,
         onOMIdChanged,
         offOMIdChanged,
+        notifyOMIdChanged,
         onOMsChanged,
         offOMsChanged,
         onSMsChanged,
@@ -765,6 +810,8 @@ export const NinjaEditorProvider = ({ children }) => {
         offNJCChanged,
         addOM,
         removeOM,
+        copyOM,
+        getCopyOM: () => copyOMRef.current,
         addSM,
         getOMById,
         getSMById,

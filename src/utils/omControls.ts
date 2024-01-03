@@ -160,6 +160,19 @@ export const addInitOM = (
         visibleType: 'auto',
         visible: true,
       };
+    case 'landScape':
+      return {
+        id: MathUtils.generateUUID(),
+        name: `*${value}`,
+        type: 'landscape',
+        args: {
+          type: value,
+        },
+        physics: true,
+        phyType: null,
+        visibleType: "force",
+        visible: true,
+      };
     case 'text':
       return {
         id: MathUtils.generateUUID(),

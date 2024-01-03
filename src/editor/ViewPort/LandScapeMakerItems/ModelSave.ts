@@ -38,7 +38,7 @@ export const modelSave = async (
         // @ts-ignore
         Swal.fire({
           title: t('completeSave'),
-          text: t('saveSuccess') + `\npersonal/terrains/${inputStr}.ter`,
+          text: t('saveSuccess') + `\npersonal/LandScape/${inputStr}.glb`,
         });
       } catch (error) {
         console.error('Error:', error.message);

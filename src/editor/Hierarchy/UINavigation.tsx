@@ -17,13 +17,14 @@ import { globalUIStore } from '../Store/Store';
 export const UINavigation = () => {
   const { ums } = useNinjaEditor();
   const { t } = useTranslation();
+  useEffect(() => {}, []);
   return (
     <>
       <div className='rounded-sm border-1 border-white p-1'>
         <div>
-          {ums.map((ui, idx) => {
+          {/* {ums.map((ui, idx) => {
             return <UIItem ui={ui} index={idx} isSelect={false} key={idx} />;
-          })}
+          })} */}
         </div>
       </div>
     </>

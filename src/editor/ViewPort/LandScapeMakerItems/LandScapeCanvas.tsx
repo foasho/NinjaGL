@@ -28,11 +28,12 @@ import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useSnapshot } from 'valtio';
 
 import { b64EncodeUnicode } from '@/commons/functional';
-import { TerrainInspector } from '@/editor/Inspector/TerrainInspector';
-import { landScapeStore, editorStore } from '@/editor/Store/Store';
+import { LandScapeInspector } from '@/editor/Inspector/TerrainInspector';
+import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { landScapeStore } from '@/editor/Store/landscape';
 
-const TerrainMakeCanvas = ({ meshRef, object }) => {
+const LandScapeMakeCanvas = ({ meshRef, object }) => {
   const [isMounted, setIsMounted] = useState(false);
   const terrainState = useSnapshot(landScapeStore);
   /**

@@ -49,6 +49,25 @@ export const MainViewInspector = () => {
         });
       }
     }
+    // Ctrl + Cでコピー
+    if (e.key == 'c' && e.ctrlKey && id) {
+      const om = editor.getOMById(id);
+      if (om) {
+        editor.copyOM(om);
+      }
+    }
+    // Ctrl + Vでペースト
+    if (e.key == 'v' && e.ctrlKey && id) {
+      const pasteOM = editor.getCopyOM();
+      if (pasteOM) {
+        editor.addOM(pasteOM);
+        // セレクトする
+        setTimeout(() => {
+          editor.notifyOMIdChanged(pasteOM.id);
+          editorStore.currentId = pasteOM.id;
+        }, 100);
+      }
+    }
   };
 
   useEffect(() => {
@@ -66,7 +85,6 @@ export const MainViewInspector = () => {
             otype == 'avatar' ||
             otype == 'light' ||
             otype == 'three' ||
-            otype == 'terrain' ||
             otype == 'camera' ||
             otype == 'text' ||
             otype == 'text3d' ||

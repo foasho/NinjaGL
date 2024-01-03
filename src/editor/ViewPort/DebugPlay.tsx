@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { Suspense, useEffect, useState } from 'react';
 
 import {
@@ -34,7 +34,7 @@ export const ExportNjcFile = (
       const target = SkeletonUtils.clone(_om.object);
       target.animations = om.animations ? om.animations : [];
       _om.object = target;
-    } else if (om.type == 'object' || om.type == 'terrain') {
+    } else if (om.type == 'object' || om.type == 'landscape') {
       if (!om.object) return _om;
       // Animationがある場合のみSckeletonUtilsでクローンする
       if (om.animations && om.animations.length > 0 && _om.object) {
@@ -72,7 +72,7 @@ export const DebugPlay = () => {
   const editor = useNinjaEditor();
   const [njcFile, setNJCFile] = useState<NJCFile | null>(null);
   useEffect(() => {
-    const _njcFile = ExportNjcFile(editor.oms, editor.ums, editor.tms, editor.sms, {
+    const _njcFile = ExportNjcFile(editor.oms.current, editor.ums.current, editor.tms.current, editor.sms.current, {
       physics: configState.physics,
       dpr: undefined,
       multi: true,

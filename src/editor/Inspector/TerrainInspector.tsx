@@ -5,7 +5,7 @@ import { useSnapshot } from 'valtio';
 
 import { isNumber } from '@/commons/functional';
 
-import { landScapeStore } from '../Store/Store';
+import { landScapeStore } from '../Store/landscape';
 
 /**
  * 入力イベント / 入力の型
@@ -16,12 +16,12 @@ interface HTMLElementEvent<T extends HTMLElement> extends Event {
   button?: number;
 }
 
-export const TerrainInspector = ({ onSave }) => {
-  const terrainState = useSnapshot(landScapeStore);
+export const LandScapeInspector = ({ onSave }) => {
+  const landScapeState = useSnapshot(landScapeStore);
   const { t } = useTranslation();
 
   const changeWF = () => {
-    landScapeStore.wireFrame = !terrainState.wireFrame;
+    landScapeStore.wireFrame = !landScapeState.wireFrame;
   };
 
   const changePower = (e: any) => {
@@ -75,10 +75,10 @@ export const TerrainInspector = ({ onSave }) => {
       <div>
         <div>{t('mode')}</div>
         <div>
-          <span className={terrainState.mode == 'view' ? '' : ''} onClick={() => changeMode('view')}>
+          <span className={landScapeState.mode == 'view' ? '' : ''} onClick={() => changeMode('view')}>
             {t('view')}
           </span>
-          <span className={terrainState.mode == 'edit' ? '' : ''} onClick={() => changeMode('edit')}>
+          <span className={landScapeState.mode == 'edit' ? '' : ''} onClick={() => changeMode('edit')}>
             {t('edit')}
           </span>
         </div>
@@ -86,19 +86,19 @@ export const TerrainInspector = ({ onSave }) => {
       <div>
         <div>{t('brushType')}</div>
         <div>
-          <div className={(terrainState.brush == 'normal' ? '' : '') + ` `} onClick={() => changeBrush('normal')}>
+          <div className={(landScapeState.brush == 'normal' ? '' : '') + ` `} onClick={() => changeBrush('normal')}>
             <div>
               <GiMountaintop />
             </div>
             <div>{t('brushNormal')}</div>
           </div>
-          <div className={(terrainState.brush == 'flat' ? '' : '') + ` `} onClick={() => changeBrush('flat')}>
+          <div className={(landScapeState.brush == 'flat' ? '' : '') + ` `} onClick={() => changeBrush('flat')}>
             <div>
               <GiFlatPlatform />
             </div>
             <div>{t('brushFlat')}</div>
           </div>
-          <div className={(terrainState.brush == 'paint' ? '' : '') + ` `} onClick={() => changeBrush('paint')}>
+          <div className={(landScapeState.brush == 'paint' ? '' : '') + ` `} onClick={() => changeBrush('paint')}>
             <div>
               <GiPaintBrush />
             </div>
@@ -112,7 +112,7 @@ export const TerrainInspector = ({ onSave }) => {
           <input
             type='checkbox'
             onInput={() => changeWF()}
-            // checked={terrainState.wireFrame}
+            // checked={landScapeState.wireFrame}
           />
         </div>
       </div>
@@ -121,7 +121,7 @@ export const TerrainInspector = ({ onSave }) => {
         <div>
           <input
             type={'range'}
-            value={terrainState.power}
+            value={landScapeState.power}
             onInput={(e) => changePower(e)}
             min={0.01}
             max={0.29}
@@ -134,10 +134,10 @@ export const TerrainInspector = ({ onSave }) => {
         <div>
           <input
             type={'range'}
-            value={terrainState.radius}
+            value={landScapeState.radius}
             onInput={(e) => changeRadius(e)}
             min={0.1}
-            max={terrainState.mapSize / 4}
+            max={landScapeState.mapSize / 4}
             step={0.1}
           />
         </div>
@@ -150,13 +150,13 @@ export const TerrainInspector = ({ onSave }) => {
           <div>{t('resolution')}</div>
         </div>
         <div>
-          <input type={'color'} value={terrainState.color} onInput={(e) => changeColor(e)} />
+          <input type={'color'} value={landScapeState.color} onInput={(e) => changeColor(e)} />
           <input
             type={'text'}
             min={1}
             max={4096}
-            // value={terrainState.mapSize}
-            placeholder={terrainState.mapSize?.toString()}
+            // value={landScapeState.mapSize}
+            placeholder={landScapeState.mapSize?.toString()}
             // onChange={(e) => changeMapSize(e)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -168,8 +168,8 @@ export const TerrainInspector = ({ onSave }) => {
             type={'text'}
             min={4}
             max={4096}
-            // value={terrainState.mapResolution}
-            placeholder={terrainState.mapResolution?.toString()}
+            // value={landScapeState.mapResolution}
+            placeholder={landScapeState.mapResolution?.toString()}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 changeMapResolution(e);

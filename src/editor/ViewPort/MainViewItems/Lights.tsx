@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { IObjectManagement } from '@ninjagl/core';
 import { useHelper } from '@react-three/drei';
@@ -11,12 +11,22 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { PivotControls } from './PivoitControl';
 
 export const MyLights = () => {
-  const { oms } = useNinjaEditor();
-  const lights = useMemo(() => {
-    return oms.filter((om) => {
-      return om.type == 'light';
-    });
-  }, [oms]);
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [lights, setLights] = useState<IObjectManagement[]>([]);
+  useEffect(() => {
+    const update = () => {
+      const _oms = oms.current.filter((om) => om.type == 'light');
+      if (lights !== _oms) {
+        setLights(_oms);
+      }
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
+
   return (
     <>
       {lights.map((om) => {

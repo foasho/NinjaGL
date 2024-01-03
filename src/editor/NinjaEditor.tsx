@@ -66,7 +66,7 @@ export const NinjaEditor = () => {
   const onClickNewObject = async () => {
     const data = await showSelectNewObjectDialog({});
     if (data && data.type) {
-      const _om = addInitOM(editor.oms, data.type, data.value);
+      const _om = addInitOM(editor.oms.current, data.type, data.value);
       if (_om) editor.addOM(_om);
     }
   };

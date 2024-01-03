@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Tooltip } from '@nextui-org/react';
-import { gltfLoader, InitScriptManagement } from '@ninjagl/core';
+import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
 import { PutBlobResult } from '@vercel/blob';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
@@ -26,11 +26,9 @@ import {
   isJS,
   isMP3,
   isNJC,
-  isTerrain,
   js_icon,
   mp3_icon,
   njc_icon,
-  terrain_icon,
 } from '@/utils/files';
 
 import { AssetsContextMenu } from '../Dialogs/AssetsContextMenu';
@@ -429,13 +427,6 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         </>
       );
       contentsSelectType = 'js';
-    } else if (isTerrain(props.name)) {
-      icon = (
-        <>
-          <img src={terrain_icon} className={iconImgStyle} data-path={props.name} />
-        </>
-      );
-      contentsSelectType = 'ter';
     }
     // どれにも該当しない場合は表示しない
     else {

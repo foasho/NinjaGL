@@ -63,7 +63,7 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
         // textファイルを作成
         const textFile = new Blob([''], { type: 'text/plain' });
         // ファイル名を設定
-        const fileName = result.value + '/.keep';
+        const fileName = result.value + '/file.keep';
         let uploadPath = prefix + '/' + fileName;
         // 頭にスラッシュがついていれば外す
         if (uploadPath.startsWith('/')) {
@@ -75,7 +75,6 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
           body: textFile,
         });
         const blob = (await response.json()) as PutBlobResult;
-        console.log(blob);
         if (!blob.url) {
           throw new Error('Error uploading file');
         }

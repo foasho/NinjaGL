@@ -51,6 +51,12 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   const selectText3D = (value: string) => {
     prop.response({ type: 'text3d', value: value });
   };
+  const selectWater = (value: string) => {
+    prop.response({ type: 'water', value: value });
+  };
+  const selectLandscape = (value: string) => {
+    prop.response({ type: 'landscape', value: value });
+  }
 
   const cardStyle = 'm-1 border-2 border-primary/25 hover:bg-cyber/25 px-3 py-2 cursor-pointer rounded-lg';
   const iconStyle = 'text-center';
@@ -135,6 +141,28 @@ const SelectNewObjectDialog = (prop: IResponse) => {
               <div
                 className={cardStyle}
                 onClick={() => {
+                  setSelectType("water");
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/water.png"} />
+                </div>
+                <div className={nameStyle}>{t("landscape")}</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  setSelectType("landscape");
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/landscape.png"} />
+                </div>
+                <div className={nameStyle}>{t("landscape")}</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
                   setSelectType('sound');
                 }}
               >
@@ -201,6 +229,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </>
           )}
 
+          
           {selectType == 'light' && (
             <>
               <div
@@ -374,6 +403,106 @@ const SelectNewObjectDialog = (prop: IResponse) => {
             </>
           )}
 
+          {selectType == 'water' && (
+            <>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectWater('ocean');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ocean.png"} />
+                </div>
+                <div className={nameStyle}>{t("water")}</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectWater('waterfall');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/waterfall.png"} />
+                </div>
+                <div className={nameStyle}>{t("water")}</div>
+              </div>
+            </>
+          )}
+        
+          {selectType == 'landscape' && (
+            <>
+              {/** ls1~6の6パターン選択 */}
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectLandscape('ls1');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls1.png"} />
+                </div>
+                <div className={nameStyle}>32x32</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectLandscape('ls2');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls2.png"} />
+                </div>
+                <div className={nameStyle}>64x64</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectLandscape('ls3');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls3.png"} />
+                </div>
+                <div className={nameStyle}>128x128</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectLandscape('ls4');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls4.png"} />
+                </div>
+                <div className={nameStyle}>256x256</div>
+              </div>
+              <div
+                className={cardStyle}
+                onClick={() => {
+                  selectLandscape('ls5');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls5.png"} />
+                </div>
+                <div className={nameStyle}>512x512</div>
+              </div>
+              {/** 重いので無しにする */}
+              {/* <div
+                className={cardStyle}
+                onClick={() => {
+                  selectLandscape('ls6');
+                }}
+              >
+                <div className={iconStyle}>
+                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls6.png"} />
+                </div>
+                <div className={nameStyle}>1024x1024</div>
+              </div> */}
+            </>
+          )}
+
           {selectType == 'environment' && (
             <>
               <div
@@ -470,32 +599,37 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt='' width={32} height={32} className={imgStyle} src={'fileicons/bloom.png'} />
+                  <Image alt='' width={32} height={32} className={imgStyle} src={'/fileicons/bloom.png'} />
                 </div>
                 <div className={nameStyle}>{t('bloom')}</div>
               </div>
               {/* SSRはバグ中 */}
               {/* <div className={styles.card} onClick={() => {selectEffect("ssr")}}>
               <div className={styles.icon}>
-                <Image alt="" className={styles.img} src={"fileicons/ssr.png"} />
+                <Image alt="" className={styles.img} src={"/fileicons/ssr.png"} />
               </div>
               <div className={styles.name}>
                 {t("ssr")}
               </div>
             </div> */}
-              <div
+
+              {/* LUTの扱い方を検討中 */}
+              {/* <div
                 className={cardStyle}
                 onClick={() => {
                   selectEffect('lut');
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt='' width={32} height={32} className={imgStyle} src={'fileicons/lut.png'} />
+                  <Image alt='' width={32} height={32} className={imgStyle} src={'/fileicons/lut.png'} />
                 </div>
                 <div className={nameStyle}>{t('lut')}</div>
-              </div>
+              </div> */}
             </>
           )}
+
+          
+
         </div>
       </div>
     </>

@@ -12,12 +12,26 @@ import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 export const HierarchyTree = () => {
-  const { oms, getOMById } = useNinjaEditor();
+  const { oms, getOMById, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [trees, setTrees] = useState<IObjectManagement[]>([]);
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const [selectOM, setSelectOM] = useState<IObjectManagement | null>(null);
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const update = () => {
+      if (oms.current !== trees) {
+        setTrees(oms.current);
+      }
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -33,7 +47,7 @@ export const HierarchyTree = () => {
       <div>
         <div className='select-none pl-[10px] text-sm font-bold text-white'>{t('objects')}</div>
         <div className='m-0 h-[25vh] min-h-[100px] overflow-y-auto overflow-x-hidden rounded-sm border-1 border-[#6e6b6b] p-2'>
-          {oms.map((om, idx) => {
+          {trees.map((om, idx) => {
             let isSelect = false;
             if (selectOM && selectOM == om) {
               isSelect = true;

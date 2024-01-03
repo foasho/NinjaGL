@@ -13,12 +13,19 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { PivotControls } from './PivoitControl';
 
 export const ThreeObjects = () => {
-  const { oms } = useNinjaEditor();
-  const threeOMs = useMemo(() => {
-    return oms.filter((om) => {
-      return om.type == 'three';
-    });
-  }, [oms]);
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [threeOMs, setThreeOMs] = useState<IObjectManagement[]>([]);
+  useEffect(() => {
+    const update = () => {
+      const _oms = oms.current.filter((om) => om.type == 'three');
+      setThreeOMs(_oms);
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, []);
   return (
     <>
       {threeOMs.map((om) => {

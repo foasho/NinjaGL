@@ -46,9 +46,9 @@ export const UICanvas = (props: IUICanvas) => {
       >
         Test
       </div> */}
-      {ums.map((um, idx) => {
+      {/* {ums.map((um, idx) => {
         return <UIViewer um={um} key={`UIItem-${idx}`} />;
-      })}
+      })} */}
       {/** 補助線 */}
       <UICanvasHelper gridNum={props.gridNum} />
       <Moveable
