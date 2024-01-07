@@ -277,6 +277,7 @@ export const NinjaEditorProvider = ({ children }) => {
             objectType: 'object',
             om: last.om,
           });
+          notifyOMsChanged();
         }
       }
       if (last.type === 'remove') {
@@ -290,6 +291,7 @@ export const NinjaEditorProvider = ({ children }) => {
             objectType: 'object',
             om: last.om,
           });
+          notifyOMsChanged();
         }
       }
       if (last.type === 'update') {
@@ -334,6 +336,7 @@ export const NinjaEditorProvider = ({ children }) => {
             objectType: 'object',
             om: last.om,
           });
+          notifyOMsChanged();
         }
       }
       if (last.type === 'remove') {
@@ -346,6 +349,7 @@ export const NinjaEditorProvider = ({ children }) => {
             objectType: 'object',
             om: last.om,
           });
+          notifyOMsChanged();
         }
       }
       if (last.type === 'update') {
@@ -592,6 +596,8 @@ export const NinjaEditorProvider = ({ children }) => {
     });
     const newOms = oms.current.filter((om) => om.id !== id);
     oms.current = newOms;
+    // 更新
+    notifyOMsChanged();
   };
   const copyOM = (om: IObjectManagement) => {
     // typeがEnvironment/Sky/Player/Effect/LandScape以外のときのみ

@@ -12,11 +12,11 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 export const FogComponent = () => {
   const ref = useRef<Fog>(null);
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
-  const [fog, setFog] = useState<IObjectManagement[]>([]);
+  const [fog, setFog] = useState<IObjectManagement>();
   useEffect(() => {
     const update = () => {
       const _fog = oms.current.find((om) => om.type == 'fog');
-      if (fog !== _fog) {
+      if (_fog && fog !== _fog) {
         setFog(_fog);
       }
     };

@@ -160,7 +160,7 @@ export const addInitOM = (
         visibleType: 'auto',
         visible: true,
       };
-    case 'landScape':
+    case 'landscape':
       return {
         id: MathUtils.generateUUID(),
         name: `*${value}`,
@@ -169,7 +169,7 @@ export const addInitOM = (
           type: value,
         },
         physics: true,
-        phyType: null,
+        phyType: "box",
         visibleType: "force",
         visible: true,
       };

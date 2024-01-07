@@ -440,7 +440,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls1.png"} />
+                  <Image alt="" width={128} height={128} className={imgStyle} src={"/fileicons/ls1.png"} />
                 </div>
                 <div className={nameStyle}>32x32</div>
               </div>
@@ -451,7 +451,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls2.png"} />
+                  <Image alt="" width={128} height={128} className={imgStyle} src={"/fileicons/ls2.png"} />
                 </div>
                 <div className={nameStyle}>64x64</div>
               </div>
@@ -462,7 +462,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls3.png"} />
+                  <Image alt="" width={128} height={128} className={imgStyle} src={"/fileicons/ls3.png"} />
                 </div>
                 <div className={nameStyle}>128x128</div>
               </div>
@@ -473,7 +473,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls4.png"} />
+                  <Image alt="" width={128} height={128} className={imgStyle} src={"/fileicons/ls4.png"} />
                 </div>
                 <div className={nameStyle}>256x256</div>
               </div>
@@ -484,7 +484,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 }}
               >
                 <div className={iconStyle}>
-                  <Image alt="" width={32} height={32} className={imgStyle} src={"/fileicons/ls5.png"} />
+                  <Image alt="" width={128} height={128} className={imgStyle} src={"/fileicons/ls5.png"} />
                 </div>
                 <div className={nameStyle}>512x512</div>
               </div>

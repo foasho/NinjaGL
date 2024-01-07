@@ -1,24 +1,22 @@
-import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link, Dropdown, DropdownMenu, DropdownItem, Button, DropdownTrigger } from '@nextui-org/react';
+import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link } from '@nextui-org/react';
 import { AiOutlineSearch } from 'react-icons/ai';
 
+import { InstallLink } from './InstallLink';
 import { StartedBtn } from './StartedBtn';
 import { TutorialMenu } from './TutorialMenu';
 
 export const SideBar = () => {
-
-
-
   return (
-    <Navbar className='shadow'>
+    <Navbar className='bg-transparent shadow'>
       <NavbarBrand>
         {/* <AcmeLogo /> */}
-        <p className='font-bold text-inherit'>NinjaGL Docs</p>
+        <p className='font-bold text-inherit'>
+          <Link href='/docs'>NinjaGL Docs</Link>
+        </p>
       </NavbarBrand>
       <NavbarContent className='hidden gap-4 sm:flex' justify='center'>
         <NavbarItem>
-          <Link color='foreground' href='#'>
-            インストール
-          </Link>
+          <InstallLink />
         </NavbarItem>
         <NavbarItem>
           <Link href='/docs/scripts'>Scripts</Link>

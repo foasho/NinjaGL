@@ -6,6 +6,7 @@ import RootProvider from '@/root.container';
 import { mplus } from '@/styles/font';
 
 import { Toast } from './_components/Toast';
+import { PWAProvider } from '@/hooks/usePWA';
 
 const title = 'NinjaGL';
 const description = 'WebGL 3D Editor';
@@ -40,7 +41,9 @@ export default function RootLayout({ children }) {
       <body className={`${mplus.variable}`}>
         <NextTopLoader showSpinner={false} color='#43D9D9' />
         <RootProvider>
-          {children}
+          <PWAProvider>
+            {children}
+          </PWAProvider>
           <Toast />
         </RootProvider>
       </body>

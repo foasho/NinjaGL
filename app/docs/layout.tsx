@@ -32,12 +32,12 @@ export default function DocsLayout({ children }) {
   return (
     <>
       <SideBar />
-      <div className='max-h-screen overflow-y-auto pb-16'>
+      <div className='fixed top-0 max-h-screen w-screen overflow-y-auto bg-gradient-to-r from-cyan-500 to-cyber pb-16 pt-[80px]'>
         <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism-tomorrow.min.css"
-          rel="stylesheet"
+          href='https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism-tomorrow.min.css'
+          rel='stylesheet'
         />
-        <article className='container prose prose-xl mx-auto p-5'>{children}</article>;
+        <article className='container prose prose-xl mx-auto rounded-lg bg-white/75 px-6 py-5 shadow-xl'>{children}</article>;
       </div>
     </>
   );
