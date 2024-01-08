@@ -16,6 +16,11 @@ import { Shadows } from './InspectorForms/Shadows';
 import { Transforms } from './InspectorForms/Transforms';
 import { Visible } from './InspectorForms/Visible';
 import { MaterialForm } from './InspectorForms/Material';
+import { ViewableDistance } from './InspectorForms/ViewableDistance';
+import { UrlArg } from './InspectorForms/UrlArg';
+import { WidthHeight } from './InspectorForms/WidthHeight';
+import { SystemContent } from './InspectorForms/SystemContent';
+import { TextContent } from './InspectorForms/TextContent';
 
 export const MainViewInspector = () => {
   const state = useSnapshot(editorStore);
@@ -82,12 +87,14 @@ export const MainViewInspector = () => {
       {otype && (
         <div className='mb-16'>
           {(otype == 'object' ||
+            otype == 'ai-npc' ||
             otype == 'avatar' ||
             otype == 'light' ||
             otype == 'three' ||
             otype == 'camera' ||
             otype == 'text' ||
             otype == 'text3d' ||
+            otype == 'water' ||
             otype == 'lightformer') && <Transforms />}
 
           {(otype == "three") && <MaterialForm />}
@@ -101,10 +108,31 @@ export const MainViewInspector = () => {
             </>
           )}
 
+          {(otype == 'object' ||
+            otype == 'ai-npc' ||
+            otype == 'light' ||
+            otype == 'three' ||
+            otype == 'text' ||
+            otype == 'text3d' ||
+            otype == 'lightformer') && <ViewableDistance />}
+
           {otype == 'object' && <Animation />}
+          {(otype == 'ai-npc' ||
+            otype == 'avatar' ||
+            otype == 'audio' ||
+            otype == 'image' ||
+            otype == 'video' ||
+            otype == 'object') && <UrlArg />}
+
+          {(otype == "water") && <WidthHeight />}
+
           {otype == 'environment' && <EnvironmentParam />}
           {otype == 'lightformer' && <FormType />}
           {(otype == 'effect' || otype == 'light') && <Intensity />}
+
+          {(otype == 'text' ||
+            otype == 'text3d') && <TextContent />}
+          {otype == 'ai-npc' && <SystemContent />}
           {otype == 'camera' && <CameraParams />}
         </div>
       )}

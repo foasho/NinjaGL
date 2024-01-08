@@ -7,7 +7,6 @@ import { useSnapshot } from 'valtio';
 
 import { editorStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { normalStyles } from '@/utils/styles';
 
 export const Physics = () => {
   const state = useSnapshot(editorStore);
@@ -22,6 +21,7 @@ export const Physics = () => {
   const [phyTypeOpt, setPhyTypeOpt] = useState<{ value: OMPhysicsType; label: string }>();
 
   // 物理判定選択肢
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const physicsOptions: { value: OMPhysicsType; label: string }[] = [
     { value: 'box', label: t('box') },
     { value: 'capsule', label: t('capsule') },
@@ -34,12 +34,12 @@ export const Physics = () => {
       setIsMoveable(om.moveable ? true : false);
       const opt = physicsOptions.find((option) => option.value == om.phyType);
       if (opt) setPhyTypeOpt(opt);
-      else {
+      else if (phyTypeOpt !== physicsOptions[0]) {
         // boxがデフォルト
         setPhyTypeOpt(physicsOptions[0]);
       }
     }
-  }, [om]);
+  }, [om, phyTypeOpt, physicsOptions]);
 
   /**
    * 物理判定の有無
@@ -81,11 +81,7 @@ export const Physics = () => {
         </div>
         {isPhysics && (
           <>
-            <Select
-              options={physicsOptions}
-              value={phyTypeOpt}
-              onChange={onChangePhyType}
-            />
+            <Select options={physicsOptions} value={phyTypeOpt} onChange={onChangePhyType} />
             <div>
               <div className='inline-block py-1.5 pl-3 font-bold'>{t('isMoveable')}</div>
               <div className='inline-block pl-3'>

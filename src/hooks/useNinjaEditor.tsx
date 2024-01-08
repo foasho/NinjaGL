@@ -522,11 +522,11 @@ export const NinjaEditorProvider = ({ children }) => {
    * argの変更
    * /CastShadow/Helper/Color/
    */
-  const setArg = (id: string, key: string, arg: any) => {
+  const setArg = (id: string, key: string, arg: any, notify=true) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args[key] = arg;
-      notifyOMIdChanged(id);
+      if (notify) notifyOMIdChanged(id);
       updateOM(target);
     }
   };
