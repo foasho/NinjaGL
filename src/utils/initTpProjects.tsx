@@ -328,13 +328,11 @@ export const initTpOms = (): IObjectManagement[] => {
       visible: true,
     },
   ];
-}
+};
 
 export const initTpSms = (): IScriptManagement[] => {
-  return [
-
-  ];
-}
+  return [];
+};
 
 export const initTpUis = (): IUIManagement[] => {
   return [
@@ -343,12 +341,12 @@ export const initTpUis = (): IUIManagement[] => {
       id: MathUtils.generateUUID(),
       name: "btn01",
       position: {
-          x: 10,
-          y: 10,
+        x: 10,
+        y: 10,
       },
       styles: ``,
       args: {},
       visible: true,
-    }
+    },
   ];
-}
+};

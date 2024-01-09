@@ -1,9 +1,9 @@
-'use client';
-import { NavbarItem, Dropdown, DropdownMenu, DropdownItem, Button, DropdownTrigger } from '@nextui-org/react';
-import Link from 'next/link';
-import { HiChevronDown } from 'react-icons/hi2';
+"use client";
+import { NavbarItem, Dropdown, DropdownMenu, DropdownItem, Button, DropdownTrigger } from "@nextui-org/react";
+import Link from "next/link";
+import { HiChevronDown } from "react-icons/hi2";
 
-import { cardItems } from '../_utils/tutorials';
+import { cardItems } from "../_utils/tutorials";
 
 export const TutorialMenu = () => {
   return (
@@ -25,7 +25,7 @@ export const TutorialMenu = () => {
         aria-label='ACME features'
         className='w-[340px]'
         itemClasses={{
-          base: 'gap-4',
+          base: "gap-4",
         }}
       >
         {cardItems.map((item, index) => {

@@ -1,18 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { Bloom, SSR, LUT, EffectComposer } from '@react-three/postprocessing';
-import { LUTCubeLoader } from 'postprocessing';
-import { Texture } from 'three';
+import { IObjectManagement } from "@ninjagl/core";
+import { Bloom, SSR, LUT, EffectComposer } from "@react-three/postprocessing";
+import { LUTCubeLoader } from "postprocessing";
+import { Texture } from "three";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const MyEffects = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [effects, setEffects] = useState<IObjectManagement[]>([]);
   useEffect(() => {
     const update = () => {
-      const _oms = oms.current.filter((om) => om.type == 'effect');
+      const _oms = oms.current.filter((om) => om.type == "effect");
       if (effects !== _oms) {
         setEffects(_oms);
       }
@@ -46,7 +46,7 @@ const MyEffect = ({ om }: { om: IObjectManagement }) => {
   const id = om.id;
 
   useEffect(() => {
-    if (om.args.type === 'lut' && om.args.texture) {
+    if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
       loader.load(om.args.texture, (loadedTexture) => {
         setTexture(loadedTexture);
@@ -64,7 +64,7 @@ const MyEffect = ({ om }: { om: IObjectManagement }) => {
   }, [om, renderCount]);
 
   const effect = useMemo(() => {
-    if (om.args.type === 'bloom') {
+    if (om.args.type === "bloom") {
       return (
         <Bloom
           luminanceThreshold={om.args.luminanceThreshold}
@@ -73,9 +73,9 @@ const MyEffect = ({ om }: { om: IObjectManagement }) => {
           intensity={om.args.intensity}
         />
       );
-    } else if (om.args.type === 'ssr') {
+    } else if (om.args.type === "ssr") {
       return <SSR {...om.args} />;
-    } else if (om.args.type === 'lut' && texture) {
+    } else if (om.args.type === "lut" && texture) {
       return <LUT lut={texture as Texture} />;
     }
   }, [om, texture, renderCount]);

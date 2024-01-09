@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 
-import { Material } from '@gltf-transform/core';
-import { useInputControl } from '@ninjagl/core';
-import { Environment, GizmoHelper, GizmoViewport, SpotLight } from '@react-three/drei';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { useSession } from 'next-auth/react';
-import { useTranslation } from 'react-i18next';
+import { Material } from "@gltf-transform/core";
+import { useInputControl } from "@ninjagl/core";
+import { GizmoHelper, GizmoViewport, SpotLight } from "@react-three/drei";
+import { useThree, useFrame } from "@react-three/fiber";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 import {
   Mesh,
   MeshStandardMaterial,
@@ -23,15 +23,14 @@ import {
   Object3D,
   PerspectiveCamera,
   Quaternion,
-} from 'three';
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { useSnapshot } from 'valtio';
+} from "three";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { useSnapshot } from "valtio";
 
-import { b64EncodeUnicode } from '@/commons/functional';
-import { LandScapeInspector } from '@/editor/Inspector/TerrainInspector';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { landScapeStore } from '@/editor/Store/landscape';
+import { b64EncodeUnicode } from "@/commons/functional";
+import { landScapeStore } from "@/editor/Store/landscape";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 const LandScapeMakeCanvas = ({ meshRef, object }) => {
   const [isMounted, setIsMounted] = useState(false);
@@ -61,28 +60,28 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
    * @param event
    */
   const keyDown = (event: KeyboardEvent) => {
-    if (event.code.toString() == 'KeyE') {
-      if (terrainState.mode == 'view') {
-        landScapeStore.mode = 'edit';
+    if (event.code.toString() == "KeyE") {
+      if (terrainState.mode == "view") {
+        landScapeStore.mode = "edit";
       } else {
-        landScapeStore.mode = 'view';
+        landScapeStore.mode = "view";
       }
     }
     if (
-      event.code.toString() == 'ShiftLeft' ||
-      event.code.toString() == 'ShiftRight' ||
-      event.code.toString() == 'KeyR' ||
-      event.code.toString() == 'Shift'
+      event.code.toString() == "ShiftLeft" ||
+      event.code.toString() == "ShiftRight" ||
+      event.code.toString() == "KeyR" ||
+      event.code.toString() == "Shift"
     ) {
       isReverse.current = true;
     }
   };
   const keyUp = (event: KeyboardEvent) => {
     if (
-      event.code.toString() == 'ShiftLeft' ||
-      event.code.toString() == 'ShiftRight' ||
-      event.code.toString() == 'KeyR' ||
-      event.code.toString() == 'Shift'
+      event.code.toString() == "ShiftLeft" ||
+      event.code.toString() == "ShiftRight" ||
+      event.code.toString() == "KeyR" ||
+      event.code.toString() == "Shift"
     ) {
       isReverse.current = false;
     }
@@ -103,7 +102,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
   }, [terrainState.mapSize, terrainState.type]);
 
   useEffect(() => {
-    if (terrainState.type == 'edit' && object) {
+    if (terrainState.type == "edit" && object) {
       // 回転があれば、考慮する
       if (object.rotation) {
         const q = new Quaternion().setFromEuler(object.rotation);
@@ -119,17 +118,17 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
   }, [terrainState.mapSize, terrainState.type]);
 
   useEffect(() => {
-    document.addEventListener('keydown', keyDown);
-    document.addEventListener('keyup', keyUp);
-    document.addEventListener('pointermove', onMouseMove, false);
-    document.addEventListener('mousedown', onMouseDown, false);
-    document.addEventListener('mouseup', onMouseUp, false);
+    document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
+    document.addEventListener("pointermove", onMouseMove, false);
+    document.addEventListener("mousedown", onMouseDown, false);
+    document.addEventListener("mouseup", onMouseUp, false);
     return () => {
-      document.removeEventListener('pointermove', onMouseMove);
-      document.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.removeEventListener('keydown', keyDown);
-      document.removeEventListener('keyup', keyUp);
+      document.removeEventListener("pointermove", onMouseMove);
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("keydown", keyDown);
+      document.removeEventListener("keyup", keyUp);
     };
   }, [
     terrainState.type,
@@ -203,8 +202,8 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
     }
     raycaster.setFromCamera(mouse, cameraRef.current);
     const intersects = raycaster.intersectObject(meshRef.current);
-    if (isMouseDown.current && terrainState.mode == 'edit') {
-      if (terrainState.brush == 'normal' || terrainState.brush == 'flat') {
+    if (isMouseDown.current && terrainState.mode == "edit") {
+      if (terrainState.brush == "normal" || terrainState.brush == "flat") {
         const { vertexIndexes, values } = getVertexes(intersects, terrainState.radius);
         if (intersects.length > 0 && intersects[0]) {
           const intersectPosition = intersects[0].point;
@@ -212,19 +211,19 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
           if (!object) return;
           vertexIndexes.map((index, i) => {
             const value = values[i];
-            if (terrainState.brush == 'normal') {
+            if (terrainState.brush == "normal") {
               let position = object.geometry.attributes.position;
               if (position instanceof GLBufferAttribute) return;
-              if (terrainState.type == 'create') {
+              if (terrainState.type == "create") {
                 position.setZ(index, position.getZ(index) + terrainState.power * value * (isReverse.current ? -1 : 1));
               } else {
                 position.setY(index, position.getY(index) + terrainState.power * value * (isReverse.current ? -1 : 1));
               }
               position.needsUpdate = true;
-            } else if (terrainState.brush == 'flat') {
+            } else if (terrainState.brush == "flat") {
               let position = object.geometry.attributes.position;
               if (position instanceof GLBufferAttribute) return;
-              if (terrainState.type == 'create') {
+              if (terrainState.type == "create") {
                 position.setZ(index, intersectPosition.z);
               } else {
                 position.setY(index, intersectPosition.y);
@@ -233,9 +232,9 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
             }
           });
         }
-      } else if (terrainState.brush == 'paint') {
+      } else if (terrainState.brush == "paint") {
         if (intersects.length > 0 && intersects[0]) {
-          if (terrainState.type == 'create') {
+          if (terrainState.type == "create") {
             const radius = terrainState.radius;
             const intersectPosition = intersects[0].point;
             const object: Mesh = intersects[0].object as Mesh;
@@ -244,7 +243,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
             if (!cloneGeometry.attributes.color) {
               const count = cloneGeometry.attributes.position.count;
               const buffer = new BufferAttribute(new Float32Array(count * 3), 3);
-              cloneGeometry.setAttribute('color', buffer);
+              cloneGeometry.setAttribute("color", buffer);
             }
             if (
               cloneGeometry.attributes.color instanceof GLBufferAttribute ||
@@ -258,13 +257,13 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
             const positionArray = Array.from(cloneGeometry.attributes.position.array);
             for (let i = 0; i <= positionArray.length - 3; i += 3) {
               vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
-              if (terrainState.type == 'create') vertex.applyMatrix4(meshRef.current.matrixWorld); // Consider rotation
+              if (terrainState.type == "create") vertex.applyMatrix4(meshRef.current.matrixWorld); // Consider rotation
               const distance = vertex.distanceTo(intersectPosition);
               if (distance <= radius) {
                 colors.set(color.toArray(), i);
               }
             }
-            cloneGeometry.setAttribute('color', new BufferAttribute(colors, 3));
+            cloneGeometry.setAttribute("color", new BufferAttribute(colors, 3));
             object.geometry.copy(cloneGeometry);
           } else {
             const radius = terrainState.radius;
@@ -280,7 +279,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
                   if (!geometry.attributes.color) {
                     const count = geometry.attributes.position.count;
                     const buffer = new BufferAttribute(new Float32Array(count * 3), 3);
-                    geometry.setAttribute('color', buffer);
+                    geometry.setAttribute("color", buffer);
                   }
 
                   const numVertices = geometry.attributes.color.array;
@@ -306,7 +305,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
                     }
                   }
 
-                  geometry.setAttribute('color', new BufferAttribute(colors, 3));
+                  geometry.setAttribute("color", new BufferAttribute(colors, 3));
                   const newMaterial = node.material.clone() as MeshStandardMaterial;
                   newMaterial.vertexColors = true;
                   newMaterial.color.set(0xffffff); // Set material color to white
@@ -348,7 +347,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
       } else {
         lightRef.current.intensity = lightRef.current.distance / 32;
       }
-      if (terrainState.type == 'create' && matRef.current && matRef.current instanceof MeshStandardMaterial) {
+      if (terrainState.type == "create" && matRef.current && matRef.current instanceof MeshStandardMaterial) {
         matRef.current.wireframe = terrainState.wireFrame;
       }
     }
@@ -358,7 +357,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
     <>
       <axesHelper />
       <gridHelper ref={gridRef} args={[terrainState.mapSize * 2, Number(terrainState.mapResolution / 2)]} />
-      {terrainState.type == 'create' ? (
+      {terrainState.type == "create" ? (
         <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} receiveShadow castShadow>
           <planeGeometry
             args={[terrainState.mapSize, terrainState.mapSize, terrainState.mapResolution, terrainState.mapResolution]}
@@ -384,7 +383,7 @@ const LandScapeMakeCanvas = ({ meshRef, object }) => {
       <GizmoHelper alignment='top-right' margin={[75, 75]}>
         <GizmoViewport labelColor='white' axisHeadScale={1} />
       </GizmoHelper>
-      <SpotLight ref={lightRef} angle={MathUtils.degToRad(45)} color={'#fadcb9'} volumetric={false} />
+      <SpotLight ref={lightRef} angle={MathUtils.degToRad(45)} color={"#fadcb9"} volumetric={false} />
       <mesh ref={mouseCircleRef} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[terrainState.radius]} />
         <meshBasicMaterial transparent={true} opacity={0.3} color={0x000000} />
@@ -406,7 +405,7 @@ export const TerrainMakerCanvas = () => {
   useEffect(() => {
     if (state.currentId) {
       const om = editor.getOMById(state.currentId);
-      if (om && om.type == 'terrain') {
+      if (om && om.type == "landscape") {
         if (meshRef.current) {
           if (meshRef.current.geometry) {
             meshRef.current.geometry.dispose();
@@ -424,12 +423,12 @@ export const TerrainMakerCanvas = () => {
           }
           meshRef.current = undefined;
         }
-        landScapeStore.type = 'edit';
+        landScapeStore.type = "edit";
       }
     } else {
-      if (terrainState.type == 'edit') {
+      if (terrainState.type == "edit") {
         meshRef.current = undefined;
-        landScapeStore.type = 'create';
+        landScapeStore.type = "create";
       }
     }
     setReady(true);

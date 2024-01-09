@@ -1,10 +1,10 @@
-import { useGLTF } from '@react-three/drei';
+import { useGLTF } from "@react-three/drei";
 
 type ModelProps = {
   children?: React.ReactNode;
 };
 export const OculusRift = ({ children }: ModelProps) => {
-  const { nodes, materials } = useGLTF('/top-models/oculus_rift.glb') as any;
+  const { nodes, materials } = useGLTF("/top-models/oculus_rift.glb") as any;
   return (
     <group dispose={null} scale={1.5}>
       <group rotation={[-Math.PI / 2, 0, 0]} scale={0.081}>

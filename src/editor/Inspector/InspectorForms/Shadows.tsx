@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const Shadows = () => {
   const state = useSnapshot(editorStore);
@@ -27,7 +27,7 @@ export const Shadows = () => {
    * CastShadowを変更
    */
   const onCheckCastShadow = () => {
-    if (id) editor.setArg(id, 'castShadow', !castShadow);
+    if (id) editor.setArg(id, "castShadow", !castShadow);
     setCastShadow(!castShadow);
   };
 
@@ -35,14 +35,14 @@ export const Shadows = () => {
    * receiveShadowを変更
    */
   const onCheckReceiveShadow = () => {
-    if (id) editor.setArg(id, 'receiveShadow', !receiveShadow);
+    if (id) editor.setArg(id, "receiveShadow", !receiveShadow);
     setReceiveShadow(!receiveShadow);
   };
 
   return (
     <>
       <div className='mt-2'>
-        <div className='inline-block px-0.5 text-lg font-bold'>{t('castshadow')}</div>
+        <div className='inline-block px-0.5 text-lg font-bold'>{t("castshadow")}</div>
         <div className='inline-block pl-3'>
           <input
             type='checkbox'
@@ -53,7 +53,7 @@ export const Shadows = () => {
         </div>
       </div>
       <div className='mt-2'>
-        <div className='inline-block px-0.5 text-lg font-bold'>{t('receiveshadow')}</div>
+        <div className='inline-block px-0.5 text-lg font-bold'>{t("receiveshadow")}</div>
         <div className='inline-block pl-3'>
           <input
             type='checkbox'

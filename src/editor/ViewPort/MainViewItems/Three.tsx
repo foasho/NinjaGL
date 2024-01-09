@@ -1,23 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { MeshReflectorMaterial, useHelper } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
-import { BoxHelper, Color, Euler, Matrix4, Mesh, Vector3 } from 'three';
-import { useSnapshot } from 'valtio';
+import { IObjectManagement } from "@ninjagl/core";
+import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { BoxHelper, Color, Euler, Matrix4, Mesh, Vector3 } from "three";
+import { useSnapshot } from "valtio";
 
-import { EnableClickTrigger } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { EnableClickTrigger } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 export const ThreeObjects = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [threeOMs, setThreeOMs] = useState<IObjectManagement[]>([]);
   useEffect(() => {
     const update = () => {
-      const _oms = oms.current.filter((om) => om.type == 'three');
+      const _oms = oms.current.filter((om) => om.type == "three");
       setThreeOMs(_oms);
     };
     update();
@@ -49,15 +49,15 @@ const ThreeObject = (props: IThreeObject) => {
   const [material, setMaterial] = useState<any>();
   // const matRef = useRef<any>();
   let geometry;
-  if (om.args.type == 'plane') {
+  if (om.args.type == "plane") {
     geometry = <planeGeometry />;
-  } else if (om.args.type == 'sphere') {
+  } else if (om.args.type == "sphere") {
     geometry = <sphereGeometry />;
-  } else if (om.args.type == 'box') {
+  } else if (om.args.type == "box") {
     geometry = <boxGeometry />;
-  } else if (om.args.type == 'cylinder') {
+  } else if (om.args.type == "cylinder") {
     geometry = <cylinderGeometry />;
-  } else if (om.args.type == 'capsule') {
+  } else if (om.args.type == "capsule") {
     geometry = <capsuleGeometry />;
   }
 
@@ -92,13 +92,13 @@ const ThreeObject = (props: IThreeObject) => {
         let _material;
         if (om.args.materialData) {
           const color = om.args.materialData.value ? new Color(om.args.materialData.value) : new Color(0xffffff);
-          if (om.args.materialData.type == 'standard') {
+          if (om.args.materialData.type == "standard") {
             _material = <meshStandardMaterial color={color} />;
-          } else if (om.args.materialData.type == 'phong') {
+          } else if (om.args.materialData.type == "phong") {
             _material = <meshPhongMaterial color={color} />;
-          } else if (om.args.materialData.type == 'toon') {
+          } else if (om.args.materialData.type == "toon") {
             _material = <meshToonMaterial color={color} />;
-          } else if (om.args.materialData.type == 'reflection') {
+          } else if (om.args.materialData.type == "reflection") {
             _material = <MeshReflectorMaterial mirror={0} color={color} />;
             // issue: https://github.com/pmndrs/drei/issues/1663
             // _material = (<meshStandardMaterial color={color} />);
@@ -150,7 +150,7 @@ const ThreeObject = (props: IThreeObject) => {
             }}
             castShadow={true}
             receiveShadow={true}
-            onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
+            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
           >
             {geometry}
             {material}

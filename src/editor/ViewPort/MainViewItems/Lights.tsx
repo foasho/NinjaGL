@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { useHelper } from '@react-three/drei';
-import { Color, DirectionalLightHelper, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from 'three';
-import { useSnapshot } from 'valtio';
+import { IObjectManagement } from "@ninjagl/core";
+import { useHelper } from "@react-three/drei";
+import { Color, DirectionalLightHelper, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 export const MyLights = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [lights, setLights] = useState<IObjectManagement[]>([]);
   useEffect(() => {
     const update = () => {
-      const _oms = oms.current.filter((om) => om.type == 'light');
+      const _oms = oms.current.filter((om) => om.type == "light");
       if (lights !== _oms) {
         setLights(_oms);
       }
@@ -95,9 +95,9 @@ export const MyLight = (prop: ILightProps) => {
   }, [om]);
 
   let _helperObject: any = DirectionalLightHelper;
-  if (om.args.type == 'spot') {
+  if (om.args.type == "spot") {
     _helperObject = SpotLightHelper;
-  } else if (om.args.type == 'point') {
+  } else if (om.args.type == "point") {
     _helperObject = PointLightHelper;
   }
 
@@ -106,17 +106,17 @@ export const MyLight = (prop: ILightProps) => {
 
   return (
     <>
-      {om.args.type == 'spot' && (
+      {om.args.type == "spot" && (
         <>
           <spotLight ref={ref} castShadow />
         </>
       )}
-      {om.args.type == 'directional' && (
+      {om.args.type == "directional" && (
         <>
           <directionalLight ref={ref} castShadow />
         </>
       )}
-      {om.args.type == 'point' && (
+      {om.args.type == "point" && (
         <>
           <pointLight ref={ref} position={[0, 5, 0]} castShadow />
         </>
@@ -143,7 +143,7 @@ export const MyLight = (prop: ILightProps) => {
           editorStore.pivotControl = true;
         }}
         onPointerMissed={(e) => {
-          if (e.type === 'click') {
+          if (e.type === "click") {
             editorStore.currentId = null;
             editorStore.pivotControl = false;
           }

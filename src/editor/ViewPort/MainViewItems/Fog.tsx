@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { Fog } from 'three';
+import { IObjectManagement } from "@ninjagl/core";
+import { Fog } from "three";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 /**
  * 霧のコンポーネント
@@ -15,7 +15,7 @@ export const FogComponent = () => {
   const [fog, setFog] = useState<IObjectManagement>();
   useEffect(() => {
     const update = () => {
-      const _fog = oms.current.find((om) => om.type == 'fog');
+      const _fog = oms.current.find((om) => om.type == "fog");
       if (_fog && fog !== _fog) {
         setFog(_fog);
       }

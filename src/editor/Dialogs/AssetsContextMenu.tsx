@@ -1,13 +1,13 @@
-'use client';
-import { PutBlobResult } from '@vercel/blob';
-import { useSession } from 'next-auth/react';
-import { useTranslation } from 'react-i18next';
+"use client";
+import { PutBlobResult } from "@vercel/blob";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 
-import { b64EncodeUnicode } from '@/commons/functional';
-import { ModelViewer } from '@/commons/ModelViewer';
-import { MySwal } from '@/commons/Swal';
-import { IFileProps } from '@/editor/Hierarchy/ContentViewer';
-import { isGLTF } from '@/utils/files';
+import { b64EncodeUnicode } from "@/commons/functional";
+import { ModelViewer } from "@/commons/ModelViewer";
+import { MySwal } from "@/commons/Swal";
+import { IFileProps } from "@/editor/Hierarchy/ContentViewer";
+import { isGLTF } from "@/utils/files";
 
 interface IAssetsContextMenuProps {
   position: {
@@ -29,14 +29,14 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
    */
   const onCreateFolder = () => {
     MySwal.fire({
-      title: t('newFolderName').toString(),
-      input: 'text',
+      title: t("newFolderName").toString(),
+      input: "text",
       showCancelButton: true,
-      confirmButtonText: t('create').toString(),
+      confirmButtonText: t("create").toString(),
       showLoaderOnConfirm: true,
       preConfirm: async (inputStr) => {
         if (inputStr.length === 0) {
-          return MySwal.showValidationMessage(t('leastInput'));
+          return MySwal.showValidationMessage(t("leastInput"));
         }
         return inputStr;
       },
@@ -46,40 +46,40 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
     }).then(async (result) => {
       if (result.value) {
         let prefix = props.path?.includes(b64EncodeUnicode((session!.user as any).email))
-          ? ''
+          ? ""
           : `${b64EncodeUnicode((session!.user as any).email)}`;
         if (props.path) {
           let p = props.path;
           // 最後にスラッシュがついていれば外す
-          if (p.endsWith('/')) {
+          if (p.endsWith("/")) {
             p = p.slice(0, -1);
           }
           // 最初にスラッシュがついていれば外す
-          if (p.startsWith('/')) {
+          if (p.startsWith("/")) {
             p = p.slice(1);
           }
-          prefix += '/' + p;
+          prefix += "/" + p;
         }
         // textファイルを作成
-        const textFile = new Blob([''], { type: 'text/plain' });
+        const textFile = new Blob([""], { type: "text/plain" });
         // ファイル名を設定
-        const fileName = result.value + '/file.keep';
-        let uploadPath = prefix + '/' + fileName;
+        const fileName = result.value + "/file.keep";
+        let uploadPath = prefix + "/" + fileName;
         // 頭にスラッシュがついていれば外す
-        if (uploadPath.startsWith('/')) {
+        if (uploadPath.startsWith("/")) {
           uploadPath = uploadPath.slice(1);
         }
         // 新しいフォルダを作成する
         const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-          method: 'POST',
+          method: "POST",
           body: textFile,
         });
         const blob = (await response.json()) as PutBlobResult;
         if (!blob.url) {
-          throw new Error('Error uploading file');
+          throw new Error("Error uploading file");
         }
         MySwal.fire({
-          title: 'フォルダを作成しました',
+          title: "フォルダを作成しました",
         });
         if (props.onUploadCallback) {
           props.onUploadCallback();
@@ -97,7 +97,7 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
       const response = await fetch(url);
       const blob = await response.blob();
 
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       const objectUrl = URL.createObjectURL(blob);
 
       a.href = objectUrl;
@@ -107,7 +107,7 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
       a.remove();
       URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      console.error('Error downloading file:', error);
+      console.error("Error downloading file:", error);
     }
   };
 
@@ -118,13 +118,13 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
     try {
       const _url = `/api/storage/delete?url=${url}`;
       const response = await fetch(_url, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       if (!response.ok) {
-        throw new Error('Error deleting file');
+        throw new Error("Error deleting file");
       }
       MySwal.fire({
-        title: '削除に成功しました',
+        title: "削除に成功しました",
       });
     } catch (error) {
       throw error;
@@ -151,17 +151,17 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
                   className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
                   onClick={() => onDownload(file.url, file.name)}
                 >
-                  {t('download')}
+                  {t("download")}
                 </div>
                 <div className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'>
-                  {t('copyUrl')}
+                  {t("copyUrl")}
                 </div>
                 {session && (
                   <div
                     className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
                     onClick={() => deleteFile(file.url)}
                   >
-                    {t('deleteFile')}
+                    {t("deleteFile")}
                   </div>
                 )}
               </>
@@ -174,7 +174,7 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
               className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
               onClick={() => onCreateFolder()}
             >
-              {t('newFolderName')}
+              {t("newFolderName")}
             </div>
           </>
         )}
@@ -185,8 +185,8 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
               className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
               onClick={async () => {
                 MySwal.fire({
-                  title: t('showModelViewer'),
-                  width: '50vw',
+                  title: t("showModelViewer"),
+                  width: "50vw",
                   html: (
                     <div className='relative h-96 w-[50vw]'>
                       <ModelViewer url={file.url} />
@@ -195,7 +195,7 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
                 });
               }}
             >
-              {t('showModelViewer')}
+              {t("showModelViewer")}
             </div>
           </>
         )}

@@ -1,13 +1,15 @@
-import { IUIManagement } from '@ninjagl/core';
+import { IUIManagement } from "@ninjagl/core";
 
 export const UIViewer = ({ um }: { um: IUIManagement }) => {
   const applyStyle = (style: string): React.CSSProperties => {
     return {
-      display: 'flex',
+      display: "flex",
     };
   };
 
-  return <div id={um.id} style={um.styles ? applyStyle(um.styles) : {}}>
-    {um.name}
-  </div>;
+  return (
+    <div id={um.id} style={um.styles ? applyStyle(um.styles) : {}}>
+      {um.name}
+    </div>
+  );
 };

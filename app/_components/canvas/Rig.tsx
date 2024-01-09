@@ -1,6 +1,6 @@
-import { useFrame, useThree } from '@react-three/fiber';
-import { easing } from 'maath';
-import { Vector3 } from 'three';
+import { useFrame, useThree } from "@react-three/fiber";
+import { easing } from "maath";
+import { Vector3 } from "three";
 
 export const Rigs = () => {
   const { camera } = useThree();

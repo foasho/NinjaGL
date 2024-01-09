@@ -1,24 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
-import { Spinner } from '@nextui-org/react';
-import { loadNJCFile, saveNJCBlob } from '@ninjagl/core';
-import { PutBlobResult } from '@vercel/blob';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { useTranslation } from 'react-i18next';
-import { AiFillSave } from 'react-icons/ai';
-import { BiEditAlt } from 'react-icons/bi';
-import { BsCheck, BsPlay, BsStop } from 'react-icons/bs';
-import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
-import { useSnapshot } from 'valtio';
+import { Spinner } from "@nextui-org/react";
+import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
+import { PutBlobResult } from "@vercel/blob";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+import { AiFillSave } from "react-icons/ai";
+import { BiEditAlt } from "react-icons/bi";
+import { BsCheck, BsPlay, BsStop } from "react-icons/bs";
+import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { useSnapshot } from "valtio";
 
-import { b64EncodeUnicode } from '@/commons/functional';
-import { MySwal } from '@/commons/Swal';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { b64EncodeUnicode } from "@/commons/functional";
+import { MySwal } from "@/commons/Swal";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { globalEditorStore } from '../Store/editor';
-import { globalConfigStore } from '../Store/Store';
-import { ExportNjcFile } from '../ViewPort/DebugPlay';
+import { globalEditorStore } from "../Store/editor";
+import { globalConfigStore } from "../Store/Store";
+import { ExportNjcFile } from "../ViewPort/DebugPlay";
 
 export const AppBarHeight = 45;
 export const AppBar = () => {
@@ -40,12 +40,12 @@ export const AppBar = () => {
    */
   useEffect(() => {
     // 最近開いたプロジェクトを取得
-    const recentProjects = localStorage.getItem('recentProjects');
+    const recentProjects = localStorage.getItem("recentProjects");
     if (recentProjects) {
       setRecentProjects(JSON.parse(recentProjects));
     }
     // AutoSaveが有効かどうかを取得
-    const autoSave = localStorage.getItem('autoSave');
+    const autoSave = localStorage.getItem("autoSave");
     if (autoSave) {
       globalEditorStore.autoSave = true;
     }
@@ -55,10 +55,10 @@ export const AppBar = () => {
    * 言語選択
    */
   const onClickSelectLang = () => {
-    if (i18n.language == 'ja') {
-      i18n.changeLanguage('en');
-    } else if (i18n.language == 'en') {
-      i18n.changeLanguage('ja');
+    if (i18n.language == "ja") {
+      i18n.changeLanguage("en");
+    } else if (i18n.language == "en") {
+      i18n.changeLanguage("ja");
     }
   };
 
@@ -66,10 +66,10 @@ export const AppBar = () => {
    * デバッグプレイ
    */
   const onPlayStop = () => {
-    if (viewSelect == 'debugplay') {
-      globalEditorStore.viewSelect = 'mainview';
+    if (viewSelect == "debugplay") {
+      globalEditorStore.viewSelect = "mainview";
     } else {
-      globalEditorStore.viewSelect = 'debugplay';
+      globalEditorStore.viewSelect = "debugplay";
     }
   };
 
@@ -78,14 +78,14 @@ export const AppBar = () => {
    */
   const changeProjectName = async (): Promise<string | null> => {
     return await MySwal.fire({
-      title: t('changeProjectName').toString(),
-      input: 'text',
+      title: t("changeProjectName").toString(),
+      input: "text",
       showCancelButton: true,
-      confirmButtonText: t('change').toString(),
+      confirmButtonText: t("change").toString(),
       showLoaderOnConfirm: true,
       preConfirm: async (inputStr) => {
         if (inputStr.length === 0) {
-          return MySwal.showValidationMessage(t('leastInput'));
+          return MySwal.showValidationMessage(t("leastInput"));
         }
         return inputStr;
       },
@@ -130,30 +130,30 @@ export const AppBar = () => {
 
     // Save to Storage
     const formData = new FormData();
-    formData.append('file', blob);
+    formData.append("file", blob);
     const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/SaveData`;
-    const filePath = (uploadPath + `/${name}.njc`).replaceAll('//', '/');
-    formData.append('filePath', filePath);
+    const filePath = (uploadPath + `/${name}.njc`).replaceAll("//", "/");
+    formData.append("filePath", filePath);
 
     // サーバーに保存
     const response = await fetch(`/api/storage/upload?filename=${filePath}`, {
-      method: 'POST',
+      method: "POST",
       body: blob,
     });
     const resResult = (await response.json()) as PutBlobResult;
     if (!resResult.url) {
       setLoading(false);
-      throw new Error('Error uploading file');
+      throw new Error("Error uploading file");
     }
     // 成功したら、ローカルストレージの追加しておく
-    localStorage.setItem('recentproject', JSON.stringify({ name: name, path: filePath }));
+    localStorage.setItem("recentproject", JSON.stringify({ name: name, path: filePath }));
     if (completeAlert) {
       const download = await MySwal.fire({
-        icon: 'success',
-        title: t('success'),
-        text: t('saveSuccess') + `SaveData/${name}.njc`,
+        icon: "success",
+        title: t("success"),
+        text: t("saveSuccess") + `SaveData/${name}.njc`,
         showCancelButton: true,
-        confirmButtonText: t('download'),
+        confirmButtonText: t("download"),
       }).then((result) => {
         if (result.isConfirmed) {
           return true;
@@ -162,7 +162,7 @@ export const AppBar = () => {
       });
       // fileをDownload
       if (download) {
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
         a.download = `${name}.njc`;
         a.click();
@@ -192,9 +192,9 @@ export const AppBar = () => {
    * プロジェクトを開く
    */
   const openProject = async () => {
-    const input: HTMLInputElement = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.njc'; // NJCの拡張子を指定
+    const input: HTMLInputElement = document.createElement("input");
+    input.type = "file";
+    input.accept = ".njc"; // NJCの拡張子を指定
     input.onchange = async (event) => {
       const target = event.target as HTMLInputElement;
       const files = target.files;
@@ -202,7 +202,7 @@ export const AppBar = () => {
         setLoading(true);
         const file = (target.files as FileList)[0];
         const njcFile = await loadNJCFile(file);
-        console.log('### ロードしたnjcFileを確認 ###');
+        console.log("### ロードしたnjcFileを確認 ###");
         console.log(njcFile);
         setNJCFile(njcFile);
         setLoading(false);
@@ -237,7 +237,7 @@ export const AppBar = () => {
                 className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 onClick={() => openFileMenu()}
               >
-                {t('file')}
+                {t("file")}
               </span>
             </li>
             <li className='float-left inline-block px-[3px] pt-[14px]'>
@@ -245,7 +245,7 @@ export const AppBar = () => {
                 className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 onClick={() => onClickSelectLang()}
               >
-                {t('lang')}
+                {t("lang")}
               </a>
             </li>
             <li className='float-left hidden px-[3px] pt-[14px] md:inline-block'>
@@ -259,7 +259,7 @@ export const AppBar = () => {
             </li>
             <li className='float-left inline-block cursor-pointer px-[3px] pt-[14px] text-white'>
               <Link href='/docs' target='_blank'>
-                {t('docs')}
+                {t("docs")}
               </Link>
             </li>
             {/** Center */}
@@ -279,7 +279,7 @@ export const AppBar = () => {
                   <>
                     <BiEditAlt className='inline-block' />
                     <span className='text-cyber'>*</span>
-                    {t('nontitle')}
+                    {t("nontitle")}
                   </>
                 )}
               </a>
@@ -305,7 +305,7 @@ export const AppBar = () => {
                 onClick={() => onPlayStop()}
               >
                 <span className='align-middle'>
-                  {viewSelect == 'debugplay' ? (
+                  {viewSelect == "debugplay" ? (
                     <>
                       <BsStop className='inline h-6 w-6 pr-1' />
                     </>
@@ -315,7 +315,7 @@ export const AppBar = () => {
                     </>
                   )}
                 </span>
-                <span className='hidden md:inline'>{viewSelect == 'debugplay' ? <>Stop</> : <>Play</>}</span>
+                <span className='hidden md:inline'>{viewSelect == "debugplay" ? <>Stop</> : <>Play</>}</span>
               </a>
             </li>
           </ul>
@@ -326,7 +326,7 @@ export const AppBar = () => {
                 {/* <li><a>{t("newProject")}</a></li> ##WEBなので不要?  */}
                 <li className='relative'>
                   <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={() => openProject()}>
-                    {t('open')}
+                    {t("open")}
                   </a>
                 </li>
                 <li
@@ -334,7 +334,7 @@ export const AppBar = () => {
                   onMouseEnter={() => handleRecentProjectsHover()}
                   onMouseLeave={() => handleSubMenuMouseLeave()}
                 >
-                  <a className='block cursor-pointer rounded-sm p-2 no-underline'>{t('recentProjects')}</a>
+                  <a className='block cursor-pointer rounded-sm p-2 no-underline'>{t("recentProjects")}</a>
                   {showSubMenu && (
                     <ul
                       className='absolute left-[160px] top-0 z-10 min-w-[160px] overflow-hidden whitespace-nowrap bg-primary shadow-sm'
@@ -350,7 +350,7 @@ export const AppBar = () => {
                       })}
                       {recentProgects.length == 0 && (
                         <li className='flex'>
-                          <a className=' p-2'>{t('noRecentData')}</a>
+                          <a className=' p-2'>{t("noRecentData")}</a>
                         </li>
                       )}
                     </ul>
@@ -362,12 +362,12 @@ export const AppBar = () => {
                     onClick={() => (globalEditorStore.autoSave = !autoSave)}
                   >
                     {autoSave ? <BsCheck className='inline-block pl-3 text-white' /> : <> </>}
-                    {t('autoSave')}
+                    {t("autoSave")}
                   </a>
                 </li>
                 <li className='relative'>
                   <Link href='/docs/help' className='block cursor-pointer rounded-sm p-2 no-underline'>
-                    {t('help')}
+                    {t("help")}
                   </Link>
                 </li>
               </ul>

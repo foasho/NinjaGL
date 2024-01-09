@@ -1,7 +1,7 @@
-import { useRef } from 'react';
+import { useRef } from "react";
 
-import { useFrame } from '@react-three/fiber';
-import { PointLight } from 'three';
+import { useFrame } from "@react-three/fiber";
+import { PointLight } from "three";
 
 export const Lighting = () => {
   return (

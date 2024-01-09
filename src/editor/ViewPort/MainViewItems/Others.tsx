@@ -1,4 +1,3 @@
+export const Others = () => {};
 
-export const Others = () => {}
-
-const Other = () => {}
+const Other = () => {};

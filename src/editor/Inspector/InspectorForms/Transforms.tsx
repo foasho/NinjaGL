@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import { Euler, MathUtils, Vector3 } from 'three';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import { Euler, MathUtils, Vector3 } from "three";
+import { useSnapshot } from "valtio";
 
-import { isNumber } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { isNumber } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const Transforms = () => {
   const state = useSnapshot(editorStore);
@@ -73,19 +73,19 @@ export const Transforms = () => {
    * @param e
    * @param xyz
    */
-  const changePosition = (e, xyz: 'x' | 'y' | 'z') => {
+  const changePosition = (e, xyz: "x" | "y" | "z") => {
     if (!om) return;
     const targetValue = e.target.value;
     const newPosition: Vector3 = om.args.position ? om.args.position.clone() : new Vector3();
-    if (xyz == 'x') {
+    if (xyz == "x") {
       if (isNumber(targetValue)) {
         newPosition.setX(Number(targetValue));
       }
-    } else if (xyz == 'y') {
+    } else if (xyz == "y") {
       if (isNumber(targetValue)) {
         newPosition.setY(Number(targetValue));
       }
-    } else if (xyz == 'z') {
+    } else if (xyz == "z") {
       if (isNumber(targetValue)) {
         newPosition.setZ(Number(targetValue));
       }
@@ -98,21 +98,21 @@ export const Transforms = () => {
    * @param e
    * @param xyz
    */
-  const changeRotation = (e, xyz: 'x' | 'y' | 'z') => {
+  const changeRotation = (e, xyz: "x" | "y" | "z") => {
     if (!om) return;
     const targetValue = e.target.value;
     const newRotation: Euler = om.args.rotation ? om.args.rotation.clone() : new Euler();
-    if (xyz == 'x') {
+    if (xyz == "x") {
       if (isNumber(targetValue)) {
         const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(Number(targetRad), newRotation.y, newRotation.z);
       }
-    } else if (xyz == 'y') {
+    } else if (xyz == "y") {
       if (isNumber(targetValue)) {
         const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(newRotation.x, Number(targetRad), newRotation.z);
       }
-    } else if (xyz == 'z') {
+    } else if (xyz == "z") {
       if (isNumber(targetValue)) {
         const targetRad = MathUtils.degToRad(targetValue);
         newRotation.set(newRotation.x, newRotation.y, Number(targetRad));
@@ -124,19 +124,19 @@ export const Transforms = () => {
   /**
    * 拡大縮小変更 Inspector -> Object
    */
-  const changeScale = (e, xyz: 'x' | 'y' | 'z') => {
+  const changeScale = (e, xyz: "x" | "y" | "z") => {
     if (!om) return;
     const targetValue = e.target.value;
     const newScale: Vector3 = om.args.scale ? om.args.scale.clone() : new Vector3();
-    if (xyz == 'x') {
+    if (xyz == "x") {
       if (isNumber(targetValue)) {
         newScale.setX(Number(targetValue));
       }
-    } else if (xyz == 'y') {
+    } else if (xyz == "y") {
       if (isNumber(targetValue)) {
         newScale.setY(Number(targetValue));
       }
-    } else if (xyz == 'z') {
+    } else if (xyz == "z") {
       if (isNumber(targetValue)) {
         newScale.setZ(Number(targetValue));
       }
@@ -148,7 +148,7 @@ export const Transforms = () => {
    * Helper表示切り替え
    */
   const onCheckHelper = () => {
-    if (id) editor.setArg(id, 'helper', !helper);
+    if (id) editor.setArg(id, "helper", !helper);
     setHelper(!helper);
   };
 
@@ -156,7 +156,7 @@ export const Transforms = () => {
     <>
       {/* Position */}
       <div className='w-full pt-4'>
-        <div className='text-sm font-bold'>{t('position')}</div>
+        <div className='text-sm font-bold'>{t("position")}</div>
         <div className='grid grid-cols-3 gap-3 text-center text-xs'>
           <div>X</div>
           <div>Y</div>
@@ -166,10 +166,10 @@ export const Transforms = () => {
           <input
             type='text'
             ref={inputXref}
-            placeholder={position ? position.x.toFixed(2) : '0'}
+            placeholder={position ? position.x.toFixed(2) : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changePosition(e, 'x');
+              if (e.key === "Enter") {
+                changePosition(e, "x");
               }
             }}
             onInput={(e: any) => {
@@ -187,10 +187,10 @@ export const Transforms = () => {
           <input
             type='text'
             ref={inputYref}
-            placeholder={position ? position.y.toFixed(2) : '0'}
+            placeholder={position ? position.y.toFixed(2) : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changePosition(e, 'y');
+              if (e.key === "Enter") {
+                changePosition(e, "y");
               }
             }}
             onInput={(e: any) => {
@@ -208,10 +208,10 @@ export const Transforms = () => {
           <input
             type='text'
             ref={inputZref}
-            placeholder={position ? position.y.toFixed(2) : '0'}
+            placeholder={position ? position.y.toFixed(2) : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changePosition(e, 'z');
+              if (e.key === "Enter") {
+                changePosition(e, "z");
               }
             }}
             onInput={(e: any) => {
@@ -230,7 +230,7 @@ export const Transforms = () => {
       </div>
       {/* Rotation */}
       <div className='w-full pt-4'>
-        <div className='text-sm font-bold'>{t('rotation')}</div>
+        <div className='text-sm font-bold'>{t("rotation")}</div>
         <div className='grid grid-cols-3 gap-3 text-center text-xs'>
           <div>X</div>
           <div>Y</div>
@@ -240,10 +240,10 @@ export const Transforms = () => {
           <input
             type='text'
             ref={inputRXref}
-            placeholder={rotation ? MathUtils.radToDeg(rotation.x).toFixed(1) : '0'}
+            placeholder={rotation ? MathUtils.radToDeg(rotation.x).toFixed(1) : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changeRotation(e, 'x');
+              if (e.key === "Enter") {
+                changeRotation(e, "x");
               }
             }}
             onInput={(e: any) => {
@@ -262,10 +262,10 @@ export const Transforms = () => {
             // value={rotation? MathUtils.radToDeg(rotation.y).toFixed(1): ""}
             type='text'
             ref={inputRYref}
-            placeholder={rotation ? MathUtils.radToDeg(rotation.y).toFixed(1) : '0'}
+            placeholder={rotation ? MathUtils.radToDeg(rotation.y).toFixed(1) : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changeRotation(e, 'y');
+              if (e.key === "Enter") {
+                changeRotation(e, "y");
               }
             }}
             onInput={(e: any) => {
@@ -284,10 +284,10 @@ export const Transforms = () => {
             // value={rotation?MathUtils.radToDeg(rotation.z).toFixed(1): ""}
             type='text'
             ref={inputRZref}
-            placeholder={rotation ? MathUtils.radToDeg(rotation.z).toFixed(1) : '0'}
+            placeholder={rotation ? MathUtils.radToDeg(rotation.z).toFixed(1) : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changeRotation(e, 'z');
+              if (e.key === "Enter") {
+                changeRotation(e, "z");
               }
             }}
             onInput={(e: any) => {
@@ -306,7 +306,7 @@ export const Transforms = () => {
       </div>
       {/* Scale */}
       <div className='w-full pt-4'>
-        <div className='text-sm font-bold'>{t('scale')}</div>
+        <div className='text-sm font-bold'>{t("scale")}</div>
         <div className='grid grid-cols-3 gap-3 text-center text-xs'>
           <div>X</div>
           <div>Y</div>
@@ -317,10 +317,10 @@ export const Transforms = () => {
             // value={scale?(scale.x).toFixed(1): ""}
             ref={inputSXref}
             type='text'
-            placeholder={scale ? scale.x.toString() : '0'}
+            placeholder={scale ? scale.x.toString() : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changeScale(e, 'x');
+              if (e.key === "Enter") {
+                changeScale(e, "x");
               }
             }}
             onInput={(e: any) => {
@@ -339,10 +339,10 @@ export const Transforms = () => {
             // value={scale?(scale.y).toFixed(1): ""}
             type='text'
             ref={inputSYref}
-            placeholder={scale ? scale.y.toString() : '0'}
+            placeholder={scale ? scale.y.toString() : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changeScale(e, 'y');
+              if (e.key === "Enter") {
+                changeScale(e, "y");
               }
             }}
             onInput={(e: any) => {
@@ -361,10 +361,10 @@ export const Transforms = () => {
             // value={scale?(scale.z).toFixed(1): ""}
             type='text'
             ref={inputSZref}
-            placeholder={scale ? scale.z.toString() : '0'}
+            placeholder={scale ? scale.z.toString() : "0"}
             onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                changeScale(e, 'z');
+              if (e.key === "Enter") {
+                changeScale(e, "z");
               }
             }}
             onInput={(e: any) => {
@@ -382,7 +382,7 @@ export const Transforms = () => {
         </div>
       </div>
       <div>
-        <div className='inline-block px-0.5 pt-2 text-lg font-bold'>{t('helper')}</div>
+        <div className='inline-block px-0.5 pt-2 text-lg font-bold'>{t("helper")}</div>
         <div className='inline-block pl-3'>
           <input
             type='checkbox'

@@ -1,8 +1,3 @@
-
 export const MyTexts = () => {};
 
-
-const MyText = () => {
-
-  
-};
+const MyText = () => {};

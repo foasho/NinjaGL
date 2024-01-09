@@ -1,19 +1,19 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef } from "react";
 
-import { type Vector } from '@dimforge/rapier3d';
-import { MeshTransmissionMaterial } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { BallCollider, Physics, RapierRigidBody, RigidBody } from '@react-three/rapier';
-import { MathUtils, Vector3 } from 'three';
+import { type Vector } from "@dimforge/rapier3d";
+import { MeshTransmissionMaterial } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { BallCollider, Physics, RapierRigidBody, RigidBody } from "@react-three/rapier";
+import { MathUtils, Vector3 } from "three";
 
-import { Apple } from './Rapiers/Apple';
-import { Bomb } from './Rapiers/Bomb';
-import { Coin } from './Rapiers/Coin';
-import { OculusRift } from './Rapiers/OculusRift';
-import { OculusTouch } from './Rapiers/OculusTouch';
-import { Shuriken } from './Rapiers/Shuriken';
-import { Star } from './Rapiers/Star';
-import { XBox } from './Rapiers/XBox';
+import { Apple } from "./Rapiers/Apple";
+import { Bomb } from "./Rapiers/Bomb";
+import { Coin } from "./Rapiers/Coin";
+import { OculusRift } from "./Rapiers/OculusRift";
+import { OculusTouch } from "./Rapiers/OculusTouch";
+import { Shuriken } from "./Rapiers/Shuriken";
+import { Star } from "./Rapiers/Star";
+import { XBox } from "./Rapiers/XBox";
 
 export const CenterRapier = () => {
   return (
@@ -38,12 +38,12 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <XBox>
-          <meshPhongMaterial color='#D3D3D3' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#D3D3D3' specular={"#171717"} shininess={30} emissive={1.0} />
         </XBox>
       </Connector>
       <Connector>
         <XBox>
-          <meshPhongMaterial color='#123242' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#123242' specular={"#171717"} shininess={30} emissive={1.0} />
         </XBox>
       </Connector>
       <Connector>
@@ -51,12 +51,12 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <Shuriken>
-          <meshPhongMaterial color='#2EA9DF' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#2EA9DF' specular={"#171717"} shininess={30} emissive={1.0} />
         </Shuriken>
       </Connector>
       <Connector>
         <Shuriken>
-          <meshPhongMaterial color='#123242' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#123242' specular={"#171717"} shininess={30} emissive={1.0} />
         </Shuriken>
       </Connector>
       <Connector>
@@ -69,7 +69,7 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <OculusTouch>
-          <meshPhongMaterial color='#F2F2F2' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#F2F2F2' specular={"#171717"} shininess={30} emissive={1.0} />
         </OculusTouch>
       </Connector>
       <Connector>
@@ -77,7 +77,7 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <OculusRift>
-          <meshPhongMaterial color='#8B81C3' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#8B81C3' specular={"#171717"} shininess={30} emissive={1.0} />
         </OculusRift>
       </Connector>
       <Connector>
@@ -85,7 +85,7 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <Bomb>
-          <meshPhongMaterial color='#DB4D6D' specular={'#171717'} shininess={30} emissive={1.0} />
+          <meshPhongMaterial color='#DB4D6D' specular={"#171717"} shininess={30} emissive={1.0} />
         </Bomb>
       </Connector>
     </Physics>

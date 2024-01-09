@@ -1,15 +1,15 @@
-import { useEffect, useRef, MutableRefObject, useState, Suspense } from 'react';
+import { useEffect, useRef, MutableRefObject, useState, Suspense } from "react";
 
-import { useGLTF, useAnimations } from '@react-three/drei';
-import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
-import { GLTF, SkeletonUtils } from 'three-stdlib';
-import { useSnapshot } from 'valtio';
+import { useGLTF, useAnimations } from "@react-three/drei";
+import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
+import { GLTF, SkeletonUtils } from "three-stdlib";
+import { useSnapshot } from "valtio";
 
-import { Loading3D } from '@/commons/Loading3D';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { Loading3D } from "@/commons/Loading3D";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 export const Avatar = () => {
   const { getAvatarOM } = useNinjaEditor();
@@ -84,7 +84,7 @@ export const Player = ({ om }) => {
       // animationsもコピー
       clone.animations = animations;
       if (id) {
-        setArg(id, 'animations', animations);
+        setArg(id, "animations", animations);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {
@@ -124,7 +124,7 @@ export const Player = ({ om }) => {
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
             onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
-            onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
+            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
             object={clone}
           />
         </group>
@@ -151,7 +151,7 @@ const AnimationHelper = ({
   const { ref, actions } = useAnimations(animations);
 
   const { getOMById, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
-  const [defaultAnimation, setDefaultAnimation] = useState<string>('Idle');
+  const [defaultAnimation, setDefaultAnimation] = useState<string>("Idle");
   const [animationLoop, setAnimationLoop] = useState<boolean>(true);
 
   const animationStop = () => {

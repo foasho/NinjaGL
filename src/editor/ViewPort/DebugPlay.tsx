@@ -1,5 +1,5 @@
-'use client';
-import { Suspense, useEffect, useState } from 'react';
+"use client";
+import { Suspense, useEffect, useState } from "react";
 
 import {
   NJCFile,
@@ -9,14 +9,13 @@ import {
   ITextureManagement,
   IScriptManagement,
   NinjaGL,
-} from '@ninjagl/core';
-import { SkeletonUtils } from 'three-stdlib';
-import { useSnapshot } from 'valtio';
+} from "@ninjagl/core";
+import { useSnapshot } from "valtio";
 
-import { Loading2D } from '@/commons/Loading2D';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { Loading2D } from "@/commons/Loading2D";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { globalConfigStore } from '../Store/Store';
+import { globalConfigStore } from "../Store/Store";
 
 export const ExportNjcFile = (
   oms: IObjectManagement[],
@@ -28,25 +27,6 @@ export const ExportNjcFile = (
   const newConfig = { ...config, dpr: undefined };
   // EditorからOMを取得してJSON化する
   const _oms = [...oms];
-  _oms.map((om) => {
-    const _om = { ...om };
-    if (om.type == 'avatar' && _om.object) {
-      const target = SkeletonUtils.clone(_om.object);
-      target.animations = om.animations ? om.animations : [];
-      _om.object = target;
-    } else if (om.type == 'object' || om.type == 'landscape') {
-      if (!om.object) return _om;
-      // Animationがある場合のみSckeletonUtilsでクローンする
-      if (om.animations && om.animations.length > 0 && _om.object) {
-        const target = SkeletonUtils.clone(_om.object);
-        target.animations = om.animations;
-        _om.object = target;
-      } else {
-        _om.object = om.object.clone();
-      }
-    }
-    return _om;
-  });
   // Configパラメータを設定する
   const _config: IConfigParams = {
     ...newConfig,
@@ -71,13 +51,15 @@ export const DebugPlay = () => {
   const configState = useSnapshot(globalConfigStore);
   const editor = useNinjaEditor();
   const [njcFile, setNJCFile] = useState<NJCFile | null>(null);
+
   useEffect(() => {
     const _njcFile = ExportNjcFile(editor.oms.current, editor.ums.current, editor.tms.current, editor.sms.current, {
       physics: configState.physics,
       dpr: undefined,
-      multi: true,
-      isApi: true,
-      isDebug: true,
+      multi: configState.multi,
+      isApi: configState.isApi,
+      isDebug: configState.isDebug,
+      projectName: configState.projectName,
     });
     setNJCFile(_njcFile);
     setTimeout(() => {
@@ -86,12 +68,21 @@ export const DebugPlay = () => {
     return () => {
       setReady(false);
     };
-  }, []);
+  }, [
+    configState.isApi,
+    configState.isDebug,
+    configState.multi,
+    configState.physics,
+    configState.projectName,
+    editor.oms,
+    editor.sms,
+    editor.tms,
+    editor.ums,
+  ]);
 
-  // omsだけ渡してProviderを作成する
   return (
     <Suspense fallback={<Loading2D />}>
-      <div id='Ninjaviewer' style={{ height: '100%' }}>
+      <div id='Ninjaviewer' style={{ height: "100%" }}>
         {ready && njcFile && <NinjaGL njc={njcFile} isSplashScreen={false}></NinjaGL>}
       </div>
     </Suspense>

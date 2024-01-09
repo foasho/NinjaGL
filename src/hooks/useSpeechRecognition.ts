@@ -1,5 +1,5 @@
-'use client';
-import { useEffect, useRef, useState } from 'react';
+"use client";
+import { useEffect, useRef, useState } from "react";
 
 interface SpeechRecognitionEvent {
   isTrusted?: boolean;
@@ -47,7 +47,7 @@ declare let webkitSpeechRecognition: any;
 
 interface IUseSpeechRecognition {
   enabled: boolean;
-  lang: 'ja-JP' | 'en-US';
+  lang: "ja-JP" | "en-US";
   continuous: boolean; // 連続的に音声認識
   interimResults: boolean; // 途中結果の出力
   threshold_volume?: number; // 音声認識の閾値
@@ -70,20 +70,20 @@ interface ISpeechRecognitionOutput {
  * @param props
  * @returns
  */
+let recognition: SpeechRecognition;
 export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecognitionOutput => {
   const ref = useRef<ISpeechRecognitionResult>({
-    prevFinishText: '',
-    prevInterimText: '',
-    finishText: '',
-    interimText: '',
+    prevFinishText: "",
+    prevInterimText: "",
+    finishText: "",
+    interimText: "",
     pause: false,
   });
 
   // 最終的なテキスト
-  const [finishText, setFinishText] = useState<string>('');
+  const [finishText, setFinishText] = useState<string>("");
 
-  let recognition: SpeechRecognition;
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || webkitSpeechRecognition;
     recognition = new window.SpeechRecognition();
     recognition.lang = props.lang;
@@ -91,8 +91,8 @@ export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecog
     recognition.continuous = props.continuous;
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       if (props.enabled) {
-        let interimTranscript = '';
-        let finalTranscript = '';
+        let interimTranscript = "";
+        let finalTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (ref.current.pause) return;
@@ -107,12 +107,12 @@ export const useSpeechRecognition = (props: IUseSpeechRecognition): ISpeechRecog
           }
         }
       } else {
-        ref.current.interimText = '';
-        ref.current.finishText = '';
+        ref.current.interimText = "";
+        ref.current.finishText = "";
       }
     };
     recognition.onerror = () => {
-      console.error('エラーでました');
+      console.error("エラーでました");
     };
   }
 

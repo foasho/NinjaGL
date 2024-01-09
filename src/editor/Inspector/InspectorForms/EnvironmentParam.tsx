@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import Select from "react-select";
+import { useSnapshot } from "valtio";
 
-import { isNumber } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { normalStyles } from '@/utils/styles';
+import { isNumber } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { normalStyles } from "@/utils/styles";
 
 export const EnvironmentParam = () => {
   const state = useSnapshot(editorStore);
@@ -20,16 +20,16 @@ export const EnvironmentParam = () => {
   const [background, setBackground] = useState<boolean>(true);
   const [blur, setBlur] = useState<number>(0.5);
   const [environmentPreset, setEnvironmentPreset] = useState<{
-    value: 'forest' | 'sunset' | 'dawn' | 'night';
+    value: "forest" | "sunset" | "dawn" | "night";
     label: string;
   }>();
 
   // Environmentの選択肢
-  const environmentOptions: { value: 'sunset' | 'dawn' | 'night' | 'forest'; label: string }[] = [
-    { value: 'sunset', label: t('sunset') },
-    { value: 'dawn', label: t('dawn') },
-    { value: 'night', label: t('night') },
-    { value: 'forest', label: t('forest') },
+  const environmentOptions: { value: "sunset" | "dawn" | "night" | "forest"; label: string }[] = [
+    { value: "sunset", label: t("sunset") },
+    { value: "dawn", label: t("dawn") },
+    { value: "night", label: t("night") },
+    { value: "forest", label: t("forest") },
   ];
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export const EnvironmentParam = () => {
    * EnvironmentのPresetを変更
    */
   const changeEnvironmentPreset = (selectEnvironmentPreset) => {
-    if (id) editor.setArg(id, 'preset', selectEnvironmentPreset.value);
+    if (id) editor.setArg(id, "preset", selectEnvironmentPreset.value);
     setEnvironmentPreset(selectEnvironmentPreset);
   };
 
@@ -54,7 +54,7 @@ export const EnvironmentParam = () => {
   const changeEnvironmentBlur = (e) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
-      editor.setArg(id, 'blur', Number(targetValue));
+      editor.setArg(id, "blur", Number(targetValue));
       setBlur(Number(targetValue));
     }
   };
@@ -63,14 +63,14 @@ export const EnvironmentParam = () => {
    * Helper表示切り替え
    */
   const onCheckEnvironmentBackGround = () => {
-    if (id) editor.setArg(id, 'background', !background);
+    if (id) editor.setArg(id, "background", !background);
     setBackground(!background);
   };
 
   return (
     <>
       <div>
-        <div>{t('preset')}</div>
+        <div>{t("preset")}</div>
         <div>
           <Select
             options={environmentOptions}
@@ -81,17 +81,25 @@ export const EnvironmentParam = () => {
         </div>
       </div>
       <div>
-        <div>{t('background')}</div>
+        <div>{t("background")}</div>
         <div>
           <input type='checkbox' checked={background} onInput={() => onCheckEnvironmentBackGround()} />
         </div>
       </div>
       <div>
         <div>
-          {t('blur')}: {blur}
+          {t("blur")}: {blur}
         </div>
         <div>
-          <input type='range' min='0' max='1' step='0.01' value={blur} defaultValue={0.5} onChange={(e) => changeEnvironmentBlur(e)} />
+          <input
+            type='range'
+            min='0'
+            max='1'
+            step='0.01'
+            value={blur}
+            defaultValue={0.5}
+            onChange={(e) => changeEnvironmentBlur(e)}
+          />
         </div>
       </div>
     </>

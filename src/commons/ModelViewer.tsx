@@ -1,12 +1,12 @@
-'use client';
-import { Stage, useGLTF, Clone, OrbitControls } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+"use client";
+import { Stage, useGLTF, Clone, OrbitControls } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
 
 type ModelViewerProps = {
   url: string;
   className?: string;
 };
-export const ModelViewer = ({ url, className="" }: ModelViewerProps) => {
+export const ModelViewer = ({ url, className = "" }: ModelViewerProps) => {
   const { scene } = useGLTF(url);
 
   return (

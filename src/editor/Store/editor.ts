@@ -1,4 +1,4 @@
-import { proxy } from 'valtio';
+import { proxy } from "valtio";
 
 type ViewSelect = "mainview" | "debugplay" | "playereditor" | "scripteditor" | "shadereditor";
 type SelectSubNav = "ui" | "shader" | "script" | "texture";
@@ -20,7 +20,7 @@ interface IEditorStore {
   isWorldHelper: boolean;
   isGizmo: boolean;
   showCanvas: boolean;
-};
+}
 export const globalEditorStore = proxy<IEditorStore>({
   projectName: "",
   autoSave: false,

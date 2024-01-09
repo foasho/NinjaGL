@@ -1,43 +1,43 @@
-import { useState, useEffect, useRef, Suspense, memo } from 'react';
+import { useState, useEffect, useRef, Suspense, memo } from "react";
 
-import { GizmoHelper, GizmoViewport, Preload, Text } from '@react-three/drei';
-import { Canvas, useThree } from '@react-three/fiber';
-import clsx from 'clsx';
-import { Perf } from 'r3f-perf';
-import { useTranslation } from 'react-i18next';
-import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import { ImEarth } from 'react-icons/im';
-import { MdVideogameAsset, MdVideogameAssetOff } from 'react-icons/md';
-import { TiSpanner } from 'react-icons/ti';
-import { Vector3, Color, Raycaster } from 'three';
-import { useSnapshot } from 'valtio';
+import { GizmoHelper, GizmoViewport, Preload, Text } from "@react-three/drei";
+import { Canvas, useThree } from "@react-three/fiber";
+import clsx from "clsx";
+import { Perf } from "r3f-perf";
+import { useTranslation } from "react-i18next";
+import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { ImEarth } from "react-icons/im";
+import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
+import { TiSpanner } from "react-icons/ti";
+import { Vector3, Color, Raycaster } from "three";
+import { useSnapshot } from "valtio";
 
-import { isNumber } from '@/commons/functional';
-import { Loading2D } from '@/commons/Loading2D';
-import { MySwal } from '@/commons/Swal';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { addInitOM } from '@/utils/omControls';
+import { isNumber } from "@/commons/functional";
+import { Loading2D } from "@/commons/Loading2D";
+import { MySwal } from "@/commons/Swal";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { addInitOM } from "@/utils/omControls";
 
-import { MoveableCameraControl } from '../Common/MoveableCamera';
-import { showSelectNewObjectDialog } from '../Dialogs/SelectNewObjectDialog';
-import { globalEditorStore } from '../Store/editor';
-import { globalConfigStore } from '../Store/Store';
+import { MoveableCameraControl } from "../Common/MoveableCamera";
+import { showSelectNewObjectDialog } from "../Dialogs/SelectNewObjectDialog";
+import { globalEditorStore } from "../Store/editor";
+import { globalConfigStore } from "../Store/Store";
 
-import { MemoLandScapeMaker } from './LandScapeMaker';
-import { FogComponent } from './MainViewItems/Fog';
-import { MyLights } from './MainViewItems/Lights';
-import { MyEffects } from './MainViewItems/MyEffects';
-import { MyEnviroment } from './MainViewItems/MyEnvironment';
-import { MyText3Ds } from './MainViewItems/MyText3Ds';
-import { StaticObjects } from './MainViewItems/Objects';
-import { Avatar } from './MainViewItems/Player';
-import { MySky } from './MainViewItems/Sky';
-import { ThreeObjects } from './MainViewItems/Three';
-import { UICanvas } from './MainViewUIs/UICanvas';
+import { MemoLandScapeMaker } from "./LandScapeMaker";
+import { FogComponent } from "./MainViewItems/Fog";
+import { MyLights } from "./MainViewItems/Lights";
+import { MyEffects } from "./MainViewItems/MyEffects";
+import { MyEnviroment } from "./MainViewItems/MyEnvironment";
+import { MyText3Ds } from "./MainViewItems/MyText3Ds";
+import { StaticObjects } from "./MainViewItems/Objects";
+import { Avatar } from "./MainViewItems/Player";
+import { MySky } from "./MainViewItems/Sky";
+import { ThreeObjects } from "./MainViewItems/Three";
+import { UICanvas } from "./MainViewUIs/UICanvas";
 
 let renderCount = 0;
 const _MainViewer = () => {
-  console.log('MainViewer Render', renderCount++);
+  console.log("MainViewer Render", renderCount++);
 
   return (
     <div className='relative h-full bg-[#e2e2e2]'>
@@ -89,7 +89,7 @@ const _HelperControls = () => {
   const { t } = useTranslation();
 
   return (
-    <div className={clsx('absolute left-1/2 top-10 z-50 -translate-x-1/2')}>
+    <div className={clsx("absolute left-1/2 top-10 z-50 -translate-x-1/2")}>
       <a
         className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
         onMouseLeave={() => setIsHovered(false)}
@@ -123,16 +123,16 @@ const _HelperControls = () => {
                   type='text'
                   placeholder={cameraFar.toString()}
                   onKeyDown={(e: any) => {
-                    if (e.key == 'Enter') {
+                    if (e.key == "Enter") {
                       if (isNumber(e.target.value)) {
                         const val = Number(e.target.value);
                         if (val <= 4096) {
                           globalEditorStore.cameraFar = val;
                         } else {
                           MySwal.fire({
-                            title: 'エラー',
-                            text: '4096以下の値を入力してください',
-                            icon: 'error',
+                            title: "エラー",
+                            text: "4096以下の値を入力してください",
+                            icon: "error",
                           });
                         }
                       }
@@ -153,7 +153,7 @@ const _HelperControls = () => {
         {isConfHovered && (
           <div className='absolute left-0 top-full z-10 block min-w-[200px] rounded-md bg-primary p-3 shadow-md'>
             <div>
-              <span className='mb-2 mr-3'>{t('physics')}</span>
+              <span className='mb-2 mr-3'>{t("physics")}</span>
               <input
                 type='checkbox'
                 className='inline'
@@ -287,8 +287,8 @@ const SystemHelper = () => {
         </GizmoHelper>
       )}
       <Perf
-        position={'bottom-right'}
-        style={{ position: 'absolute' }}
+        position={"bottom-right"}
+        style={{ position: "absolute" }}
         minimal={minimal}
         onClick={() => setMinimal(!minimal)}
       />
@@ -335,32 +335,32 @@ const ContextHelper = () => {
         }
       }
     };
-    const canvas = document.getElementById('mainviewcanvas');
-    if (canvas && editorState.viewSelect === 'mainview') {
-      document.addEventListener('keydown', (e) => {
+    const canvas = document.getElementById("mainviewcanvas");
+    if (canvas && editorState.viewSelect === "mainview") {
+      document.addEventListener("keydown", (e) => {
         // SHIFT + A
-        if (e.shiftKey && e.key === 'A') {
+        if (e.shiftKey && e.key === "A") {
           // 押された時のpointerの位置を取得
           // -1 ~ +1の範囲
           onCreateMenu();
         }
       });
       // MouseMove
-      canvas.addEventListener('mousemove', (e) => {
+      canvas.addEventListener("mousemove", (e) => {
         point.current.x = e.clientX;
         point.current.y = e.clientY;
       });
       // TouchMove
-      canvas.addEventListener('touchmove', (e) => {
+      canvas.addEventListener("touchmove", (e) => {
         point.current.x = e.touches[0].clientX;
         point.current.y = e.touches[0].clientY;
       });
     }
     return () => {
       if (canvas) {
-        document.removeEventListener('keydown', () => {});
-        canvas.removeEventListener('mousemove', () => {});
-        canvas.removeEventListener('touchmove', () => {});
+        document.removeEventListener("keydown", () => {});
+        canvas.removeEventListener("mousemove", () => {});
+        canvas.removeEventListener("touchmove", () => {});
       }
     };
   }, [oms, editorState.viewSelect, pointer, camera, scene.children, addOM]);

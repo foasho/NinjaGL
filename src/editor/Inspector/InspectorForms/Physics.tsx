@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { OMPhysicsType } from '@ninjagl/core';
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { useSnapshot } from 'valtio';
+import { OMPhysicsType } from "@ninjagl/core";
+import { useTranslation } from "react-i18next";
+import Select from "react-select";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const Physics = () => {
   const state = useSnapshot(editorStore);
@@ -23,9 +23,9 @@ export const Physics = () => {
   // 物理判定選択肢
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const physicsOptions: { value: OMPhysicsType; label: string }[] = [
-    { value: 'box', label: t('box') },
-    { value: 'capsule', label: t('capsule') },
-    { value: 'sphere', label: t('sphere') },
+    { value: "box", label: t("box") },
+    { value: "capsule", label: t("capsule") },
+    { value: "sphere", label: t("sphere") },
   ];
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export const Physics = () => {
   return (
     <>
       <div className='mt-2'>
-        <div className='inline-block px-0.5 py-1.5 text-lg font-bold'>{t('isPhysics')}</div>
+        <div className='inline-block px-0.5 py-1.5 text-lg font-bold'>{t("isPhysics")}</div>
         <div className='inline-block pl-3'>
           <input
             type='checkbox'
@@ -83,7 +83,7 @@ export const Physics = () => {
           <>
             <Select options={physicsOptions} value={phyTypeOpt} onChange={onChangePhyType} />
             <div>
-              <div className='inline-block py-1.5 pl-3 font-bold'>{t('isMoveable')}</div>
+              <div className='inline-block py-1.5 pl-3 font-bold'>{t("isMoveable")}</div>
               <div className='inline-block pl-3'>
                 <input
                   type='checkbox'

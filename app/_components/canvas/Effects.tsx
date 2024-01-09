@@ -1,4 +1,4 @@
-import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Noise } from "@react-three/postprocessing";
 
 export const Effects = () => {
   return (

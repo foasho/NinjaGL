@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { Tooltip } from '@nextui-org/react';
+import { Tooltip } from "@nextui-org/react";
 import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
-import { PutBlobResult } from '@vercel/blob';
-import Image from 'next/image';
-import { useSession } from 'next-auth/react';
-import { useTranslation } from 'react-i18next';
-import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
-import { BsFolder } from 'react-icons/bs';
-import { MdUploadFile } from 'react-icons/md';
-import Swal from 'sweetalert2';
-import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from 'three';
+import { PutBlobResult } from "@vercel/blob";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import { BsFolder } from "react-icons/bs";
+import { MdUploadFile } from "react-icons/md";
+import Swal from "sweetalert2";
+import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 
-import { b64EncodeUnicode } from '@/commons/functional';
-import { Loading2D } from '@/commons/Loading2D';
-import { MySwal } from '@/commons/Swal';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { b64EncodeUnicode } from "@/commons/functional";
+import { Loading2D } from "@/commons/Loading2D";
+import { MySwal } from "@/commons/Swal";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import {
   formatBytes,
   glsl_icon,
@@ -29,10 +29,10 @@ import {
   js_icon,
   mp3_icon,
   njc_icon,
-} from '@/utils/files';
+} from "@/utils/files";
 
-import { AssetsContextMenu } from '../Dialogs/AssetsContextMenu';
-import { globalContentStore, globalScriptStore } from '../Store/Store';
+import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
+import { globalContentStore, globalScriptStore } from "../Store/Store";
 
 export interface IFileProps {
   url: string;
@@ -61,7 +61,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const [showMenu, setShowMenu] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [containerPosition, setContainerPosition] = useState({ x: 0, y: 0 });
-  const [path, setPath] = useState('');
+  const [path, setPath] = useState("");
   const [offset, setOffset] = useState(0);
   const [maxPages, setMaxPages] = useState(1);
   const { t } = useTranslation();
@@ -80,7 +80,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
       ? path
       : `${b64EncodeUnicode(session.user!.email as string)}/${path}`;
     try {
-      const response = await fetch(`/api/storage/list?prefix=${prefix.replaceAll('//', '/')}&offset=${offset}`);
+      const response = await fetch(`/api/storage/list?prefix=${prefix.replaceAll("//", "/")}&offset=${offset}`);
       const items = await response.json();
       const files: IFileProps[] = [];
       for (const item of items) {
@@ -95,7 +95,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
       }
       setFiles(files);
     } catch (error) {
-      console.error('Error fetching file:', error);
+      console.error("Error fetching file:", error);
     }
     setIsLoading(false);
   };
@@ -105,10 +105,10 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     return () => {};
   }, [path, offset]);
 
-  const onDoubleClick = (type: 'dir' | 'gltf' | 'js' | 'njc', path: string, name: string | null = null) => {
-    if (type == 'dir' && path) {
+  const onDoubleClick = (type: "dir" | "gltf" | "js" | "njc", path: string, name: string | null = null) => {
+    if (type == "dir" && path) {
       setPath(path);
-    } else if (type == 'njc' && path && name) {
+    } else if (type == "njc" && path && name) {
       // NJCファイルをダブルクリックした場合は、エディタに読み込む
       props.changeProject(path, name);
     }
@@ -123,14 +123,14 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
    * @param value
    */
   const onMoveDic = (value: string) => {
-    const routes = path.split('/');
-    let _path = '';
+    const routes = path.split("/");
+    let _path = "";
     if (value.length > 0) {
       for (const route of routes) {
         if (route.length == 0) {
           continue;
         }
-        _path += route + '/';
+        _path += route + "/";
         if (route == value) {
           break;
         }
@@ -159,28 +159,28 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     // 4.5MB以上のファイルはアップロードできない
     if (file.size > 4.5 * 1024 * 1024) {
       MySwal.fire({
-        title: '4.5MB以上のファイルはアップロードできません',
+        title: "4.5MB以上のファイルはアップロードできません",
       });
       return;
     }
     const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/${filename}`;
     try {
       const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-        method: 'POST',
+        method: "POST",
         body: file,
       });
 
       const blob = (await response.json()) as PutBlobResult;
 
       if (!blob.url) {
-        throw new Error('Error uploading file');
+        throw new Error("Error uploading file");
       }
       MySwal.fire({
-        title: 'アップロードに成功しました',
+        title: "アップロードに成功しました",
       });
       MoveDirectory(); //Directoryの更新
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error("Error:", error.message);
     }
   };
 
@@ -205,18 +205,18 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     <>
       <div className='select-none'>
         <div className='inline-block pb-1 pr-3 text-sm font-bold'>
-          {t('contentsBrowser')}
+          {t("contentsBrowser")}
           <span
             className='cursor-pointer pl-2 text-lg'
             onClick={() => {
-              onMoveDic('');
+              onMoveDic("");
             }}
           >
             <AiFillHome className='inline' />
           </span>
         </div>
         <div className='pb-2'>
-          {path.split('/').map((route, idx) => {
+          {path.split("/").map((route, idx) => {
             if (route.length == 0) {
               return null;
             }
@@ -373,8 +373,8 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     setShowMenu(false);
   };
 
-  let contentsSelectType: 'gltf' | 'mp3' | 'js' | 'glsl' | 'image' | 'ter' | 'avt' | 'njc' | 'dir' | null = null;
-  const iconImgStyle = 'p-1.5 w-4/5 mx-auto max-h-10 text-4xl select inline';
+  let contentsSelectType: "gltf" | "mp3" | "js" | "glsl" | "image" | "ter" | "avt" | "njc" | "dir" | null = null;
+  const iconImgStyle = "p-1.5 w-4/5 mx-auto max-h-10 text-4xl select inline";
   if (props.isFile) {
     if (isImage(props.name)) {
       icon = (
@@ -382,14 +382,14 @@ export const ContentViewer = (props: IContenetViewerProps) => {
           <Image src={props.url} className={iconImgStyle} width={35} height={35} alt='icon-image' draggable={true} />
         </>
       );
-      contentsSelectType = 'image';
+      contentsSelectType = "image";
     } else if (isGLTF(props.name)) {
       icon = (
         <>
           <a className={iconImgStyle}>
             <Image
               src={gltf_icon}
-              className={iconImgStyle + ' cursor-grab'}
+              className={iconImgStyle + " cursor-grab"}
               width={35}
               height={35}
               alt='icon-gltf'
@@ -398,35 +398,35 @@ export const ContentViewer = (props: IContenetViewerProps) => {
           </a>
         </>
       );
-      contentsSelectType = 'gltf';
+      contentsSelectType = "gltf";
     } else if (isNJC(props.name)) {
       icon = (
         <>
           <img src={njc_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
-      contentsSelectType = 'njc';
+      contentsSelectType = "njc";
     } else if (isMP3(props.name)) {
       icon = (
         <>
           <img src={mp3_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
-      contentsSelectType = 'mp3';
+      contentsSelectType = "mp3";
     } else if (isGLSL(props.name)) {
       icon = (
         <>
           <img src={glsl_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
-      contentsSelectType = 'glsl';
+      contentsSelectType = "glsl";
     } else if (isJS(props.name)) {
       icon = (
         <>
           <img src={js_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
-      contentsSelectType = 'js';
+      contentsSelectType = "js";
     }
     // どれにも該当しない場合は表示しない
     else {
@@ -438,15 +438,15 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         <BsFolder className='inline' />
       </a>
     );
-    contentsSelectType = 'dir';
+    contentsSelectType = "dir";
   }
 
   const onDoubleClick = async (type: string, name: string) => {
     if (props.isDirectory) {
       if (props.onDoubleClick) {
-        props.onDoubleClick('dir', props.url, name);
+        props.onDoubleClick("dir", props.url, name);
       }
-    } else if (props.isFile && type == 'js') {
+    } else if (props.isFile && type == "js") {
       const sm = { ...InitScriptManagement };
       sm.id = MathUtils.generateUUID();
       const scriptCheck = async () => {
@@ -455,27 +455,27 @@ export const ContentViewer = (props: IContenetViewerProps) => {
           if (response.ok) {
             const text = await response.text();
             // 特定の文字列をチェックします。
-            const searchString = 'initialize';
-            const searchString2 = 'frameLoop';
+            const searchString = "initialize";
+            const searchString2 = "frameLoop";
             if (text.includes(searchString) && text.includes(searchString2)) {
               sm.script = text;
               return true;
             }
           }
         } catch (error) {
-          console.error('Error fetching file:', error);
+          console.error("Error fetching file:", error);
         }
         return false;
       };
       const result = await scriptCheck();
       if (result) {
-        sm.name = props.name.split('/').pop() || '';
+        sm.name = props.name.split("/").pop() || "";
         const success = editor.addSM(sm);
         if (!success) {
           MySwal.fire({
-            title: t('scriptError'),
-            text: t('scriptErrorAlreadyText'),
-            icon: 'error',
+            title: t("scriptError"),
+            text: t("scriptErrorAlreadyText"),
+            icon: "error",
           });
         } else {
           globalScriptStore.currentSM = sm;
@@ -483,19 +483,19 @@ export const ContentViewer = (props: IContenetViewerProps) => {
         }
       } else {
         MySwal.fire({
-          title: t('scriptError'),
-          text: t('scriptErrorText'),
-          icon: 'error',
+          title: t("scriptError"),
+          text: t("scriptErrorText"),
+          icon: "error",
         });
       }
-    } else if (props.isFile && type == 'njc') {
-      if (props.onDoubleClick) props.onDoubleClick('njc', props.url, name);
-    } else if (props.isFile && type == 'gltf') {
+    } else if (props.isFile && type == "njc") {
+      if (props.onDoubleClick) props.onDoubleClick("njc", props.url, name);
+    } else if (props.isFile && type == "gltf") {
       // モデルを配置
       editor.addOM({
         id: MathUtils.generateUUID(),
         name: `*model`,
-        type: 'object',
+        type: "object",
         args: {
           url: props.url,
           castShadow: true,
@@ -503,8 +503,8 @@ export const ContentViewer = (props: IContenetViewerProps) => {
           distance: 25,
         },
         physics: false,
-        phyType: 'box',
-        visibleType: 'auto',
+        phyType: "box",
+        visibleType: "auto",
         visible: true,
       });
     }
@@ -545,10 +545,10 @@ export const ContentViewer = (props: IContenetViewerProps) => {
           isDisabled={!props.isFile}
           content={
             <div className='text-left'>
-              <strong>{t('filename')}:&nbsp;</strong>
+              <strong>{t("filename")}:&nbsp;</strong>
               {props.name}
               <br />
-              <strong>{t('size')}:&nbsp;</strong>
+              <strong>{t("size")}:&nbsp;</strong>
               {formatBytes(props.size)}
             </div>
           }
@@ -572,7 +572,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
  * @returns
  */
 const CreateGLTFImage = (gltfUrl): Promise<string | null> => {
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = 100;
   canvas.height = 100;
 
@@ -628,10 +628,10 @@ const CreateGLTFImage = (gltfUrl): Promise<string | null> => {
         console.error(error);
         cleanup();
         Swal.fire({
-          title: 'Error',
+          title: "Error",
           text: `Loading GLTF Error。\nFileName: ${gltfUrl}\n\n${error}`,
-          icon: 'error',
-          confirmButtonText: 'OK',
+          icon: "error",
+          confirmButtonText: "OK",
         }).then((result) => {
           return resolve(null);
         });

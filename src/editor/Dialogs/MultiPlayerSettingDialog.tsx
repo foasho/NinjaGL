@@ -1,6 +1,6 @@
-import ReactDOM from 'react-dom/client';
+import ReactDOM from "react-dom/client";
 
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 interface IResponse {
   response: () => void;
@@ -11,7 +11,7 @@ export const MultiPlayerDialog = (prop: IResponse) => {
     prop.response();
   };
   const handleClickOutside = (event) => {
-    if (event.target.classList.contains('selectNewObjectDialog')) {
+    if (event.target.classList.contains("selectNewObjectDialog")) {
       prop.response();
     }
   };
@@ -19,7 +19,7 @@ export const MultiPlayerDialog = (prop: IResponse) => {
     <div onClick={handleClickOutside}>
       <div>
         <div>Multi Player Setting</div>
-        {t('nowDeveloping')}
+        {t("nowDeveloping")}
         <div>
           <input type='text' />
         </div>
@@ -34,7 +34,7 @@ export const MultiPlayerDialog = (prop: IResponse) => {
  */
 export const showMultiPlayerDialog = async () => {
   return new Promise((resolve) => {
-    const dialogContainer = document.getElementById('myDialog') as HTMLElement;
+    const dialogContainer = document.getElementById("myDialog") as HTMLElement;
     const root = ReactDOM.createRoot(dialogContainer);
     const handleDialogClose = () => {
       root.unmount();

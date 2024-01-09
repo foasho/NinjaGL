@@ -1,9 +1,3 @@
-
-
 export const ProgressBar = () => {
-  
-  return (
-    <>
-    </>
-  )
-}
+  return <></>;
+};

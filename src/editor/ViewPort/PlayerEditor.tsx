@@ -1,20 +1,21 @@
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from "react";
 
-import { convertObjectToFile } from '@ninjagl/core';
-import { Center, ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
-import { PutBlobResult } from '@vercel/blob';
-import { useSession } from 'next-auth/react';
-import { useTranslation } from 'react-i18next';
-import Swal from 'sweetalert2';
-import { AnimationClip, Box3, Group, Vector3 } from 'three';
-import { SkeletonUtils } from 'three-stdlib';
-import tunnel from 'tunnel-rat';
+import { convertObjectToFile } from "@ninjagl/core";
+import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
+import { PutBlobResult } from "@vercel/blob";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+import Swal from "sweetalert2";
+import { AnimationClip, Box3, Group, Vector3 } from "three";
+import { SkeletonUtils } from "three-stdlib";
+import tunnel from "tunnel-rat";
 
-import { b64EncodeUnicode } from '@/commons/functional';
-import { Loading2D } from '@/commons/Loading2D';
-import { MySwal } from '@/commons/Swal';
-import { globalEditorStore } from '../Store/editor';
+import { b64EncodeUnicode } from "@/commons/functional";
+import { Loading2D } from "@/commons/Loading2D";
+import { MySwal } from "@/commons/Swal";
+
+import { globalEditorStore } from "../Store/editor";
 
 const dom = tunnel();
 
@@ -42,12 +43,12 @@ export const PlayerEditor = () => {
     if (files.length > 0 && session) {
       const file = files[0];
       // ファイル名が.glbか.gltfでなければエラー
-      const ext = file.name.split('.').pop();
-      if (ext !== 'glb' && ext !== 'gltf') {
+      const ext = file.name.split(".").pop();
+      if (ext !== "glb" && ext !== "gltf") {
         MySwal.fire({
-          icon: 'error',
-          title: t('error'),
-          text: t('leastSelectGLTF'),
+          icon: "error",
+          title: t("error"),
+          text: t("leastSelectGLTF"),
         });
         return;
       }
@@ -70,39 +71,39 @@ export const PlayerEditor = () => {
       target.userData = config;
       const file = await convertObjectToFile(target);
       MySwal.fire({
-        title: t('inputFileName'),
-        input: 'text',
+        title: t("inputFileName"),
+        input: "text",
         showCancelButton: true,
-        confirmButtonText: t('confirmSave'),
+        confirmButtonText: t("confirmSave"),
         showLoaderOnConfirm: true,
         preConfirm: async (inputStr: string) => {
           //バリデーションを入れたりしても良い
           if (inputStr.length == 0) {
-            return MySwal.showValidationMessage(t('leastInput'));
+            return MySwal.showValidationMessage(t("leastInput"));
           }
           if (session) {
             // ログインしていればストレージに保存
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append("file", file);
             // formData.append("file", blob);
             const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/Characters/${inputStr}.glb`;
             try {
               const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-                method: 'POST',
+                method: "POST",
                 body: file,
               });
               const blob = (await response.json()) as PutBlobResult;
               if (!blob.url) {
-                throw new Error('Error uploading file');
+                throw new Error("Error uploading file");
               }
               MySwal.fire({
-                icon: 'success',
-                title: t('success'),
-                text: t('saveSuccess') + `\nCharacters/${inputStr}.glb`,
+                icon: "success",
+                title: t("success"),
+                text: t("saveSuccess") + `\nCharacters/${inputStr}.glb`,
               });
-              globalEditorStore.viewSelect = 'mainview';
+              globalEditorStore.viewSelect = "mainview";
             } catch (error) {
-              console.error('Error:', error.message);
+              console.error("Error:", error.message);
             }
           }
         },
@@ -113,9 +114,9 @@ export const PlayerEditor = () => {
     } else {
       // @ts-ignore
       Swal.fire({
-        icon: 'error',
-        title: t('error'),
-        text: t('leastSelect'),
+        icon: "error",
+        title: t("error"),
+        text: t("leastSelect"),
       });
     }
   };
@@ -137,7 +138,7 @@ export const PlayerEditor = () => {
         ) : (
           <>
             <div
-              style={{ background: '#121212', height: '100%', position: 'relative' }}
+              style={{ background: "#121212", height: "100%", position: "relative" }}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => {
@@ -148,18 +149,18 @@ export const PlayerEditor = () => {
             >
               <div
                 style={{
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  position: 'absolute',
-                  width: '100%',
-                  textAlign: 'center',
-                  top: '50%',
-                  left: '50%',
-                  maxWidth: '50%',
-                  transform: 'translate(-50%, -50%)',
+                  color: "#fff",
+                  fontWeight: "bold",
+                  position: "absolute",
+                  width: "100%",
+                  textAlign: "center",
+                  top: "50%",
+                  left: "50%",
+                  maxWidth: "50%",
+                  transform: "translate(-50%, -50%)",
                 }}
               >
-                {t('uploadGLTF')}
+                {t("uploadGLTF")}
               </div>
               <input
                 type='file'
@@ -193,19 +194,19 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
   const grp = useRef<Group>(null);
   const [size, setSize] = useState<Vector3>(new Vector3());
   const [scale, setScale] = useState(1);
-  const [idleAnimName, setIdleAnimName] = useState('Walk');
-  const [walkAnimName, setWalkAnimName] = useState('Walk');
-  const [runAnimName, setRunAnimName] = useState('Run');
-  const [jumpAnimName, setJumpAnimName] = useState('Jump');
-  const [weaponAnimName, setWeaponAnimName] = useState('Weapon');
-  const [subWeaponAnimName, setSubWeaponAnimName] = useState('SubWeapon');
+  const [idleAnimName, setIdleAnimName] = useState("Walk");
+  const [walkAnimName, setWalkAnimName] = useState("Walk");
+  const [runAnimName, setRunAnimName] = useState("Run");
+  const [jumpAnimName, setJumpAnimName] = useState("Jump");
+  const [weaponAnimName, setWeaponAnimName] = useState("Weapon");
+  const [subWeaponAnimName, setSubWeaponAnimName] = useState("SubWeapon");
 
   useEffect(() => {
     const box = new Box3().setFromObject(scene);
     const size = box.getSize(new Vector3());
     setSize(size);
-    if (actions && actions['Idle']) {
-      actions['Idle'].play();
+    if (actions && actions["Idle"]) {
+      actions["Idle"].play();
     }
   }, [scene]);
 
@@ -280,7 +281,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           <boxGeometry args={[0.5, 0.03, 0.03]} />
           <meshStandardMaterial color='red' />
         </mesh>
-        <Text position={[0.5, 2, 0]} scale={0.25} color={'red'}>
+        <Text position={[0.5, 2, 0]} scale={0.25} color={"red"}>
           2m
         </Text>
         <mesh position={[0, 1.5, 0]}>
@@ -291,7 +292,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           <boxGeometry args={[0.5, 0.03, 0.03]} />
           <meshStandardMaterial color='red' />
         </mesh>
-        <Text position={[0.5, 1, 0]} scale={0.25} color={'red'}>
+        <Text position={[0.5, 1, 0]} scale={0.25} color={"red"}>
           1m
         </Text>
         <mesh position={[0, 0.5, 0]}>
@@ -308,7 +309,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           <div>
             <div className='pt-2 font-bold'>
               <span>
-                {t('scale')}: {scale.toFixed(1)}
+                {t("scale")}: {scale.toFixed(1)}
               </span>
             </div>
             <input
@@ -325,12 +326,12 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
         </div>
         <div>
           <div className='pt-2 font-bold'>
-            <span>{t('motionSelect')}</span>
+            <span>{t("motionSelect")}</span>
           </div>
           {/** Idle設定 */}
           <div className='pt-2'>
-            <div>{t('idle')}</div>
-            <select className='rounded-sm' defaultValue={'Idle'} onChange={onSelectIdle}>
+            <div>{t("idle")}</div>
+            <select className='rounded-sm' defaultValue={"Idle"} onChange={onSelectIdle}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -343,8 +344,8 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** 歩く設定 */}
           <div className='pt-2'>
-            <div>{t('walk')}</div>
-            <select className='rounded-sm' defaultValue={'Walk'} onChange={onSelectWalk}>
+            <div>{t("walk")}</div>
+            <select className='rounded-sm' defaultValue={"Walk"} onChange={onSelectWalk}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -357,8 +358,8 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** 走る設定 */}
           <div className='pt-2'>
-            <div>{t('run')}</div>
-            <select className='rounded-sm' defaultValue={'Run'} onChange={onSelectRun}>
+            <div>{t("run")}</div>
+            <select className='rounded-sm' defaultValue={"Run"} onChange={onSelectRun}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -371,8 +372,8 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** ジャンプ設定 */}
           <div className='pt-2'>
-            <div>{t('jump')}</div>
-            <select className='rounded-sm' defaultValue={'Jump'} onChange={onSelectJump}>
+            <div>{t("jump")}</div>
+            <select className='rounded-sm' defaultValue={"Jump"} onChange={onSelectJump}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -385,8 +386,8 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** ウェポン設定 */}
           <div className='pt-2'>
-            <div>{t('weapon')}</div>
-            <select className='rounded-sm' defaultValue={'Weapon'} onChange={onSelectWeapon}>
+            <div>{t("weapon")}</div>
+            <select className='rounded-sm' defaultValue={"Weapon"} onChange={onSelectWeapon}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -399,8 +400,8 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
           {/** サブウェポン */}
           <div className='py-2'>
-            <div>{t('subWeapon')}</div>
-            <select className='rounded-sm' defaultValue={'SubWeapon'} onChange={onSelectSubWeapon}>
+            <div>{t("subWeapon")}</div>
+            <select className='rounded-sm' defaultValue={"SubWeapon"} onChange={onSelectSubWeapon}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -431,7 +432,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
                 );
               }}
             >
-              {t('save')}
+              {t("save")}
             </button>
           </div>
         </div>

@@ -1,15 +1,15 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { Clone, useGLTF } from '@react-three/drei';
-import { Euler, Group, Matrix4, Vector3 } from 'three';
-import { GLTF } from 'three-stdlib';
-import { useSnapshot } from 'valtio';
+import { IObjectManagement } from "@ninjagl/core";
+import { Clone, useGLTF } from "@react-three/drei";
+import { Euler, Group, Matrix4, Vector3 } from "three";
+import { GLTF } from "three-stdlib";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 export const NPCs = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -17,10 +17,10 @@ export const NPCs = () => {
 
   useEffect(() => {
     const update = () => {
-      const _npcs = oms.current.filter((om) => om.type === 'ai-npc');
+      const _npcs = oms.current.filter((om) => om.type === "ai-npc");
       if (_npcs !== npcs) {
         setNPCs(_npcs);
-        console.log('Update NPCs', _npcs);
+        console.log("Update NPCs", _npcs);
       }
     };
     update();
@@ -42,7 +42,7 @@ export const NPCs = () => {
 const NPC = ({ ...om }: IObjectManagement) => {
   const ref = useRef<Group>(null);
   const state = useSnapshot(editorStore);
-  const { scene } = useGLTF(om.args.url || '/models/ybot.glb') as GLTF;
+  const { scene } = useGLTF(om.args.url || "/models/ybot.glb") as GLTF;
   const editor = useNinjaEditor();
 
   // 操作系
@@ -78,7 +78,7 @@ const NPC = ({ ...om }: IObjectManagement) => {
     };
   });
 
-  console.log('NPCs');
+  console.log("NPCs");
 
   return (
     <>

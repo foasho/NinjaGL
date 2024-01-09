@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { Environment, Float, Lightformer } from '@react-three/drei';
-import { Euler, Vector3, DoubleSide } from 'three';
-import { useSnapshot } from 'valtio';
+import { Environment, Float, Lightformer } from "@react-three/drei";
+import { Euler, Vector3, DoubleSide } from "three";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 /**
  * Environment
@@ -20,8 +20,8 @@ export const MyEnviroment = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   useEffect(() => {
     const update = () => {
-      const _envs = oms.current.find((om) => om.type == 'environment');
-      const _lfs = oms.current.filter((om) => om.type == 'lightformer');
+      const _envs = oms.current.find((om) => om.type == "environment");
+      const _lfs = oms.current.filter((om) => om.type == "lightformer");
       setEnvironment(_envs);
       setLightformers(_lfs);
     };
@@ -34,7 +34,7 @@ export const MyEnviroment = () => {
 
   let enabled = false;
   if (environment) {
-    if (environment.args.visible !== '') enabled = true;
+    if (environment.args.visible !== "") enabled = true;
   }
 
   return (
@@ -119,7 +119,7 @@ const LightFormerControl = ({ om }) => {
       )}
       <mesh
         onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
-        onPointerMissed={(e) => e.type === 'click' && (editorStore.currentId = null)}
+        onPointerMissed={(e) => e.type === "click" && (editorStore.currentId = null)}
         ref={catchRef}
       >
         <planeGeometry />

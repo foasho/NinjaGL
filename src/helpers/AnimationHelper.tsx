@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
-import { useAnimations } from '@react-three/drei';
-import { Object3D } from 'three';
+import { useAnimations } from "@react-three/drei";
+import { Object3D } from "three";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export type AnimationHelperProps = {
   id: string;
@@ -19,7 +19,7 @@ export const AnimationHelper = ({
   visible = true,
   onClick = () => {},
   onPointerMissed = () => {},
-  initSelectAnimation = 'Idle',
+  initSelectAnimation = "Idle",
 }: AnimationHelperProps) => {
   const animations = object.animations;
   const { ref, actions } = useAnimations(animations);

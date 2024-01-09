@@ -1,9 +1,9 @@
-import { useRef } from 'react';
+import { useRef } from "react";
 
-import { useGLTF } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { easing } from 'maath';
-import { Mesh, MeshStandardMaterial } from 'three';
+import { useGLTF } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { easing } from "maath";
+import { Mesh, MeshStandardMaterial } from "three";
 
 type ModelProps = {
   children?: React.ReactNode;
@@ -11,10 +11,10 @@ type ModelProps = {
   roughness?: number;
 };
 
-export const Shuriken = ({ children, color = 'white', roughness = 0.75 }: ModelProps) => {
+export const Shuriken = ({ children, color = "white", roughness = 0.75 }: ModelProps) => {
   const ref = useRef<Mesh>(null);
 
-  const { nodes, materials } = useGLTF('/top-models/shuriken.glb') as any;
+  const { nodes, materials } = useGLTF("/top-models/shuriken.glb") as any;
 
   useFrame((_, delta) => {
     if (ref.current && ref.current.material) {
@@ -27,11 +27,11 @@ export const Shuriken = ({ children, color = 'white', roughness = 0.75 }: ModelP
     <group scale={0.4}>
       {children ? (
         <>
-          <mesh geometry={nodes['Object_4'].geometry}>{children}</mesh>
+          <mesh geometry={nodes["Object_4"].geometry}>{children}</mesh>
         </>
       ) : (
         <>
-          <mesh geometry={nodes['Object_4'].geometry} material={materials['Material.003']} />
+          <mesh geometry={nodes["Object_4"].geometry} material={materials["Material.003"]} />
         </>
       )}
     </group>

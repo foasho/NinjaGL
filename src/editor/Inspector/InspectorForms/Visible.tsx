@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import Select from "react-select";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { normalStyles } from '@/utils/styles';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { normalStyles } from "@/utils/styles";
 
 export const Visible = () => {
   const state = useSnapshot(editorStore);
@@ -14,18 +14,18 @@ export const Visible = () => {
   const editor = useNinjaEditor();
   const { t } = useTranslation();
   const om = editor.getOMById(id);
-  const [visibleType, setVisibleType] = useState<{ value: 'none' | 'auto' | 'force'; label: string }>(
+  const [visibleType, setVisibleType] = useState<{ value: "none" | "auto" | "force"; label: string }>(
     om?.args.visibleType
       ? { value: om.args.visibleType, label: om.args.visibleType }
-      : { value: 'auto', label: t('autoScaling') },
+      : { value: "auto", label: t("autoScaling") },
   );
   const [distance, setDistance] = useState(25);
 
   // 描画種別の選択肢
-  const visibleTypeOptions: { value: 'auto' | 'force' | 'none'; label: string }[] = [
-    { value: 'auto', label: t('autoScaling') },
-    { value: 'force', label: t('visibleForce') },
-    { value: 'none', label: t('visibleNone') },
+  const visibleTypeOptions: { value: "auto" | "force" | "none"; label: string }[] = [
+    { value: "auto", label: t("autoScaling") },
+    { value: "force", label: t("visibleForce") },
+    { value: "none", label: t("visibleNone") },
   ];
 
   useEffect(() => {
@@ -49,14 +49,14 @@ export const Visible = () => {
    * オート表示の場合のみ設定可
    */
   const changeDistance = (e) => {
-    if (id) editor.setArg(id, 'distance', Number(e.target.value));
+    if (id) editor.setArg(id, "distance", Number(e.target.value));
     setDistance(Number(e.target.value));
   };
 
   return (
     <div className='mt-2'>
       <div>
-        <div className='inline-block p-2 text-sm font-bold'>{t('visibleType')}</div>
+        <div className='inline-block p-2 text-sm font-bold'>{t("visibleType")}</div>
         <div>
           <Select
             options={visibleTypeOptions}
@@ -67,21 +67,14 @@ export const Visible = () => {
         </div>
       </div>
       {/** オート表示の場合のみ設定可 */}
-      {visibleType && visibleType.value == 'auto' && (
+      {visibleType && visibleType.value == "auto" && (
         <div className='mb-4 mt-2'>
           <div>
-            {t('visibleDistance')}
+            {t("visibleDistance")}
             <span className='pl-2'>{distance}</span>
           </div>
           <div>
-            <input
-              type='range'
-              min={0}
-              value={distance}
-              max={150}
-              step={1}
-              onChange={changeDistance}
-            />
+            <input type='range' min={0} value={distance} max={150} step={1} onChange={changeDistance} />
           </div>
         </div>
       )}

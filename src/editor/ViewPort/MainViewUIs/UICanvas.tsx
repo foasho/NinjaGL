@@ -1,11 +1,11 @@
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useState, memo } from "react";
 
-import Moveable from 'react-moveable';
-import { useSnapshot } from 'valtio';
+import Moveable from "react-moveable";
+import { useSnapshot } from "valtio";
 
-import { globalEditorStore } from '@/editor/Store/editor';
-import { globalUIStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { globalEditorStore } from "@/editor/Store/editor";
+import { globalUIStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 const _UICanvas = () => {
   const { uiGridNum, uiMode } = useSnapshot(globalEditorStore);
@@ -15,7 +15,7 @@ const _UICanvas = () => {
   const [elementGuidelines, setElementGuideliens] = useState<HTMLElement[]>([]);
 
   useEffect(() => {
-    setElementGuideliens([].slice.call(document.querySelectorAll('.moveable')));
+    setElementGuideliens([].slice.call(document.querySelectorAll(".moveable")));
     return () => {
       setElementGuideliens([]);
     };
@@ -35,12 +35,12 @@ const _UICanvas = () => {
   }, [uistore.currentId]);
 
   return (
-    <div className='absolute top-0 z-20 h-full w-full bg-white/50' style={{ display: uiMode ? 'block' : 'none' }}>
+    <div className='absolute top-0 z-20 h-full w-full bg-white/50' style={{ display: uiMode ? "block" : "none" }}>
       <div
         style={{
-          height: '100%',
-          width: '100%',
-          position: 'relative',
+          height: "100%",
+          width: "100%",
+          position: "relative",
         }}
       >
         {/* <div
@@ -94,7 +94,7 @@ const UICanvasHelper = (props: IUICanvasHelper) => {
                         <div
                           className='target moveable relative z-10 box-border h-full border-[0.5px] border-dashed border-primary/75'
                           style={{ width: `${gridwidth}%` }}
-                          key={j + '-ui-grid'}
+                          key={j + "-ui-grid"}
                         ></div>
                       );
                     })}

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { IShaderManagement } from '@ninjagl/core';
-import { useTranslation } from 'react-i18next';
+import { IShaderManagement } from "@ninjagl/core";
+import { useTranslation } from "react-i18next";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const ShaderNavigation = () => {
   const editor = useNinjaEditor();

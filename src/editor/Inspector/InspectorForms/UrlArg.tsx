@@ -1,16 +1,16 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from "react";
 
-import { Select, SelectItem, Button, RadioGroup, Radio, Spinner } from '@nextui-org/react';
-import { useSession } from 'next-auth/react';
-import { useTranslation } from 'react-i18next';
-import { FaCheck } from 'react-icons/fa';
-import { useSnapshot } from 'valtio';
+import { Select, SelectItem, Button, RadioGroup, Radio, Spinner } from "@nextui-org/react";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+import { FaCheck } from "react-icons/fa";
+import { useSnapshot } from "valtio";
 
-import { b64EncodeUnicode } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { b64EncodeUnicode } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-type UrlArgType = 'url' | 'item';
+type UrlArgType = "url" | "item";
 
 type ItemProps = {
   value: string;
@@ -29,9 +29,9 @@ export const UrlArg = () => {
 
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [type, setType] = useState<UrlArgType>('url');
+  const [type, setType] = useState<UrlArgType>("url");
   const [items, setItems] = useState<ItemProps[]>([]);
-  const [url, setUrl] = useState<string>('');
+  const [url, setUrl] = useState<string>("");
 
   const updateUrl = (e: ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
@@ -49,7 +49,7 @@ export const UrlArg = () => {
     if (url && om) {
       const val = await validateUrl(url);
       if (val) {
-        editor.setArg(om.id, 'url', url);
+        editor.setArg(om.id, "url", url);
       }
     }
   };
@@ -80,10 +80,10 @@ export const UrlArg = () => {
         setUrl(om!.args.url);
       }
     };
-    if (type === 'url' && om && om.args.url) {
+    if (type === "url" && om && om.args.url) {
       getValidationItem();
     }
-    if (type === 'item') {
+    if (type === "item") {
       getItems();
     }
   }, [type]);
@@ -99,11 +99,11 @@ export const UrlArg = () => {
             setType(e.target.value as UrlArgType);
           }}
         >
-          <Radio value='url'>{t('url')}</Radio>
-          <Radio value='item'>{t('item')}</Radio>
+          <Radio value='url'>{t("url")}</Radio>
+          <Radio value='item'>{t("item")}</Radio>
         </RadioGroup>
       </div>
-      {type === 'url' && (
+      {type === "url" && (
         <div className='flex'>
           <input
             type='text'
@@ -123,7 +123,7 @@ export const UrlArg = () => {
           </Button>
         </div>
       )}
-      {type === 'item' && (
+      {type === "item" && (
         <Select label='URL' startContent={isLoading ? <Spinner size='sm' /> : <></>}>
           {items.map((item) => (
             <SelectItem key={item.value} value={item.value}>

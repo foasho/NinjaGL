@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { useTranslation } from 'react-i18next';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import { BsBox, BsLightbulbFill, BsPersonFill } from 'react-icons/bs';
-import { MdTerrain } from 'react-icons/md';
-import Swal from 'sweetalert2';
-import { useSnapshot } from 'valtio';
+import { IObjectManagement } from "@ninjagl/core";
+import { useTranslation } from "react-i18next";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
+import { MdTerrain } from "react-icons/md";
+import Swal from "sweetalert2";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const HierarchyTree = () => {
   const { oms, getOMById, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -45,7 +45,7 @@ export const HierarchyTree = () => {
   return (
     <>
       <div>
-        <div className='select-none pl-[10px] text-sm font-bold text-white'>{t('objects')}</div>
+        <div className='select-none pl-[10px] text-sm font-bold text-white'>{t("objects")}</div>
         <div className='m-0 h-[25vh] min-h-[100px] overflow-y-auto overflow-x-hidden rounded-sm border-1 border-[#6e6b6b] p-2'>
           {trees.map((om, idx) => {
             let isSelect = false;
@@ -73,20 +73,20 @@ const TreeItem = (prop: ITreeItem) => {
   const { t } = useTranslation();
   const { om } = prop;
   const id = om.id;
-  let lineStyle = 'text-white bg-[#797272]';
+  let lineStyle = "text-white bg-[#797272]";
   if (prop.index % 2 !== 0) {
-    lineStyle = 'text-gray-300 bg-[#4b4848]';
+    lineStyle = "text-gray-300 bg-[#4b4848]";
   }
   let className = `text-xs py-0.5 px-1.25 items-center ${lineStyle}`;
   if (prop.isSelect) {
-    className += ' border border-[1.5px] border-[#43D9D9]';
+    className += " border border-[1.5px] border-[#43D9D9]";
   }
   let typeIcon = <BsBox />; // デフォルトObject型
-  if (prop.om.type == 'terrain') {
+  if (prop.om.type == "landscape") {
     typeIcon = <MdTerrain />;
-  } else if (prop.om.type == 'light') {
+  } else if (prop.om.type == "light") {
     typeIcon = <BsLightbulbFill />;
-  } else if (prop.om.type == 'avatar') {
+  } else if (prop.om.type == "avatar") {
     typeIcon = <BsPersonFill />;
   }
 
@@ -102,15 +102,15 @@ const TreeItem = (prop: ITreeItem) => {
    */
   const changeName = async () => {
     Swal.fire({
-      title: '名前の変更',
-      input: 'text',
+      title: "名前の変更",
+      input: "text",
       showCancelButton: true,
-      confirmButtonText: '変更',
+      confirmButtonText: "変更",
       showLoaderOnConfirm: true,
       preConfirm: async (inputStr) => {
         //バリデーションを入れたりしても良い
         if (inputStr.length == 0) {
-          return Swal.showValidationMessage('1文字以上いれてね');
+          return Swal.showValidationMessage("1文字以上いれてね");
         }
         return inputStr;
       },
@@ -145,7 +145,7 @@ const TreeItem = (prop: ITreeItem) => {
    * 選択/非選択を切り替える
    */
   const onSelectObject = () => {
-    if (ref.current!.classList.contains('select')) {
+    if (ref.current!.classList.contains("select")) {
       state.init();
     } else {
       editorStore.currentId = prop.om.id;

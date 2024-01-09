@@ -1,26 +1,25 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { Text3D, useFont, useHelper } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
-import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from 'three';
-import { useSnapshot } from 'valtio';
+import { IObjectManagement } from "@ninjagl/core";
+import { Text3D, useFont, useHelper } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from "three";
+import { useSnapshot } from "valtio";
 
-import { EnableClickTrigger } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { EnableClickTrigger } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 const _MyText3Ds = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [text3ds, setText3ds] = useState<IObjectManagement[]>([]);
   useEffect(() => {
     const update = () => {
-      const _text3ds = oms.current.filter((om) => om.type == 'text3d');
+      const _text3ds = oms.current.filter((om) => om.type == "text3d");
       setText3ds(_text3ds);
-      console.log('Update Text3Ds', _text3ds);
-     
+      console.log("Update Text3Ds", _text3ds);
     };
     update();
     onOMsChanged(update);
@@ -29,7 +28,7 @@ const _MyText3Ds = () => {
     };
   }, []);
 
-  console.log('text3ds', text3ds);
+  console.log("text3ds", text3ds);
 
   return (
     <>
@@ -43,7 +42,7 @@ const _MyText3Ds = () => {
 const Text3d = ({ om }) => {
   const ref = useRef<any>();
   const { camera } = useThree();
-  const font = useFont('/fonts/MPLUS.json');
+  const font = useFont("/fonts/MPLUS.json");
   const state = useSnapshot(editorStore);
   const matRef = useRef<MeshStandardMaterial>(null);
   const editor = useNinjaEditor();
@@ -118,10 +117,10 @@ const Text3d = ({ om }) => {
             editorStore.currentId = id;
           }
         }}
-        onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
+        onPointerMissed={(e) => e.type === "click" && editorStore.init()}
       >
         {om.args.content}
-        <meshStandardMaterial ref={matRef} color={om.args.color || '#43D9D9'} />
+        <meshStandardMaterial ref={matRef} color={om.args.color || "#43D9D9"} />
       </Text3D>
     </>
   );

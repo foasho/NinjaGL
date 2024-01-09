@@ -1,9 +1,9 @@
-import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link } from '@nextui-org/react';
-import { AiOutlineSearch } from 'react-icons/ai';
+import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
+import { AiOutlineSearch } from "react-icons/ai";
 
-import { InstallLink } from './InstallLink';
-import { StartedBtn } from './StartedBtn';
-import { TutorialMenu } from './TutorialMenu';
+import { InstallLink } from "./InstallLink";
+import { StartedBtn } from "./StartedBtn";
+import { TutorialMenu } from "./TutorialMenu";
 
 export const SideBar = () => {
   return (
@@ -26,10 +26,10 @@ export const SideBar = () => {
       <NavbarContent justify='end'>
         <Input
           classNames={{
-            base: 'max-w-full sm:max-w-[12rem] h-10',
-            mainWrapper: 'h-full',
-            input: 'text-small',
-            inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
+            base: "max-w-full sm:max-w-[12rem] h-10",
+            mainWrapper: "h-full",
+            input: "text-small",
+            inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
           }}
           placeholder='検索...'
           size='sm'

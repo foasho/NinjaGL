@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 
-import { OrbitControls, PerspectiveCamera as DPerspectiveCamera } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, PerspectiveCamera } from 'three';
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { useSnapshot } from 'valtio';
+import { OrbitControls, PerspectiveCamera as DPerspectiveCamera } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Vector3, PerspectiveCamera } from "three";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { useSnapshot } from "valtio";
 
-import { EDeviceType, useInputControl } from '@/hooks/useInputControl';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { globalContentStore, editorStore } from '../Store/Store';
+import { globalContentStore, editorStore } from "../Store/Store";
 
 /**
  * WASDカメラ視点移動
@@ -98,9 +98,9 @@ export const MoveableCameraControl = (props: ICameraControl) => {
 
   useFrame((_, delta) => {
     // Fキーが押された瞬間の検出
-    if (input.pressedKeys.includes('KeyF') && !focusOnObject) {
+    if (input.pressedKeys.includes("KeyF") && !focusOnObject) {
       setFocusOnObject(true);
-    } else if (!input.pressedKeys.includes('KeyF') && focusOnObject) {
+    } else if (!input.pressedKeys.includes("KeyF") && focusOnObject) {
       setFocusOnObject(false);
     }
 

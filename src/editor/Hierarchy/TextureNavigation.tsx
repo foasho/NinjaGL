@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { ITextureManagement } from '@ninjagl/core';
-import { useTranslation } from 'react-i18next';
+import { ITextureManagement } from "@ninjagl/core";
+import { useTranslation } from "react-i18next";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const TextureNavigation = () => {
   const editor = useNinjaEditor();

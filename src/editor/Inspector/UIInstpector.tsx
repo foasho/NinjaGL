@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-import { IUIManagement } from '@ninjagl/core';
-import { useSnapshot } from 'valtio';
+import { IUIManagement } from "@ninjagl/core";
+import { useSnapshot } from "valtio";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { globalUIStore } from '../Store/Store';
+import { globalUIStore } from "../Store/Store";
 
 export const UIInspector = () => {
   const { currentId } = useSnapshot(globalUIStore);
@@ -17,7 +17,6 @@ export const UIInspector = () => {
 };
 
 const UIInspectorItem = ({ um }: { um: IUIManagement }) => {
-
   return (
     <div>
       {/** Top */}
@@ -47,8 +46,6 @@ const UIInspectorItem = ({ um }: { um: IUIManagement }) => {
 };
 
 const StyleEditor = () => {
-  const [code, setCode] = useState<string>('');
-  return (
-    <></>
-  );
+  const [code, setCode] = useState<string>("");
+  return <></>;
 };

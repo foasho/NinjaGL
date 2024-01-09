@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const Color = () => {
   const state = useSnapshot(editorStore);
@@ -24,24 +24,24 @@ export const Color = () => {
    */
   const changeColor = (e) => {
     if (id) {
-      editor.setArg(id, 'color', e.target.value);
+      editor.setArg(id, "color", e.target.value);
     }
     setColor(e.target.value);
   };
 
   return (
     <div>
-      <div>{t('color')}</div>
+      <div>{t("color")}</div>
       <div>
         <input
-          type={'color'}
+          type={"color"}
           value={color}
           onChange={(e) => changeColor(e)}
           onFocus={() => (editorStore.editorFocus = true)}
           onBlur={() => (editorStore.editorFocus = false)}
-          defaultValue={'#ffffff'}
+          defaultValue={"#ffffff"}
         />
-        <input type={'text'} value={color} />
+        <input type={"text"} value={color} />
       </div>
     </div>
   );

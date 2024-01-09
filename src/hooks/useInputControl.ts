@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import { IInputMovement } from '@ninjagl/core';
-import { Vector2 } from 'three';
+import { IInputMovement } from "@ninjagl/core";
+import { Vector2 } from "three";
 
 /**
  * ----------------
@@ -15,12 +15,12 @@ export enum EDeviceType {
   Mobile = 3,
 }
 export const detectDeviceType = (): EDeviceType => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // check if window is defined (we are on client side)
     const ua = navigator.userAgent;
-    if (ua.indexOf('iPhone') > 0 || ua.indexOf('iPod') > 0 || (ua.indexOf('Android') > 0 && ua.indexOf('Mobile') > 0)) {
+    if (ua.indexOf("iPhone") > 0 || ua.indexOf("iPod") > 0 || (ua.indexOf("Android") > 0 && ua.indexOf("Mobile") > 0)) {
       return EDeviceType.Mobile;
-    } else if (ua.indexOf('iPad') > 0 || ua.indexOf('Android') > 0) {
+    } else if (ua.indexOf("iPad") > 0 || ua.indexOf("Android") > 0) {
       return EDeviceType.Tablet;
     } else if (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform)) {
       return EDeviceType.Tablet;
@@ -36,25 +36,25 @@ export const detectDeviceType = (): EDeviceType => {
  * ActionキーのリストEnum
  */
 interface IActionKey {
-  KeyW: 'forward';
-  KeyS: 'backward';
-  KeyA: 'left';
-  KeyD: 'right';
-  Space: 'jump';
-  ShiftLeft: 'dash';
-  ShiftRight: 'dash';
-  Shift: 'dash';
+  KeyW: "forward";
+  KeyS: "backward";
+  KeyA: "left";
+  KeyD: "right";
+  Space: "jump";
+  ShiftLeft: "dash";
+  ShiftRight: "dash";
+  Shift: "dash";
   [key: string]: any;
 }
 export const EActionKey: IActionKey = {
-  KeyW: 'forward',
-  KeyS: 'backward',
-  KeyA: 'left',
-  KeyD: 'right',
-  Space: 'jump',
-  ShiftLeft: 'dash',
-  ShiftRight: 'dash',
-  Shift: 'dash',
+  KeyW: "forward",
+  KeyS: "backward",
+  KeyA: "left",
+  KeyD: "right",
+  Space: "jump",
+  ShiftLeft: "dash",
+  ShiftRight: "dash",
+  Shift: "dash",
 };
 
 const initialKeyState: IInputMovement = {
@@ -163,10 +163,10 @@ interface IInputControl {
 }
 export const useInputControl = ({
   device = EDeviceType.Unknown,
-  targetId = 'target',
+  targetId = "target",
   ratio = 0.375, // 0 ~ 1: 画面の何割をジョイスティックにするか
   margin = [48, 64], // 画面の端から何pxMarginをとるか
-  joyColor = 'rgba(255, 242, 189, 0.8)',
+  joyColor = "rgba(255, 242, 189, 0.8)",
 }: IInputControl) => {
   const [setupCount, setSetupCount] = useState<number>(1);
   // タッチ発火フラグ(入力が競合しないように)
@@ -192,30 +192,30 @@ export const useInputControl = ({
       target = document.body;
     }
     // すでにJoyStickのIDがある場合は追加しない
-    if (document.getElementById('joystick')) {
+    if (document.getElementById("joystick")) {
       return;
     }
-    joystick.current = document.createElement('div');
-    joystick.current.id = 'joystick';
-    joystickOuter.current = document.createElement('div');
-    joystickOuter.current.className = 'input-joystick';
-    joystickInner.current = document.createElement('div');
-    canvas.current = document.createElement('canvas');
+    joystick.current = document.createElement("div");
+    joystick.current.id = "joystick";
+    joystickOuter.current = document.createElement("div");
+    joystickOuter.current.className = "input-joystick";
+    joystickInner.current = document.createElement("div");
+    canvas.current = document.createElement("canvas");
     // 追加: ジョイスティックのスタイル設定
     joystickOuter.current.style.outlineOffset = `-${outerLineWidth}px`;
     joystickOuter.current.style.outline = `${outerLineWidth}px solid rgba(16, 16, 16, 0)`;
-    joystickOuter.current.style.borderRadius = '50%';
-    joystickInner.current.style.position = 'absolute';
+    joystickOuter.current.style.borderRadius = "50%";
+    joystickInner.current.style.position = "absolute";
     const zIndex = 100 + setupCount;
     joystickOuter.current.style.zIndex = `${zIndex}`;
-    joystickInner.current.style.left = '50%';
-    joystickInner.current.style.top = '50%';
-    joystickInner.current.style.transform = 'translate(-50%, -50%)';
-    joystickInner.current.style.borderRadius = '50%';
-    joystickInner.current.style.pointerEvents = 'none';
-    joystickOuter.current.style.position = 'absolute';
+    joystickInner.current.style.left = "50%";
+    joystickInner.current.style.top = "50%";
+    joystickInner.current.style.transform = "translate(-50%, -50%)";
+    joystickInner.current.style.borderRadius = "50%";
+    joystickInner.current.style.pointerEvents = "none";
+    joystickOuter.current.style.position = "absolute";
     // Outer/Innerのデザインを非表示にする
-    joystickInner.current.style.visibility = 'hidden';
+    joystickInner.current.style.visibility = "hidden";
     // JoyStickをtargetのidをもつ子要素として追加
     target.appendChild(joystick.current);
     const rect = target.getBoundingClientRect();
@@ -223,8 +223,8 @@ export const useInputControl = ({
     if (rect.width < rect.height) {
       const mg = Array.isArray(margin) ? margin[1] : margin;
       joystickOuter.current.style.bottom = `${mg}px`;
-      joystickOuter.current.style.left = '50%';
-      joystickOuter.current.style.transform = 'translateX(-50%)';
+      joystickOuter.current.style.left = "50%";
+      joystickOuter.current.style.transform = "translateX(-50%)";
     } else {
       const mg_x = Array.isArray(margin) ? margin[0] : margin;
       const mg_y = Array.isArray(margin) ? margin[1] : margin;
@@ -239,9 +239,9 @@ export const useInputControl = ({
     joystickInner.current.style.height = `${joyRadius.current * 0.5}px`;
 
     // 追加: Canvas要素の作成
-    canvas.current.style.position = 'absolute';
-    canvas.current.style.width = '100%';
-    canvas.current.style.height = '100%';
+    canvas.current.style.position = "absolute";
+    canvas.current.style.width = "100%";
+    canvas.current.style.height = "100%";
     canvas.current.width = joyRadius.current;
     canvas.current.height = joyRadius.current;
 
@@ -259,23 +259,23 @@ export const useInputControl = ({
     img.src = svgBase64;
     img.onload = () => {
       // 十字キーを生成し、joyStickOuterに追加
-      const cross = document.createElement('div');
-      cross.id = 'cross';
-      cross.style.position = 'absolute';
-      cross.style.width = '50%';
-      cross.style.height = '50%';
-      cross.style.left = '25%';
-      cross.style.top = '25%';
+      const cross = document.createElement("div");
+      cross.id = "cross";
+      cross.style.position = "absolute";
+      cross.style.width = "50%";
+      cross.style.height = "50%";
+      cross.style.left = "25%";
+      cross.style.top = "25%";
       cross.style.backgroundImage = `url(${svgBase64})`;
-      cross.style.backgroundSize = '100% 100%';
-      cross.style.backgroundRepeat = 'no-repeat';
-      cross.style.backgroundPosition = 'center';
-      cross.className = 'move-svg';
+      cross.style.backgroundSize = "100% 100%";
+      cross.style.backgroundRepeat = "no-repeat";
+      cross.style.backgroundPosition = "center";
+      cross.className = "move-svg";
       joystickOuter.current!.appendChild(cross);
     };
     if (isDesktop()) {
-      joystick.current.style.display = 'none';
-      canvas.current.style.display = 'none';
+      joystick.current.style.display = "none";
+      canvas.current.style.display = "none";
     }
   };
 
@@ -287,7 +287,7 @@ export const useInputControl = ({
 
   // 描画関数
   const drawArc = (angle: number) => {
-    const ctx = canvas.current!.getContext('2d');
+    const ctx = canvas.current!.getContext("2d");
     const range = 0.17; // 弧の範囲を円の1/6に変更
     const innerRange = range / 1.5; // さらに内側の弧の範囲を円の1/2に変更
     if (ctx) {
@@ -324,7 +324,7 @@ export const useInputControl = ({
 
   const moveKeyFromCode = (key: string) => {
     if (EActionKey[key] === undefined) {
-      return 'action';
+      return "action";
     }
     return EActionKey[key];
   };
@@ -334,7 +334,7 @@ export const useInputControl = ({
    */
   const handleKeyDown = (e: KeyboardEvent) => {
     const key = moveKeyFromCode(e.code);
-    movement.current[key] = key === 'action' ? true : 1;
+    movement.current[key] = key === "action" ? true : 1;
     movement.current.speed = 1;
     //  movement.currentが移動系の入力がされた場合にフラグを発火
     if (movement.current[key]) {
@@ -347,7 +347,7 @@ export const useInputControl = ({
   };
   const handleKeyUp = (e: KeyboardEvent) => {
     const key = moveKeyFromCode(e.code);
-    movement.current[key] = key === 'action' ? false : 0;
+    movement.current[key] = key === "action" ? false : 0;
     const index = movement.current.pressedKeys.indexOf(e.code);
     if (index > -1) {
       movement.current.pressedKeys.splice(index, 1);
@@ -373,7 +373,7 @@ export const useInputControl = ({
       const targetTouch = e.touches[e.touches.length - 1];
       movementTouchId = targetTouch.identifier;
       movement.current.prevDrag = new Vector2(targetTouch.clientX, targetTouch.clientY);
-      canvas.current!.style.visibility = 'visible';
+      canvas.current!.style.visibility = "visible";
       joystickOuter.current!.style.outline = `${outerLineWidth}px solid rgba(16, 16, 16, 0.1)`;
       // setTouchFlag(true);
     }
@@ -433,10 +433,10 @@ export const useInputControl = ({
       // 変更: すべての終了したタッチイベントをループ処理
       if (e.changedTouches[i].identifier === movementTouchId) {
         // Inner Reset
-        joystickInner.current!.style.left = '50%';
-        joystickInner.current!.style.top = '50%';
+        joystickInner.current!.style.left = "50%";
+        joystickInner.current!.style.top = "50%";
         // Canvas Reset
-        canvas.current!.style.visibility = 'hidden';
+        canvas.current!.style.visibility = "hidden";
         joystickOuter.current!.style.outline = `${outerLineWidth}px solid rgba(16, 16, 16, 0)`;
 
         // Reset movement states
@@ -488,8 +488,8 @@ export const useInputControl = ({
           keyboardFlag.current = false;
           gamepadFlag.current = true;
         } else {
-          angleX = '0';
-          angleY = '0';
+          angleX = "0";
+          angleY = "0";
         }
         // どれかが入力されていればキーボード入力をさせない
         if (forward || backward || left || right || jump || dash || action) {
@@ -534,10 +534,10 @@ export const useInputControl = ({
 
     // デスクトップ対応
     if (deviceType == EDeviceType.Desktop) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('keyup', handleKeyUp);
-      document.addEventListener('mousedown', handleClickDown);
-      document.addEventListener('mouseup', handleClickUp);
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", handleKeyUp);
+      document.addEventListener("mousedown", handleClickDown);
+      document.addEventListener("mouseup", handleClickUp);
     }
 
     // スマホ / タブレット対応
@@ -547,19 +547,19 @@ export const useInputControl = ({
         return;
       }
       // 発火はOuter範囲内のみ
-      joystickOuter.current!.addEventListener('touchstart', handleTouchStart);
+      joystickOuter.current!.addEventListener("touchstart", handleTouchStart);
       // document.addEventListener("touchmove", handleTouchMove, { passive: false });
-      joystickOuter.current!.addEventListener('touchmove', handleTouchMove, { passive: false });
-      joystickOuter.current!.addEventListener('touchend', handleTouchEnd);
+      joystickOuter.current!.addEventListener("touchmove", handleTouchMove, { passive: false });
+      joystickOuter.current!.addEventListener("touchend", handleTouchEnd);
       if (runId) {
         const runBtn = document.getElementById(runId);
         if (runBtn) {
           // タッチされたときにmovement.current.dashをtrueにする
-          runBtn.addEventListener('touchstart', () => {
+          runBtn.addEventListener("touchstart", () => {
             movement.current.dash = true;
           });
           // タッチが離されたときにmovement.current.dashをfalseにする
-          runBtn.addEventListener('touchend', () => {
+          runBtn.addEventListener("touchend", () => {
             movement.current.dash = false;
           });
         }
@@ -568,22 +568,22 @@ export const useInputControl = ({
         const jumpBtn = document.getElementById(jumpId);
         if (jumpBtn) {
           // タッチされたときにmovement.current.jumpをtrueにする
-          jumpBtn.addEventListener('touchstart', () => {
+          jumpBtn.addEventListener("touchstart", () => {
             movement.current.jump = true;
           });
           // タッチが離されたときにmovement.current.jumpをfalseにする
-          jumpBtn.addEventListener('touchend', () => {
+          jumpBtn.addEventListener("touchend", () => {
             movement.current.jump = false;
           });
         }
       }
       // waves
       if (joystickOuter.current) {
-        joystickOuter.current.id = 'joystick-outer';
-        const color1 = document.createElement('div');
-        color1.className = 'outer-color move1';
-        const color2 = document.createElement('div');
-        color2.className = 'outer-color move2';
+        joystickOuter.current.id = "joystick-outer";
+        const color1 = document.createElement("div");
+        color1.className = "outer-color move1";
+        const color2 = document.createElement("div");
+        color2.className = "outer-color move2";
         // joyStickOuterに追加
         joystickOuter.current.appendChild(color1);
         joystickOuter.current.appendChild(color2);
@@ -597,35 +597,36 @@ export const useInputControl = ({
 
     return () => {
       if (deviceType == EDeviceType.Desktop) {
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keyup', handleKeyUp);
-        document.removeEventListener('mousedown', handleClickDown);
-        document.removeEventListener('mouseup', handleClickUp);
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keyup", handleKeyUp);
+        document.removeEventListener("mousedown", handleClickDown);
+        document.removeEventListener("mouseup", handleClickUp);
       }
       if (deviceType === EDeviceType.Mobile || (deviceType === EDeviceType.Tablet && joystickOuter.current)) {
-        joystickOuter.current!.removeEventListener('touchstart', handleTouchStart);
-        joystickOuter.current!.removeEventListener('touchmove', handleTouchMove);
-        joystickOuter.current!.removeEventListener('touchend', handleTouchEnd);
+        joystickOuter.current!.removeEventListener("touchstart", handleTouchStart);
+        joystickOuter.current!.removeEventListener("touchmove", handleTouchMove);
+        joystickOuter.current!.removeEventListener("touchend", handleTouchEnd);
         if (runId) {
           const runBtn = document.getElementById(runId);
           if (runBtn) {
-            runBtn.removeEventListener('touchstart', () => {
+            runBtn.removeEventListener("touchstart", () => {
               movement.current.dash = true;
             });
-            runBtn.removeEventListener('touchend', () => {
+            runBtn.removeEventListener("touchend", () => {
+              // eslint-disable-next-line react-hooks/exhaustive-deps
               movement.current.dash = false;
             });
           }
         }
         // wavesの削除
         if (joystickOuter.current) {
-          joystickOuter.current.id = '';
-          const colors = document.getElementsByClassName('outer-color');
+          joystickOuter.current.id = "";
+          const colors = document.getElementsByClassName("outer-color");
           for (let i = 0; i < colors.length; i++) {
             try {
               joystickOuter.current.removeChild(colors[i]);
             } catch (e) {
-              // console.log(e);
+              console.error(e);
             }
           }
         }
@@ -633,6 +634,7 @@ export const useInputControl = ({
       // ゲームパッド対応
       clearInterval(gamepadInterval);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId, jumpId]);
 
   return {

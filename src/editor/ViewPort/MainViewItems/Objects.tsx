@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useRef, MutableRefObject, useState, Suspense } from 'react';
+import { useEffect, useRef, MutableRefObject, useState, Suspense } from "react";
 
-import { IObjectManagement } from '@ninjagl/core';
-import { useGLTF } from '@react-three/drei';
-import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
-import { GLTF, SkeletonUtils } from 'three-stdlib';
-import { useSnapshot } from 'valtio';
+import { IObjectManagement } from "@ninjagl/core";
+import { useGLTF } from "@react-three/drei";
+import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
+import { GLTF, SkeletonUtils } from "three-stdlib";
+import { useSnapshot } from "valtio";
 
-import { Loading3D } from '@/commons/Loading3D';
-import { editorStore } from '@/editor/Store/Store';
-import { AnimationHelper } from '@/helpers/AnimationHelper';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { Loading3D } from "@/commons/Loading3D";
+import { editorStore } from "@/editor/Store/Store";
+import { AnimationHelper } from "@/helpers/AnimationHelper";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from './PivoitControl';
+import { PivotControls } from "./PivoitControl";
 
 /**
  * シーン上で構築される基本的なオブジェクト
@@ -22,7 +22,7 @@ export const StaticObjects = () => {
   const [staticOMs, setStaticOMs] = useState<IObjectManagement[]>([]);
   useEffect(() => {
     const update = () => {
-      const _oms = oms.current.filter((om) => om.type == 'object');
+      const _oms = oms.current.filter((om) => om.type == "object");
       setStaticOMs(_oms);
     };
     update();
@@ -34,7 +34,7 @@ export const StaticObjects = () => {
   return (
     <>
       {staticOMs.map((om) => {
-        if (om.type == 'object') {
+        if (om.type == "object") {
           return <StaticObject om={om} key={om.id} />;
         }
       })}
@@ -115,7 +115,7 @@ const StaticObject = ({ om }) => {
       // animationsもコピー
       clone.animations = animations;
       if (id) {
-        setArg(id, 'animations', animations);
+        setArg(id, "animations", animations);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {
@@ -155,7 +155,7 @@ const StaticObject = ({ om }) => {
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
             onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
-            onPointerMissed={(e) => e.type === 'click' && editorStore.init()}
+            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
             object={clone}
           />
         </group>

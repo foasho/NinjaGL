@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { AnimationClip } from 'three';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import Select from "react-select";
+import { AnimationClip } from "three";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { normalStyles } from '@/utils/styles';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { normalStyles } from "@/utils/styles";
 
 export const Animation = () => {
   const state = useSnapshot(editorStore);
@@ -18,7 +18,7 @@ export const Animation = () => {
 
   // Animationsの設定
   const [defalutAnim, setDefalutAnim] = useState<{ value: string; label: string }>(
-    om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: '', label: '' },
+    om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: "", label: "" },
   );
   const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop);
 
@@ -33,7 +33,7 @@ export const Animation = () => {
    * デフォルトアニメーションの変更
    */
   const changeDefaultAnimation = (selectDefaultAnimation) => {
-    if (id) editor.setArg(id, 'defaultAnimation', selectDefaultAnimation.value);
+    if (id) editor.setArg(id, "defaultAnimation", selectDefaultAnimation.value);
     setDefalutAnim(selectDefaultAnimation);
   };
 
@@ -41,7 +41,7 @@ export const Animation = () => {
    * アニメーションループの切り替え
    */
   const onCheckAnimationLoop = () => {
-    if (id) editor.setArg(id, 'animationLoop', !animLoop);
+    if (id) editor.setArg(id, "animationLoop", !animLoop);
     setAnimLoop(!animLoop);
   };
 
@@ -50,7 +50,7 @@ export const Animation = () => {
       <div>
         {om && om.args.animations && om.args.animations.length > 0 && (
           <>
-            <div>{t('animations')}</div>
+            <div>{t("animations")}</div>
             <div>
               <Select
                 options={om.args.animations.map((anim: AnimationClip) => {
@@ -65,7 +65,7 @@ export const Animation = () => {
         )}
       </div>
       <div className='mt-2'>
-        <div className='inline-block px-0.5 text-lg font-bold'>{t('animationLoop')}</div>
+        <div className='inline-block px-0.5 text-lg font-bold'>{t("animationLoop")}</div>
         <div className='inline-block pl-3'>
           <input
             type='checkbox'

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import { useSnapshot } from "valtio";
 
-import { isNumber } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { isNumber } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const Intensity = () => {
   const state = useSnapshot(editorStore);
@@ -26,7 +26,7 @@ export const Intensity = () => {
   const changeIntensity = (e) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
-      editor.setArg(id, 'intensity', Number(targetValue));
+      editor.setArg(id, "intensity", Number(targetValue));
       setIntensity(Number(targetValue));
     }
   };
@@ -35,10 +35,10 @@ export const Intensity = () => {
     <>
       <div>
         <div>
-          {t('intensity')}: {intensity}
+          {t("intensity")}: {intensity}
         </div>
         <div>
-          <input type={'range'} min={0} max={10} step={0.01} value={intensity} onChange={(e) => changeIntensity(e)} />
+          <input type={"range"} min={0} max={10} step={0.01} value={intensity} onChange={(e) => changeIntensity(e)} />
         </div>
       </div>
     </>

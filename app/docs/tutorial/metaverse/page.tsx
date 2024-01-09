@@ -1,4 +1,4 @@
-import MetaverseTutorial from '@/docs/tutorials/metaverse.mdx';
+import MetaverseTutorial from "@/docs/tutorials/metaverse.mdx";
 
 const MetaverseTutorialpage = () => {
   return <MetaverseTutorial />;

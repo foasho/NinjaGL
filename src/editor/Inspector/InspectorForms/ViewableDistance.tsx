@@ -1,11 +1,11 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import { useSnapshot } from "valtio";
 
-import { isNumber } from '@/commons/functional';
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { isNumber } from "@/commons/functional";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 export const ViewableDistance = () => {
   const state = useSnapshot(editorStore);
@@ -26,7 +26,7 @@ export const ViewableDistance = () => {
   const changeDistance = (e: ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
-      editor.setArg(id, 'distance', Number(targetValue));
+      editor.setArg(id, "distance", Number(targetValue));
       setDistance(Number(targetValue));
     }
   };
@@ -34,10 +34,10 @@ export const ViewableDistance = () => {
   return (
     <div>
       <div>
-        {t('distance')}: {distance}
+        {t("distance")}: {distance}
       </div>
       <div>
-        <input type={'range'} min={0} max={10} step={0.01} value={distance} onChange={(e) => changeDistance(e)} />
+        <input type={"range"} min={0} max={10} step={0.01} value={distance} onChange={(e) => changeDistance(e)} />
       </div>
     </div>
   );

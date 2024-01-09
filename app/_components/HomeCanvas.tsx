@@ -1,13 +1,12 @@
-'use client';
-import { Suspense } from 'react';
+"use client";
+import { Suspense } from "react";
 
-import { Environment, SoftShadows } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Environment, SoftShadows } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
 
-import { CenterRapier } from './canvas/CenterRapier';
-import { Effects } from './canvas/Effects';
-import { Lighting } from './canvas/LIghting';
-import { Rigs } from './canvas/Rig';
+import { CenterRapier } from "./canvas/CenterRapier";
+import { Effects } from "./canvas/Effects";
+import { Lighting } from "./canvas/LIghting";
 
 export const HomeCanvas = () => {
   return (
@@ -23,7 +22,7 @@ export const HomeCanvas = () => {
         <meshStandardMaterial color='black' />
       </mesh>
       <SoftShadows />
-      <color attach='background' args={['#504F56']} />
+      <color attach='background' args={["#504F56"]} />
     </Canvas>
   );
 };

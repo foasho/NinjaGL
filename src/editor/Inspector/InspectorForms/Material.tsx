@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { useSnapshot } from 'valtio';
+import { useTranslation } from "react-i18next";
+import Select from "react-select";
+import { useSnapshot } from "valtio";
 
-import { editorStore } from '@/editor/Store/Store';
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
-import { normalStyles } from '@/utils/styles';
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { normalStyles } from "@/utils/styles";
 
 export const MaterialForm = () => {
   const state = useSnapshot(editorStore);
@@ -15,7 +15,7 @@ export const MaterialForm = () => {
   const id = state.currentId;
   const om = editor.getOMById(id);
   const [materialType, setMaterialType] = useState<{
-    value: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection';
+    value: "standard" | "phong" | "toon" | "shader" | "reflection";
     label: string;
   }>();
   const [materialColor, setMaterialColor] = useState<string>();
@@ -25,8 +25,8 @@ export const MaterialForm = () => {
       if (om.args.materialData !== undefined) {
         setMaterialType(materialOptions.find((option) => option.value == om.args.materialData.type));
       } else {
-        setMaterialType(materialOptions.find((option) => option.value == 'standard'));
-        setMaterialColor('#ffffff');
+        setMaterialType(materialOptions.find((option) => option.value == "standard"));
+        setMaterialColor("#ffffff");
       }
       if (om.args.materialData !== undefined && om.args.materialData.value)
         setMaterialColor(om.args.materialData.value);
@@ -34,19 +34,19 @@ export const MaterialForm = () => {
   }, [om]);
 
   // マテリアル種別の選択肢
-  const materialOptions: { value: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection'; label: string }[] = [
-    { value: 'standard', label: t('StandardMaterial') },
-    { value: 'phong', label: t('PhongMaterial') },
-    { value: 'toon', label: t('ToonMaterial') },
+  const materialOptions: { value: "standard" | "phong" | "toon" | "shader" | "reflection"; label: string }[] = [
+    { value: "standard", label: t("StandardMaterial") },
+    { value: "phong", label: t("PhongMaterial") },
+    { value: "toon", label: t("ToonMaterial") },
     // { value: 'shader', label: t('ShaderMaterial') },
-    { value: 'reflection', label: t('reflection') },
+    { value: "reflection", label: t("reflection") },
   ];
 
   /**
    * マテリアル(種別/色)の変更
    */
-  const changeMaterial = (type: 'shader' | 'standard' | 'phong' | 'toon' | 'reflection', value: any) => {
-    if (type !== 'shader' && value && id) {
+  const changeMaterial = (type: "shader" | "standard" | "phong" | "toon" | "reflection", value: any) => {
+    if (type !== "shader" && value && id) {
       editor.setMaterialData(id, type, value);
       setMaterialColor(value);
       setMaterialType(materialOptions.find((option) => option.value == type));
@@ -55,9 +55,9 @@ export const MaterialForm = () => {
 
   return (
     <div className='mx-4'>
-      <div className='px-0.5 py-1.5 text-sm font-bold'>{t('materialConfig')}</div>
+      <div className='px-0.5 py-1.5 text-sm font-bold'>{t("materialConfig")}</div>
       <div>
-        <div className='px-0.5 py-1.5 text-sm font-bold'>{t('type')}</div>
+        <div className='px-0.5 py-1.5 text-sm font-bold'>{t("type")}</div>
         <div>
           <Select
             options={materialOptions}
@@ -67,12 +67,12 @@ export const MaterialForm = () => {
           />
         </div>
       </div>
-      {materialType && materialType.value !== 'shader' && (
+      {materialType && materialType.value !== "shader" && (
         <div className='mt-3'>
-          <div className='text-sm font-bold'>{t('color')}</div>
+          <div className='text-sm font-bold'>{t("color")}</div>
           <div className='flex items-center pt-0.5 leading-[30px]'>
             <input
-              type={'color'}
+              type={"color"}
               value={materialColor}
               onChange={(e) => changeMaterial(materialType.value, e.target.value)}
               onFocus={() => (editorStore.editorFocus = true)}
@@ -80,7 +80,7 @@ export const MaterialForm = () => {
               className='h-7 w-7 cursor-pointer rounded-full border-none bg-transparent p-0 shadow-lg outline-none'
             />
             <input
-              type={'text'}
+              type={"text"}
               value={materialColor}
               onChange={(e) => {
                 // HEXのみを許可

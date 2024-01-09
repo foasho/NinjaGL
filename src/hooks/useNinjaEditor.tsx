@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import {
   IObjectManagement,
@@ -7,43 +7,42 @@ import {
   IUIManagement,
   NJCFile,
   OMPhysicsType,
-  initTpSMs,
-} from '@ninjagl/core';
-import { Euler, Group, MathUtils, Object3D, Vector3 } from 'three';
-import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+} from "@ninjagl/core";
+import { Euler, Group, MathUtils, Object3D, Vector3 } from "three";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
-import { globalEditorStore } from '@/editor/Store/editor';
-import { initTpOms, initTpUis } from '@/utils/initTpProjects';
-import { MySwal } from '@/commons/Swal';
+import { MySwal } from "@/commons/Swal";
+import { globalEditorStore } from "@/editor/Store/editor";
+import { initTpOms, initTpUis } from "@/utils/initTpProjects";
 
 /**
  * コンテンツブラウザの操作モード
  */
 export enum ECBMode {
-  POSITION = 'position',
-  ROTATION = 'rotation',
-  SCALE = 'scale',
+  POSITION = "position",
+  ROTATION = "rotation",
+  SCALE = "scale",
 }
 
 /**
  * コンテンツブラウザのファイル種別
  */
 export enum ECBSelectType {
-  GLTF = 'gltf',
-  MP3 = 'mp3',
-  JS = 'js',
-  GLSL = 'glsl',
-  IMAGE = 'image',
-  TER = 'ter',
-  AVT = 'avt',
-  CAMERA = 'camera',
+  GLTF = "gltf",
+  MP3 = "mp3",
+  JS = "js",
+  GLSL = "glsl",
+  IMAGE = "image",
+  TER = "ter",
+  AVT = "avt",
+  CAMERA = "camera",
 }
 
 /**
  * プレイヤー
  */
 export interface IPlayerManager {
-  type: 'avatar';
+  type: "avatar";
   selectAnim: string;
   height: number;
   animations: [];
@@ -75,7 +74,7 @@ type NinjaEditorProp = {
   undo: () => void;
   redo: () => void;
   setName: (id: string, name: string) => void;
-  setVisibleType: (id: string, visibleType: 'force' | 'auto') => void;
+  setVisibleType: (id: string, visibleType: "force" | "auto") => void;
   setVisible: (id: string, visible: boolean) => void;
   setPosition: (id: string, position: Vector3) => void;
   getPosition: (id: string) => Vector3;
@@ -83,7 +82,7 @@ type NinjaEditorProp = {
   getRotation: (id: string) => Euler;
   setScale: (id: string, scale: Vector3) => void;
   getScale: (id: string) => Vector3;
-  setMaterialData: (id: string, mtype: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection', value: any) => void;
+  setMaterialData: (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => void;
   getMaterialData: (id: string) => any;
   setArg: (id: string, key: string, arg: any) => void;
   setPhysics: (id: string, physics: boolean) => void;
@@ -121,9 +120,9 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   transformDecimal: 2,
   mode: ECBMode.POSITION,
   gltfViewerObj: null,
-  wireFrameColor: '#ffffff',
-  fileSelect: '',
-  assetRoute: '',
+  wireFrameColor: "#ffffff",
+  fileSelect: "",
+  assetRoute: "",
   contentsSelect: false,
   contentsSelectType: null,
   contentsSelectPath: null,
@@ -173,8 +172,8 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
 export const useNinjaEditor = () => useContext(NinjaEditorContext);
 
 interface IHistory {
-  type: 'add' | 'remove' | 'update';
-  objectType: 'object' | 'ui'; // 今のところobjectのみ
+  type: "add" | "remove" | "update";
+  objectType: "object" | "ui"; // 今のところobjectのみ
   om?: IObjectManagement;
   um?: IUIManagement;
 }
@@ -197,9 +196,9 @@ export const NinjaEditorProvider = ({ children }) => {
   // コンテンツブラウザで利用
   const mode = useRef<ECBMode>(ECBMode.POSITION);
   const gltfViewerObj = useRef<Object3D | null>(null);
-  const wireFrameColor = useRef<string>('#ffffff');
-  const fileSelect = useRef<string>('');
-  const assetRoute = useRef<string>('');
+  const wireFrameColor = useRef<string>("#ffffff");
+  const fileSelect = useRef<string>("");
+  const assetRoute = useRef<string>("");
   const contentsSelect = useRef<boolean>(false);
   const contentsSelectType = useRef<ECBSelectType | null>(null);
   const contentsSelectPath = useRef<string | null>(null);
@@ -208,8 +207,8 @@ export const NinjaEditorProvider = ({ children }) => {
   const history = useRef<{ undo: IHistory[]; redo: IHistory[] }>({ undo: [], redo: [] });
   // プレイヤーパラメータ
   const playerManager = useRef<IPlayerManager>({
-    type: 'avatar',
-    selectAnim: 'idle',
+    type: "avatar",
+    selectAnim: "idle",
     height: 1.7,
     animations: [],
     object: new Group(),
@@ -237,15 +236,15 @@ export const NinjaEditorProvider = ({ children }) => {
       gltfViewerObj.current.remove(...gltfViewerObj.current.children);
       gltfViewerObj.current = null;
     }
-    wireFrameColor.current = '#ffffff';
-    fileSelect.current = '';
-    assetRoute.current = '';
+    wireFrameColor.current = "#ffffff";
+    fileSelect.current = "";
+    assetRoute.current = "";
     contentsSelect.current = false;
     contentsSelectType.current = null;
     contentsSelectPath.current = null;
     playerManager.current = {
-      type: 'avatar',
-      selectAnim: 'idle',
+      type: "avatar",
+      selectAnim: "idle",
       height: 1.7,
       animations: [],
       object: new Group(),
@@ -266,35 +265,35 @@ export const NinjaEditorProvider = ({ children }) => {
     if (!last) {
       return;
     }
-    if (last.objectType === 'object' && last.om !== undefined) {
-      if (last.type === 'add') {
+    if (last.objectType === "object" && last.om !== undefined) {
+      if (last.type === "add") {
         // OMにidがあれば削除
         if (oms.current.find((om) => om.id === last.om!.id)) {
           oms.current = oms.current.filter((om) => om.id !== last.om!.id);
           // historyに追加
-          addHistory('redo', {
-            type: 'remove',
-            objectType: 'object',
+          addHistory("redo", {
+            type: "remove",
+            objectType: "object",
             om: last.om,
           });
           notifyOMsChanged();
         }
       }
-      if (last.type === 'remove') {
+      if (last.type === "remove") {
         // すでに同じIDがなければOMを追加
         if (!oms.current.find((om) => om.id === last.om!.id)) {
           // setOMs([...oms, last.om]);
           oms.current = [...oms.current, last.om];
           // historyに追加
-          addHistory('redo', {
-            type: 'add',
-            objectType: 'object',
+          addHistory("redo", {
+            type: "add",
+            objectType: "object",
             om: last.om,
           });
           notifyOMsChanged();
         }
       }
-      if (last.type === 'update') {
+      if (last.type === "update") {
         // OMを更新
         const target = oms.current.find((om) => om.id === last.om!.id);
         if (!target) {
@@ -305,9 +304,9 @@ export const NinjaEditorProvider = ({ children }) => {
         // console.log('next args', target.args);
         notifyOMIdChanged(target.id);
         // historyに追加
-        addHistory('redo', {
-          type: 'update',
-          objectType: 'object',
+        addHistory("redo", {
+          type: "update",
+          objectType: "object",
           om: target,
         });
       }
@@ -325,34 +324,34 @@ export const NinjaEditorProvider = ({ children }) => {
     if (!last) {
       return;
     }
-    if (last.objectType === 'object' && last.om !== undefined) {
-      if (last.type === 'add') {
+    if (last.objectType === "object" && last.om !== undefined) {
+      if (last.type === "add") {
         // すでに同じIDがなければOMを追加
         if (!oms.current.find((om) => om.id === last.om!.id)) {
           oms.current = [...oms.current, last.om];
           // historyに追加
-          addHistory('undo', {
-            type: 'add',
-            objectType: 'object',
+          addHistory("undo", {
+            type: "add",
+            objectType: "object",
             om: last.om,
           });
           notifyOMsChanged();
         }
       }
-      if (last.type === 'remove') {
+      if (last.type === "remove") {
         // OMにIDがあれば削除
         if (oms.current.find((om) => om.id === last.om!.id)) {
           oms.current = oms.current.filter((om) => om.id !== last.om!.id);
           // historyに追加
-          addHistory('undo', {
-            type: 'remove',
-            objectType: 'object',
+          addHistory("undo", {
+            type: "remove",
+            objectType: "object",
             om: last.om,
           });
           notifyOMsChanged();
         }
       }
-      if (last.type === 'update') {
+      if (last.type === "update") {
         // OMを更新
         const target = oms.current.find((om) => om.id === last.om!.id);
         if (!target) {
@@ -360,9 +359,9 @@ export const NinjaEditorProvider = ({ children }) => {
         }
         target.args = last.om.args;
         // historyに追加
-        addHistory('undo', {
-          type: 'update',
-          objectType: 'object',
+        addHistory("undo", {
+          type: "update",
+          objectType: "object",
           om: target,
         });
       }
@@ -372,14 +371,14 @@ export const NinjaEditorProvider = ({ children }) => {
   /**
    * undo/redo用の履歴を追加
    */
-  const addHistory = (type: 'undo' | 'redo', newHistory: IHistory) => {
-    if (type === 'undo') {
+  const addHistory = (type: "undo" | "redo", newHistory: IHistory) => {
+    if (type === "undo") {
       history.current.undo.push(newHistory);
       if (history.current.undo.length > HISTORY_MAX) {
         history.current.undo.shift();
       }
     }
-    if (type === 'redo') {
+    if (type === "redo") {
       history.current.redo.push(newHistory);
       if (history.current.redo.length > HISTORY_MAX) {
         history.current.redo.shift();
@@ -414,7 +413,7 @@ export const NinjaEditorProvider = ({ children }) => {
   /**
    * 特定のObjectのVisibleTypeを変更
    */
-  const setVisibleType = (id: string, visibleType: 'force' | 'auto') => {
+  const setVisibleType = (id: string, visibleType: "force" | "auto") => {
     const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.visibleType = visibleType;
@@ -499,7 +498,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param id
    * @param material Material
    */
-  const setMaterialData = (id: string, mtype: 'standard' | 'phong' | 'toon' | 'shader' | 'reflection', value: any) => {
+  const setMaterialData = (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args.materialData = {
@@ -522,7 +521,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * argの変更
    * /CastShadow/Helper/Color/
    */
-  const setArg = (id: string, key: string, arg: any, notify=true) => {
+  const setArg = (id: string, key: string, arg: any, notify = true) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args[key] = arg;
@@ -564,9 +563,9 @@ export const NinjaEditorProvider = ({ children }) => {
   /** -------- Control Select Object ------- */
   const addOM = (om: IObjectManagement) => {
     // historyに追加
-    addHistory('undo', {
-      type: 'add',
-      objectType: 'object',
+    addHistory("undo", {
+      type: "add",
+      objectType: "object",
       om: om,
     });
     oms.current = [...oms.current, om];
@@ -580,18 +579,18 @@ export const NinjaEditorProvider = ({ children }) => {
     }
     updateTimeOut.current = setTimeout(() => {
       // historyに追加
-      addHistory('undo', {
-        type: 'update',
-        objectType: 'object',
+      addHistory("undo", {
+        type: "update",
+        objectType: "object",
         om: om,
       });
     }, 1000);
   };
   const removeOM = (id: string) => {
     // historyに追加
-    addHistory('undo', {
-      type: 'remove',
-      objectType: 'object',
+    addHistory("undo", {
+      type: "remove",
+      objectType: "object",
       om: oms.current.find((om) => om.id === id),
     });
     const newOms = oms.current.filter((om) => om.id !== id);
@@ -602,17 +601,17 @@ export const NinjaEditorProvider = ({ children }) => {
   const copyOM = (om: IObjectManagement) => {
     // typeがEnvironment/Sky/Player/Effect/LandScape以外のときのみ
     if (
-      om.type === 'environment' ||
-      om.type === 'sky' ||
-      om.type === 'avatar' ||
-      om.type === 'effect' ||
-      om.type === 'landscape'
+      om.type === "environment" ||
+      om.type === "sky" ||
+      om.type === "avatar" ||
+      om.type === "effect" ||
+      om.type === "landscape"
     ) {
       MySwal.fire({
-        title: 'Copy',
-        text: 'Copy is not allowed object type',
-        icon: 'warning',
-        confirmButtonText: 'OK',
+        title: "Copy",
+        text: "Copy is not allowed object type",
+        icon: "warning",
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -629,10 +628,10 @@ export const NinjaEditorProvider = ({ children }) => {
     return sms.current.find((sm) => sm.id === id);
   };
   const getAvatarOM = () => {
-    return oms.current.find((om) => om.type === 'avatar');
+    return oms.current.find((om) => om.type === "avatar");
   };
   const getLights = () => {
-    return oms.current.filter((om) => om.type === 'light');
+    return oms.current.filter((om) => om.type === "light");
   };
   const addSM = (sm: IScriptManagement): boolean => {
     // historyに追加
@@ -718,7 +717,7 @@ export const NinjaEditorProvider = ({ children }) => {
     ums.current = njcFile.ums;
     tms.current = njcFile.tms;
     sms.current = njcFile.sms;
-    console.log('<< Complete NJC File >>');
+    console.info("<< Complete NJC File >>");
     notifyNJCChanged();
     notifyOMsChanged();
     notifySMsChanged();
@@ -737,10 +736,10 @@ export const NinjaEditorProvider = ({ children }) => {
 
   const undoEvent = (e: KeyboardEvent) => {
     // mainviewのときのみ
-    if (globalEditorStore.viewSelect !== 'mainview') return;
-    if (e.ctrlKey && e.key === 'z') {
+    if (globalEditorStore.viewSelect !== "mainview") return;
+    if (e.ctrlKey && e.key === "z") {
       undo();
-    } else if (e.ctrlKey && e.key === 'y') {
+    } else if (e.ctrlKey && e.key === "y") {
       redo();
     }
   };
@@ -760,11 +759,11 @@ export const NinjaEditorProvider = ({ children }) => {
   // Undo/Redoの履歴を初期化
   useEffect(() => {
     // Ctrl + Zでundo
-    document.addEventListener('keydown', undoEvent);
+    document.addEventListener("keydown", undoEvent);
     return () => {
-      document.removeEventListener('keydown', undoEvent);
+      document.removeEventListener("keydown", undoEvent);
     };
-  }, [oms, sms, ums, tms]);
+  });
 
   return (
     <NinjaEditorContext.Provider

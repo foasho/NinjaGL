@@ -1,6 +1,6 @@
-import { IConfigParams, IScriptManagement } from '@ninjagl/core';
-import { AnimationClip, Vector3 } from 'three';
-import { proxy } from 'valtio';
+import { IConfigParams, IScriptManagement } from "@ninjagl/core";
+import { AnimationClip, Vector3 } from "three";
+import { proxy } from "valtio";
 
 export const HomeCameraPosition = new Vector3(5, 5, -5);
 
@@ -8,7 +8,7 @@ export const HomeCameraPosition = new Vector3(5, 5, -5);
  * Editor操作状態管理
  */
 interface IEditorStore {
-  mode: 'select' | 'landscape';
+  mode: "select" | "landscape";
   currentId: string | null;
   editorFocus: boolean;
   pivotControl: boolean;
@@ -16,7 +16,7 @@ interface IEditorStore {
   init: () => void;
 }
 export const editorStore = proxy<IEditorStore>({
-  mode: 'select',
+  mode: "select",
   currentId: null,
   editorFocus: false,
   pivotControl: false,
@@ -105,7 +105,7 @@ export const globalAddonStore = proxy<IGlobalAddonStore>({
 });
 
 export interface IGlobalPlayerStore {
-  type: 'avatar' | 'other' | 'npc';
+  type: "avatar" | "other" | "npc";
   height: number;
   selectAnim: string;
   animMapper: { [key: string]: string };
@@ -113,15 +113,15 @@ export interface IGlobalPlayerStore {
   init: () => void;
 }
 export const globalPlayerStore = proxy<IGlobalPlayerStore>({
-  type: 'avatar',
+  type: "avatar",
   height: 1.7,
-  selectAnim: '',
+  selectAnim: "",
   animMapper: {},
   animations: [],
   init: () => {
-    globalPlayerStore.type = 'avatar';
+    globalPlayerStore.type = "avatar";
     globalPlayerStore.height = 1.7;
-    globalPlayerStore.selectAnim = '';
+    globalPlayerStore.selectAnim = "";
     globalPlayerStore.animMapper = {};
     globalPlayerStore.animations = [];
   },
@@ -136,5 +136,5 @@ export const globalConfigStore = proxy<IConfigParams>({
   multi: true, // マルチプレイヤーの有無
   isApi: true, // API(サーバーサイド)の有無
   isDebug: true, // デバッグモードかどうか // デバックプレイ時の補助線等
-  projectName: 'NinjaGL', // プロジェクト名
+  projectName: "NinjaGL", // プロジェクト名
 });

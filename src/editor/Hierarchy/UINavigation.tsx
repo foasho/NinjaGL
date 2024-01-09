@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
-import { IUIManagement } from '@ninjagl/core';
-import { useTranslation } from 'react-i18next';
-import { BsFiletypeCss } from 'react-icons/bs';
-import Swal from 'sweetalert2';
-import { useSnapshot } from 'valtio';
+import { IUIManagement } from "@ninjagl/core";
+import { useTranslation } from "react-i18next";
+import { BsFiletypeCss } from "react-icons/bs";
+import Swal from "sweetalert2";
+import { useSnapshot } from "valtio";
 
-import { useNinjaEditor } from '@/hooks/useNinjaEditor';
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { globalUIStore } from '../Store/Store';
+import { globalUIStore } from "../Store/Store";
 
 /**
  * UI表示コンポネント
@@ -40,11 +40,11 @@ const UIItem = (prop: IUIItem) => {
   const ref = useRef<HTMLDivElement>(null);
   const uistore = useSnapshot(globalUIStore);
   const { t } = useTranslation();
-  let lineBgStyle = 'bg-[#797272]';
+  let lineBgStyle = "bg-[#797272]";
   if (prop.index % 2 !== 0) {
-    lineBgStyle = 'bg-[#4b4848]';
+    lineBgStyle = "bg-[#4b4848]";
   }
-  const [name, setName] = useState<string>(prop.ui.name || t('nonNameUI') as string);
+  const [name, setName] = useState<string>(prop.ui.name || (t("nonNameUI") as string));
   let typeIcon = <BsFiletypeCss className='mx-1 inline' />;
 
   const onClickItem = () => {
@@ -58,15 +58,15 @@ const UIItem = (prop: IUIItem) => {
   const changeName = async () => {
     // @ts-ignore
     Swal.fire({
-      title: t('changeName'),
-      input: 'text',
+      title: t("changeName"),
+      input: "text",
       showCancelButton: true,
-      confirmButtonText: t('change'),
+      confirmButtonText: t("change"),
       showLoaderOnConfirm: true,
       preConfirm: async (inputStr) => {
         //バリデーションを入れたりしても良い
         if (inputStr.length == 0) {
-          return Swal.showValidationMessage(t('leastInput'));
+          return Swal.showValidationMessage(t("leastInput"));
         }
         return inputStr;
       },
@@ -81,9 +81,9 @@ const UIItem = (prop: IUIItem) => {
     });
   };
 
-  let selectStyle = '';
+  let selectStyle = "";
   if (prop.ui.id === uistore.currentId) {
-    selectStyle = 'border-color-cyber border-1';
+    selectStyle = "border-color-cyber border-1";
   }
 
   return (

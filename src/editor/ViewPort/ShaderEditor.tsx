@@ -1,16 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+// @ts-nocheck
+// TODO: いつか直す
+import { useEffect, useRef, useState } from "react";
 
-import path from 'path';
+import path from "path";
 
-import MonacoEditor, { Monaco } from '@monaco-editor/react';
-import { Environment, OrbitControls, Sky, SoftShadows } from '@react-three/drei';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { toast } from 'react-toastify';
-import { DoubleSide, ShaderMaterial, Matrix3, Matrix4, Vector2, Vector3, Vector4 } from 'three';
+import MonacoEditor, { Monaco } from "@monaco-editor/react";
+import { Environment, OrbitControls, Sky, SoftShadows } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useTranslation } from "react-i18next";
+import Select from "react-select";
+import { toast } from "react-toastify";
+import { DoubleSide, ShaderMaterial, Matrix3, Matrix4, Vector2, Vector3, Vector4 } from "three";
 
-import type { languages } from 'monaco-editor';
+import type { languages } from "monaco-editor";
 
 interface IShaderEditor {
   shaderPath?: string;
@@ -18,21 +20,21 @@ interface IShaderEditor {
 export const ShaderEditor = (props: IShaderEditor) => {
   const fragmentRef = useRef<any>(null);
   const vertexRef = useRef<any>(null);
-  const [objectType, setObjectType] = useState<'box' | 'plane' | 'sphere' | 'gltf'>('box');
+  const [objectType, setObjectType] = useState<"box" | "plane" | "sphere" | "gltf">("box");
   const [fragmentCode, setFragmentCode] = useState<string>(initCodeFragment);
   const [vertexCode, setVertexCode] = useState<string>(initCodeVertex);
   const [fileName, setFileName] = useState<string | null>(null);
   const { t } = useTranslation();
-  const [mode, setMode] = useState<'Fragment' | 'Vertex'>('Fragment');
+  const [mode, setMode] = useState<"Fragment" | "Vertex">("Fragment");
   const [showPreview, setShowPreview] = useState<boolean>(true);
   const [separate, setSeparate] = useState<{ editorWidth: string; previewWidth: string }>({
-    editorWidth: '50%',
-    previewWidth: '50%',
+    editorWidth: "50%",
+    previewWidth: "50%",
   });
 
   const handleEditorWillMount = (monaco: Monaco) => {
-    monaco?.languages.register({ id: 'glsl' });
-    monaco?.languages.setMonarchTokensProvider('glsl', glslLanguage);
+    monaco?.languages.register({ id: "glsl" });
+    monaco?.languages.setMonarchTokensProvider("glsl", glslLanguage);
   };
 
   const handleEditorDidMount = (editor, ref) => {
@@ -52,15 +54,15 @@ export const ShaderEditor = (props: IShaderEditor) => {
    * 保存
    */
   const onSave = () => {
-    toast(t('completeSave'), {
-      position: 'top-right',
+    toast(t("completeSave"), {
+      position: "top-right",
       autoClose: 1000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: false,
       draggable: true,
       progress: undefined,
-      theme: 'light',
+      theme: "light",
     });
     if (fileName) {
     } else {
@@ -78,14 +80,14 @@ export const ShaderEditor = (props: IShaderEditor) => {
    */
   const changeMode = () => {
     let currentCode;
-    if (mode === 'Fragment') {
+    if (mode === "Fragment") {
       if (fragmentRef.current) {
         currentCode = fragmentRef.current.getValue();
       } else {
         currentCode = initCodeFragment;
       }
       setFragmentCode(currentCode);
-      setMode('Vertex');
+      setMode("Vertex");
     } else {
       if (vertexRef.current) {
         currentCode = vertexRef.current.getValue();
@@ -93,7 +95,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
         currentCode = initCodeVertex;
       }
       setVertexCode(currentCode);
-      setMode('Fragment');
+      setMode("Fragment");
     }
   };
 
@@ -102,8 +104,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
    */
   const onMouseDown = (e) => {
     e.preventDefault();
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
   };
 
   const onMouseMove = (event) => {
@@ -118,8 +120,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
   };
 
   const onMouseUp = () => {
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
   };
 
   /**
@@ -127,7 +129,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
    * @param event
    */
   const handleKeyDown = (event) => {
-    if (event.ctrlKey && event.key === 's') {
+    if (event.ctrlKey && event.key === "s") {
       event.preventDefault();
       onSave();
     }
@@ -141,19 +143,19 @@ export const ShaderEditor = (props: IShaderEditor) => {
     const signal = controller.signal;
     if (props.shaderPath) {
       const fileName = path.basename(props.shaderPath);
-      let _mode: 'Vertex' | 'Fragment' = 'Vertex';
-      if (fileName.includes('.frag')) {
-        _mode = 'Fragment';
+      let _mode: "Vertex" | "Fragment" = "Vertex";
+      if (fileName.includes(".frag")) {
+        _mode = "Fragment";
       }
       const fetchData = async () => {
         try {
           const scriptPath = `${props.shaderPath}`;
           const response = await fetch(props.shaderPath!, { signal });
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error("Network response was not ok");
           }
           const jsonData = await response.json();
-          if (_mode == 'Fragment') {
+          if (_mode == "Fragment") {
             setMode(_mode);
             setFragmentCode(jsonData);
           } else {
@@ -161,10 +163,10 @@ export const ShaderEditor = (props: IShaderEditor) => {
             setVertexCode(jsonData);
           }
         } catch (error) {
-          if (error.name === 'AbortError') {
-            console.log('Fetch aborted');
+          if (error.name === "AbortError") {
+            console.log("Fetch aborted");
           } else {
-            console.error('Error fetching data:', error);
+            console.error("Error fetching data:", error);
           }
         }
       };
@@ -176,16 +178,16 @@ export const ShaderEditor = (props: IShaderEditor) => {
     };
   }, [props.shaderPath]);
 
-  let filename = t('nonNameShader');
+  let filename = t("nonNameShader");
   if (props.shaderPath) {
     filename = path.basename(props.shaderPath);
   }
 
   const options: { value: string; label: string }[] = [
-    { value: 'box', label: '立方体' },
-    { value: 'sphere', label: '球体' },
-    { value: 'plane', label: '平面' },
-    { value: 'gltf', label: '' },
+    { value: "box", label: "立方体" },
+    { value: "sphere", label: "球体" },
+    { value: "plane", label: "平面" },
+    { value: "gltf", label: "" },
   ];
 
   const onChangeObjectType = (option) => {
@@ -198,7 +200,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
         <div onClick={() => changeMode()}>{mode}</div>
         <div>
           {filename}
-          {mode == 'Fragment' ? '.frag' : '.vertex'}
+          {mode == "Fragment" ? ".frag" : ".vertex"}
         </div>
         <div onClick={() => onSave()}>Save</div>
         <div onClick={() => onPreview()}>Preview</div>
@@ -212,8 +214,8 @@ export const ShaderEditor = (props: IShaderEditor) => {
         </div>
       </div>
       <div>
-        <div style={{ width: showPreview ? separate.editorWidth : '100%' }} onKeyDown={handleKeyDown}>
-          <div style={{ display: mode == 'Fragment' ? 'block' : 'none', height: '100%' }}>
+        <div style={{ width: showPreview ? separate.editorWidth : "100%" }} onKeyDown={handleKeyDown}>
+          <div style={{ display: mode == "Fragment" ? "block" : "none", height: "100%" }}>
             <MonacoEditor
               language='glsl'
               theme='vs-dark'
@@ -224,12 +226,12 @@ export const ShaderEditor = (props: IShaderEditor) => {
                 selectOnLineNumbers: true,
                 roundedSelection: false,
                 readOnly: false,
-                cursorStyle: 'line',
+                cursorStyle: "line",
                 automaticLayout: true,
               }}
             />
           </div>
-          <div style={{ display: mode == 'Vertex' ? 'block' : 'none', height: '100%' }}>
+          <div style={{ display: mode == "Vertex" ? "block" : "none", height: "100%" }}>
             <MonacoEditor
               language='glsl'
               theme='vs-dark'
@@ -240,7 +242,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
                 selectOnLineNumbers: true,
                 roundedSelection: false,
                 readOnly: false,
-                cursorStyle: 'line',
+                cursorStyle: "line",
                 automaticLayout: true,
               }}
             />
@@ -276,7 +278,7 @@ export const ShaderEditor = (props: IShaderEditor) => {
 };
 
 interface IShaderViewer {
-  objectType: 'box' | 'plane' | 'sphere' | 'gltf';
+  objectType: "box" | "plane" | "sphere" | "gltf";
   vertexCode: string;
   fragmentCode: string;
   url?: string;
@@ -291,16 +293,16 @@ const ShaderViewer = (props: IShaderViewer) => {
   let geometry;
   let obj;
   switch (props.objectType) {
-    case 'box':
+    case "box":
       geometry = <boxGeometry args={[1, 1, 1]} />;
       break;
-    case 'plane':
+    case "plane":
       geometry = <planeGeometry args={[1, 1]} />;
       break;
-    case 'sphere':
+    case "sphere":
       geometry = <sphereGeometry args={[1, 32, 32]} />;
       break;
-    case 'gltf':
+    case "gltf":
       if (!props.url) {
         obj = <mesh></mesh>;
       } else {
@@ -344,22 +346,22 @@ const ShaderViewer = (props: IShaderViewer) => {
  */
 const getDefaultInitialValue = (type: string) => {
   switch (type) {
-    case 'float':
+    case "float":
       return 0.0;
-    case 'int':
-    case 'bool':
+    case "int":
+    case "bool":
       return 0;
-    case 'vec2':
+    case "vec2":
       return new Vector2();
-    case 'vec3':
+    case "vec3":
       return new Vector3();
-    case 'vec4':
+    case "vec4":
       return new Vector4();
-    case 'mat3':
+    case "mat3":
       return new Matrix3();
-    case 'mat4':
+    case "mat4":
       return new Matrix4();
-    case 'sampler2D':
+    case "sampler2D":
       return null; // テクスチャが未指定の場合、Three.jsはデフォルトの白いテクスチャを使用します。
     default:
       return undefined;
@@ -377,11 +379,11 @@ const extractVariables = (shaderCode, initialValues = {}) => {
   let match;
 
   while ((match = regex.exec(shaderCode)) !== null) {
-    if (match[1] === 'attribute') {
+    if (match[1] === "attribute") {
       variables.attributes[match[3]] = { type: match[2] };
-    } else if (match[1] === 'varying') {
+    } else if (match[1] === "varying") {
       variables.varyings[match[3]] = { type: match[2] };
-    } else if (match[1] === 'uniform') {
+    } else if (match[1] === "uniform") {
       variables.uniforms[match[3]] = {
         type: match[2],
         value: initialValues.hasOwnProperty(match[3]) ? initialValues[match[3]] : getDefaultInitialValue(match[2]),
@@ -450,53 +452,53 @@ void main() {
 const darkThemeStyles = {
   singleValue: (provided) => ({
     ...provided,
-    color: '#43D9D9',
-    fontSize: '10px',
-    paddingLeft: '15px',
+    color: "#43D9D9",
+    fontSize: "10px",
+    paddingLeft: "15px",
   }),
   input: (styles) => ({
     ...styles,
   }),
   control: (styles) => ({
     ...styles,
-    backgroundColor: '#111',
-    borderColor: '#555',
-    height: 'auto',
-    minHeight: '30px',
-    width: '120px',
-    lineHeight: '1',
-    alignItems: 'center',
+    backgroundColor: "#111",
+    borderColor: "#555",
+    height: "auto",
+    minHeight: "30px",
+    width: "120px",
+    lineHeight: "1",
+    alignItems: "center",
   }),
   valueContainer: (provided) => ({
     ...provided,
-    padding: '0', // これを追加
+    padding: "0", // これを追加
   }),
   menu: (styles) => ({
     ...styles,
-    backgroundColor: '#333',
-    width: '180px',
+    backgroundColor: "#333",
+    width: "180px",
   }),
   option: (styles, { isFocused, isSelected }) => {
     return {
       ...styles,
-      backgroundColor: isSelected ? '#555' : isFocused ? '#444' : 'transparent',
-      color: isSelected ? '#fff' : '#fff',
-      height: 'auto',
-      minHeight: '30px',
-      fontSize: '10px',
+      backgroundColor: isSelected ? "#555" : isFocused ? "#444" : "transparent",
+      color: isSelected ? "#fff" : "#fff",
+      height: "auto",
+      minHeight: "30px",
+      fontSize: "10px",
     };
   },
   indicatorsContainer: (provided) => ({
     ...provided,
-    padding: '0',
+    padding: "0",
   }),
   indicatorSeparator: (provided) => ({
     ...provided,
-    display: 'none',
+    display: "none",
   }),
   dropdownIndicator: (provided) => ({
     ...provided,
-    padding: '0', // これを追加
+    padding: "0", // これを追加
   }),
 };
 
@@ -505,203 +507,203 @@ const darkThemeStyles = {
  */
 const glslLanguage: languages.IMonarchLanguage = {
   // Set defaultToken to invalid to see what you do not tokenize yet
-  defaultToken: 'invalid',
-  tokenPostfix: '.glsl',
+  defaultToken: "invalid",
+  tokenPostfix: ".glsl",
 
   keywords: [
-    'void',
-    'bool',
-    'int',
-    'float',
-    'uint',
-    'double',
-    'vec2',
-    'vec3',
-    'vec4',
-    'bvec2',
-    'bvec3',
-    'bvec4',
-    'ivec2',
-    'ivec3',
-    'ivec4',
-    'uvec2',
-    'uvec3',
-    'uvec4',
-    'dvec2',
-    'dvec3',
-    'dvec4',
-    'mat2',
-    'mat3',
-    'mat4',
-    'mat2x2',
-    'mat2x3',
-    'mat2x4',
-    'mat3x2',
-    'mat3x3',
-    'mat3x4',
-    'mat4x2',
-    'mat4x3',
-    'mat4x4',
-    'sampler1D',
-    'sampler2D',
-    'sampler3D',
-    'samplerCube',
-    'sampler1DShadow',
-    'sampler2DShadow',
-    'samplerCubeShadow',
-    'sampler1DArray',
-    'sampler2DArray',
-    'sampler1DArrayShadow',
-    'sampler2DArrayShadow',
-    'isampler1D',
-    'isampler2D',
-    'isampler3D',
-    'isamplerCube',
-    'isampler1DArray',
-    'isampler2DArray',
-    'usampler1D',
-    'usampler2D',
-    'usampler3D',
-    'usamplerCube',
-    'usampler1DArray',
-    'usampler2DArray',
-    'sampler2DRect',
-    'sampler2DRectShadow',
-    'isampler2DRect',
-    'usampler2DRect',
-    'samplerBuffer',
-    'isamplerBuffer',
-    'usamplerBuffer',
-    'sampler2DMS',
-    'isampler2DMS',
-    'usampler2DMS',
-    'sampler2DMSArray',
-    'isampler2DMSArray',
-    'usampler2DMSArray',
-    'struct',
-    'uniform',
-    'layout',
-    'in',
-    'out',
-    'inout',
-    'attribute',
-    'varying',
-    'const',
-    'if',
-    'else',
-    'switch',
-    'case',
-    'default',
-    'while',
-    'do',
-    'for',
-    'continue',
-    'break',
-    'return',
-    'discards',
-    'beginInvocationInterlock',
-    'endInvocationInterlock',
-    'subroutine',
-    'lowp',
-    'mediump',
-    'highp',
-    'precision',
-    'invariant',
-    'discard',
-    'mat2x2',
-    'mat3',
-    'mat3x3',
-    'mat4',
-    'mat4x4',
-    'dmat2',
-    'dmat2x2',
-    'dmat2x3',
-    'dmat2x4',
-    'dmat3',
-    'dmat3x2',
-    'dmat3x3',
-    'dmat3x4',
-    'dmat4',
-    'dmat4x2',
-    'dmat4x3',
-    'dmat4x4',
-    'vec2',
-    'vec3',
-    'vec4',
-    'ivec2',
-    'ivec3',
-    'ivec4',
-    'uvec2',
-    'uvec3',
-    'uvec4',
-    'dvec2',
-    'dvec3',
-    'dvec4',
-    'bvec2',
-    'bvec3',
-    'bvec4',
-    'float',
-    'double',
-    'bool',
-    'int',
-    'uint',
-    'true',
-    'false',
-    'mix',
-    'step',
-    'smoothstep',
-    'length',
-    'distance',
-    'dot',
-    'cross',
-    'normalize',
-    'faceforward',
-    'reflect',
-    'refract',
-    'matrixCompMult',
-    'outerProduct',
-    'transpose',
+    "void",
+    "bool",
+    "int",
+    "float",
+    "uint",
+    "double",
+    "vec2",
+    "vec3",
+    "vec4",
+    "bvec2",
+    "bvec3",
+    "bvec4",
+    "ivec2",
+    "ivec3",
+    "ivec4",
+    "uvec2",
+    "uvec3",
+    "uvec4",
+    "dvec2",
+    "dvec3",
+    "dvec4",
+    "mat2",
+    "mat3",
+    "mat4",
+    "mat2x2",
+    "mat2x3",
+    "mat2x4",
+    "mat3x2",
+    "mat3x3",
+    "mat3x4",
+    "mat4x2",
+    "mat4x3",
+    "mat4x4",
+    "sampler1D",
+    "sampler2D",
+    "sampler3D",
+    "samplerCube",
+    "sampler1DShadow",
+    "sampler2DShadow",
+    "samplerCubeShadow",
+    "sampler1DArray",
+    "sampler2DArray",
+    "sampler1DArrayShadow",
+    "sampler2DArrayShadow",
+    "isampler1D",
+    "isampler2D",
+    "isampler3D",
+    "isamplerCube",
+    "isampler1DArray",
+    "isampler2DArray",
+    "usampler1D",
+    "usampler2D",
+    "usampler3D",
+    "usamplerCube",
+    "usampler1DArray",
+    "usampler2DArray",
+    "sampler2DRect",
+    "sampler2DRectShadow",
+    "isampler2DRect",
+    "usampler2DRect",
+    "samplerBuffer",
+    "isamplerBuffer",
+    "usamplerBuffer",
+    "sampler2DMS",
+    "isampler2DMS",
+    "usampler2DMS",
+    "sampler2DMSArray",
+    "isampler2DMSArray",
+    "usampler2DMSArray",
+    "struct",
+    "uniform",
+    "layout",
+    "in",
+    "out",
+    "inout",
+    "attribute",
+    "varying",
+    "const",
+    "if",
+    "else",
+    "switch",
+    "case",
+    "default",
+    "while",
+    "do",
+    "for",
+    "continue",
+    "break",
+    "return",
+    "discards",
+    "beginInvocationInterlock",
+    "endInvocationInterlock",
+    "subroutine",
+    "lowp",
+    "mediump",
+    "highp",
+    "precision",
+    "invariant",
+    "discard",
+    "mat2x2",
+    "mat3",
+    "mat3x3",
+    "mat4",
+    "mat4x4",
+    "dmat2",
+    "dmat2x2",
+    "dmat2x3",
+    "dmat2x4",
+    "dmat3",
+    "dmat3x2",
+    "dmat3x3",
+    "dmat3x4",
+    "dmat4",
+    "dmat4x2",
+    "dmat4x3",
+    "dmat4x4",
+    "vec2",
+    "vec3",
+    "vec4",
+    "ivec2",
+    "ivec3",
+    "ivec4",
+    "uvec2",
+    "uvec3",
+    "uvec4",
+    "dvec2",
+    "dvec3",
+    "dvec4",
+    "bvec2",
+    "bvec3",
+    "bvec4",
+    "float",
+    "double",
+    "bool",
+    "int",
+    "uint",
+    "true",
+    "false",
+    "mix",
+    "step",
+    "smoothstep",
+    "length",
+    "distance",
+    "dot",
+    "cross",
+    "normalize",
+    "faceforward",
+    "reflect",
+    "refract",
+    "matrixCompMult",
+    "outerProduct",
+    "transpose",
   ],
 
   operators: [
-    '=',
-    '+=',
-    '-=',
-    '*=',
-    '/=',
-    '%=',
-    '&=',
-    '|=',
-    '^=',
-    '++',
-    '--',
-    '+',
-    '-',
-    '*',
-    '/',
-    '%',
-    '<',
-    '>',
-    '<=',
-    '>=',
-    '==',
-    '!=',
-    '&&',
-    '||',
-    '!',
-    '~',
-    '&',
-    '|',
-    '^',
-    '<<',
-    '>>',
-    '>>>',
+    "=",
+    "+=",
+    "-=",
+    "*=",
+    "/=",
+    "%=",
+    "&=",
+    "|=",
+    "^=",
+    "++",
+    "--",
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "==",
+    "!=",
+    "&&",
+    "||",
+    "!",
+    "~",
+    "&",
+    "|",
+    "^",
+    "<<",
+    ">>",
+    ">>>",
   ],
 
   brackets: [
-    { open: '(', close: ')', token: 'delimiter.parenthesis' },
-    { open: '{', close: '}', token: 'delimiter.curly' },
-    { open: '[', close: ']', token: 'delimiter.square' },
+    { open: "(", close: ")", token: "delimiter.parenthesis" },
+    { open: "{", close: "}", token: "delimiter.curly" },
+    { open: "[", close: "]", token: "delimiter.square" },
   ],
 
   // we include these common regular expressions
@@ -709,8 +711,8 @@ const glslLanguage: languages.IMonarchLanguage = {
 
   // C style block comments are supported
   comments: [
-    ['\\/\\*', '\\*\\/', 'comment'],
-    ['\\/\\/', '$', 'comment'],
+    ["\\/\\*", "\\*\\/", "comment"],
+    ["\\/\\/", "$", "comment"],
   ],
 
   // The main tokenizer for our languages
@@ -721,63 +723,63 @@ const glslLanguage: languages.IMonarchLanguage = {
         /[a-z_$][\w$]*/,
         {
           cases: {
-            '@keywords': { token: 'keyword.$0' },
-            '@default': 'identifier',
+            "@keywords": { token: "keyword.$0" },
+            "@default": "identifier",
           },
         },
       ],
-      [/[A-Z][\w\$]*/, 'type.identifier'], // to show class names nicely
+      [/[A-Z][\w\$]*/, "type.identifier"], // to show class names nicely
 
       // whitespace
-      { include: '@whitespace' },
+      { include: "@whitespace" },
 
       // delimiters and operators
-      [/[{}()\[\]]/, '@brackets'],
+      [/[{}()\[\]]/, "@brackets"],
       [
         /@symbols/,
         {
           cases: {
-            '@operators': 'delimiter.operator',
-            '@default': '',
+            "@operators": "delimiter.operator",
+            "@default": "",
           },
         },
       ],
 
       // numbers
-      [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
-      [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-      [/\d+/, 'number'],
+      [/\d*\.\d+([eE][\-+]?\d+)?/, "number.float"],
+      [/0[xX][0-9a-fA-F]+/, "number.hex"],
+      [/\d+/, "number"],
 
       // delimiter: after number because of .\d floats
-      [/[;,.]/, 'delimiter'],
+      [/[;,.]/, "delimiter"],
 
       // strings
-      [/"([^"\\]|\\.)*$/, 'string.invalid'], // non-teminated string
-      [/"/, 'string', '@string'],
+      [/"([^"\\]|\\.)*$/, "string.invalid"], // non-teminated string
+      [/"/, "string", "@string"],
 
       // characters
-      [/'[^\\']'/, 'string'],
+      [/'[^\\']'/, "string"],
       // [/(')(@escapes)(')/, ['string','string.escape','string']],
-      [/'/, 'string.invalid'],
+      [/'/, "string.invalid"],
     ],
 
     whitespace: [
-      [/[ \t\r\n]+/, ''],
-      [/\/\*/, 'comment', '@comment'],
-      [/\/\/.*$/, 'comment'],
+      [/[ \t\r\n]+/, ""],
+      [/\/\*/, "comment", "@comment"],
+      [/\/\/.*$/, "comment"],
     ],
 
     comment: [
-      [/[^\/*]+/, 'comment'],
-      [/\*\//, 'comment', '@pop'],
-      [/[\/*]/, 'comment'],
+      [/[^\/*]+/, "comment"],
+      [/\*\//, "comment", "@pop"],
+      [/[\/*]/, "comment"],
     ],
 
     string: [
-      [/[^\\"]+/, 'string'],
+      [/[^\\"]+/, "string"],
       // [/@escapes/, 'string.escape'],
       // [/\\./,      'string.escape.invalid'],
-      [/"/, 'string', '@pop'],
+      [/"/, "string", "@pop"],
     ],
   },
 };
