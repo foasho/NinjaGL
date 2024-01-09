@@ -1,9 +1,9 @@
-import { Suspense } from 'react';
+import { Suspense } from "react";
 
-import Link from 'next/link';
+import Link from "next/link";
 
-import { Header } from './_components/Header';
-import { HomeCanvas } from './_components/HomeCanvas';
+import { Header } from "./_components/Header";
+import { HomeCanvas } from "./_components/HomeCanvas";
 
 export default function HomePage() {
   return (

@@ -1,32 +1,30 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 
 import { IObjectManagement } from "@ninjagl/core";
-import { Clone, useGLTF } from "@react-three/drei";
-import { Euler, Group, Matrix4, Vector3 } from "three";
-import { GLTF } from "three-stdlib";
+import { useGLTF } from "@react-three/drei";
+import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
+import { GLTF, SkeletonUtils } from "three-stdlib";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
+import { AnimationHelper } from "@/helpers/AnimationHelper";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 import { PivotControls } from "./PivoitControl";
 
-export const NPCs = () => {
+const _NPCs = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [npcs, setNPCs] = useState<IObjectManagement[]>([]);
 
   useEffect(() => {
     const update = () => {
       const _npcs = oms.current.filter((om) => om.type === "ai-npc");
-      if (_npcs !== npcs) {
-        setNPCs(_npcs);
-        console.log("Update NPCs", _npcs);
-      }
+      setNPCs(_npcs);
     };
     update();
-    // onOMsChanged(update);
+    onOMsChanged(update);
     return () => {
-      // offOMsChanged(update);
+      offOMsChanged(update);
     };
   }, [npcs]);
 
@@ -39,10 +37,11 @@ export const NPCs = () => {
   );
 };
 
-const NPC = ({ ...om }: IObjectManagement) => {
+const _NPC = ({ ...om }: IObjectManagement) => {
   const ref = useRef<Group>(null);
   const state = useSnapshot(editorStore);
-  const { scene } = useGLTF(om.args.url || "/models/ybot.glb") as GLTF;
+  const { scene, animations } = useGLTF(om.args.url || "/models/ybot.glb") as GLTF;
+  const [clone, setClone] = useState<Object3D>();
   const editor = useNinjaEditor();
 
   // 操作系
@@ -78,7 +77,25 @@ const NPC = ({ ...om }: IObjectManagement) => {
     };
   });
 
-  console.log("NPCs");
+  useEffect(() => {
+    if (scene) {
+      // cloneを作成
+      const clone = SkeletonUtils.clone(scene);
+      // animationsもコピー
+      clone.animations = animations;
+      if (om.id) {
+        editor.setArg(om.id, "animations", animations);
+      }
+      if (om.args.castShadow) {
+        clone.traverse((node) => {
+          if (node instanceof Mesh) {
+            node.castShadow = true;
+          }
+        });
+      }
+      setClone(clone);
+    }
+  }, [scene]);
 
   return (
     <>
@@ -94,11 +111,24 @@ const NPC = ({ ...om }: IObjectManagement) => {
           onDragStart={() => onDragStart()}
         />
       )}
-      <group ref={ref}>
-        <Clone deep object={scene} />
-      </group>
+      {clone && (
+        <group ref={ref}>
+          <AnimationHelper
+            id={om.id}
+            visible={state.hiddenList.indexOf(om.id) == -1}
+            onClick={(e) => (e.stopPropagation(), (editorStore.currentId = om.id))}
+            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
+            object={clone}
+          />
+        </group>
+      )}
     </>
   );
 };
 
-// export const NPCs = memo(_NPCs);
+// idが変わったら再描画
+const NPC = React.memo(_NPC, (prev, next) => {
+  return prev.id === next.id;
+});
+
+export const NPCs = memo(_NPCs);

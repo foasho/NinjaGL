@@ -1,36 +1,36 @@
-import './global.css';
-import { Metadata } from 'next';
-import NextTopLoader from 'nextjs-toploader';
+import "./global.css";
+import { Metadata } from "next";
+import NextTopLoader from "nextjs-toploader";
 
-import RootProvider from '@/root.container';
-import { mplus } from '@/styles/font';
+import { PWAProvider } from "@/hooks/usePWA";
+import RootProvider from "@/root.container";
+import { mplus } from "@/styles/font";
 
-import { Toast } from './_components/Toast';
-import { PWAProvider } from '@/hooks/usePWA';
+import { Toast } from "./_components/Toast";
 
-const title = 'NinjaGL';
-const description = 'WebGL 3D Editor';
+const title = "NinjaGL";
+const description = "WebGL 3D Editor";
 
 export const metadata: Metadata = {
   title: {
     default: title,
-    template: '%s(β版)',
+    template: "%s(β版)",
   },
   description: description,
   applicationName: title,
-  manifest: '/manifest.json',
-  themeColor: '#000000',
+  manifest: "/manifest.json",
+  themeColor: "#000000",
   formatDetection: {
     telephone: false,
   },
   icons: {
-    shortcut: '/icons/apple-touch-icon.png',
-    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
+    shortcut: "/icons/apple-touch-icon.png",
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
-    title: 'NinjaGL',
+    statusBarStyle: "default",
+    title: "NinjaGL",
   },
 };
 
@@ -41,9 +41,7 @@ export default function RootLayout({ children }) {
       <body className={`${mplus.variable}`}>
         <NextTopLoader showSpinner={false} color='#43D9D9' />
         <RootProvider>
-          <PWAProvider>
-            {children}
-          </PWAProvider>
+          <PWAProvider>{children}</PWAProvider>
           <Toast />
         </RootProvider>
       </body>

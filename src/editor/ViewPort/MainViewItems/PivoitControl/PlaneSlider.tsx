@@ -1,9 +1,9 @@
-import React from "react";
+import * as React from "react";
 
 import { Line } from "@react-three/drei";
 import { Html } from "@react-three/drei";
 import { ThreeEvent, useThree } from "@react-three/fiber";
-import THREE from "three";
+import * as THREE from "three";
 
 import { context } from "./context";
 

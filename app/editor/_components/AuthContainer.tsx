@@ -1,16 +1,16 @@
-'use client';
-import React, { createContext, useEffect } from 'react';
+"use client";
+import React, { createContext, useEffect } from "react";
 
-import { redirect } from 'next/navigation';
-import { Session } from 'next-auth';
-import { SessionProvider, useSession } from 'next-auth/react';
+import { redirect } from "next/navigation";
+import { Session } from "next-auth";
+import { SessionProvider, useSession } from "next-auth/react";
 
-import { Loading2D } from '@/commons/Loading2D';
+import { Loading2D } from "@/commons/Loading2D";
 
 /**
  * 認証済みかどうかを判定して、認証済みなら子コンポーネントを表示する
  */
-export type AuthProviderProps = 'secure' | 'optional' | 'public';
+export type AuthProviderProps = "secure" | "optional" | "public";
 const AuthContainer = ({
   children,
   session,
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children, type }: { children: React.ReactNode; ty
 
   useEffect(() => {
     // Secureの場合、sessionがなければログインページにリダイレクトする
-    if (type === 'secure' && !session && status !== 'loading') {
+    if (type === "secure" && !session && status !== "loading") {
       // 現在のURLをcallbackUrlとして渡す
       const callbackUrl = window.location.pathname;
       redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children, type }: { children: React.ReactNode; ty
         user: session?.user,
       }}
     >
-      {status === 'loading' ? <Loading2D /> : <>{children}</>}
+      {status === "loading" ? <Loading2D /> : <>{children}</>}
     </AuthContext.Provider>
   );
 };

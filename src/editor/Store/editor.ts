@@ -16,6 +16,7 @@ interface IEditorStore {
   worldSize: number;
   cameraFar: number;
   cameraSpeed: number;
+  viewDistance: number;
   isGrid: boolean;
   isWorldHelper: boolean;
   isGizmo: boolean;
@@ -35,6 +36,7 @@ export const globalEditorStore = proxy<IEditorStore>({
   worldSize: 32,
   cameraFar: 1000,
   cameraSpeed: 1,
+  viewDistance: 50,
   isGrid: false,
   isWorldHelper: true,
   isGizmo: true,

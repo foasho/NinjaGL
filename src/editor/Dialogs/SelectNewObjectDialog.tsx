@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ReactDOM from "react-dom/client";
+import ReactDOM, { Root } from "react-dom/client";
 
 import { OMType } from "@ninjagl/core";
 import clsx from "clsx";
@@ -147,7 +147,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
                 <div className={iconStyle}>
                   <Image alt='' width={32} height={32} className={imgStyle} src={"/fileicons/water.png"} />
                 </div>
-                <div className={nameStyle}>{t("landscape")}</div>
+                <div className={nameStyle}>{t("water")}</div>
               </div>
               <div
                 className={cardStyle}
@@ -644,18 +644,29 @@ type NewObjectDialogProps = {
   x?: number;
   y?: number;
 };
+// rootインスタンスを格納するための変数を定義
+let dialogRoot: Root | null = null;
 export const showSelectNewObjectDialog = async ({
   x = undefined,
   y = undefined,
 }: NewObjectDialogProps): Promise<ISelectNewObjectDialog> => {
   return new Promise((resolve) => {
     const dialogContainer = document.getElementById("myDialog") as HTMLElement;
-    const root = ReactDOM.createRoot(dialogContainer);
+    // rootがまだ存在しない場合のみ新しく作成
+    if (!dialogRoot) {
+      dialogRoot = ReactDOM.createRoot(dialogContainer);
+    }
     const handleDialogClose = (props: ISelectNewObjectDialog) => {
-      root.unmount();
+      if (dialogRoot) {
+        dialogRoot.unmount();
+        dialogRoot = null; // アンマウント後にrootをnullに設定
+      }
       resolve(props);
     };
 
-    root.render(<SelectNewObjectDialog x={x} y={y} response={handleDialogClose} />);
+    // rootが存在する場合のみレンダリングを実行
+    if (dialogRoot) {
+      dialogRoot.render(<SelectNewObjectDialog x={x} y={y} response={handleDialogClose} />);
+    }
   });
 };

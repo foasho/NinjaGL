@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 
 import { IObjectManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ import { useSnapshot } from "valtio";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-export const HierarchyTree = () => {
+const _HierarchyTree = () => {
   const { oms, getOMById, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [trees, setTrees] = useState<IObjectManagement[]>([]);
   const state = useSnapshot(editorStore);
@@ -170,3 +170,6 @@ const TreeItem = (prop: ITreeItem) => {
     </>
   );
 };
+
+
+export const HierarchyTree = memo(_HierarchyTree);

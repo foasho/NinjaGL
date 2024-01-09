@@ -49,7 +49,8 @@ export const StaticObjects = () => {
  */
 const StaticObject = ({ om }) => {
   const state = useSnapshot(editorStore);
-  const { scene, animations } = useGLTF(om.args.url) as GLTF;
+  const [modelUrl, setModelUrl] = useState<string>(om.args.url);
+  const { scene, animations } = useGLTF(modelUrl) as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const ref = useRef<Group>(null);
   const { setPosition, setRotation, setScale, setArg, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
@@ -80,6 +81,9 @@ const StaticObject = ({ om }) => {
         }
         if (om.args.scale) {
           ref.current.scale.copy(om.args.scale);
+        }
+        if (om.args.url) {
+          setModelUrl(om.args.url);
         }
         if (om.args.castShadow !== undefined) {
           if (clone) {

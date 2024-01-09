@@ -93,10 +93,9 @@ export const NinjaEditor = () => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         const njcFile = await loadNJCFileFromURL(njcUrl);
-        console.log("### ロードしたnjcFileを確認 ###");
-        console.log(njcFile);
+        console.info("<< Change: NJCFile >>");
+        console.info(njcFile);
         editor.setNJCFile(njcFile);
-        // setProject({...project, name: name});
       }
     });
   };

@@ -19,7 +19,7 @@ export const AnimationHelper = ({
   visible = true,
   onClick = () => {},
   onPointerMissed = () => {},
-  initSelectAnimation = "Idle",
+  initSelectAnimation = "",
 }: AnimationHelperProps) => {
   const animations = object.animations;
   const { ref, actions } = useAnimations(animations);

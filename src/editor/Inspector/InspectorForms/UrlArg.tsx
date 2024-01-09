@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 
 import { Select, SelectItem, Button, RadioGroup, Radio, Spinner } from "@nextui-org/react";
+import { OMType } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { FaCheck } from "react-icons/fa";
@@ -15,6 +16,24 @@ type UrlArgType = "url" | "item";
 type ItemProps = {
   value: string;
   label: string;
+};
+
+const AcceptableFileType = (otype: OMType | undefined): string[] => {
+  if (!otype) return [];
+  switch (otype) {
+    case "ai-npc":
+    case "avatar":
+    case "object":
+      return [".glb", ".gltf"];
+    case "audio":
+      return [".mp3"];
+    case "image":
+      return [".png", ".jpg", ".jpeg", ".gif", ".svg", ".bmp", ".tiff", ".webp"];
+    case "video":
+      return [".mp4"];
+    default:
+      return [];
+  }
 };
 
 /**
@@ -38,18 +57,26 @@ export const UrlArg = () => {
   };
 
   const validateUrl = async (url: string) => {
+    setIsLoading(true);
     // URLがfileとして存在するか確認
-    const response = await fetch(url);
-    if (response.status === 200) {
-      return true;
+    try {
+      const response = await fetch(url);
+      if (response.status === 200) {
+        setIsLoading(false);
+        return true;
+      }
+    } catch (e) {
+      console.error(e);
     }
+    setIsLoading(false);
   };
 
-  const setUrlArgWithValidate = async () => {
-    if (url && om) {
-      const val = await validateUrl(url);
+  const setUrlArgWithValidate = async (_url: string | undefined = undefined) => {
+    const checkUrl = _url || url;
+    if (checkUrl && om) {
+      const val = await validateUrl(checkUrl);
       if (val) {
-        editor.setArg(om.id, "url", url);
+        editor.setArg(om.id, "url", checkUrl);
       }
     }
   };
@@ -68,9 +95,14 @@ export const UrlArg = () => {
             label: item.filename,
           };
         });
-        setItems(_items);
+        const accept = AcceptableFileType(om!.type);
+        const filtered = _items.filter((item) => {
+          const ext = item.label.split(".").pop();
+          return accept.includes(`.${ext}`);
+        });
+        setItems(filtered);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
       setIsLoading(false);
     };
@@ -95,12 +127,17 @@ export const UrlArg = () => {
         <RadioGroup
           label='Select Type'
           orientation='horizontal'
+          value={type}
           onChange={(e) => {
             setType(e.target.value as UrlArgType);
           }}
         >
-          <Radio value='url'>{t("url")}</Radio>
-          <Radio value='item'>{t("item")}</Radio>
+          <Radio value='url' aria-label='' aria-labelledby=''>
+            {t("url")}
+          </Radio>
+          <Radio value='item' aria-label='' aria-labelledby=''>
+            {t("item")}
+          </Radio>
         </RadioGroup>
       </div>
       {type === "url" && (
@@ -117,19 +154,26 @@ export const UrlArg = () => {
             color='warning'
             variant='faded'
             aria-label='check'
-            onClick={() => setUrlArgWithValidate}
+            onClick={() => setUrlArgWithValidate()}
           >
-            <FaCheck />
+            {isLoading ? <Spinner size='sm' /> : <FaCheck />}
           </Button>
         </div>
       )}
       {type === "item" && (
-        <Select label='URL' startContent={isLoading ? <Spinner size='sm' /> : <></>}>
-          {items.map((item) => (
+        <Select
+          size='sm'
+          color='primary'
+          className='mt-3'
+          items={items}
+          startContent={isLoading ? <Spinner size='sm' /> : <></>}
+          onChange={(e) => setUrlArgWithValidate(e.target.value)}
+        >
+          {(item) => (
             <SelectItem key={item.value} value={item.value}>
               {item.label}
             </SelectItem>
-          ))}
+          )}
         </Select>
       )}
     </>

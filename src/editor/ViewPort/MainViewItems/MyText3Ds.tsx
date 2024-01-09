@@ -19,16 +19,13 @@ const _MyText3Ds = () => {
     const update = () => {
       const _text3ds = oms.current.filter((om) => om.type == "text3d");
       setText3ds(_text3ds);
-      console.log("Update Text3Ds", _text3ds);
     };
     update();
     onOMsChanged(update);
     return () => {
       offOMsChanged(update);
     };
-  }, []);
-
-  console.log("text3ds", text3ds);
+  }, [offOMsChanged, oms, onOMsChanged]);
 
   return (
     <>
@@ -39,7 +36,7 @@ const _MyText3Ds = () => {
   );
 };
 
-const Text3d = ({ om }) => {
+const _Text3d = ({ om }) => {
   const ref = useRef<any>();
   const { camera } = useThree();
   const font = useFont("/fonts/MPLUS.json");
@@ -125,5 +122,6 @@ const Text3d = ({ om }) => {
     </>
   );
 };
+const Text3d = memo(_Text3d);
 
 export const MyText3Ds = memo(_MyText3Ds);
