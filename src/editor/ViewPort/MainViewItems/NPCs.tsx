@@ -11,17 +11,24 @@ import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
 import { PivotControls } from './PivoitControl';
 
-const _NPCs = () => {
-  const { onOMsChanged, offOMsChanged } = useNinjaEditor();
+export const NPCs = () => {
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [npcs, setNPCs] = useState<IObjectManagement[]>([]);
 
   useEffect(() => {
-    const update = () => {};
-    onOMsChanged(update);
-    return () => {
-      offOMsChanged(update);
+    const update = () => {
+      const _npcs = oms.current.filter((om) => om.type === 'ai-npc');
+      if (_npcs !== npcs) {
+        setNPCs(_npcs);
+        console.log('Update NPCs', _npcs);
+      }
     };
-  });
+    update();
+    // onOMsChanged(update);
+    return () => {
+      // offOMsChanged(update);
+    };
+  }, [npcs]);
 
   return (
     <>
@@ -71,6 +78,8 @@ const NPC = ({ ...om }: IObjectManagement) => {
     };
   });
 
+  console.log('NPCs');
+
   return (
     <>
       {!state.editorFocus && (
@@ -92,4 +101,4 @@ const NPC = ({ ...om }: IObjectManagement) => {
   );
 };
 
-export const NPCs = memo(_NPCs);
+// export const NPCs = memo(_NPCs);

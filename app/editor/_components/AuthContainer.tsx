@@ -1,8 +1,11 @@
 'use client';
 import React, { createContext, useEffect } from 'react';
+
 import { redirect } from 'next/navigation';
-import { SessionProvider, useSession } from 'next-auth/react';
 import { Session } from 'next-auth';
+import { SessionProvider, useSession } from 'next-auth/react';
+
+import { Loading2D } from '@/commons/Loading2D';
 
 /**
  * 認証済みかどうかを判定して、認証済みなら子コンポーネントを表示する
@@ -45,7 +48,7 @@ export const AuthProvider = ({ children, type }: { children: React.ReactNode; ty
         user: session?.user,
       }}
     >
-      {status === 'loading' ? <>Loading...</> : <>{children}</>}
+      {status === 'loading' ? <Loading2D /> : <>{children}</>}
     </AuthContext.Provider>
   );
 };

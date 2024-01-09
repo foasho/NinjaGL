@@ -9,12 +9,12 @@ import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { ImEarth } from 'react-icons/im';
 import { MdVideogameAsset, MdVideogameAssetOff } from 'react-icons/md';
 import { TiSpanner } from 'react-icons/ti';
-import Swal from 'sweetalert2';
 import { Vector3, Color, Raycaster } from 'three';
 import { useSnapshot } from 'valtio';
 
 import { isNumber } from '@/commons/functional';
 import { Loading2D } from '@/commons/Loading2D';
+import { MySwal } from '@/commons/Swal';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 import { addInitOM } from '@/utils/omControls';
 
@@ -35,252 +35,199 @@ import { MySky } from './MainViewItems/Sky';
 import { ThreeObjects } from './MainViewItems/Three';
 import { UICanvas } from './MainViewUIs/UICanvas';
 
-export const MainViewer = () => {
-  const configState = useSnapshot(globalConfigStore);
-  const editorState = useSnapshot(globalEditorStore);
-  const [renderCount, setRenderCount] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isConfHovered, setIsConfHovered] = useState(false);
-  // const cameraSpeedRef = useRef<HTMLInputElement>();
-  const [cameraSpeed, setCameraSpeed] = useState<number>(1);
-  const cameraFarRef = useRef<HTMLInputElement>(null);
-  const [cameraFar, setCameraFar] = useState<number>(1000);
-  const worldSize = 64;
-  const worldGridSize = 8;
-  const [uiGridNum, setUIGridNum] = useState<8 | 16 | 24 | 32>(8);
-  const { onNJCChanged, offNJCChanged } = useNinjaEditor();
-  // 水平グリッド
-  const [isGrid, setIsGrid] = useState<boolean>(false);
-  const [isWorldHelper, setIsWorldHelper] = useState<boolean>(true);
-  const [isGizmo, setIsGizmo] = useState<boolean>(true);
-  const [showCanvas, setShowCanvas] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  /**
-   * Editorの設定に同期
-   */
-
-  /**
-   * NJCの変更を検知して、再レンダリングする
-   */
-  useEffect(() => {
-    const init = () => {
-      setRenderCount(renderCount + 1);
-    };
-    onNJCChanged(init);
-    return () => {
-      offNJCChanged(init);
-    };
-  }, []);
-
-  const { t } = useTranslation();
+let renderCount = 0;
+const _MainViewer = () => {
+  console.log('MainViewer Render', renderCount++);
 
   return (
     <div className='relative h-full bg-[#e2e2e2]'>
       <Suspense fallback={<Loading2D />}>
-        <Canvas key={renderCount} style={{ display: showCanvas ? 'block' : 'none' }} id='mainviewcanvas' shadows>
-          <Suspense fallback={null}>
-            <MyLights />
-            <StaticObjects />
-            <Avatar />
-            <MySky />
-            <ThreeObjects />
-            <FogComponent />
-            <MyEnviroment />
-            <MyText3Ds />
-            <MyEffects />
-            <MemoLandScapeMaker />
-            <SystemHelper
-              isGizmo={isGizmo}
-              cameraFar={cameraFar}
-              cameraSpeed={cameraSpeed}
-              worldSize={worldSize}
-              isGrid={isGrid}
-              isWorldHelper={isWorldHelper}
-              worldGridSize={worldGridSize}
-            />
-            <MemoContextHelper />
-            <Preload all />
-          </Suspense>
+        <Canvas id='mainviewcanvas' shadows>
+          <SceneItems />
         </Canvas>
       </Suspense>
-      <div
-        className='absolute top-0 z-20 h-full w-full bg-white/50'
-        style={{ display: editorState.uiMode ? 'block' : 'none' }}
-      >
-        <UICanvas gridNum={uiGridNum} />
-      </div>
-      {/** コントロール層 */}
-      <div className={clsx('absolute left-1/2 top-10 z-50 -translate-x-1/2')}>
-        <a
-          className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
-          onMouseLeave={() => setIsHovered(false)}
-          onMouseOver={() => setIsHovered(true)}
-        >
-          <ImEarth className='inline' />
-          {isHovered && (
-            <div className='absolute left-0 top-full z-10 block w-48 rounded-md bg-primary p-3 shadow-md'>
-              <div className='mb-3'>
-                <label className='block'>
-                  <input type='checkbox' checked={isGrid} onChange={() => setIsGrid(!isGrid)} />
-                  水平グリッド線
-                </label>
-                <label className='block'>
-                  <input type='checkbox' checked={isWorldHelper} onChange={() => setIsWorldHelper(!isWorldHelper)} />
-                  ワールド補助線
-                </label>
-                <label className='block'>
-                  <input type='checkbox' checked={isGizmo} onChange={() => setIsGizmo(!isGizmo)} />
-                  Gizmo
-                </label>
-              </div>
-              <div className='mb-3 grid grid-cols-2 gap-1'>
-                <label>
-                  視野(far)
-                  <input
-                    type='text'
-                    ref={cameraFarRef}
-                    placeholder={cameraFar.toString()}
-                    onKeyDown={(e: any) => {
-                      if (e.key == 'Enter' && cameraFarRef.current) {
-                        if (isNumber(cameraFarRef.current.value)) {
-                          const val = Number(cameraFarRef.current.value);
-                          if (val <= 4096) {
-                            setCameraFar(val);
-                          } else {
-                            Swal.fire({
-                              title: 'エラー',
-                              text: '4096以下の値を入力してください',
-                              icon: 'error',
-                            });
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-        </a>
-        <a
-          className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
-          onMouseLeave={() => setIsConfHovered(false)}
-          onMouseOver={() => setIsConfHovered(true)}
-        >
-          <TiSpanner className='inline' />
-          {isConfHovered && (
-            <div className='absolute left-0 top-full z-10 block min-w-[200px] rounded-md bg-primary p-3 shadow-md'>
-              <div>
-                <span className='mb-2 mr-3'>{t('physics')}</span>
-                <input
-                  type='checkbox'
-                  className='inline'
-                  checked={configState.physics}
-                  onChange={(e) => {
-                    globalConfigStore.physics = e.target.checked;
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </a>
-        <a
-          onClick={() => {
-            if (cameraSpeed > 7) {
-              setCameraSpeed(1);
-            } else {
-              setCameraSpeed(cameraSpeed + 1);
-            }
-          }}
-          className='relative mr-1 cursor-pointer select-none rounded-md bg-[#222] px-1.5 py-1 text-white'
-        >
-          <AiFillCamera className='inline' />
-          <span className='align-top text-sm'>{cameraSpeed}</span>
-        </a>
-        <a
-          className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
-          onClick={() => setShowCanvas(!showCanvas)}
-        >
-          {showCanvas ? <AiFillEye className='inline' /> : <AiFillEyeInvisible className='inline' />}
-        </a>
-        <a
-          className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
-          onClick={() => (globalEditorStore.uiMode = !editorState.uiMode)}
-        >
-          {editorState.uiMode ? <MdVideogameAsset className='inline' /> : <MdVideogameAssetOff className='inline' />}
-        </a>
-        {editorState.uiMode && (
-          <>
-            <a
-              onClick={() => {
-                if (uiGridNum == 8) {
-                  setUIGridNum(16);
-                } else if (uiGridNum == 16) {
-                  setUIGridNum(24);
-                } else if (uiGridNum == 24) {
-                  setUIGridNum(32);
-                } else if (uiGridNum == 32) {
-                  setUIGridNum(8);
-                }
-              }}
-              className='ml-0.5 mr-1.5 cursor-pointer rounded-md bg-[#222] px-2.5 py-1 text-lg text-white'
-            >
-              {uiGridNum}
-            </a>
-          </>
-        )}
-      </div>
-      {isLoading && (
-        <div
-          style={{
-            display: 'none',
-            background: '#12121266',
-            height: '100%',
-            width: '100%',
-            top: 0,
-            left: 0,
-            position: 'absolute',
-            zIndex: 1000000,
-          }}
-        >
-          <div
-            style={{
-              color: '#fff',
-              fontWeight: 'bold',
-              position: 'absolute',
-              width: '100%',
-              textAlign: 'center',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
-          >
-            Loading...
-          </div>
-        </div>
-      )}
+      <HelperControls />
+      <UICanvas />
     </div>
   );
 };
 
+const SceneItems = () => {
+  const { showCanvas } = useSnapshot(globalEditorStore);
+  return (
+    <group visible={showCanvas}>
+      <Suspense fallback={null}>
+        <MyLights />
+        <StaticObjects />
+        <Avatar />
+        <MySky />
+        <ThreeObjects />
+        <FogComponent />
+        <MyEnviroment />
+        <MyText3Ds />
+        <MyEffects />
+        {/* <NPCs /> */}
+        <MemoLandScapeMaker />
+        <SystemHelper />
+        <MemoContextHelper />
+        <Preload all />
+      </Suspense>
+    </group>
+  );
+};
+
+/**
+ *
+ */
+const _HelperControls = () => {
+  const { physics } = useSnapshot(globalConfigStore);
+  const { isGrid, showCanvas, isWorldHelper, isGizmo, cameraFar, cameraSpeed, uiMode, uiGridNum } =
+    useSnapshot(globalEditorStore);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isConfHovered, setIsConfHovered] = useState(false);
+
+  const { t } = useTranslation();
+
+  return (
+    <div className={clsx('absolute left-1/2 top-10 z-50 -translate-x-1/2')}>
+      <a
+        className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
+        onMouseLeave={() => setIsHovered(false)}
+        onMouseOver={() => setIsHovered(true)}
+      >
+        <ImEarth className='inline' />
+        {isHovered && (
+          <div className='absolute left-0 top-full z-10 block w-48 rounded-md bg-primary p-3 shadow-md'>
+            <div className='mb-3'>
+              <label className='block'>
+                <input type='checkbox' checked={isGrid} onChange={() => (globalEditorStore.isGrid = !isGrid)} />
+                水平グリッド線
+              </label>
+              <label className='block'>
+                <input
+                  type='checkbox'
+                  checked={isWorldHelper}
+                  onChange={() => (globalEditorStore.isWorldHelper = !isWorldHelper)}
+                />
+                ワールド補助線
+              </label>
+              <label className='block'>
+                <input type='checkbox' checked={isGizmo} onChange={() => (globalEditorStore.isGizmo = !isGizmo)} />
+                Gizmo
+              </label>
+            </div>
+            <div className='mb-3 grid grid-cols-2 gap-1'>
+              <label>
+                視野(far)
+                <input
+                  type='text'
+                  placeholder={cameraFar.toString()}
+                  onKeyDown={(e: any) => {
+                    if (e.key == 'Enter') {
+                      if (isNumber(e.target.value)) {
+                        const val = Number(e.target.value);
+                        if (val <= 4096) {
+                          globalEditorStore.cameraFar = val;
+                        } else {
+                          MySwal.fire({
+                            title: 'エラー',
+                            text: '4096以下の値を入力してください',
+                            icon: 'error',
+                          });
+                        }
+                      }
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+        )}
+      </a>
+      <a
+        className='relative mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
+        onMouseLeave={() => setIsConfHovered(false)}
+        onMouseOver={() => setIsConfHovered(true)}
+      >
+        <TiSpanner className='inline' />
+        {isConfHovered && (
+          <div className='absolute left-0 top-full z-10 block min-w-[200px] rounded-md bg-primary p-3 shadow-md'>
+            <div>
+              <span className='mb-2 mr-3'>{t('physics')}</span>
+              <input
+                type='checkbox'
+                className='inline'
+                checked={physics}
+                onChange={(e) => {
+                  globalConfigStore.physics = e.target.checked;
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </a>
+      <a
+        onClick={() => {
+          if (cameraSpeed > 7) {
+            globalEditorStore.cameraSpeed = 1;
+          } else {
+            globalEditorStore.cameraSpeed += 1;
+          }
+        }}
+        className='relative mr-1 cursor-pointer select-none rounded-md bg-[#222] px-1.5 py-1 text-white'
+      >
+        <AiFillCamera className='inline' />
+        <span className='align-top text-sm'>{cameraSpeed}</span>
+      </a>
+      <a
+        className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
+        onClick={() => (globalEditorStore.showCanvas = !showCanvas)}
+      >
+        {showCanvas ? <AiFillEye className='inline' /> : <AiFillEyeInvisible className='inline' />}
+      </a>
+      <a
+        className='mr-1 cursor-pointer rounded-md bg-[#222] px-1.5 py-1 text-white'
+        onClick={() => (globalEditorStore.uiMode = !uiMode)}
+      >
+        {uiMode ? <MdVideogameAsset className='inline' /> : <MdVideogameAssetOff className='inline' />}
+      </a>
+      {uiMode && (
+        <>
+          <a
+            onClick={() => {
+              if (uiGridNum == 8) {
+                globalEditorStore.uiGridNum = 16;
+              } else if (uiGridNum == 16) {
+                globalEditorStore.uiGridNum = 24;
+              } else if (uiGridNum == 24) {
+                globalEditorStore.uiGridNum = 32;
+              } else if (uiGridNum == 32) {
+                globalEditorStore.uiGridNum = 64;
+              } else if (uiGridNum == 64) {
+                globalEditorStore.uiGridNum = 8;
+              }
+            }}
+            className='ml-0.5 mr-1.5 cursor-pointer rounded-md bg-[#222] px-2.5 py-1 text-lg text-white'
+          >
+            {uiGridNum}
+          </a>
+        </>
+      )}
+    </div>
+  );
+};
+const HelperControls = memo(_HelperControls);
+
 /**
  * 補助機能
  */
-interface ISysytemHelper {
-  worldGridSize: number;
-  cameraFar: number;
-  cameraSpeed: number;
-  isGrid: boolean;
-  isWorldHelper: boolean;
-  worldSize: number;
-  isGizmo: boolean;
-}
-const SystemHelper = (props: ISysytemHelper) => {
+const SystemHelper = () => {
+  const { isGrid, isGizmo, isWorldHelper, cameraSpeed, cameraFar, worldGridSize, worldSize } =
+    useSnapshot(globalEditorStore);
   const [minimal, setMinimal] = useState(true);
   const gridHelperSize = 4096;
-  const divisions = props.worldGridSize;
-  const cellSize = props.worldSize / divisions;
+  const divisions = worldGridSize;
+  const cellSize = worldSize / divisions;
   const numberElements: any[] = [];
   const numberPlanes: any[] = [];
 
@@ -298,11 +245,11 @@ const SystemHelper = (props: ISysytemHelper) => {
     return new Vector3(worldXZ[0], yPos, worldXZ[1]);
   };
 
-  if (props.isWorldHelper) {
+  if (isWorldHelper) {
     for (let i = 0; i < divisions; i++) {
       for (let j = 0; j < divisions; j++) {
         const number = i * divisions + j + 1;
-        const textPosition = getCenterPosFromLayer(number, -0.01, props.worldSize, divisions);
+        const textPosition = getCenterPosFromLayer(number, -0.01, worldSize, divisions);
         const planePosition = new Vector3().addVectors(textPosition, new Vector3(0, -0.01, 0));
         const isEven = (i + j) % 2 === 0;
         const color1 = isEven ? new Color(0x808080) : new Color(0xd3d3d3);
@@ -330,9 +277,9 @@ const SystemHelper = (props: ISysytemHelper) => {
 
   return (
     <>
-      <MoveableCameraControl cameraSpeed={props.cameraSpeed} cameraFar={props.cameraFar} />
-      {props.isGrid && <gridHelper args={[gridHelperSize, gridHelperSize]} />}
-      {props.isGizmo && (
+      <MoveableCameraControl cameraSpeed={cameraSpeed} cameraFar={cameraFar} />
+      {isGrid && <gridHelper args={[gridHelperSize, gridHelperSize]} />}
+      {isGizmo && (
         <GizmoHelper alignment='top-right' margin={[75, 75]}>
           <group scale={0.75}>
             <GizmoViewport labelColor='white' axisHeadScale={1} />
@@ -379,7 +326,7 @@ const ContextHelper = () => {
         y: point.current.y,
       });
       if (data && data.type) {
-        const _om = addInitOM(oms, data.type, data.value);
+        const _om = addInitOM(oms.current, data.type, data.value);
         if (_om) {
           if (position) {
             _om.args.position = position;
@@ -416,10 +363,12 @@ const ContextHelper = () => {
         canvas.removeEventListener('touchmove', () => {});
       }
     };
-  }, [oms, editorState.viewSelect]);
+  }, [oms, editorState.viewSelect, pointer, camera, scene.children, addOM]);
 
   return <></>;
 };
 
 // Memo化
 const MemoContextHelper = memo(ContextHelper);
+
+export const MainViewer = memo(_MainViewer);

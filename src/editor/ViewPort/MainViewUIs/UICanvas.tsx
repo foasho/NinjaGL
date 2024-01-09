@@ -1,24 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 
 import Moveable from 'react-moveable';
 import { useSnapshot } from 'valtio';
 
+import { globalEditorStore } from '@/editor/Store/editor';
 import { globalUIStore } from '@/editor/Store/Store';
 import { useNinjaEditor } from '@/hooks/useNinjaEditor';
 
-import { UIViewer } from './UIView';
-
-interface IUICanvas {
-  gridNum: number;
-}
-export const UICanvas = (props: IUICanvas) => {
+const _UICanvas = () => {
+  const { uiGridNum, uiMode } = useSnapshot(globalEditorStore);
   const uistore = useSnapshot(globalUIStore);
   const { ums } = useNinjaEditor();
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const [elementGuidelines, setElementGuideliens] = useState<HTMLElement[]>([]);
+
   useEffect(() => {
     setElementGuideliens([].slice.call(document.querySelectorAll('.moveable')));
-  }, [props.gridNum]);
+    return () => {
+      setElementGuideliens([]);
+    };
+  }, [uiGridNum]);
 
   const onChangeSelectEle = (ele: HTMLElement) => {
     setTarget(ele);
@@ -34,37 +35,40 @@ export const UICanvas = (props: IUICanvas) => {
   }, [uistore.currentId]);
 
   return (
-    <div
-      style={{
-        height: '100%',
-        width: '100%',
-        position: 'relative',
-      }}
-    >
-      {/* <div
+    <div className='absolute top-0 z-20 h-full w-full bg-white/50' style={{ display: uiMode ? 'block' : 'none' }}>
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* <div
       className={` target`}
       >
         Test
       </div> */}
-      {/* {ums.map((um, idx) => {
+        {/* {ums.map((um, idx) => {
         return <UIViewer um={um} key={`UIItem-${idx}`} />;
       })} */}
-      {/** 補助線 */}
-      <UICanvasHelper gridNum={props.gridNum} />
-      <Moveable
-        target={target}
-        draggable={true}
-        resizable={true}
-        snappable={true}
-        keepRatio={true}
-        elementGuidelines={elementGuidelines}
-        onRender={(e) => {
-          e.target.style.cssText += e.cssText;
-        }}
-      />
+        {/** 補助線 */}
+        <UICanvasHelper gridNum={uiGridNum} />
+        <Moveable
+          target={target}
+          draggable={true}
+          resizable={true}
+          snappable={true}
+          keepRatio={true}
+          elementGuidelines={elementGuidelines}
+          onRender={(e) => {
+            e.target.style.cssText += e.cssText;
+          }}
+        />
+      </div>
     </div>
   );
 };
+export const UICanvas = memo(_UICanvas);
 
 interface IUICanvasHelper {
   gridNum: number;
@@ -88,7 +92,7 @@ const UICanvasHelper = (props: IUICanvasHelper) => {
                     .map((_, j) => {
                       return (
                         <div
-                          className={`target moveable relative z-10 box-border h-full border-[0.5px] border-dashed border-primary/75`}
+                          className='target moveable relative z-10 box-border h-full border-[0.5px] border-dashed border-primary/75'
                           style={{ width: `${gridwidth}%` }}
                           key={j + '-ui-grid'}
                         ></div>

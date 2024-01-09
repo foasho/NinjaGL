@@ -11,6 +11,15 @@ interface IEditorStore {
   appBar: boolean;
   sideBar: boolean;
   isMd: boolean;
+  uiGridNum: number;
+  worldGridSize: number;
+  worldSize: number;
+  cameraFar: number;
+  cameraSpeed: number;
+  isGrid: boolean;
+  isWorldHelper: boolean;
+  isGizmo: boolean;
+  showCanvas: boolean;
 };
 export const globalEditorStore = proxy<IEditorStore>({
   projectName: "",
@@ -21,4 +30,13 @@ export const globalEditorStore = proxy<IEditorStore>({
   appBar: true,
   sideBar: true,
   isMd: true,
+  uiGridNum: 8,
+  worldGridSize: 8,
+  worldSize: 32,
+  cameraFar: 1000,
+  cameraSpeed: 1,
+  isGrid: false,
+  isWorldHelper: true,
+  isGizmo: true,
+  showCanvas: true,
 });
