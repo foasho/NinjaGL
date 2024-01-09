@@ -17,6 +17,7 @@ import { StaticObjects } from "./Objects";
 import { Avatar } from "./Player";
 import { MySky } from "./Sky";
 import { ThreeObjects } from "./Three";
+import { MyWaters } from "./Waters";
 
 const _SceneItems = () => {
   const { showCanvas } = useSnapshot(globalEditorStore);
@@ -32,6 +33,7 @@ const _SceneItems = () => {
       <MyTexts />
       <MyText3Ds />
       <MyEffects />
+      <MyWaters />
       <NPCs />
       <ViewHelper />
       <EditorHelper />

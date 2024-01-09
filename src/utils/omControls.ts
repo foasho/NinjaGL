@@ -150,6 +150,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         type: "water",
         args: {
           type: value,
+          width: 5,
+          height: 5,
+          widthSegments: 12,
+          heightSegments: 12,
         },
         physics: false,
         phyType: "box",
