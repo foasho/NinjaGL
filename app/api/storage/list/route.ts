@@ -46,6 +46,7 @@ export async function GET(request: Request) {
   const filteredBlobs: any[] = [];
   // pathnameが prifixに収まらないものは、フォルダデータとしてsize0のものに変換
   blobs.forEach((blob) => {
+    console.log(blob);
     const filename = blob.pathname.split("/").pop();
     if (isFolder(prefix, blob.pathname)) {
       // forlderまでのpathnameに変換

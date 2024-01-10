@@ -444,7 +444,7 @@ export const TerrainMakerCanvas = () => {
   const onSave = async () => {
     if (!meshRef.current) return;
     if (!session) return;
-    const saveDir = `users/${b64EncodeUnicode(session.user!.email as string)}/terrains`;
+    const saveDir = `${b64EncodeUnicode(session.user!.email as string)}/terrains`;
   };
 
   return (

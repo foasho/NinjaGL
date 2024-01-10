@@ -131,7 +131,7 @@ export const AppBar = () => {
     const file = new File([blob], filename, { type: "application/octet-stream" });
 
     // Save to Storage
-    const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/SaveData`;
+    const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/SaveData`;
     const filePath = (uploadPath + `/${name}.njc`).replaceAll("//", "/");
 
     // サーバーに保存
@@ -149,6 +149,7 @@ export const AppBar = () => {
         text: t("saveSuccess") + `SaveData/${name}.njc`,
         showCancelButton: true,
         confirmButtonText: t("download"),
+        cancelButtonText: t("close"),
       }).then((result) => {
         if (result.isConfirmed) {
           return true;
@@ -197,8 +198,8 @@ export const AppBar = () => {
         setLoading(true);
         const file = (target.files as FileList)[0];
         const njcFile = await loadNJCFile(file);
-        console.log("### ロードしたnjcFileを確認 ###");
-        console.log(njcFile);
+        console.info("### ロードしたnjcFileを確認 ###");
+        console.info(njcFile);
         setNJCFile(njcFile);
         setLoading(false);
       }
@@ -282,7 +283,7 @@ export const AppBar = () => {
             {/** Right */}
             <li className='float-right inline-block px-[3px] pt-[6px]'>
               <button
-                className='flex cursor-pointer rounded-lg bg-cyber p-2 text-primary outline-none hover:bg-secondary hover:text-white'
+                className='flex cursor-pointer rounded-lg bg-cyber p-2 text-primary outline-none hover:bg-secondary hover:text-white disabled:opacity-50'
                 disabled={loading}
                 onClick={() => onSave()}
               >
