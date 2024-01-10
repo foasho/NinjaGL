@@ -51,7 +51,7 @@ export const WidthHeight = () => {
           {t("width")}: {width}
         </div>
         <div>
-          <input type={"range"} min={0} max={100} step={0.1} value={width} onChange={(e) => changeWidth(e)} />
+          <input type={"range"} min={1} max={100} step={0.5} value={width} onChange={(e) => changeWidth(e)} />
         </div>
       </div>
       <div>
@@ -59,7 +59,7 @@ export const WidthHeight = () => {
           {t("height")}: {height}
         </div>
         <div>
-          <input type={"range"} min={0} max={100} step={0.1} value={height} onChange={(e) => changeHeight(e)} />
+          <input type={"range"} min={1} max={100} step={0.5} value={height} onChange={(e) => changeHeight(e)} />
         </div>
       </div>
     </>

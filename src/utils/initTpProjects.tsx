@@ -326,23 +326,6 @@ export const initTpOms = (): IObjectManagement[] => {
       phyType: "capsule",
       visibleType: "force",
       visible: true,
-    },
-    {
-      id: MathUtils.generateUUID(),
-      name: `*ocean`,
-      type: "water",
-      args: {
-        type: "ocean",
-        width: 5,
-        height: 5,
-        widthSegments: 12,
-        heightSegments: 12,
-        position: new Vector3(3, 1, 0),
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true,
     }
   ];
 };

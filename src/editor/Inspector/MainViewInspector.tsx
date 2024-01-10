@@ -21,6 +21,7 @@ import { UrlArg } from "./InspectorForms/UrlArg";
 import { ViewableDistance } from "./InspectorForms/ViewableDistance";
 import { Visible } from "./InspectorForms/Visible";
 import { WidthHeight } from "./InspectorForms/WidthHeight";
+import { WidthHeightSegments } from "./InspectorForms/WidthHeightSegments";
 
 export const MainViewInspector = () => {
   const state = useSnapshot(editorStore);
@@ -125,6 +126,7 @@ export const MainViewInspector = () => {
             otype == "object") && <UrlArg />}
 
           {otype == "water" && <WidthHeight />}
+          {otype == "water" && <WidthHeightSegments />}
 
           {otype == "environment" && <EnvironmentParam />}
           {otype == "lightformer" && <FormType />}
