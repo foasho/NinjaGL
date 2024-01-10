@@ -8,7 +8,7 @@ export const uploadFile = async (file: File, filePath: string): Promise<PutBlobR
     if (process.env.NEXT_PUBLIC_UPLOAD_TYPE === "client") {
       const newBlob = await upload(filePath, file, {
         access: "public",
-        handleUploadUrl: "/api/upload",
+        handleUploadUrl: "/api/storage/upload-client",
       });
       return newBlob;
     } else {
