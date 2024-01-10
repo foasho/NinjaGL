@@ -16,10 +16,10 @@ export const SideBar = () => {
       </NavbarBrand>
       <NavbarContent className='hidden gap-4 sm:flex' justify='center'>
         <NavbarItem>
-          <InstallLink />
+          <Link href='/'>ホーム</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link href='/docs/scripts'>Scripts</Link>
+          <InstallLink />
         </NavbarItem>
         <TutorialMenu />
       </NavbarContent>
