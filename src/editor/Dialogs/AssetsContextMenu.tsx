@@ -112,6 +112,20 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
   };
 
   /**
+   * URLをコピーする
+   */
+  const onCopyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      MySwal.fire({
+        title: "コピーしました",
+      });
+    } catch (error) {
+      console.error("Error copying file:", error);
+    }
+  };
+
+  /**
    * 特定のURLを削除する
    */
   const deleteFile = async (url: string) => {
@@ -153,7 +167,10 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
                 >
                   {t("download")}
                 </div>
-                <div className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'>
+                <div
+                  className='cursor-pointer select-none rounded px-4 py-3 text-primary hover:bg-primary/25'
+                  onClick={() => onCopyUrl(file.url)}
+                >
                   {t("copyUrl")}
                 </div>
                 {session && (
