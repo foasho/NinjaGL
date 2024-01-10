@@ -3,7 +3,6 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { convertObjectToFile } from "@ninjagl/core";
 import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { PutBlobResult } from "@vercel/blob";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
@@ -14,6 +13,7 @@ import tunnel from "tunnel-rat";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { Loading2D } from "@/commons/Loading2D";
 import { MySwal } from "@/commons/Swal";
+import { uploadFile } from "@/utils/upload";
 
 import { globalEditorStore } from "../Store/editor";
 
@@ -85,15 +85,10 @@ export const PlayerEditor = () => {
             // ログインしていればストレージに保存
             const formData = new FormData();
             formData.append("file", file);
-            // formData.append("file", blob);
-            const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/Characters/${inputStr}.glb`;
+            const filePath = `${b64EncodeUnicode(session.user!.email as string)}/Characters/${inputStr}.glb`;
             try {
-              const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-                method: "POST",
-                body: file,
-              });
-              const blob = (await response.json()) as PutBlobResult;
-              if (!blob.url) {
+              const res = await uploadFile(file, filePath);
+              if (!res || !res.url) {
                 throw new Error("Error uploading file");
               }
               MySwal.fire({

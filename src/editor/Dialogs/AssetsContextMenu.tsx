@@ -1,5 +1,4 @@
 "use client";
-import { PutBlobResult } from "@vercel/blob";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 
@@ -8,6 +7,7 @@ import { ModelViewer } from "@/commons/ModelViewer";
 import { MySwal } from "@/commons/Swal";
 import { IFileProps } from "@/editor/Hierarchy/ContentViewer";
 import { isGLTF } from "@/utils/files";
+import { uploadFile } from "@/utils/upload";
 
 interface IAssetsContextMenuProps {
   position: {
@@ -60,22 +60,22 @@ export const AssetsContextMenu = (props: IAssetsContextMenuProps) => {
           }
           prefix += "/" + p;
         }
-        // textファイルを作成
-        const textFile = new Blob([""], { type: "text/plain" });
+
         // ファイル名を設定
         const fileName = result.value + "/file.keep";
-        let uploadPath = prefix + "/" + fileName;
+        let filePath = prefix + "/" + fileName;
         // 頭にスラッシュがついていれば外す
-        if (uploadPath.startsWith("/")) {
-          uploadPath = uploadPath.slice(1);
+        if (filePath.startsWith("/")) {
+          filePath = filePath.slice(1);
         }
-        // 新しいフォルダを作成する
-        const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-          method: "POST",
-          body: textFile,
-        });
-        const blob = (await response.json()) as PutBlobResult;
-        if (!blob.url) {
+        // textファイルを作成
+        const file = new File([""], fileName, { type: "text/plain" });
+        // サーバーに保存
+        const res = await uploadFile(file, filePath);
+        if (!res) {
+          throw new Error("Error uploading file");
+        }
+        if (!res.url) {
           throw new Error("Error uploading file");
         }
         MySwal.fire({

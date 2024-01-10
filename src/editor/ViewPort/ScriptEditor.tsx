@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 
 import MonacoEditor from "@monaco-editor/react";
 import { IScriptManagement } from "@ninjagl/core";
-import { PutBlobResult } from "@vercel/blob";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -12,6 +11,7 @@ import { useSnapshot } from "valtio";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { MySwal } from "@/commons/Swal";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { uploadFile } from "@/utils/upload";
 
 import { globalScriptStore } from "../Store/Store";
 
@@ -105,14 +105,10 @@ export const ScriptEditor = () => {
   const saveCode = async (filename: string) => {
     if (session && code.current) {
       const file = await convertFile(code.current);
-      const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/Scripts/${filename}`;
-      const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-        method: "POST",
-        body: file,
-      });
-      const blob = (await response.json()) as PutBlobResult;
+      const filePath = `${b64EncodeUnicode(session.user!.email as string)}/Scripts/${filename}`;
+      const res = await uploadFile(file, filePath);
 
-      if (!blob.url) {
+      if (!res || !res.url) {
         throw new Error("Error uploading file");
       }
       if (scriptState.currentSM && globalScriptStore.currentSM) {

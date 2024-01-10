@@ -3,6 +3,7 @@ import { t } from "i18next";
 import { Group, Mesh, Object3D } from "three";
 
 import { MySwal } from "@/commons/Swal";
+import { uploadFile } from "@/utils/upload";
 
 export const modelSave = async (object: Object3D | Group | Mesh, saveDir: string) => {
   const obj3d = new Object3D();
@@ -19,21 +20,15 @@ export const modelSave = async (object: Object3D | Group | Mesh, saveDir: string
       if (inputStr.length == 0) {
         return MySwal.showValidationMessage(t("leastInput"));
       }
-      const formData = new FormData();
-      formData.append("file", blob);
-      const keyPath = `${saveDir}/${inputStr}.glb`;
-      formData.append("filePath", keyPath);
+      const file = new File([blob], `${inputStr}.glb`, { type: "model/gltf-binary" });
+      const filePath = `${saveDir}/${inputStr}.glb`;
       try {
-        const response = await fetch("/api/storage/upload", {
-          method: "POST",
-          body: formData,
-        });
+        const res = await uploadFile(file, filePath);
 
-        if (!response.ok) {
+        if (!res || !res.url) {
           throw new Error("Error uploading file");
         }
-        // @ts-ignore
-        Swal.fire({
+        MySwal.fire({
           title: t("completeSave"),
           text: t("saveSuccess") + `\npersonal/LandScape/${inputStr}.glb`,
         });

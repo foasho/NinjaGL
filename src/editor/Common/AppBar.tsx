@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 
 import { Spinner } from "@nextui-org/react";
 import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
-import { PutBlobResult } from "@vercel/blob";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +14,7 @@ import { useSnapshot } from "valtio";
 import { b64EncodeUnicode } from "@/commons/functional";
 import { MySwal } from "@/commons/Swal";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { uploadFile } from "@/utils/upload";
 
 import { globalEditorStore } from "../Store/editor";
 import { globalConfigStore } from "../Store/Store";
@@ -126,22 +126,17 @@ export const AppBar = () => {
       isApi: configState.isApi,
       projectName: name,
     });
+    const filename = `${name}.njc`;
     const blob = await saveNJCBlob(njcFile);
+    const file = new File([blob], filename, { type: "application/octet-stream" });
 
     // Save to Storage
-    const formData = new FormData();
-    formData.append("file", blob);
     const uploadPath = `users/${b64EncodeUnicode(session.user!.email as string)}/SaveData`;
     const filePath = (uploadPath + `/${name}.njc`).replaceAll("//", "/");
-    formData.append("filePath", filePath);
 
     // サーバーに保存
-    const response = await fetch(`/api/storage/upload?filename=${filePath}`, {
-      method: "POST",
-      body: blob,
-    });
-    const resResult = (await response.json()) as PutBlobResult;
-    if (!resResult.url) {
+    const res = await uploadFile(file, filePath);
+    if (!res) {
       setLoading(false);
       throw new Error("Error uploading file");
     }

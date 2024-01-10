@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { Tooltip } from "@nextui-org/react";
 import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
-import { PutBlobResult } from "@vercel/blob";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +29,7 @@ import {
   mp3_icon,
   njc_icon,
 } from "@/utils/files";
+import { uploadFile } from "@/utils/upload";
 
 import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
 import { globalContentStore, globalScriptStore } from "../Store/Store";
@@ -153,26 +153,21 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     setShowMenu(false);
   };
 
-  const uploadFile = async (file: File) => {
+  const _uploadFile = async (file: File) => {
     if (!session) return;
     const filename = file.name;
-    // 4.5MB以上のファイルはアップロードできない
-    if (file.size > 4.5 * 1024 * 1024) {
+    // ClientUpload以外の時に、4.5MB以上のファイルはアップロードできない
+    if (process.env.NEXT_PUBLIC_UPLOAD_TYPE !== "client" && file.size > 4.5 * 1024 * 1024) {
       MySwal.fire({
         title: "4.5MB以上のファイルはアップロードできません",
       });
       return;
     }
-    const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/${filename}`;
+    const filePath = `${b64EncodeUnicode(session.user!.email as string)}/${filename}`;
     try {
-      const response = await fetch(`/api/storage/upload?filename=${uploadPath}`, {
-        method: "POST",
-        body: file,
-      });
+      const res = await uploadFile(file, filePath);
 
-      const blob = (await response.json()) as PutBlobResult;
-
-      if (!blob.url) {
+      if (!res || !res.url) {
         throw new Error("Error uploading file");
       }
       MySwal.fire({
@@ -194,7 +189,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
     const files = e.dataTransfer.files;
     if (files.length > 0 && session) {
       const file = files[0];
-      uploadFile(file);
+      _uploadFile(file);
     }
   };
   const handleDragOver = (e) => {
@@ -291,7 +286,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             const files = e.target.files;
             if (files && files.length > 0) {
               const file = files[0];
-              uploadFile(file);
+              _uploadFile(file);
             }
           }}
         />

@@ -39,20 +39,4 @@ function App() {
 
 ### ゲームエンジンをクローンするとき
 
-VercelBlobをStorageに使用しています。
-- 4.5MB より小さいファイルしかアップロードできない。
-- next.config.js を各自の環境に合わせて設定する
-
-```
-images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        // Rewrite your self domain to your Vercel domain
-        hostname: '<YOUR_URL>.public.blob.vercel-storage.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  }
-```
+(Prepare Vercel Clone Button)
