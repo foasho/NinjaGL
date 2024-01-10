@@ -4,14 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody;
-
-  let alreadyUploaded = false;
-  const { blobs } = await list({ token: process.env.SOLB_READ_WRITE_TOKEN });
-  let deletingBlobs: any[] = [];
-  // filenameがすでに存在する場合は、削除する対象を探す
-  if (body.payload["pathname"]) {
-    deletingBlobs = [...blobs.filter((blob) => blob.pathname === body.payload["pathname"])];
-  }
+  const { blobs: beforeMerged } = await list({ token: process.env.SOLB_READ_WRITE_TOKEN });
 
   try {
     const jsonResponse = await handleUpload({
@@ -25,6 +18,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         try {
           // TODO: DBを使っている場合はここで処理を追加する
           // 削除する
+          const deletingBlobs = beforeMerged.filter((bmblob) => bmblob.pathname === blob.pathname);
           deletingBlobs.forEach(async (blob) => {
             await del(blob.url, { token: process.env.SOLB_READ_WRITE_TOKEN });
           });
