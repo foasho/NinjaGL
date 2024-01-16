@@ -1,4 +1,4 @@
-import { IObjectManagement, OMType } from "@ninjagl/core";
+import type { IObjectManagement, OMType } from "@ninjagl/core";
 import { t } from "i18next";
 import { Euler, MathUtils, Vector3 } from "three";
 
@@ -12,7 +12,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "light",
         args: {
-          type: value,
+          type: value!,
           castShadow: true,
           receiveShadow: false,
         },
@@ -22,9 +22,8 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         visible: true,
       };
     case "sky":
-      const sky = oms.find((om) => om.type === "sky");
-      if (sky) {
-        MySwal.fire({
+      if (oms.find((om) => om.type === "sky")) {
+        void MySwal.fire({
           text: t("skyExistAlert"),
           icon: "warning",
           showCancelButton: false,
@@ -37,7 +36,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "sky",
         args: {
-          type: value,
+          type: value!,
         },
         physics: false,
         phyType: "box",
@@ -50,7 +49,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "three",
         args: {
-          type: value,
+          type: value!,
         },
         physics: false,
         phyType: "box",
@@ -58,9 +57,8 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         visible: true,
       };
     case "fog":
-      const fog = oms.find((om) => om.type === "fog");
-      if (fog) {
-        MySwal.fire({
+      if (oms.find((om) => om.type === "fog")) {
+        void MySwal.fire({
           text: t("fogExistAlert"),
           icon: "warning",
           showCancelButton: false,
@@ -73,7 +71,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "fog",
         args: {
-          type: value,
+          type: value!,
         },
         physics: false,
         phyType: "box",
@@ -81,9 +79,8 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         visible: true,
       };
     case "environment":
-      const environment = oms.find((om) => om.type === "environment");
-      if (environment) {
-        MySwal.fire({
+      if (oms.find((om) => om.type === "environment")) {
+        void MySwal.fire({
           text: t("environmentExistAlert"),
           icon: "warning",
           showCancelButton: false,
@@ -96,7 +93,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "environment",
         args: {
-          type: value,
+          type: value!,
         },
         physics: false,
         phyType: "box",
@@ -149,7 +146,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "water",
         args: {
-          type: value,
+          type: value!,
           width: 5,
           height: 5,
           widthSegments: 12,
@@ -166,7 +163,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         name: `*${value}`,
         type: "landscape",
         args: {
-          type: value,
+          type: value!,
         },
         physics: true,
         phyType: "box",

@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-
+import { b64EncodeUnicode } from "@/commons/functional";
+import { MySwal } from "@/commons/Swal";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { uploadFile } from "@/utils/upload";
 import MonacoEditor from "@monaco-editor/react";
 import { IScriptManagement } from "@ninjagl/core";
-import { useSession } from "@acme/auth";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { MathUtils } from "three";
 import { useSnapshot } from "valtio";
 
-import { b64EncodeUnicode } from "@/commons/functional";
-import { MySwal } from "@/commons/Swal";
-import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-import { uploadFile } from "@/utils/upload";
+import { useSession } from "@ninjagl/auth";
 
 import { globalScriptStore } from "../Store/Store";
 
@@ -105,7 +104,9 @@ export const ScriptEditor = () => {
   const saveCode = async (filename: string) => {
     if (session && code.current) {
       const file = await convertFile(code.current);
-      const filePath = `${b64EncodeUnicode(session.user!.email as string)}/Scripts/${filename}`;
+      const filePath = `${b64EncodeUnicode(
+        session.user!.email as string,
+      )}/Scripts/${filename}`;
       const res = await uploadFile(file, filePath);
 
       if (!res || !res.url) {
@@ -117,7 +118,9 @@ export const ScriptEditor = () => {
         globalScriptStore.currentSM.script = code.current;
       } else {
         const newSM: IScriptManagement = {
-          id: scriptState.currentSM ? scriptState.currentSM.id : MathUtils.generateUUID(),
+          id: scriptState.currentSM
+            ? scriptState.currentSM.id
+            : MathUtils.generateUUID(),
           type: "script",
           name: filename,
           script: code.current,
@@ -207,16 +210,21 @@ export const ScriptEditor = () => {
 
   return (
     <>
-      <div className='h-full bg-primary'>
-        <div className='absolute bottom-8 right-8 z-20 rounded-lg bg-cyber/25 p-3'>
-          <div className='pb-2 text-center font-bold text-white'>{name ? name : "*Untitled.js"}</div>
+      <div className="bg-primary h-full">
+        <div className="bg-cyber/25 absolute bottom-8 right-8 z-20 rounded-lg p-3">
+          <div className="pb-2 text-center font-bold text-white">
+            {name ? name : "*Untitled.js"}
+          </div>
           <div
-            className='float-right inline-block cursor-pointer bg-cyber px-3.5 py-[5px] font-bold'
+            className="bg-cyber float-right inline-block cursor-pointer px-3.5 py-[5px] font-bold"
             onClick={() => onSave()}
           >
             Save
           </div>
-          <div className='float-right bg-[#494949] px-2.5 py-[5px] text-white' onClick={() => onPreview()}>
+          <div
+            className="float-right bg-[#494949] px-2.5 py-[5px] text-white"
+            onClick={() => onPreview()}
+          >
             Preview
           </div>
           {/** Previewが未実装 */}
@@ -229,12 +237,12 @@ export const ScriptEditor = () => {
             </>
           )} */}
         </div>
-        <div className='h-full w-full bg-[#838383] pt-6'>
+        <div className="h-full w-full bg-[#838383] pt-6">
           <MonacoEditor
-            height='100%'
-            width='100%'
-            language='javascript'
-            theme='vs-dark'
+            height="100%"
+            width="100%"
+            language="javascript"
+            theme="vs-dark"
             value={code.current}
             onChange={(value: any) => handleEditorChange(value)}
             onMount={(editor, monaco) => handleEditorDidMount(monaco, editor)}

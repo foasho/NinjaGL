@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 import React, { createContext, useContext, useEffect, useRef } from "react";
 
@@ -5,7 +6,7 @@ import { MySwal } from "@/commons/Swal";
 
 type BrowserType = "chrome" | "safari" | "edge" | "firefox" | "opera" | "ie" | "unknown";
 
-type PWAContextType = {
+interface PWAContextType {
   browser: React.MutableRefObject<BrowserType>;
   availablePWA: React.MutableRefObject<boolean>;
   InstallApplication: () => void;
@@ -15,35 +16,26 @@ type PWAContextType = {
 const PWAContext = createContext<PWAContextType>({
   browser: { current: "unknown" },
   availablePWA: { current: false },
-  InstallApplication: () => {},
-  reqNotifPermission: () => {},
+  InstallApplication: () => void undefined,
+  reqNotifPermission: () => void undefined,
 } as PWAContextType);
 
 export const usePWA = () => useContext(PWAContext);
 
 export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
-  const deferredPrompt = useRef<any>(null);
+  const deferredPrompt = useRef<Event|null>(null);
   const browser = useRef<BrowserType>("unknown");
   const availablePWA = useRef<boolean>(false);
-
-  const checkedInstall = async () => {
-    //check if browser version supports the api
-    if ("getInstalledRelatedApps" in window.navigator) {
-      const relatedApps = await (navigator as any).getInstalledRelatedApps();
-      relatedApps.forEach((app: any) => {
-        //if your PWA exists in the array it is installed
-        // console.log(app.platform, app.url);
-      });
-    }
-  };
 
   const detectBrowser = (): BrowserType => {
     const agent = window.navigator.userAgent.toLowerCase();
     switch (true) {
       case agent.indexOf("edge") > -1:
         return "edge";
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       case agent.indexOf("opr") > -1 && !!(window as any).opr:
         return "opera";
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       case agent.indexOf("chrome") > -1 && !!(window as any).chrome:
         return "chrome";
       case agent.indexOf("trident") > -1:
@@ -60,24 +52,27 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const _browser = detectBrowser();
     browser.current = _browser;
-    window.addEventListener("beforeinstallprompt", (e) => {
+    window.addEventListener("beforeinstallprompt", (e: Event) => {
       e.preventDefault();
+      if (browser.current === "safari") {
+        return;
+      }
       deferredPrompt.current = e;
       availablePWA.current = false;
     });
     // PWAのインストールが完了したとき
-    window.addEventListener("appinstalled", (evt) => {
-      MySwal.fire({
+    window.addEventListener("appinstalled", () => {
+      void MySwal.fire({
         title: "インストール完了",
         text: "インストールが完了しました",
         icon: "success",
         confirmButtonText: "閉じる",
       });
     });
-    checkedInstall();
+
     return () => {
-      window.removeEventListener("beforeinstallprompt", () => {});
-      window.removeEventListener("appinstalled", () => {});
+      window.removeEventListener("beforeinstallprompt", () => void undefined);
+      window.removeEventListener("appinstalled", () => void undefined);
     };
   }, []);
 
@@ -87,7 +82,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   const InstallApplication = () => {
     // 利用しているBrowserがSafariの場合は動画を表示
     if (browser.current === "safari") {
-      MySwal.fire({
+      void MySwal.fire({
         title: "<ruby>インストール方法<rt>お使いのブラウザでの</rt></ruby >",
         html: `
           <div class="flex mx-aut0 flex-col items-center">
@@ -101,8 +96,10 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     if (deferredPrompt.current) {
-      deferredPrompt.current.prompt();
-      deferredPrompt.current.userChoice.then((choiceResult: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+      (deferredPrompt.current as any).prompt();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+      (deferredPrompt.current as any).userChoice.then((choiceResult: any) => {
         if (choiceResult.outcome === "accepted") {
           // console.log('User accepted the install prompt');
           // deferredPrompt.current = null; // 必要かどうかは不明
@@ -111,10 +108,10 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
         }
       });
     } else {
-      let title = "インストールできません";
-      let text = "このブラウザではインストールできません";
-      let icon: "error" | "info" = "error";
-      MySwal.fire({
+      const title = "インストールできません";
+      const text = "このブラウザではインストールできません";
+      const icon: "error" | "info" = "error";
+      void MySwal.fire({
         title: title,
         text: text,
         icon: icon,
@@ -128,7 +125,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
    */
   const reqNotifPermission = () => {
     if (Notification.permission === "default") {
-      Notification.requestPermission().then((permission) => {
+      void Notification.requestPermission().then((permission) => {
         if (permission === "granted") {
           // console.log('Notification permission granted.');
         }
@@ -137,36 +134,36 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   /**
-   * プッシュ通知を送信する
+   * TODO: プッシュ通知を送信する
    */
-  const sendPushNotification = ({ title = "Hello world!", logo = "img/logo.svg" }) => {
-    if (Notification.permission === "granted") {
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        const options = {
-          body: "First notification!",
-          icon: logo,
-          vibrate: [100, 50, 100],
-          data: {
-            dateOfArrival: Date.now(),
-            primaryKey: 1,
-          },
-          actions: [
-            {
-              action: "explore",
-              title: "Explore this new world",
-              icon: logo,
-            },
-            {
-              action: "close",
-              title: "Close notification",
-              icon: logo,
-            },
-          ],
-        };
-        reg?.showNotification(title, options);
-      });
-    }
-  };
+  // const sendPushNotification = ({ title = "Hello world!", logo = "img/logo.svg" }) => {
+  //   if (Notification.permission === "granted") {
+  //     navigator.serviceWorker.getRegistration().then((reg) => {
+  //       const options = {
+  //         body: "First notification!",
+  //         icon: logo,
+  //         vibrate: [100, 50, 100],
+  //         data: {
+  //           dateOfArrival: Date.now(),
+  //           primaryKey: 1,
+  //         },
+  //         actions: [
+  //           {
+  //             action: "explore",
+  //             title: "Explore this new world",
+  //             icon: logo,
+  //           },
+  //           {
+  //             action: "close",
+  //             title: "Close notification",
+  //             icon: logo,
+  //           },
+  //         ],
+  //       };
+  //       reg?.showNotification(title, options);
+  //     });
+  //   }
+  // };
 
   return (
     <PWAContext.Provider

@@ -5,7 +5,7 @@ import { Material } from "@gltf-transform/core";
 import { useInputControl } from "@ninjagl/core";
 import { GizmoHelper, GizmoViewport, SpotLight } from "@react-three/drei";
 import { useThree, useFrame } from "@react-three/fiber";
-import { auth } from "@acme/auth";
+import { auth } from "@ninjagl/auth";
 import { useTranslation } from "react-i18next";
 import {
   Mesh,

@@ -1,9 +1,9 @@
 import { createContext, useContext, useRef } from "react";
 
-type kvsProps = {
-  [key: string]: string;
-};
-type NinjaLVSProps = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type kvsProps = Record<string, any>;;
+
+interface NinjaLVSProps {
   kvs: kvsProps;
   getKVS: (key: string) => string | null;
   setKVS: (kvs: kvsProps) => void;
@@ -14,30 +14,36 @@ type NinjaLVSProps = {
   offKVSKeysChanged: (listener: () => void) => void;
   onKVSKeyChanged: (key: string, listener: () => void) => void;
   offKVSKeyChanged: (key: string, listener: () => void) => void;
-};
-const NinjaKVSContext = createContext({
+}
+const NinjaKVSContext = createContext<NinjaLVSProps>({
   kvs: {},
-  getKVS: (key: string) => null,
-  setKVS: (kvs: kvsProps) => {},
-  createKVS: (key: string, value: string) => {},
-  updateKVS: (key: string, value: string) => {},
-  removeKVS: (key: string) => {},
-  onKVSKeysChanged: (listener: () => void) => {},
-  offKVSKeysChanged: (listener: () => void) => {},
-  onKVSKeyChanged: (key: string, listener: () => void) => {},
-} as NinjaLVSProps);
+  getKVS: () => null,
+  setKVS: () => void undefined,
+  createKVS: () => void undefined,
+  updateKVS: () => void undefined,
+  removeKVS: () => void undefined,
+  onKVSKeysChanged: () => void undefined,
+  offKVSKeysChanged: () => void undefined,
+  onKVSKeyChanged: () => void undefined,
+  offKVSKeyChanged: () => void undefined,
+});
 
 export const useNinjaKVS = () => useContext(NinjaKVSContext);
 
-export const NinjaKVSProvider = ({ children }) => {
+interface NinjaKVSProviderProps {
+  children: React.ReactNode;
+}
+export const NinjaKVSProvider = ({ children }: NinjaKVSProviderProps) => {
   const kvs: kvsProps = {};
 
   const getKVS = (key: string) => {
-    return kvs[key] || null;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return kvs[key] ?? null;
   };
-  const setKVS = (kvs: kvsProps) => {
-    Object.keys(kvs).forEach((key) => {
-      kvs[key] = kvs[key];
+  const setKVS = (_kvs: kvsProps) => {
+    Object.keys(_kvs).forEach((key) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      kvs[key] = _kvs[key] ?? null;
     });
     notifyKVSKeysChanged();
   };
@@ -55,7 +61,7 @@ export const NinjaKVSProvider = ({ children }) => {
   };
 
   /**
-   * Keys　Listener
+   * KeysListener
    */
   const kvsKeysChangedListeners = useRef<(() => void)[]>([]);
   const onKVSKeysChanged = (listener: () => void) => {
@@ -72,25 +78,28 @@ export const NinjaKVSProvider = ({ children }) => {
   /**
    * Update Listener
    */
-  const kvsKeyChangedListeners = useRef<{ [key: string]: (() => void)[] }>({});
+  const kvsKeyChangedListeners = useRef<Record<string, (() => void)[]>>({});
   const onKVSKeyChanged = (key: string, listener: () => void) => {
     if (!kvsKeyChangedListeners.current[key]) {
       kvsKeyChangedListeners.current[key] = [];
     }
-    kvsKeyChangedListeners.current[key].push(listener);
+    kvsKeyChangedListeners.current[key]?.push(listener);
   };
   const offKVSKeyChanged = (key: string, listener: () => void) => {
     if (!kvsKeyChangedListeners.current[key]) {
       return;
     }
-    kvsKeyChangedListeners.current[key] = kvsKeyChangedListeners.current[key].filter((l) => l !== listener);
+    const updatedKvsLisners = kvsKeyChangedListeners.current[key]?.filter((l) => l !== listener);
+    if (updatedKvsLisners){
+      kvsKeyChangedListeners.current[key] = updatedKvsLisners;
+    }
   };
   // 特定のKVS変更を通知する
   const notifyKVSKeyChanged = (key: string) => {
     if (!kvsKeyChangedListeners.current[key]) {
       return;
     }
-    kvsKeyChangedListeners.current[key].forEach((l) => l());
+    kvsKeyChangedListeners.current[key]?.forEach((l) => l());
   };
 
   return (

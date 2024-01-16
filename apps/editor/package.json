@@ -1,5 +1,5 @@
 {
-  "name": "@acme/editor",
+  "name": "@ninjagl/editor",
   "version": "0.2.0",
   "description": "R3F-WEBGL FastGameEditor",
   "private": true,
@@ -15,11 +15,12 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/api": "workspace:^0.1.0",
-    "@acme/auth": "workspace:^0.1.0",
-    "@acme/db": "workspace:^0.1.0",
-    "@acme/ui": "workspace:^0.1.0",
-    "@acme/validators": "workspace:^0.1.0",
+    "@ninjagl/api": "workspace:^0.1.0",
+    "@ninjagl/auth": "workspace:^0.1.0",
+    "@ninjagl/db": "workspace:^0.1.0",
+    "@ninjagl/ui": "workspace:^0.1.0",
+    "@ninjagl/core": "workspace:^1.1.46",
+    "@ninjagl/validators": "workspace:^0.1.0",
     "@ducanh2912/next-pwa": "^9.1.4",
     "@gltf-transform/core": "^3.1.1",
     "@gltf-transform/functions": "^3.1.1",
@@ -31,16 +32,10 @@
     "@next/font": "^13.5.6",
     "@next/mdx": "^14.0.4",
     "@nextui-org/react": "^2.2.9",
-    "@ninjagl/api": "^1.0.2",
-    "@ninjagl/core": "^1.1.43",
     "@react-three/drei": "^9.88.7",
     "@react-three/fiber": "^8.14.5",
     "@react-three/postprocessing": "^2.15.8",
     "@react-three/rapier": "^1.2.1",
-    "@skyway-sdk/core": "^1.2.2",
-    "@skyway-sdk/room": "^1.2.2",
-    "@skyway-sdk/sfu-bot": "^1.2.2",
-    "@skyway-sdk/token": "^1.2.2",
     "@t3-oss/env-nextjs": "^0.7.1",
     "@tanstack/react-query": "^5.17.7",
     "@tanstack/react-query-devtools": "^5.17.7",
@@ -62,7 +57,7 @@
     "jszip": "^3.10.1",
     "lodash.clamp": "^4.0.3",
     "maath": "^0.10.4",
-    "meshoptimizer": "^0.18.1",
+    "meshoptimizer": "^0.19.0",
     "monaco-editor": "^0.36.1",
     "multer": "^1.4.5-lts.1",
     "next": "^14.0.4",
@@ -82,11 +77,11 @@
     "react-twitter-embed": "^4.0.4",
     "remark-gfm": "^4.0.0",
     "source-map": "^0.7.4",
-    "styled-components": "^5.3.8",
+    "styled-components": "^5.3.11",
     "sweetalert2": "^11.7.20",
     "sweetalert2-react-content": "^5.0.7",
-    "three": "^0.157.0",
-    "three-custom-shader-material": "^5.3.7",
+    "three": "^0.160.0",
+    "three-custom-shader-material": "^5.4.0",
     "three-stdlib": "^2.26.13",
     "tunnel-rat": "^0.1.2",
     "valtio": "^1.10.4",
@@ -94,16 +89,16 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^0.2.0",
-    "@acme/prettier-config": "workspace:^0.1.0",
-    "@acme/tailwind-config": "workspace:^0.1.0",
-    "@acme/tsconfig": "workspace:^0.1.0",
+    "@ninjagl/eslint-config": "workspace:^0.2.0",
+    "@ninjagl/prettier-config": "workspace:^0.1.0",
+    "@ninjagl/tailwind-config": "workspace:^0.1.0",
+    "@ninjagl/tsconfig": "workspace:^0.1.0",
     "@dimforge/rapier3d": "^0.11.2",
     "@next/bundle-analyzer": "^13.1.6",
     "@types/mdx": "^2.0.10",
     "@types/node": "^20.10.6",
-    "@types/styled-components": "^5.1.26",
-    "@types/three": "^0.156.0",
+    "@types/styled-components": "^5.1.32",
+    "@types/three": "^0.160.0",
     "autoprefixer": "^10.4.16",
     "cypress": "^12.9.0",
     "dotenv-cli": "^7.3.0",
@@ -127,10 +122,10 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@acme/eslint-config/base",
-      "@acme/eslint-config/nextjs",
-      "@acme/eslint-config/react"
+      "@ninjagl/eslint-config/base",
+      "@ninjagl/eslint-config/nextjs",
+      "@ninjagl/eslint-config/react"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@ninjagl/prettier-config"
 }

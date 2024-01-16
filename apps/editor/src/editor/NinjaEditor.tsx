@@ -1,23 +1,23 @@
 import "./Locale";
-import { loadNJCFileFromURL } from "@ninjagl/core";
-import clsx from "clsx";
-import { useTranslation } from "react-i18next";
-import {
-  AiOutlineAppstore,
-  AiOutlineCode,
-  AiOutlineHighlight,
-  AiOutlinePicture,
-  AiOutlinePlus,
-  AiOutlineDown,
-  AiOutlineUp,
-} from "react-icons/ai";
-import { useSnapshot } from "valtio";
 
 import { MySwal } from "@/commons/Swal";
 import { MainViewer } from "@/editor/ViewPort/MainViewer";
 import { PlayerEditor } from "@/editor/ViewPort/PlayerEditor";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { addInitOM } from "@/utils/omControls";
+import { loadNJCFileFromURL } from "@ninjagl/core";
+import clsx from "clsx";
+import { useTranslation } from "react-i18next";
+import {
+  AiOutlineAppstore,
+  AiOutlineCode,
+  AiOutlineDown,
+  AiOutlineHighlight,
+  AiOutlinePicture,
+  AiOutlinePlus,
+  AiOutlineUp,
+} from "react-icons/ai";
+import { useSnapshot } from "valtio";
 
 import { AppBar, AppBarHeight } from "./Common/AppBar";
 import { WindowdAnalyzer } from "./Common/WindowAnalyzer";
@@ -34,7 +34,7 @@ import { globalEditorStore } from "./Store/editor";
 import { editorStore } from "./Store/Store";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
-import { ShaderEditor } from "./ViewPort/ShaderEditor";
+
 /**
  * NinjaEngineメインコンポネント
  */
@@ -48,7 +48,14 @@ export const NinjaEditor = () => {
   /**
    * ビューポートの切り替え
    */
-  const changeView = (viewType: "mainview" | "debugplay" | "playereditor" | "scripteditor" | "shadereditor") => {
+  const changeView = (
+    viewType:
+      | "mainview"
+      | "debugplay"
+      | "playereditor"
+      | "scripteditor"
+      | "shadereditor",
+  ) => {
     if (editorState.viewSelect !== viewType) {
       // editorStore.init();
       globalEditorStore.viewSelect = viewType;
@@ -102,7 +109,7 @@ export const NinjaEditor = () => {
 
   return (
     <>
-      <div className='w-auto'>
+      <div className="w-auto">
         <AppBar />
 
         <div
@@ -111,95 +118,117 @@ export const NinjaEditor = () => {
             height: "100vh",
           }}
         >
-          <div className={`relative grid h-[calc(100vh-45px)] w-full grid-cols-6 gap-0`}>
+          <div
+            className={`relative grid h-[calc(100vh-45px)] w-full grid-cols-6 gap-0`}
+          >
             {/** ヒエラルキービュー */}
             <div
-              className={clsx(`absolute left-3 top-[12px] z-30 w-[190px] rounded-lg pt-[2px]`, sideBar && "bg-primary")}
+              className={clsx(
+                `absolute left-3 top-[12px] z-30 w-[190px] rounded-lg pt-[2px]`,
+                sideBar && "bg-primary",
+              )}
               style={{
                 display: viewSelect == "mainview" ? "block" : "none",
               }}
             >
-              <div className='relative'>
+              <div className="relative">
                 <a
                   className={clsx(
-                    "absolute top-0 h-6 cursor-pointer rounded-lg bg-primary bg-primary/75 p-0.5 text-white",
+                    "bg-primary bg-primary/75 absolute top-0 h-6 cursor-pointer rounded-lg p-0.5 text-white",
                     sideBar ? "right-2" : "left-2",
                   )}
                   onClick={() => (globalEditorStore.sideBar = !sideBar)}
                 >
                   {sideBar ? (
-                    <AiOutlineDown className='mx-0.5 inline h-4 w-4 pb-1' />
+                    <AiOutlineDown className="mx-0.5 inline h-4 w-4 pb-1" />
                   ) : (
-                    <AiOutlineUp className='mx-0.5 inline h-4 w-4 pb-1' />
+                    <AiOutlineUp className="mx-0.5 inline h-4 w-4 pb-1" />
                   )}
                 </a>
               </div>
               <div
-                className='overflow-y-auto'
+                className="overflow-y-auto"
                 style={{
                   height: `calc(100vh - ${AppBarHeight + 54}px)`,
                   display: sideBar ? "block" : "none",
                 }}
               >
-                <div className='min-h-[20%] px-[5px] py-[12px]'>
-                  <div className='m-0'>
+                <div className="min-h-[20%] px-[5px] py-[12px]">
+                  <div className="m-0">
                     <HierarchyTree />
                   </div>
                 </div>
-                <div className='min-h-[15%] px-[5px] py-[12px]'>
-                  <div className='mb-2 h-[20px] select-none p-0 text-center text-white'>
+                <div className="min-h-[15%] px-[5px] py-[12px]">
+                  <div className="mb-2 h-[20px] select-none p-0 text-center text-white">
                     <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == "ui" && "bg-black"}`}
+                      className={`inline-block text-[#3b3b3b] ${
+                        selectSubNav == "ui" && "bg-black"
+                      }`}
                       onClick={() => (globalEditorStore.selectSubNav = "ui")}
                     >
-                      <span className='cursor-pointer border-r-1 border-white px-1'>
-                        <AiOutlineAppstore className='inline pb-1 text-xl font-bold text-white' />
+                      <span className="border-r-1 cursor-pointer border-white px-1">
+                        <AiOutlineAppstore className="inline pb-1 text-xl font-bold text-white" />
                       </span>
                     </div>
                     <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == "script" && "bg-black"}`}
-                      onClick={() => (globalEditorStore.selectSubNav = "script")}
+                      className={`inline-block text-[#3b3b3b] ${
+                        selectSubNav == "script" && "bg-black"
+                      }`}
+                      onClick={() =>
+                        (globalEditorStore.selectSubNav = "script")
+                      }
                     >
-                      <span className='cursor-pointer border-r-1 border-white px-1'>
-                        <AiOutlineCode className='inline pb-1 text-xl font-bold text-white' />
+                      <span className="border-r-1 cursor-pointer border-white px-1">
+                        <AiOutlineCode className="inline pb-1 text-xl font-bold text-white" />
                       </span>
                     </div>
                     <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == "shader" && "bg-black"}`}
-                      onClick={() => (globalEditorStore.selectSubNav = "shader")}
+                      className={`inline-block text-[#3b3b3b] ${
+                        selectSubNav == "shader" && "bg-black"
+                      }`}
+                      onClick={() =>
+                        (globalEditorStore.selectSubNav = "shader")
+                      }
                     >
-                      <span className='cursor-pointer border-r-1 border-white px-1'>
-                        <AiOutlineHighlight className='inline pb-1 text-xl font-bold text-white' />
+                      <span className="border-r-1 cursor-pointer border-white px-1">
+                        <AiOutlineHighlight className="inline pb-1 text-xl font-bold text-white" />
                       </span>
                     </div>
                     <div
-                      className={`inline-block text-[#3b3b3b] ${selectSubNav == "texture" && "bg-black"}`}
-                      onClick={() => (globalEditorStore.selectSubNav = "texture")}
+                      className={`inline-block text-[#3b3b3b] ${
+                        selectSubNav == "texture" && "bg-black"
+                      }`}
+                      onClick={() =>
+                        (globalEditorStore.selectSubNav = "texture")
+                      }
                     >
-                      <span className='px-1'>
-                        <AiOutlinePicture className='inline pb-1 text-xl font-bold text-white' />
+                      <span className="px-1">
+                        <AiOutlinePicture className="inline pb-1 text-xl font-bold text-white" />
                       </span>
                     </div>
                   </div>
-                  <div className='m-0 block px-3 text-white '>
+                  <div className="m-0 block px-3 text-white ">
                     {selectSubNav == "ui" && <UINavigation />}
                     {selectSubNav == "script" && <ScriptNavigation />}
                     {selectSubNav == "shader" && <ShaderNavigation />}
                     {selectSubNav == "texture" && <TextureNavigation />}
                   </div>
                 </div>
-                <div className='bg-primary px-2 pb-12 text-white'>
-                  <ContentsBrowser changeScriptEditor={changeScriptEditor} changeProject={changeProject} />
+                <div className="bg-primary px-2 pb-12 text-white">
+                  <ContentsBrowser
+                    changeScriptEditor={changeScriptEditor}
+                    changeProject={changeProject}
+                  />
                 </div>
                 <div
-                  className='absolute bottom-0 w-full rounded-md border-t-2 border-black bg-primary'
+                  className="bg-primary absolute bottom-0 w-full rounded-md border-t-2 border-black"
                   onClick={() => onClickNewObject()}
                 >
-                  <div className='cursor-pointer select-none rounded-md px-2.5 py-3 text-center text-lg font-bold text-white hover:bg-gray-700'>
+                  <div className="cursor-pointer select-none rounded-md px-2.5 py-3 text-center text-lg font-bold text-white hover:bg-gray-700">
                     <span>
-                      <AiOutlinePlus className='inline' />
+                      <AiOutlinePlus className="inline" />
                     </span>
-                    <span className='text-sm'>{t("newObject")}</span>
+                    <span className="text-sm">{t("newObject")}</span>
                   </div>
                 </div>
               </div>
@@ -207,31 +236,43 @@ export const NinjaEditor = () => {
 
             {/** コンテンツビュー */}
             <div
-              className={clsx(`relative w-screen bg-primary`)}
+              className={clsx(`bg-primary relative w-screen`)}
               style={{
                 height: appBar ? `calc(100vh - ${AppBarHeight}px)` : "100vh",
               }}
             >
-              <div className='absolute left-0 top-0 z-10 m-0 w-full select-none items-center bg-cyber/50 p-0 text-center text-primary'>
-                <div className='inline-block'>
+              <div className="bg-cyber/50 text-primary absolute left-0 top-0 z-10 m-0 w-full select-none items-center p-0 text-center">
+                <div className="inline-block">
                   <a
                     onClick={() => changeView("mainview")}
-                    className='cursor-pointer rounded border-r-2 border-black px-2.5 text-xs'
-                    style={viewSelect == "mainview" ? { background: "#fff", color: "#838383" } : {}}
+                    className="cursor-pointer rounded border-r-2 border-black px-2.5 text-xs"
+                    style={
+                      viewSelect == "mainview"
+                        ? { background: "#fff", color: "#838383" }
+                        : {}
+                    }
                   >
                     {t("mainView")}
                   </a>
                   <a
                     onClick={() => changeView("playereditor")}
-                    className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
-                    style={viewSelect == "playereditor" ? { background: "#fff", color: "#838383" } : {}}
+                    className="cursor-pointer border-r-2 border-black px-2.5 text-xs"
+                    style={
+                      viewSelect == "playereditor"
+                        ? { background: "#fff", color: "#838383" }
+                        : {}
+                    }
                   >
                     {t("playerEditor")}
                   </a>
                   <a
                     onClick={() => changeView("scripteditor")}
-                    className='cursor-pointer border-r-2 border-black px-2.5 text-xs'
-                    style={viewSelect == "scripteditor" ? { background: "#fff", color: "#838383" } : {}}
+                    className="cursor-pointer border-r-2 border-black px-2.5 text-xs"
+                    style={
+                      viewSelect == "scripteditor"
+                        ? { background: "#fff", color: "#838383" }
+                        : {}
+                    }
                   >
                     {t("scriptEditor")}
                   </a>
@@ -245,7 +286,7 @@ export const NinjaEditor = () => {
                   </a> */}
                 </div>
               </div>
-              <div className='m-0 h-full bg-white p-0'>
+              <div className="m-0 h-full bg-white p-0">
                 {viewSelect == "mainview" && (
                   <>
                     <MainViewer />
@@ -266,23 +307,22 @@ export const NinjaEditor = () => {
                     <ScriptEditor />
                   </>
                 )}
-                {viewSelect == "shadereditor" && (
-                  <>
-                    <ShaderEditor />
-                  </>
-                )}
               </div>
             </div>
           </div>
           <div
-            className='absolute right-[10px] top-[80px] z-30 block text-left text-white'
+            className="absolute right-[10px] top-[80px] z-30 block text-left text-white"
             style={{
-              display: (viewSelect == "mainview" && state.currentId) || viewSelect == "playereditor" ? "block" : "none",
+              display:
+                (viewSelect == "mainview" && state.currentId) ||
+                viewSelect == "playereditor"
+                  ? "block"
+                  : "none",
             }}
           >
             {viewSelect == "mainview" && (
               <div
-                className='overflow-y-auto rounded-lg bg-secondary/75 px-[10px]'
+                className="bg-secondary/75 overflow-y-auto rounded-lg px-[10px]"
                 style={{
                   width: editorState.uiMode ? "350px" : "230px",
                   height: "calc(100vh - 120px)",
@@ -294,7 +334,7 @@ export const NinjaEditor = () => {
           </div>
         </div>
 
-        <div id='myDialog'></div>
+        <div id="myDialog"></div>
         <WindowdAnalyzer />
       </div>
     </>

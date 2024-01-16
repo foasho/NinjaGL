@@ -1,0 +1,72 @@
+import { Meta } from "@storybook/blocks";
+
+export const RightArrow = () => (
+  <svg
+    viewBox="0 0 14 14"
+    width="8px"
+    height="14px"
+    style={{
+      marginLeft: "4px",
+      display: "inline-block",
+      shapeRendering: "inherit",
+      verticalAlign: "middle",
+      fill: "currentColor",
+      "path fill": "currentColor",
+    }}
+  >
+    <path d="m11.1 7.35-5.5 5.5a.5.5 0 0 1-.7-.7L10.04 7 4.9 1.85a.5.5 0 1 1 .7-.7l5.5 5.5c.2.2.2.5 0 .7Z" />
+  </svg>
+);
+
+<Meta title="Introduction" />
+
+<div className="sb-container">
+  <div className='sb-section-title'>
+    # Introduction
+  </div>
+</div>
+<div className="sb-container">
+  <div className='sb-section-title'>
+    # Usage
+
+    ```bash
+    npm install @ninjagl/core
+    // or
+    yarn add @ninjagl/core
+    // or
+    pnpm add @ninjagl/core
+    ```
+
+  </div>
+  <div className='sb-section-title'>
+    ## Basic Usage
+
+    ```typescript
+      import { NinjaGL } from '@ninjagl/core';
+    ```
+
+  </div>
+</div>
+
+<style>
+  {`
+  .sb-container {
+    margin-bottom: 48px;
+  }
+
+  .sb-section {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  img {
+    object-fit: cover;
+  }
+
+  .sb-section-title {
+    margin-bottom: 32px;
+  }
+  `}
+</style>

@@ -8,10 +8,10 @@ import { PWAProvider } from "@/hooks/usePWA";
 import RootProvider from "@/root.container";
 import { mplus } from "@/styles/font";
 
-import { Toaster } from "@acme/ui/toast";
+import { Toaster } from "@ninjagl/ui/toast";
 import { env } from "../env";
 import { TRPCReactProvider } from "@/trpc/react";
-import { SessionProvider } from "@acme/auth";
+import { SessionProvider } from "@ninjagl/auth";
 
 const getHeaders = cache(async () => headers());
 

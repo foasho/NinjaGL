@@ -13,8 +13,9 @@ export const TouchController = () => {
    * 開始
    * @param e
    */
-  const handleTouchStart = (e) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
+    if (!e.touches[0]) return;
     const { clientX, clientY } = e.touches[0];
 
     setOuterCircleStyle({
@@ -39,9 +40,10 @@ export const TouchController = () => {
    * 移動
    * @param e
    */
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     e.preventDefault();
     if (!dragging) return;
+    if (!e.touches[0]) return;
     const { clientX, clientY } = e.touches[0];
 
     setInnerCircleStyle({
@@ -80,14 +82,14 @@ export const TouchController = () => {
     <>
       <div
         ref={joystickRef}
-        className='joystick'
+        className="joystick"
         style={{ position: "relative", width: "100%", height: "100%" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className='outer-circle' style={outerCircleStyle}></div>
-        <div className='inner-circle' style={innerCircleStyle}></div>
+        <div className="outer-circle" style={outerCircleStyle}></div>
+        <div className="inner-circle" style={innerCircleStyle}></div>
       </div>
     </>
   );

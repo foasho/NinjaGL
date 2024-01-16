@@ -1,6 +1,6 @@
 "use client";
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
-import { signOut, useSession } from "@acme/auth";
+import { signOut, useSession } from "@ninjagl/auth";
 
 export const Header = () => {
   const session = useSession();

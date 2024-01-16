@@ -4,7 +4,7 @@ import NextAuth from "next-auth";
 import { useSession, SessionProvider } from "next-auth/react";
 import Discord from "next-auth/providers/discord";
 
-import { db, tableCreator } from "@acme/db";
+import { db, tableCreator } from "@ninjagl/db";
 
 export type { Session } from "next-auth";
 

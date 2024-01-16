@@ -1,13 +1,15 @@
-import { useEffect, useRef, MutableRefObject, useState, Suspense } from "react";
-
-import { useGLTF, useAnimations } from "@react-three/drei";
-import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
-import { GLTF, SkeletonUtils } from "three-stdlib";
-import { useSnapshot } from "valtio";
-
+import type { IObjectManagement } from "@ninjagl/core";
+import type { MutableRefObject } from "react";
+import type { Group, Matrix4, Object3D } from "three";
+import type { GLTF } from "three-stdlib";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Loading3D } from "@/commons/Loading3D";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { useAnimations, useGLTF } from "@react-three/drei";
+import { Euler, Mesh, Vector3 } from "three";
+import { SkeletonUtils } from "three-stdlib";
+import { useSnapshot } from "valtio";
 
 import { PivotControls } from "./PivoitControl";
 
@@ -15,15 +17,15 @@ export const Avatar = () => {
   const { getAvatarOM } = useNinjaEditor();
   const om = getAvatarOM();
 
-  return <>{om && <Player om={om} />}</>;
+  return <>{om && <Player {...om} />}</>;
 };
 
 /**
  * アバターデータ
  */
-export const Player = ({ om }) => {
+export const Player = ({ ...om }: IObjectManagement) => {
   const state = useSnapshot(editorStore);
-  const { scene, animations } = useGLTF(om.args.url) as GLTF;
+  const { scene, animations } = useGLTF(om.args.url!) as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const ref = useRef<Group>(null);
   const {
@@ -42,7 +44,9 @@ export const Player = ({ om }) => {
   const onDragStart = () => {
     editorStore.pivotControl = true;
   };
-  const onDragEnd = () => {};
+  const onDragEnd = () => {
+    // TODO: Save To DB
+  };
   const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
@@ -108,7 +112,11 @@ export const Player = ({ om }) => {
     <Suspense fallback={<Loading3D />}>
       {!state.editorFocus && (
         <PivotControls
-          object={state.currentId == id ? (ref as MutableRefObject<Object3D>) : undefined}
+          object={
+            state.currentId == id
+              ? (ref as MutableRefObject<Object3D>)
+              : undefined
+          }
           visible={state.currentId == id}
           depthTest={false}
           lineWidth={2}
@@ -123,8 +131,12 @@ export const Player = ({ om }) => {
           <AnimationHelper
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
-            onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
-            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
+            onClick={(e: React.PointerEvent) => (
+              e.stopPropagation(), (editorStore.currentId = id)
+            )}
+            onPointerMissed={(e: React.PointerEvent) =>
+              e.type === "click" && editorStore.init()
+            }
             object={clone}
           />
         </group>
@@ -133,13 +145,13 @@ export const Player = ({ om }) => {
   );
 };
 
-type AnimationHelperProps = {
+interface AnimationHelperProps {
   id: string;
   object: Object3D;
   visible?: boolean;
   onClick?: (e: any) => void;
   onPointerMissed?: (e: any) => void;
-};
+}
 const AnimationHelper = ({
   id,
   object,
@@ -155,7 +167,7 @@ const AnimationHelper = ({
   const [animationLoop, setAnimationLoop] = useState<boolean>(true);
 
   const animationStop = () => {
-    if (actions && actions[defaultAnimation]) {
+    if (actions?.[defaultAnimation]) {
       actions[defaultAnimation]!.stop();
     }
   };
@@ -173,9 +185,9 @@ const AnimationHelper = ({
       const _om = getOMById(id);
       if (_om) {
         if (_om.args.defaultAnimation) {
-          setDefaultAnimation(_om.args.defaultAnimation);
+          setDefaultAnimation(_om.args.defaultAnimation as string);
         }
-        setAnimationLoop(_om.args.animationLoop);
+        setAnimationLoop(_om.args.animationLoop!);
       }
     };
     init();
@@ -186,7 +198,7 @@ const AnimationHelper = ({
   });
 
   useEffect(() => {
-    if (actions && actions[defaultAnimation]) {
+    if (actions?.[defaultAnimation]) {
       animationAllStop();
       actions[defaultAnimation]!.play();
     }
@@ -195,5 +207,13 @@ const AnimationHelper = ({
     }
   }, [actions, defaultAnimation, animationLoop]);
 
-  return <primitive ref={ref} visible={visible} onClick={onClick} onPointerMissed={onPointerMissed} object={object} />;
+  return (
+    <primitive
+      ref={ref}
+      visible={visible}
+      onClick={onClick}
+      onPointerMissed={onPointerMissed}
+      object={object}
+    />
+  );
 };

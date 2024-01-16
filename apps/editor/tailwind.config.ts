@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 import { nextui } from '@nextui-org/react';
-import baseConfig from "@acme/tailwind-config";
+import baseConfig from "@ninjagl/tailwind-config";
 
 export default {
   mode: 'jit',

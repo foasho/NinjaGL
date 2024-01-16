@@ -1,19 +1,20 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-
-import {
+import type {
   IObjectManagement,
   IScriptManagement,
   ITextureManagement,
   IUIManagement,
   NJCFile,
+  OMArgsProps,
   OMPhysicsType,
+  MaterialDataProps
 } from "@ninjagl/core";
-import { Euler, Group, MathUtils, Object3D, Vector3 } from "three";
-import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-
+import type { Object3D } from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { MySwal } from "@/commons/Swal";
 import { globalEditorStore } from "@/editor/Store/editor";
 import { initTpOms, initTpUis } from "@/utils/initTpProjects";
+import { Euler, Group, MathUtils, Vector3 } from "three";
 
 /**
  * コンテンツブラウザの操作モード
@@ -47,12 +48,10 @@ export interface IPlayerManager {
   height: number;
   animations: [];
   object: Group;
-  animMapper: { [key: string]: string };
-  sounds: any[];
-  args: any;
+  animMapper: Record<string, string>;
 }
 
-type NinjaEditorProp = {
+interface NinjaEditorProp {
   oms: React.MutableRefObject<IObjectManagement[]>;
   ums: React.MutableRefObject<IUIManagement[]>;
   tms: React.MutableRefObject<ITextureManagement[]>;
@@ -68,9 +67,6 @@ type NinjaEditorProp = {
   contentsSelectPath: string | null;
   ready: boolean;
   initialize: () => void;
-  setCamera: (camera: OrbitControlsImpl) => void;
-  setPlayerManager: (pm: IPlayerManager) => void;
-  setSelectPlayerAnimation: (anim: string) => void;
   undo: () => void;
   redo: () => void;
   setName: (id: string, name: string) => void;
@@ -82,9 +78,13 @@ type NinjaEditorProp = {
   getRotation: (id: string) => Euler;
   setScale: (id: string, scale: Vector3) => void;
   getScale: (id: string) => Vector3;
-  setMaterialData: (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => void;
-  getMaterialData: (id: string) => any;
-  setArg: (id: string, key: string, arg: any) => void;
+  setMaterialData: (
+    id: string,
+    mtype: "standard" | "phong" | "toon" | "shader" | "reflection",
+    value: string,
+  ) => void;
+  getMaterialData: (id: string) => MaterialDataProps | null;
+  setArg: (id: string, key: string, arg: OMArgsProps) => void;
   setPhysics: (id: string, physics: boolean) => void;
   setPhyType: (id: string, phyType: OMPhysicsType) => void;
   setMoveable: (id: string, moveable: boolean) => void;
@@ -100,19 +100,15 @@ type NinjaEditorProp = {
   offNJCChanged: (listener: () => void) => void;
   addOM: (om: IObjectManagement) => void;
   removeOM: (id: string) => void;
-  copyOM: (om: IObjectManagement) => void;
+  copyOM: (om: IObjectManagement) => Promise<boolean>;
   getCopyOM: () => IObjectManagement | null;
   addSM: (sm: IScriptManagement) => boolean;
-  getOMById: (id: string | null) => IObjectManagement | undefined;
+  getOMById: (id: string) => IObjectManagement | undefined;
   getSMById: (id: string) => IScriptManagement | undefined;
   getAvatarOM: () => IObjectManagement | undefined;
   getLights: () => IObjectManagement[];
-};
+}
 const NinjaEditorContext = createContext<NinjaEditorProp>({
-  // oms: [],
-  // ums: [],
-  // tms: [],
-  // sms: [],
   oms: { current: [] },
   ums: { current: [] },
   tms: { current: [] },
@@ -127,40 +123,42 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   contentsSelectType: null,
   contentsSelectPath: null,
   ready: false,
-  initialize: () => {},
-  setCamera: () => {},
-  setPlayerManager: () => {},
-  setSelectPlayerAnimation: () => {},
-  undo: () => {},
-  redo: () => {},
-  setName: () => {},
-  setVisibleType: () => {},
-  setVisible: () => {},
-  setPosition: () => {},
+  initialize: () => void undefined,
+  undo: () => void undefined,
+  redo: () => void undefined,
+  setName: () => void undefined,
+  setVisibleType: () => void undefined,
+  setVisible: () => void undefined,
+  setPosition: () => void undefined,
   getPosition: () => new Vector3(0, 0, 0),
-  setRotation: () => {},
+  setRotation: () => void undefined,
   getRotation: () => new Euler(0, 0, 0),
-  setScale: () => {},
+  setScale: () => void undefined,
   getScale: () => new Vector3(1, 1, 1),
-  setMaterialData: () => {},
-  getMaterialData: () => {},
-  setArg: () => {},
-  setPhysics: () => {},
-  setPhyType: () => {},
-  setMoveable: () => {},
-  onOMIdChanged: () => {},
-  offOMIdChanged: () => {},
-  notifyOMIdChanged: () => {},
-  onOMsChanged: () => {},
-  offOMsChanged: () => {},
-  onSMsChanged: () => {},
-  offSMsChanged: () => {},
-  setNJCFile: () => {},
-  onNJCChanged: () => {},
-  offNJCChanged: () => {},
-  addOM: () => {},
-  removeOM: () => {},
-  copyOM: () => {},
+  setMaterialData: () => void undefined,
+  getMaterialData: () => {
+    return {
+      type: "standard",
+      value: "",
+    };
+  },
+  setArg: () => void undefined,
+  setPhysics: () => void undefined,
+  setPhyType: () => void undefined,
+  setMoveable: () => void undefined,
+  onOMIdChanged: () => void undefined,
+  offOMIdChanged: () => void undefined,
+  notifyOMIdChanged: () => void undefined,
+  onOMsChanged: () => void undefined,
+  offOMsChanged: () => void undefined,
+  onSMsChanged: () => void undefined,
+  offSMsChanged: () => void undefined,
+  setNJCFile: () => void undefined,
+  onNJCChanged: () => void undefined,
+  offNJCChanged: () => void undefined,
+  addOM: () => void undefined,
+  removeOM: () => void undefined,
+  copyOM: () => Promise.resolve(false),
   getCopyOM: () => null,
   addSM: () => false,
   getOMById: () => undefined,
@@ -179,14 +177,9 @@ interface IHistory {
 }
 const HISTORY_MAX = 30; // 履歴の最大数
 
-export const NinjaEditorProvider = ({ children }) => {
+export const NinjaEditorProvider = ({ children }: { children: React.ReactNode }) => {
   const [ready, setReady] = useState<boolean>(false); // 初期化完了フラグ
   // コンテンツ管理
-  // const [oms, setOMs] = useState<IObjectManagement[]>([]);
-  // const [ums, setUMs] = useState<IUIManagement[]>([]);
-  // const [tms, setTMs] = useState<ITextureManagement[]>([]);
-  // const [sms, setSMs] = useState<IScriptManagement[]>([]);
-  // refに変更
   const oms = useRef<IObjectManagement[]>([]);
   const ums = useRef<IUIManagement[]>([]);
   const tms = useRef<ITextureManagement[]>([]);
@@ -204,7 +197,10 @@ export const NinjaEditorProvider = ({ children }) => {
   const contentsSelectPath = useRef<string | null>(null);
   // 操作履歴
   const updateTimeOut = useRef<NodeJS.Timeout | null>(null);
-  const history = useRef<{ undo: IHistory[]; redo: IHistory[] }>({ undo: [], redo: [] });
+  const history = useRef<{ undo: IHistory[]; redo: IHistory[] }>({
+    undo: [],
+    redo: [],
+  });
   // プレイヤーパラメータ
   const playerManager = useRef<IPlayerManager>({
     type: "avatar",
@@ -213,8 +209,6 @@ export const NinjaEditorProvider = ({ children }) => {
     animations: [],
     object: new Group(),
     animMapper: {},
-    sounds: [],
-    args: {},
   });
   // Copy/Paste用
   const copyOMRef = useRef<IObjectManagement | null>(null);
@@ -249,8 +243,6 @@ export const NinjaEditorProvider = ({ children }) => {
       animations: [],
       object: new Group(),
       animMapper: {},
-      sounds: [],
-      args: {},
     };
   };
 
@@ -300,7 +292,7 @@ export const NinjaEditorProvider = ({ children }) => {
           return;
         }
         // console.log('prev args', target.args);
-        target.args = { ...last.om!.args };
+        target.args = { ...last.om.args };
         // console.log('next args', target.args);
         notifyOMIdChanged(target.id);
         // historyに追加
@@ -386,18 +378,6 @@ export const NinjaEditorProvider = ({ children }) => {
     }
   };
 
-  const setCamera = (camera: OrbitControlsImpl) => {
-    orbit.current = camera;
-  };
-
-  const setPlayerManager = (pm: IPlayerManager) => {
-    playerManager.current = pm;
-  };
-
-  const setSelectPlayerAnimation = (anim: string) => {
-    playerManager.current.selectAnim = anim;
-  };
-
   /**
    * 特定のObjectの名前を変更
    */
@@ -445,7 +425,7 @@ export const NinjaEditorProvider = ({ children }) => {
   };
   const getPosition = (id: string): Vector3 => {
     const target = oms.current.find((om) => om.id == id);
-    if (!target || !target.args.position) {
+    if (!target?.args.position) {
       return new Vector3(0, 0, 0);
     }
     return target.args.position;
@@ -466,7 +446,7 @@ export const NinjaEditorProvider = ({ children }) => {
   };
   const getRotation = (id: string): Euler => {
     const target = oms.current.find((om) => om.id == id);
-    if (!target || !target.args.rotation) {
+    if (!target?.args.rotation) {
       return new Euler(0, 0, 0);
     }
     return target.args.rotation;
@@ -487,7 +467,7 @@ export const NinjaEditorProvider = ({ children }) => {
   };
   const getScale = (id: string): Vector3 => {
     const target = oms.current.find((om) => om.id == id);
-    if (!target || !target.args.scale) {
+    if (!target?.args.scale) {
       return new Vector3(1, 1, 1);
     }
     return target.args.scale;
@@ -498,21 +478,25 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param id
    * @param material Material
    */
-  const setMaterialData = (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => {
+  const setMaterialData = (
+    id: string,
+    mtype: "standard" | "phong" | "toon" | "shader" | "reflection",
+    value: string,
+  ) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args.materialData = {
         type: mtype,
         value: value,
-      };
+      } as MaterialDataProps;
       notifyOMIdChanged(id);
       updateOM(target);
     }
   };
-  const getMaterialData = (id: string): any => {
+  const getMaterialData = (id: string): MaterialDataProps|null => {
     const target = oms.current.find((om) => om.id == id);
-    if (!target || !target.args.materialData) {
-      return undefined;
+    if (!target?.args.materialData) {
+      return null;
     }
     return target.args.materialData;
   };
@@ -521,7 +505,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * argの変更
    * /CastShadow/Helper/Color/
    */
-  const setArg = (id: string, key: string, arg: any, notify = true) => {
+  const setArg = (id: string, key: string, arg: OMArgsProps, notify = true) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args[key] = arg;
@@ -598,7 +582,7 @@ export const NinjaEditorProvider = ({ children }) => {
     // 更新
     notifyOMsChanged();
   };
-  const copyOM = (om: IObjectManagement) => {
+  const copyOM = async (om: IObjectManagement): Promise<boolean> => {
     // typeがEnvironment/Sky/Player/Effect/LandScape以外のときのみ
     if (
       om.type === "environment" ||
@@ -607,19 +591,26 @@ export const NinjaEditorProvider = ({ children }) => {
       om.type === "effect" ||
       om.type === "landscape"
     ) {
-      MySwal.fire({
+      await MySwal.fire({
         title: "Copy",
         text: "Copy is not allowed object type",
         icon: "warning",
         confirmButtonText: "OK",
       });
-      return;
+      return false;
     }
     // Copyしたオブジェクトがわかりやすいように少し移動させる
-    const newPosition = om.args.position ? om.args.position.clone() : new Vector3(0, 0, 0);
+    const newPosition = om.args.position
+      ? om.args.position.clone()
+      : new Vector3(0, 0, 0);
     newPosition.add(new Vector3(0.5, 0.5, 0.5));
     const newOMArgs = { ...om.args, position: newPosition };
-    copyOMRef.current = { ...om, args: newOMArgs, id: MathUtils.generateUUID() };
+    copyOMRef.current = {
+      ...om,
+      args: newOMArgs,
+      id: MathUtils.generateUUID(),
+    };
+    return true;
   };
   const getOMById = (id: string): IObjectManagement | undefined => {
     return oms.current.find((om) => om.id === id);
@@ -653,27 +644,33 @@ export const NinjaEditorProvider = ({ children }) => {
   /**
    * 個別のOM変更リスナー
    */
-  const objectManagementIdChangedListeners = useRef<{ [id: string]: (() => void)[] }>({});
+  const objectManagementIdChangedListeners = useRef<
+    Record<string, (() => void)[]>
+  >({});
   const onOMIdChanged = (id: string, listener: () => void) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       objectManagementIdChangedListeners.current[id] = [];
     }
-    objectManagementIdChangedListeners.current[id].push(listener);
+    objectManagementIdChangedListeners.current[id]?.push(listener);
   };
   const offOMIdChanged = (id: string, listener: () => void) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
     }
-    objectManagementIdChangedListeners.current[id] = objectManagementIdChangedListeners.current[id].filter(
-      (l) => l !== listener,
-    );
+    const updatedOMLisners =
+      objectManagementIdChangedListeners.current[id]?.filter(
+        (l) => l !== listener,
+      );
+    if (updatedOMLisners){
+      objectManagementIdChangedListeners.current[id] = updatedOMLisners;
+    }
   };
   // 特定のOM変更を通知する
   const notifyOMIdChanged = (id: string) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
     }
-    objectManagementIdChangedListeners.current[id].forEach((l) => l());
+    objectManagementIdChangedListeners.current[id]?.forEach((l) => l());
   };
   /**
    * OMの変更リスナー
@@ -683,7 +680,8 @@ export const NinjaEditorProvider = ({ children }) => {
     objectManagementChangedListeners.current.push(listener);
   };
   const offOMsChanged = (listener: () => void) => {
-    objectManagementChangedListeners.current = objectManagementChangedListeners.current.filter((l) => l !== listener);
+    objectManagementChangedListeners.current =
+      objectManagementChangedListeners.current.filter((l) => l !== listener);
   };
   // OMの変更を通知する
   const notifyOMsChanged = () => {
@@ -697,7 +695,8 @@ export const NinjaEditorProvider = ({ children }) => {
     scriptManagementChangedListeners.current.push(listener);
   };
   const offSMsChanged = (listener: () => void) => {
-    scriptManagementChangedListeners.current = scriptManagementChangedListeners.current.filter((l) => l !== listener);
+    scriptManagementChangedListeners.current =
+      scriptManagementChangedListeners.current.filter((l) => l !== listener);
   };
   // SMの変更を通知する
   const notifySMsChanged = () => {
@@ -727,7 +726,9 @@ export const NinjaEditorProvider = ({ children }) => {
     njcChangedListeners.current.push(listener);
   };
   const offNJCChanged = (listener: () => void) => {
-    njcChangedListeners.current = njcChangedListeners.current.filter((l) => l !== listener);
+    njcChangedListeners.current = njcChangedListeners.current.filter(
+      (l) => l !== listener,
+    );
   };
   // NJCの変更を通知する
   const notifyNJCChanged = () => {
@@ -783,9 +784,6 @@ export const NinjaEditorProvider = ({ children }) => {
         contentsSelectPath: contentsSelectPath.current,
         ready,
         initialize,
-        setCamera,
-        setPlayerManager,
-        setSelectPlayerAnimation,
         undo,
         redo,
         setName,

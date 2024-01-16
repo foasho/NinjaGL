@@ -1,0 +1,26 @@
+{
+  "extends": "@acme/tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "moduleResolution": "Node",
+    "strict": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "emitDeclarationOnly": true,
+    "declaration": true, // 型定義ファイルを出力しない
+    "declarationDir": "./dist",
+    "noUnusedLocals": false,// 未使用エラーを出さない
+    "noUnusedParameters": false,// 未使用エラーを出さない
+    "noImplicitReturns": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    /* GLSL */
+    "types": ["vite-plugin-glsl/ext", "vitest/globals"]
+  },
+  "include": ["src/lib"]
+}

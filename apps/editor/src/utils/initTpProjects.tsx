@@ -1,4 +1,4 @@
-import { IObjectManagement, IScriptManagement, IUIManagement } from "@ninjagl/core";
+import type { IObjectManagement, IScriptManagement, IUIManagement } from "@ninjagl/core";
 import { Euler, MathUtils, Vector3 } from "three";
 
 export const initTpOms = (): IObjectManagement[] => {

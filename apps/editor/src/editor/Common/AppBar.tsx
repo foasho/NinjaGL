@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Spinner } from "@nextui-org/react";
 import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
 import Link from "next/link";
-import { useSession } from "@acme/auth";
+import { useSession } from "@ninjagl/auth";
 import { useTranslation } from "react-i18next";
 import { AiFillSave } from "react-icons/ai";
 import { BiEditAlt } from "react-icons/bi";

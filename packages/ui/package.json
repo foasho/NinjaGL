@@ -1,5 +1,5 @@
 {
-  "name": "@acme/ui",
+  "name": "@ninjagl/ui",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -34,10 +34,10 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^0.2.0",
-    "@acme/prettier-config": "workspace:^0.1.0",
-    "@acme/tailwind-config": "workspace:^0.1.0",
-    "@acme/tsconfig": "workspace:^0.1.0",
+    "@ninjagl/eslint-config": "workspace:^0.2.0",
+    "@ninjagl/prettier-config": "workspace:^0.1.0",
+    "@ninjagl/tailwind-config": "workspace:^0.1.0",
+    "@ninjagl/tsconfig": "workspace:^0.1.0",
     "eslint": "^8.56.0",
     "prettier": "^3.1.1",
     "tailwindcss": "^3.4.0",
@@ -49,9 +49,9 @@
   },
   "eslintConfig": {
     "extends": [
-      "@acme/eslint-config/base",
-      "@acme/eslint-config/react"
+      "@ninjagl/eslint-config/base",
+      "@ninjagl/eslint-config/react"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@ninjagl/prettier-config"
 }

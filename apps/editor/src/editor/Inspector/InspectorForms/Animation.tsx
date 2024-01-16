@@ -2,37 +2,42 @@ import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
-import { AnimationClip } from "three";
+import type { AnimationClip } from "three";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { normalStyles } from "@/utils/styles";
 
+interface AnimationSelectProps {
+  label: string;
+  value: string;
+}
 export const Animation = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id?editor.getOMById(id): null;
 
   // Animationsの設定
-  const [defalutAnim, setDefalutAnim] = useState<{ value: string; label: string }>(
-    om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: "", label: "" },
-  );
-  const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop);
+  const [defalutAnim, setDefalutAnim] = useState<AnimationSelectProps>({ value: "", label: "" });
+  const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop? om.args.animationLoop: false);
 
   useEffect(() => {
     if (om) {
-      if (om.args.defaultAnim) setDefalutAnim(om.args.defaultAnim);
-      if (om.args.animLoop !== undefined) setAnimLoop(om.args.animLoop);
+      if (om.args.defaultAnim) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        setDefalutAnim({ value: om.args.defaultAnim, label: om.args.defaultAnim });
+      }
+      if (om.args.animLoop !== undefined) setAnimLoop(om.args.animationLoop? om.args.animationLoop: false);
     }
   }, [om]);
 
   /**
    * デフォルトアニメーションの変更
    */
-  const changeDefaultAnimation = (selectDefaultAnimation) => {
+  const changeDefaultAnimation = (selectDefaultAnimation: AnimationSelectProps) => {
     if (id) editor.setArg(id, "defaultAnimation", selectDefaultAnimation.value);
     setDefalutAnim(selectDefaultAnimation);
   };

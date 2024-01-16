@@ -1,5 +1,5 @@
 "use client";
-import { useSession } from "@acme/auth";
+import { useSession } from "@ninjagl/auth";
 import { useTranslation } from "react-i18next";
 
 import { b64EncodeUnicode } from "@/commons/functional";

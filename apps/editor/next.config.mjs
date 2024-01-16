@@ -1,5 +1,5 @@
 import "./env.js";
-import "@acme/auth/env";
+import "@ninjagl/auth/env";
 
 import nextPWA from '@ducanh2912/next-pwa';
 import nextBundleAnalyzer from '@next/bundle-analyzer';
@@ -34,11 +34,12 @@ const nextConfig = {
   experimental: {},
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
-    "@acme/api",
-    "@acme/auth",
-    "@acme/db",
-    "@acme/ui",
-    "@acme/validators",
+    "@ninjagl/api",
+    "@ninjagl/auth",
+    "@ninjagl/db",
+    "@ninjagl/ui",
+    "@ninjagl/validators",
+    "@ninjagl/core",
   ],  
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },

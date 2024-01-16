@@ -1,0 +1,133 @@
+{
+  "name": "@ninjagl/core",
+  "version": "1.1.46",
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false,
+  "author": "ShoOsaka",
+  "license": "MIT",
+  "description": "R3F-WEBGL FastGameEditorCore",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foasho/NinjaCore.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "react",
+    "components",
+    "webgl"
+  ],
+  "scripts": {
+    "test": "vitest --no-threads",
+    "prebuild": "rimraf dist && pnpm run typegen",
+    "prepublishOnly": "pnpm run package:build && pnpm version patch",
+    "dev": "concurrently \"pnpm run dev:frontend\" \"pnpm run dev:backend\"",
+    "dev:frontend": "vite",
+    "dev:backend": "node backend/index.js",
+    "build": "vite build --config vite-lib.config.ts && tsc",
+    "package:build": "vite build --config vite-lib.config.ts && tsc",
+    "start": "concurrently \"node backend/index.js\" \"vite preview\"",
+    "eslint": "eslint --fix .",
+    "eslint:ci": "eslint .",
+    "prettier": "prettier --check .",
+    "prettier-fix": "prettier --write .",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false --strict --jsx react",
+    "typegen": "tsc",
+    "storybook": "concurrently \"storybook dev -p 6006\" \"pnpm run dev:backend\"",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@minchat/react-chat-ui": "^0.13.4",
+    "@react-spring/web": "^9.7.3",
+    "@react-three/drei": "^9.88.7",
+    "@react-three/fiber": "^8.14.5",
+    "@react-three/postprocessing": "^2.15.8",
+    "@skyway-sdk/core": "^1.6.1",
+    "@skyway-sdk/room": "^1.6.1",
+    "axios": "^1.3.3",
+    "file-saver": "^2.0.5",
+    "gl-noise": "^1.6.1",
+    "jszip": "^3.10.1",
+    "r3f-perf": "^7.1.2",
+    "react-icons": "^4.8.0",
+    "react-inspector": "^6.0.2",
+    "stream-browserify": "^3.0.0",
+    "styled-components": "^5.3.11",
+    "three": "^0.160.0",
+    "three-custom-shader-material": "^5.4.0",
+    "three-mesh-bvh": "^0.6.3",
+    "three-stdlib": "^2.26.13",
+    "tunnel-rat": "^0.1.2"
+  },
+  "devDependencies": {
+    "@react-three/test-renderer": "^8.2.0",
+    "@storybook/addon-essentials": "7.6.6",
+    "@storybook/addon-interactions": "7.6.6",
+    "@storybook/addon-links": "7.6.6",
+    "@storybook/addon-onboarding": "1.0.10",
+    "@storybook/addons": "^7.6.6",
+    "@storybook/blocks": "7.6.6",
+    "@storybook/react": "7.6.6",
+    "@storybook/react-vite": "7.6.6",
+    "@storybook/testing-library": "0.2.2",
+    "@testing-library/react": "^14.1.2",
+    "@types/file-saver": "^2.0.5",
+    "@types/styled-components": "^5.1.32",
+    "@types/three": "^0.160.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "chromatic": "^7.0.0",
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "eslint-plugin-storybook": "^0.6.15",
+    "express": "^4.18.2",
+    "jsdom": "^23.0.1",
+    "meshoptimizer": "^0.19.0",
+    "storybook": "7.6.6",
+    "storybook-react-i18next": "^2.0.10",
+    "typescript": "^5.3.3",
+    "vite": "^4.4.5",
+    "vite-plugin-glsl": "^1.1.2",
+    "vite-plugin-pwa": "^0.17.4",
+    "vitest": "^0.34.6"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/foasho/NinjaCore/issues"
+  },
+  "homepage": "https://shoslabo.vercel.app",
+  "exports": {
+    ".": {
+      "require": "./dist/index.umd.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
