@@ -1,3 +1,7 @@
 export { GET, POST } from "@ninjagl/auth";
 
-export const runtime = "edge";
+/**
+ * Issue Only WindowsOS
+ * https://github.com/vercel/next.js/issues/52176
+ */
+// export const runtime = "edge";

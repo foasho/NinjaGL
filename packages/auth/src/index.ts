@@ -1,8 +1,7 @@
 import type { DefaultSession } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth from "next-auth";
-import { useSession, SessionProvider } from "next-auth/react";
-import Discord from "next-auth/providers/discord";
+import Google from "next-auth/providers/google";
 
 import { db, tableCreator } from "@ninjagl/db";
 
@@ -16,6 +15,14 @@ declare module "next-auth" {
   }
 }
 
+// declare module "@auth/core/types" {
+//   interface Session {
+//     user: {
+//       id: string;
+//     } & DefaultSession["user"];
+//   }
+// }
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -23,7 +30,12 @@ export const {
   signOut,
 } = NextAuth({
   adapter: DrizzleAdapter(db, tableCreator),
-  providers: [Discord],
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+  ],
   callbacks: {
     session: ({ session, user }) => ({
       ...session,
@@ -34,6 +46,3 @@ export const {
     }),
   },
 });
-
-// useSessionも使えるようにする
-export { useSession, SessionProvider };

@@ -3,7 +3,11 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter, createTRPCContext } from "@ninjagl/dbapi";
 import { auth } from "@ninjagl/auth";
 
-export const runtime = "edge";
+/**
+ * Issue Only WindowsOS
+ * https://github.com/vercel/next.js/issues/52176
+ */
+// export const runtime = "edge";
 
 /**
  * Configure basic CORS headers

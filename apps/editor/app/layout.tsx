@@ -11,7 +11,7 @@ import { mplus } from "@/styles/font";
 import { Toaster } from "@ninjagl/ui/toast";
 import { env } from "../env";
 import { TRPCReactProvider } from "@/trpc/react";
-import { SessionProvider } from "@ninjagl/auth";
+import { SessionProvider } from "@ninjagl/auth/react";
 
 const getHeaders = cache(async () => headers());
 
@@ -49,15 +49,15 @@ export default function RootLayout({ children }: Props) {
       <head />
       <body className={`${mplus.variable}`}>
         <NextTopLoader showSpinner={false} color='#43D9D9' />
-        <SessionProvider>
-          <TRPCReactProvider headersPromise={getHeaders()}>
+        <TRPCReactProvider headersPromise={getHeaders()}>
+          <SessionProvider>
             <RootProvider>
               <PWAProvider>{children}</PWAProvider>
               {/* <Toast /> */}
               <Toaster />
             </RootProvider>
-          </TRPCReactProvider>
-        </SessionProvider>
+          </SessionProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );
