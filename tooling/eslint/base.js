@@ -13,22 +13,44 @@ const config = {
   },
   parser: "@typescript-eslint/parser",
   parserOptions: { project: true },
-  plugins: ["@typescript-eslint", "import"],
+  "plugins": ["@typescript-eslint", "unused-imports", "simple-import-sort", "react", "import"],
   rules: {
-    "turbo/no-undeclared-env-vars": "off",
-    "@typescript-eslint/no-unused-vars": [
+    "simple-import-sort/imports": [
       "error",
-      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      {
+        "groups": [
+          // type (e.g. `import type { ... } from "..."`)
+          ["^.*\\u0000$"],
+          // `react`.
+          [
+            "^react",
+            // `next`
+            "^next\\/",
+            // things that start with a letter (or digit or underscore), or `@` followed by a letter
+            "^@?\\w",
+          ],
+          // internal
+          ["^@/"],
+          // relative parent (e.g. `import ... from ".."`)
+          ["^\\.\\.(?!/?$)"],
+          ["^\\.\\./?$"],
+          // relative same folder (e.g. `import ... from "./"`)
+          ["^\\./(?=.*/)(?!/?$)"],
+          ["^\\.(?!/?$)"],
+          ["^\\./?$"],
+          // side effect (e.g. `import "./foo"`)
+          ["^\\u0000"],
+          // css
+          ["^.+\\.s?css$"],
+        ],
+      },
     ],
-    "@typescript-eslint/consistent-type-imports": [
-      "warn",
-      { prefer: "type-imports", fixStyle: "separate-type-imports" },
-    ],
-    "@typescript-eslint/no-misused-promises": [
-      2,
-      { checksVoidReturn: { attributes: false } },
-    ],
-    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    "simple-import-sort/exports": "error",
+    // "unused-imports/no-unused-imports": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
+    "@typescript-eslint/no-empty-function": "off",
   },
   ignorePatterns: [
     "**/*.config.js",
@@ -39,6 +61,11 @@ const config = {
     "pnpm-lock.yaml",
   ],
   reportUnusedDisableDirectives: true,
+  settings: {
+    "react": {
+      "version": "detect"
+    }
+  }
 };
 
 module.exports = config;

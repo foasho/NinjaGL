@@ -1,7 +1,19 @@
 {
+  // ESLintの機能を有効にする
+  "eslint.enable": true,
+  // ファイルを保存する際に、自動的にフォーマットを行う
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // 保存時に実行されるコードアクションを指定
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.addMissingImports": "explicit"
+  },
+  "eslint.validate": ["javascript"],
   "eslint.workingDirectories": [
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "editor.tabSize": 2
 }

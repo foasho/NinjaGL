@@ -6,31 +6,23 @@ import { fileURLToPath } from "url";
 
 /** @type { PrettierConfig | SortImportsConfig | TailwindConfig } */
 const config = {
-  plugins: [
-    "@ianvs/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss",
-  ],
-  tailwindConfig: fileURLToPath(
-    new URL("../../tooling/tailwind/index.ts", import.meta.url),
-  ),
-  tailwindFunctions: ["cn", "cva"],
-  importOrder: [
-    "<TYPES>",
-    "^(react/(.*)$)|^(react$)|^(react-native(.*)$)",
-    "^(next/(.*)$)|^(next$)",
-    // "^(expo(.*)$)|^(expo$)",
-    "<THIRD_PARTY_MODULES>",
-    "",
-    "<TYPES>^@ninjagl",
-    "^@ninjagl/(.*)$",
-    "",
-    "<TYPES>^[.|..|~]",
-    "^~/",
-    "^[../]",
-    "^[./]",
-  ],
-  importOrderParserPlugins: ["typescript", "jsx", "decorators-legacy"],
-  importOrderTypeScriptVersion: "4.4.0",
+  arrowParens: "always",
+  bracketSpacing: true,
+  endOfLine: "auto",
+  embeddedLanguageFormatting: "auto",
+  htmlWhitespaceSensitivity: "css",
+  insertPragma: false,
+  jsxSingleQuote: true,
+  printWidth: 120,
+  proseWrap: "preserve",
+  quoteProps: "as-needed",
+  requirePragma: false,
+  semi: true,
+  singleQuote: false,
+  tabWidth: 2,
+  trailingComma: "all",
+  useTabs: false,
+  vueIndentScriptAndStyle: false
 };
 
 export default config;
