@@ -15,7 +15,8 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@ninjagl/api": "workspace:^0.1.0",
+    "@ninjagl/api": "^1.0.4",
+    "@ninjagl/dbapi": "workspace:^0.1.0",
     "@ninjagl/auth": "workspace:^0.1.0",
     "@ninjagl/db": "workspace:^0.1.0",
     "@ninjagl/ui": "workspace:^0.1.0",

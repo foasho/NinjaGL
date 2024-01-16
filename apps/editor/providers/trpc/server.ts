@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 
-import { createCaller, createTRPCContext } from "@ninjagl/api";
+import { createCaller, createTRPCContext } from "@ninjagl/dbapi";
 import { auth } from "@ninjagl/auth";
 
 /**

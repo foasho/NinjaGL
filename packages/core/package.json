@@ -1,6 +1,6 @@
 {
   "name": "@ninjagl/core",
-  "version": "1.1.47",
+  "version": "1.1.48",
   "publishConfig": {
     "access": "public"
   },
@@ -31,9 +31,7 @@
     "test": "vitest --no-threads",
     "prebuild": "rimraf dist && pnpm run typegen",
     "prepublishOnly": "pnpm run package:build && pnpm version patch",
-    "dev": "concurrently \"pnpm run dev:frontend\" \"pnpm run dev:backend\"",
     "dev:frontend": "vite",
-    "dev:backend": "node backend/index.js",
     "build": "vite build --config vite-lib.config.ts && tsc",
     "package:build": "vite build --config vite-lib.config.ts && tsc",
     "start": "concurrently \"node backend/index.js\" \"vite preview\"",

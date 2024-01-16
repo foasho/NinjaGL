@@ -1,6 +1,6 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { appRouter, createTRPCContext } from "@ninjagl/api";
+import { appRouter, createTRPCContext } from "@ninjagl/dbapi";
 import { auth } from "@ninjagl/auth";
 
 export const runtime = "edge";

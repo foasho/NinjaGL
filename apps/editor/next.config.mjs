@@ -34,7 +34,7 @@ const nextConfig = {
   experimental: {},
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
-    "@ninjagl/api",
+    "@ninjagl/dbapi",
     "@ninjagl/auth",
     "@ninjagl/db",
     "@ninjagl/ui",
