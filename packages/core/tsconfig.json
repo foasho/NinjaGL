@@ -1,5 +1,4 @@
 {
-  "extends": "@ninjagl/tsconfig/base.json",
   "compilerOptions": {
     "jsx": "react",
     "target": "ESNext",
