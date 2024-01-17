@@ -23,26 +23,34 @@ declare module "next-auth" {
 //   }
 // }
 
+/**
+ * TODO: DB連携
+ */
 export const {
   handlers: { GET, POST },
   auth,
   signIn,
   signOut,
 } = NextAuth({
-  adapter: DrizzleAdapter(db, tableCreator),
+  // @ts-ignore
+  // adapter: DrizzleAdapter(db, tableCreator),
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+  // callbacks: {
+  //   session: ({ session, user }) => ({
+  //     ...session,
+  //     user: {
+  //       ...session.user,
+  //       id: user.id,
+  //     },
+  //   }),
+  // },
+  session: {
+    strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET,
 });

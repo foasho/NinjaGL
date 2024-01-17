@@ -11,5 +11,5 @@ export default {
   dbCredentials: {
     connectionString: uri,
   },
-  tablesFilter: ["t3turbo_*"],
+  // tablesFilter: ["t3turbo_*"],
 } satisfies Config;
