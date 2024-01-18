@@ -152,11 +152,11 @@ export const ScriptEditor = () => {
 
   return (
     <>
-      <div className='bg-primary h-full'>
-        <div className='bg-cyber/25 absolute bottom-8 right-8 z-20 rounded-lg p-3'>
+      <div className='h-full bg-primary'>
+        <div className='absolute bottom-8 right-8 z-20 rounded-lg bg-cyber/25 p-3'>
           <div className='pb-2 text-center font-bold text-white'>{name ? name : "*Untitled.js"}</div>
           <button
-            className='bg-cyber float-right inline-block cursor-pointer px-3.5 py-[5px] font-bold'
+            className='float-right inline-block cursor-pointer bg-cyber px-3.5 py-[5px] font-bold'
             onClick={() => {
               void onSave();
             }}
@@ -181,7 +181,7 @@ export const ScriptEditor = () => {
             </>
           )} */}
         </div>
-        <div className='h-full w-full bg-[#838383] pt-6'>
+        <div className='size-full bg-[#838383] pt-6'>
           <MonacoEditor
             height='100%'
             width='100%'

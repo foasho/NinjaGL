@@ -1,28 +1,28 @@
-import {
-  Mesh,
-  Group,
-  FrontSide,
-  DoubleSide,
-  MeshStandardMaterial,
-  Color,
-  Vector2,
-  Vector3,
-  WebGLRenderTarget,
-  DepthTexture,
-  NearestFilter,
-  FloatType,
-} from "three";
 import React from "react";
 import { useTexture } from "@react-three/drei";
 import { GroupProps, ThreeEvent, useFrame, useThree } from "@react-three/fiber";
-
-import CSM from "three-custom-shader-material";
-import HSVLerp from "./HSVLerp";
-import Fresnel from "./Fresnel";
 // @ts-ignore
 import { patchShaders } from "gl-noise/build/glNoise.m";
-import DistortUv from "./DistortUv";
+import {
+  Color,
+  DepthTexture,
+  DoubleSide,
+  FloatType,
+  FrontSide,
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  NearestFilter,
+  Vector2,
+  Vector3,
+  WebGLRenderTarget,
+} from "three";
+import CSM from "three-custom-shader-material";
+
 import Blend from "./Blend";
+import DistortUv from "./DistortUv";
+import Fresnel from "./Fresnel";
+import HSVLerp from "./HSVLerp";
 import { usePlanarReflections } from "./usePlanarReflections";
 import { defaultUniforms } from "./WaterParams";
 
@@ -160,7 +160,7 @@ const _Water = ({
       vReflectionUv = uReflectionTextureMatrix * vec4(csm_Position, 1.0);
     }
   `,
-    []
+    [],
   );
 
   const fragmentShader = React.useMemo(
@@ -396,13 +396,10 @@ const _Water = ({
         // csm_FragColor = vec4(vec3(sceneColor.rgb), 1.0);
     }
   `,
-    []
+    [],
   );
 
-  const [foamTexture, normalsTexture] = useTexture([
-    "/foam.png",
-    "/normal.jpg",
-  ]);
+  const [foamTexture, normalsTexture] = useTexture(["/foam.png", "/normal.jpg"]);
 
   const planarReflections = usePlanarReflections(waterRef, hasReflection);
 
@@ -457,7 +454,7 @@ const _Water = ({
       uReflectionMix: { value: 0.5 },
       // ...defaultUniforms
     }),
-    []
+    [],
   );
 
   useFrame((state) => {
@@ -488,19 +485,8 @@ const _Water = ({
   });
 
   return (
-    <group
-      {...props}
-      ref={grp}
-      onClick={onClick}
-      onPointerMissed={onPointerMissed}
-    >
-      <mesh
-        receiveShadow
-        position-x={-0.2}
-        position-y={-0.2}
-        rotation-x={-Math.PI / 2}
-        ref={waterRef}
-      >
+    <group {...props} ref={grp} onClick={onClick} onPointerMissed={onPointerMissed}>
+      <mesh receiveShadow position-x={-0.2} position-y={-0.2} rotation-x={-Math.PI / 2} ref={waterRef}>
         <planeGeometry args={[width, height, widthSegments, heightSegments]} />
         <CSM
           baseMaterial={MeshStandardMaterial}

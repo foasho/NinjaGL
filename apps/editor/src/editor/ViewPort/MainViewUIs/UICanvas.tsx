@@ -91,6 +91,7 @@ const UICanvasHelper = (props: IUICanvasHelper) => {
                     .map((_, j) => {
                       return (
                         <div
+                          // eslint-disable-next-line tailwindcss/no-custom-classname
                           className='target moveable relative z-10 box-border h-full border-[0.5px] border-dashed border-primary/75'
                           style={{ width: `${gridwidth}%` }}
                           key={j + "-ui-grid"}

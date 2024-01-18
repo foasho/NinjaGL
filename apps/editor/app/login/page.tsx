@@ -24,7 +24,7 @@ export default function LoginPage() {
       </Link>
       <div className='flex min-h-screen flex-col items-center justify-center gap-2 bg-gray-100 p-10 text-center'>
         {/** タイトル */}
-        <div id='login_title' className='text-bold my-4 text-gray-700'>
+        <div id='login_title' className='my-4 font-bold text-gray-700'>
           <h1 className='text-center text-4xl font-bold'>SignIn / SignUp</h1>
         </div>
 

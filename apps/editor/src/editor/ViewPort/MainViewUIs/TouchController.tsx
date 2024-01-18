@@ -82,13 +82,16 @@ export const TouchController = () => {
     <>
       <div
         ref={joystickRef}
+        // eslint-disable-next-line tailwindcss/no-custom-classname
         className='joystick'
         style={{ position: "relative", width: "100%", height: "100%" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
         <div className='outer-circle' style={outerCircleStyle}></div>
+        {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
         <div className='inner-circle' style={innerCircleStyle}></div>
       </div>
     </>

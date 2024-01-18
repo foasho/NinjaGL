@@ -83,7 +83,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   return (
     <>
       <div
-        className='size-screen fixed left-0 top-0 z-10 flex items-center justify-center bg-transparent'
+        className='fixed left-0 top-0 z-10 flex items-center justify-center bg-transparent'
         onClick={handleClickOutside}
       ></div>
       <div

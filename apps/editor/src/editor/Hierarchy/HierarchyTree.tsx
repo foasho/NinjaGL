@@ -154,9 +154,9 @@ const TreeItem = (prop: ITreeItem) => {
   return (
     <>
       <div className={className} ref={ref}>
-        <div className='pr-0.75 inline-block align-middle text-sm'>{typeIcon}</div>
+        <div className='inline-block pr-0.5 align-middle text-sm'>{typeIcon}</div>
         <div
-          className='pl-0.75 inline-block cursor-pointer select-none'
+          className='inline-block cursor-pointer select-none pl-0.5'
           onClick={onSelectObject}
           onDoubleClick={changeName}
         >

@@ -397,28 +397,28 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     } else if (isNJC(props.name)) {
       icon = (
         <>
-          <img src={njc_icon} className={iconImgStyle} data-path={props.name} />
+          <Image alt='' width={32} height={32} src={njc_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "njc";
     } else if (isMP3(props.name)) {
       icon = (
         <>
-          <img src={mp3_icon} className={iconImgStyle} data-path={props.name} />
+          <Image alt='' width={32} height={32} src={mp3_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "mp3";
     } else if (isGLSL(props.name)) {
       icon = (
         <>
-          <img src={glsl_icon} className={iconImgStyle} data-path={props.name} />
+          <Image alt='' width={32} height={32} src={glsl_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "glsl";
     } else if (isJS(props.name)) {
       icon = (
         <>
-          <img src={js_icon} className={iconImgStyle} data-path={props.name} />
+          <Image alt='' width={32} height={32} src={js_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "js";

@@ -8,7 +8,7 @@ export default function HomePage() {
   return (
     <div className='bg-[#504F56]'>
       <Header />
-      <div className='size-screen relative z-20'>
+      <div className='relative z-20'>
         {/* Hero文字やタイトル等 */}
         <div className='absolute left-1/2 top-36 z-20 -translate-x-1/2 text-center'>
           <p className='text-2xl text-white md:text-4xl'>Web First GameEngine</p>
