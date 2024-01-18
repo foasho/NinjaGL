@@ -30,13 +30,13 @@ const _MyTexts = () => {
   return (
     <>
       {texts.map((om) => {
-        return <MyText om={om} key={om.id} />;
+        return <MyText {...om} key={om.id} />;
       })}
     </>
   );
 };
 
-const _Text = ({ om }) => {
+const _Text = ({ ...om }: IObjectManagement) => {
   const ref = useRef<any>();
   const { camera } = useThree();
   const font = om.args.font || "/fonts/MPLUS.ttf";

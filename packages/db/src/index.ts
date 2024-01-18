@@ -6,7 +6,6 @@ import * as auth from "./schema/auth";
 export const schema = { ...auth };
 
 export { pgTable as tableCreator } from "./schema/_table";
-
 export * from "drizzle-orm";
 
 const connection = connect({

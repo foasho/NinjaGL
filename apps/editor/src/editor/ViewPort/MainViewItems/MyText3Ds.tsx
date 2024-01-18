@@ -1,9 +1,9 @@
-import { memo, useEffect, useRef, useState } from "react";
+import type { IObjectManagement } from "@ninjagl/core";
 
-import { IObjectManagement } from "@ninjagl/core";
+import { memo, useEffect, useRef, useState } from "react";
 import { Text3D, useFont, useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from "three";
+import { BoxHelper, Euler, Matrix4, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import { useSnapshot } from "valtio";
 
 import { EnableClickTrigger } from "@/commons/functional";
@@ -30,14 +30,14 @@ const _MyText3Ds = () => {
   return (
     <>
       {text3ds.map((om) => {
-        return <Text3d om={om} key={om.id} />;
+        return <Text3d {...om} key={om.id} />;
       })}
     </>
   );
 };
 
-const _Text3d = ({ om }) => {
-  const ref = useRef<any>();
+const _Text3d = ({ ...om }: IObjectManagement) => {
+  const ref = useRef<Mesh>(null);
   const { camera } = useThree();
   const font = useFont("/fonts/MPLUS.json");
   const state = useSnapshot(editorStore);
@@ -74,7 +74,7 @@ const _Text3d = ({ om }) => {
         if (om.args.scale) {
           ref.current.scale.copy(om.args.scale);
         }
-        if (om.args.helper !== undefined) setHelper(om.args.helper);
+        if (om.args.helper !== undefined) setHelper(!!om.args.helper);
       }
       if (matRef.current) {
         if (om.args.color !== undefined) {
@@ -89,6 +89,7 @@ const _Text3d = ({ om }) => {
     };
   });
 
+  // @ts-ignore
   useHelper(state.currentId == id && helper && ref, BoxHelper);
 
   return (
@@ -117,7 +118,7 @@ const _Text3d = ({ om }) => {
         onPointerMissed={(e) => e.type === "click" && editorStore.init()}
       >
         {om.args.content}
-        <meshStandardMaterial ref={matRef} color={om.args.color || "#43D9D9"} />
+        <meshStandardMaterial ref={matRef} color={om.args.color ?? "#43D9D9"} />
       </Text3D>
     </>
   );

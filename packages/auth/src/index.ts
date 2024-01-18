@@ -1,9 +1,9 @@
 import type { DefaultSession } from "next-auth";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
+
+// import { DrizzleAdapter } from "@auth/drizzle-adapter";
+// import { db, tableCreator } from "@ninjagl/db";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-
-import { db, tableCreator } from "@ninjagl/db";
 
 export type { Session } from "next-auth";
 
@@ -32,7 +32,6 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  // @ts-ignore
   // adapter: DrizzleAdapter(db, tableCreator),
   providers: [
     Google({

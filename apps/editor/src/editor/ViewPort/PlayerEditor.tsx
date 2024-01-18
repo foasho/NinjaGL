@@ -4,14 +4,7 @@ import { Loading2D } from "@/commons/Loading2D";
 import { MySwal } from "@/commons/Swal";
 import { uploadFile } from "@/utils/upload";
 import { convertObjectToFile } from "@ninjagl/core";
-import {
-  ContactShadows,
-  Environment,
-  OrbitControls,
-  Text,
-  useAnimations,
-  useGLTF,
-} from "@react-three/drei";
+import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
@@ -19,7 +12,7 @@ import { AnimationClip, Box3, Group, Vector3 } from "three";
 import { SkeletonUtils } from "three-stdlib";
 import tunnel from "tunnel-rat";
 
-import { useSession } from "@ninjagl/auth";
+import { useSession } from "@ninjagl/auth/react";
 
 import { globalEditorStore } from "../Store/editor";
 
@@ -69,11 +62,7 @@ export const PlayerEditor = () => {
   /**
    * 保存する
    */
-  const onSave = async (
-    config: ITpConfig,
-    scene: Group,
-    animations: AnimationClip[],
-  ) => {
+  const onSave = async (config: ITpConfig, scene: Group, animations: AnimationClip[]) => {
     // 最低限typeが選択されていればOK
     if (scene) {
       //ファイル名の確認
@@ -96,9 +85,7 @@ export const PlayerEditor = () => {
             // ログインしていればストレージに保存
             const formData = new FormData();
             formData.append("file", file);
-            const filePath = `${b64EncodeUnicode(
-              session.user!.email as string,
-            )}/Characters/${inputStr}.glb`;
+            const filePath = `${b64EncodeUnicode(session.user!.email as string)}/Characters/${inputStr}.glb`;
             try {
               const res = await uploadFile(file, filePath);
               if (!res || !res.url) {
@@ -131,19 +118,16 @@ export const PlayerEditor = () => {
 
   return (
     <>
-      <div className="relative h-full">
-        <div className="bg-cyber/50 absolute right-4 top-8 z-20 w-48 rounded-lg p-3">
+      <div className='relative h-full'>
+        <div className='bg-cyber/50 absolute right-4 top-8 z-20 w-48 rounded-lg p-3'>
           <dom.Out />
         </div>
         {selected ? (
-          <Suspense fallback={<Loading2D className="bg-cyber h-full" />}>
+          <Suspense fallback={<Loading2D className='bg-cyber h-full' />}>
             <Canvas shadows>
-              <Environment preset="dawn" blur={0.7} background />
+              <Environment preset='dawn' blur={0.7} background />
               <OrbitControls />
-              <ModelPreview
-                url={URL.createObjectURL(selected)}
-                onSave={onSave}
-              />
+              <ModelPreview url={URL.createObjectURL(selected)} onSave={onSave} />
             </Canvas>
           </Suspense>
         ) : (
@@ -178,16 +162,13 @@ export const PlayerEditor = () => {
                 {t("uploadGLTF")}
               </div>
               <input
-                type="file"
+                type='file'
                 ref={inputRef}
-                className="hidden"
-                accept=".glb,.gltf"
+                className='hidden'
+                accept='.glb,.gltf'
                 onInput={(e) => {
                   if (e.currentTarget.files) {
-                    if (
-                      e.currentTarget.files.length > 0 &&
-                      e.currentTarget.files[0]
-                    ) {
+                    if (e.currentTarget.files.length > 0 && e.currentTarget.files[0]) {
                       setSelected(e.currentTarget.files[0]);
                     }
                   }
@@ -297,41 +278,41 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
       <group position={[0.5, 0, 0]}>
         <mesh position={[0, 2, 0]}>
           <boxGeometry args={[0.5, 0.03, 0.03]} />
-          <meshStandardMaterial color="red" />
+          <meshStandardMaterial color='red' />
         </mesh>
         <Text position={[0.5, 2, 0]} scale={0.25} color={"red"}>
           2m
         </Text>
         <mesh position={[0, 1.5, 0]}>
           <boxGeometry args={[0.25, 0.03, 0.03]} />
-          <meshStandardMaterial color="red" />
+          <meshStandardMaterial color='red' />
         </mesh>
         <mesh position={[0, 1, 0]}>
           <boxGeometry args={[0.5, 0.03, 0.03]} />
-          <meshStandardMaterial color="red" />
+          <meshStandardMaterial color='red' />
         </mesh>
         <Text position={[0.5, 1, 0]} scale={0.25} color={"red"}>
           1m
         </Text>
         <mesh position={[0, 0.5, 0]}>
           <boxGeometry args={[0.25, 0.03, 0.03]} />
-          <meshStandardMaterial color="red" />
+          <meshStandardMaterial color='red' />
         </mesh>
         <mesh>
           <boxGeometry args={[0.5, 0.03, 0.03]} />
-          <meshStandardMaterial color="red" />
+          <meshStandardMaterial color='red' />
         </mesh>
       </group>
       <dom.In>
         <div>
           <div>
-            <div className="pt-2 font-bold">
+            <div className='pt-2 font-bold'>
               <span>
                 {t("scale")}: {scale.toFixed(1)}
               </span>
             </div>
             <input
-              type="range"
+              type='range'
               min={0.01}
               max={10}
               step={0.01}
@@ -343,17 +324,13 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           </div>
         </div>
         <div>
-          <div className="pt-2 font-bold">
+          <div className='pt-2 font-bold'>
             <span>{t("motionSelect")}</span>
           </div>
           {/** Idle設定 */}
-          <div className="pt-2">
+          <div className='pt-2'>
             <div>{t("idle")}</div>
-            <select
-              className="rounded-sm"
-              defaultValue={"Idle"}
-              onChange={onSelectIdle}
-            >
+            <select className='rounded-sm' defaultValue={"Idle"} onChange={onSelectIdle}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -365,13 +342,9 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
             </select>
           </div>
           {/** 歩く設定 */}
-          <div className="pt-2">
+          <div className='pt-2'>
             <div>{t("walk")}</div>
-            <select
-              className="rounded-sm"
-              defaultValue={"Walk"}
-              onChange={onSelectWalk}
-            >
+            <select className='rounded-sm' defaultValue={"Walk"} onChange={onSelectWalk}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -383,13 +356,9 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
             </select>
           </div>
           {/** 走る設定 */}
-          <div className="pt-2">
+          <div className='pt-2'>
             <div>{t("run")}</div>
-            <select
-              className="rounded-sm"
-              defaultValue={"Run"}
-              onChange={onSelectRun}
-            >
+            <select className='rounded-sm' defaultValue={"Run"} onChange={onSelectRun}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -401,13 +370,9 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
             </select>
           </div>
           {/** ジャンプ設定 */}
-          <div className="pt-2">
+          <div className='pt-2'>
             <div>{t("jump")}</div>
-            <select
-              className="rounded-sm"
-              defaultValue={"Jump"}
-              onChange={onSelectJump}
-            >
+            <select className='rounded-sm' defaultValue={"Jump"} onChange={onSelectJump}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -419,13 +384,9 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
             </select>
           </div>
           {/** ウェポン設定 */}
-          <div className="pt-2">
+          <div className='pt-2'>
             <div>{t("weapon")}</div>
-            <select
-              className="rounded-sm"
-              defaultValue={"Weapon"}
-              onChange={onSelectWeapon}
-            >
+            <select className='rounded-sm' defaultValue={"Weapon"} onChange={onSelectWeapon}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -437,13 +398,9 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
             </select>
           </div>
           {/** サブウェポン */}
-          <div className="py-2">
+          <div className='py-2'>
             <div>{t("subWeapon")}</div>
-            <select
-              className="rounded-sm"
-              defaultValue={"SubWeapon"}
-              onChange={onSelectSubWeapon}
-            >
+            <select className='rounded-sm' defaultValue={"SubWeapon"} onChange={onSelectSubWeapon}>
               {/* アニメーション一覧 */}
               {Object.keys(actions).map((key, idx) => {
                 return (
@@ -457,7 +414,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           {/** 保存ボタン */}
           <div>
             <button
-              className="bg-primary/50 hover:bg-primary/75 my-2 w-full rounded px-4 py-2 font-bold text-white"
+              className='bg-primary/50 hover:bg-primary/75 my-2 w-full rounded px-4 py-2 font-bold text-white'
               onClick={() => {
                 onSave(
                   {

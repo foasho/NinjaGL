@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 
 import { Select, SelectItem, Button, RadioGroup, Radio, Spinner } from "@nextui-org/react";
 import { OMType } from "@ninjagl/core";
-import { useSession } from "@ninjagl/auth";
+import { useSession } from "@ninjagl/auth/react";
 import { useTranslation } from "react-i18next";
 import { FaCheck } from "react-icons/fa";
 import { useSnapshot } from "valtio";

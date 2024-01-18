@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import MonacoEditor from "@monaco-editor/react";
+import { useSession } from "@ninjagl/auth/react";
+import { IScriptManagement } from "@ninjagl/core";
+import { MathUtils } from "three";
+import { useSnapshot } from "valtio";
+
 import { b64EncodeUnicode } from "@/commons/functional";
 import { MySwal } from "@/commons/Swal";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { uploadFile } from "@/utils/upload";
-import MonacoEditor from "@monaco-editor/react";
-import { IScriptManagement } from "@ninjagl/core";
-import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
-import { MathUtils } from "three";
-import { useSnapshot } from "valtio";
-
-import { useSession } from "@ninjagl/auth";
 
 import { globalScriptStore } from "../Store/Store";
 
@@ -19,8 +19,8 @@ export const ScriptEditor = () => {
   const myeditor = useNinjaEditor();
   const scriptState = useSnapshot(globalScriptStore);
   const [name, setName] = useState<string>();
-  const [pause, setPause] = useState<boolean>(true);
-  const [isPreview, setIsPreview] = useState<boolean>(false);
+  // const [pause, setPause] = useState<boolean>(true);
+  // const [isPreview, setIsPreview] = useState<boolean>(false);
   const code = useRef<string>(initCode);
   const { t } = useTranslation();
 
@@ -30,60 +30,6 @@ export const ScriptEditor = () => {
    */
   const handleEditorChange = (value: string) => {
     if (code.current) code.current = value;
-  };
-
-  /**
-   * 予測変換を設定
-   * @param monaco
-   */
-  const handleEditorDidMount = (monaco: any, editor: any) => {
-    // 入力付加項目とSuggentionの設定
-    monaco.languages.registerCompletionItemProvider("javascript", {
-      provideCompletionItems: async (model: any, position: any, token: any) => {
-        // 現在のカーソル位置の前のテキストを取得します。
-        const textUntilPosition = model.getValueInRange({
-          startLineNumber: position.lineNumber,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const suggestions = [];
-        if (textUntilPosition.includes("EngineInstance.")) {
-          // @ts-ignore
-          suggestions.push({
-            label: "getPositionByName",
-            kind: monaco.languages.CompletionItemKind.Function,
-            documentation: "Get ObjectPosition by Name",
-            insertText: "getPositionByName()",
-          });
-        } else {
-          suggestions.push(
-            // @ts-ignore
-            {
-              label: "EngineInstance",
-              kind: monaco.languages.CompletionItemKind.Module,
-              documentation: "EngineInstance",
-              insertText: "EngineInstance",
-            },
-            {
-              label: "userData",
-              kind: monaco.languages.CompletionItemKind.Variable,
-              documentation: "userData",
-              insertText: "userData",
-            },
-            {
-              label: "MyTesting",
-              kind: monaco.languages.CompletionItemKind.Variable,
-              documentation: "MyTesting",
-              insertText: "MyTesting",
-            },
-          );
-        }
-
-        return Promise.resolve({ suggestions });
-      },
-    });
   };
 
   /**
@@ -104,12 +50,10 @@ export const ScriptEditor = () => {
   const saveCode = async (filename: string) => {
     if (session && code.current) {
       const file = await convertFile(code.current);
-      const filePath = `${b64EncodeUnicode(
-        session.user!.email as string,
-      )}/Scripts/${filename}`;
+      const filePath = `${b64EncodeUnicode(session.user.email!)}/Scripts/${filename}`;
       const res = await uploadFile(file, filePath);
 
-      if (!res || !res.url) {
+      if (!res?.url) {
         throw new Error("Error uploading file");
       }
       if (scriptState.currentSM && globalScriptStore.currentSM) {
@@ -118,9 +62,7 @@ export const ScriptEditor = () => {
         globalScriptStore.currentSM.script = code.current;
       } else {
         const newSM: IScriptManagement = {
-          id: scriptState.currentSM
-            ? scriptState.currentSM.id
-            : MathUtils.generateUUID(),
+          id: scriptState.currentSM ? scriptState.currentSM.id : MathUtils.generateUUID(),
           type: "script",
           name: filename,
           script: code.current,
@@ -149,7 +91,7 @@ export const ScriptEditor = () => {
       const filename = scriptState.currentSM.name.replace(".js", "") + ".js";
       await saveCode(filename);
     } else {
-      MySwal.fire({
+      void MySwal.fire({
         title: "ファイル名を決めてください",
         input: "text",
         showCancelButton: true,
@@ -174,10 +116,10 @@ export const ScriptEditor = () => {
       });
     }
   };
-  const handlerSave = (event: any) => {
+  const handlerSave = (event: KeyboardEvent) => {
     if (event.ctrlKey && event.key === "s") {
       event.preventDefault();
-      onSave();
+      void onSave();
     }
   };
 
@@ -185,7 +127,7 @@ export const ScriptEditor = () => {
    * プレビュー
    */
   const onPreview = () => {
-    MySwal.fire({
+    void MySwal.fire({
       title: "unimplemented",
     });
     // setIsPreview(!isPreview);
@@ -210,23 +152,25 @@ export const ScriptEditor = () => {
 
   return (
     <>
-      <div className="bg-primary h-full">
-        <div className="bg-cyber/25 absolute bottom-8 right-8 z-20 rounded-lg p-3">
-          <div className="pb-2 text-center font-bold text-white">
-            {name ? name : "*Untitled.js"}
-          </div>
-          <div
-            className="bg-cyber float-right inline-block cursor-pointer px-3.5 py-[5px] font-bold"
-            onClick={() => onSave()}
+      <div className='bg-primary h-full'>
+        <div className='bg-cyber/25 absolute bottom-8 right-8 z-20 rounded-lg p-3'>
+          <div className='pb-2 text-center font-bold text-white'>{name ? name : "*Untitled.js"}</div>
+          <button
+            className='bg-cyber float-right inline-block cursor-pointer px-3.5 py-[5px] font-bold'
+            onClick={() => {
+              void onSave();
+            }}
           >
             Save
-          </div>
-          <div
-            className="float-right bg-[#494949] px-2.5 py-[5px] text-white"
-            onClick={() => onPreview()}
+          </button>
+          <button
+            className='float-right bg-[#494949] px-2.5 py-[5px] text-white'
+            onClick={() => {
+              onPreview();
+            }}
           >
             Preview
-          </div>
+          </button>
           {/** Previewが未実装 */}
           {/* {isPreview && (
             <>
@@ -237,15 +181,14 @@ export const ScriptEditor = () => {
             </>
           )} */}
         </div>
-        <div className="h-full w-full bg-[#838383] pt-6">
+        <div className='h-full w-full bg-[#838383] pt-6'>
           <MonacoEditor
-            height="100%"
-            width="100%"
-            language="javascript"
-            theme="vs-dark"
+            height='100%'
+            width='100%'
+            language='javascript'
+            theme='vs-dark'
             value={code.current}
-            onChange={(value: any) => handleEditorChange(value)}
-            onMount={(editor, monaco) => handleEditorDidMount(monaco, editor)}
+            onChange={(value) => value && handleEditorChange(value)}
             options={{
               selectOnLineNumbers: true,
               roundedSelection: false,

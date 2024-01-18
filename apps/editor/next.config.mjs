@@ -34,11 +34,8 @@ const nextConfig = {
   experimental: {},
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
-    "@ninjagl/dbapi",
     "@ninjagl/auth",
     "@ninjagl/db",
-    "@ninjagl/ui",
-    "@ninjagl/validators",
     "@ninjagl/core",
   ],  
   /** We already do linting and typechecking as separate tasks in CI */

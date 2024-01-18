@@ -1,7 +1,6 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
   extends: [
-    "turbo",
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
@@ -50,6 +49,7 @@ const config = {
     "import/first": "error",
     "import/newline-after-import": "error",
     "import/no-duplicates": "error",
+    "@typescript-eslint/ban-ts-comment": "off",// @ts-ignoreを許可する
     "@typescript-eslint/no-empty-function": "off",
   },
   ignorePatterns: [

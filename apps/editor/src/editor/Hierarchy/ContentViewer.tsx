@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@nextui-org/react";
 import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
 import Image from "next/image";
-import { useSession } from "@ninjagl/auth";
+import { useSession } from "@ninjagl/auth/react";
 import { useTranslation } from "react-i18next";
 import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { BsFolder } from "react-icons/bs";
