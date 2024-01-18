@@ -1,7 +1,7 @@
 "use client";
-import { NavbarItem, Dropdown, DropdownMenu, DropdownItem, Button, DropdownTrigger } from "@nextui-org/react";
-import Link from "next/link";
 import { HiChevronDown } from "react-icons/hi2";
+import Link from "next/link";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, NavbarItem } from "@nextui-org/react";
 
 import { cardItems } from "../_utils/tutorials";
 

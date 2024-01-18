@@ -1,16 +1,14 @@
 "use client";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
-import { useSession } from "@ninjagl/auth/react";
+import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { signOut } from "@ninjagl/auth";
+import { useSession } from "@ninjagl/auth/react";
 
 export const Header = () => {
   const { data: session } = useSession();
 
-  console.log("session: ", session);
-
   return (
     <>
-      <Navbar className='fixed z-30 p-3 top-0 w-screen bg-transparent text-white'>
+      <Navbar className='fixed top-0 z-30 w-screen bg-transparent p-3 text-white'>
         <NavbarBrand>
           {/* <AcmeLogo /> */}
           <p className='cursor-pointer font-bold text-inherit'>

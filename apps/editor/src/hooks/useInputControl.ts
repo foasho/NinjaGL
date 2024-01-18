@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-
 import { IInputMovement } from "@ninjagl/core";
 
 /**
@@ -99,17 +98,13 @@ export const initInput = () => {
  * @param vals
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setManualInputs = (names: string[], vals: any[]) => {
   names.map((name, idx) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (manualKeyState as any)[name] = vals[idx];
   });
 };
 export const setManualInput = (key: string, val: boolean) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   if ((manualKeyState as any)[key] !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (manualKeyState as any)[key] = val;
   }
 };
@@ -125,9 +120,7 @@ interface IInputControl {
   device?: EDeviceType;
   targetId?: string;
 }
-export const useInputControl = ({
-  device = EDeviceType.Unknown,
-}: IInputControl) => {
+export const useInputControl = ({ device = EDeviceType.Unknown }: IInputControl) => {
   const keyboardFlag = useRef<boolean>(false);
   const gamepadFlag = useRef<boolean>(false);
 
@@ -143,7 +136,7 @@ export const useInputControl = ({
    */
   const handleKeyDown = (e: KeyboardEvent) => {
     const key = moveKeyFromCode(e.code) as keyof IInputMovement; // Add 'as keyof IInputMovement' to ensure type safety
-    if (key){
+    if (key) {
       if (key === "action") {
         movement.current[key] = key === "action" ? true : false;
       }
@@ -159,7 +152,7 @@ export const useInputControl = ({
   };
   const handleKeyUp = (e: KeyboardEvent) => {
     const key = moveKeyFromCode(e.code) as keyof IInputMovement;
-    if (key){
+    if (key) {
       if (key === "action") {
         movement.current[key] = false;
       }
@@ -192,7 +185,6 @@ export const useInputControl = ({
   });
 
   useEffect(() => {
-
     const deviceType = device === EDeviceType.Unknown ? detectDeviceType() : device;
 
     // デスクトップ対応
@@ -211,7 +203,6 @@ export const useInputControl = ({
         document.removeEventListener("mouseup", handleClickUp);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

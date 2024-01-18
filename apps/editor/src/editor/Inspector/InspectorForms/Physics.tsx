@@ -1,28 +1,31 @@
 import { useEffect, useState } from "react";
-
-import { OMPhysicsType } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
+import { OMPhysicsType } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+
+interface PhysicsSelectProps {
+  value: OMPhysicsType;
+  label: string;
+}
 
 export const Physics = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const { getOMById, setPhyType, setPhysics, setMoveable } = useNinjaEditor();
   const { t } = useTranslation();
-  const om = getOMById(id);
+  const om = id ? getOMById(id) : null;
 
   const [isPhysics, setIsPhysics] = useState(false);
   const [isMoveable, setIsMoveable] = useState(false);
 
-  const [phyTypeOpt, setPhyTypeOpt] = useState<{ value: OMPhysicsType; label: string }>();
+  const [phyTypeOpt, setPhyTypeOpt] = useState<PhysicsSelectProps>();
 
   // 物理判定選択肢
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const physicsOptions: { value: OMPhysicsType; label: string }[] = [
+  const physicsOptions: PhysicsSelectProps[] = [
     { value: "box", label: t("box") },
     { value: "capsule", label: t("capsule") },
     { value: "sphere", label: t("sphere") },
@@ -53,7 +56,7 @@ export const Physics = () => {
    * 物理判定種別の変更
    * @param selectPhysics
    */
-  const onChangePhyType = (selectPhysics) => {
+  const onChangePhyType = (selectPhysics: PhysicsSelectProps) => {
     setPhyTypeOpt(selectPhysics);
     const pt = selectPhysics.value as OMPhysicsType;
     if (id) setPhyType(id, pt);
@@ -81,7 +84,11 @@ export const Physics = () => {
         </div>
         {isPhysics && (
           <>
-            <Select options={physicsOptions} value={phyTypeOpt} onChange={onChangePhyType} />
+            <Select
+              options={physicsOptions}
+              value={phyTypeOpt}
+              onChange={(e) => onChangePhyType(e as PhysicsSelectProps)}
+            />
             <div>
               <div className='inline-block py-1.5 pl-3 font-bold'>{t("isMoveable")}</div>
               <div className='inline-block pl-3'>

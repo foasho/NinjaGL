@@ -1,7 +1,6 @@
 import { createContext, useContext, useRef } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type kvsProps = Record<string, any>;;
+type kvsProps = Record<string, any>;
 
 interface NinjaLVSProps {
   kvs: kvsProps;
@@ -37,12 +36,10 @@ export const NinjaKVSProvider = ({ children }: NinjaKVSProviderProps) => {
   const kvs: kvsProps = {};
 
   const getKVS = (key: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return kvs[key] ?? null;
   };
   const setKVS = (_kvs: kvsProps) => {
     Object.keys(_kvs).forEach((key) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       kvs[key] = _kvs[key] ?? null;
     });
     notifyKVSKeysChanged();
@@ -90,7 +87,7 @@ export const NinjaKVSProvider = ({ children }: NinjaKVSProviderProps) => {
       return;
     }
     const updatedKvsLisners = kvsKeyChangedListeners.current[key]?.filter((l) => l !== listener);
-    if (updatedKvsLisners){
+    if (updatedKvsLisners) {
       kvsKeyChangedListeners.current[key] = updatedKvsLisners;
     }
   };

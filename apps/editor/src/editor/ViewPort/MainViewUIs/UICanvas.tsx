@@ -1,5 +1,4 @@
-import { useEffect, useState, memo } from "react";
-
+import { memo, useEffect, useState } from "react";
 import Moveable from "react-moveable";
 import { useSnapshot } from "valtio";
 
@@ -35,7 +34,7 @@ const _UICanvas = () => {
   }, [uistore.currentId]);
 
   return (
-    <div className='absolute top-0 z-20 h-full w-full bg-white/50' style={{ display: uiMode ? "block" : "none" }}>
+    <div className='absolute top-0 z-20 size-full bg-white/50' style={{ display: uiMode ? "block" : "none" }}>
       <div
         style={{
           height: "100%",
@@ -79,9 +78,9 @@ const UICanvasHelper = (props: IUICanvasHelper) => {
 
   return (
     <>
-      <div className='absolute left-1/2 top-1/2 z-[-1] h-full w-full -translate-x-1/2 -translate-y-1/2'>
+      <div className='absolute left-1/2 top-1/2 z-[-1] size-full -translate-x-1/2 -translate-y-1/2'>
         <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[50px] text-primary'>UI</div>
-        <div className='flex h-full w-full flex-col flex-wrap'>
+        <div className='flex size-full flex-col flex-wrap'>
           {Array(props.gridNum)
             .fill(0)
             .map((_, i) => {

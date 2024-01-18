@@ -1,5 +1,4 @@
-import { useEffect, useRef, MutableRefObject, useState, Suspense } from "react";
-
+import { MutableRefObject, Suspense, useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { useGLTF } from "@react-three/drei";
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
@@ -35,7 +34,7 @@ export const StaticObjects = () => {
     <>
       {staticOMs.map((om) => {
         if (om.type == "object") {
-          return <StaticObject om={om} key={om.id} />;
+          return <StaticObject {...om} key={om.id} />;
         }
       })}
     </>
@@ -47,9 +46,9 @@ export const StaticObjects = () => {
  * @param props
  * @returns
  */
-const StaticObject = ({ om }) => {
+const StaticObject = ({ ...om }: IObjectManagement) => {
   const state = useSnapshot(editorStore);
-  const [modelUrl, setModelUrl] = useState<string>(om.args.url);
+  const [modelUrl, setModelUrl] = useState<string>(om.args.url!);
   const { scene, animations } = useGLTF(modelUrl) as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const ref = useRef<Group>(null);
@@ -89,7 +88,7 @@ const StaticObject = ({ om }) => {
           if (clone) {
             clone.traverse((node) => {
               if (node instanceof Mesh) {
-                node.castShadow = om.args.castShadow;
+                node.castShadow = !!om.args.castShadow;
               }
             });
           }
@@ -98,7 +97,7 @@ const StaticObject = ({ om }) => {
           if (clone) {
             clone.traverse((node) => {
               if (node instanceof Mesh) {
-                node.receiveShadow = om.args.receiveShadow;
+                node.receiveShadow = !!om.args.receiveShadow;
               }
             });
           }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -10,7 +9,7 @@ export const Color = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
-  const om = editor.getOMById(id);
+  const om = id? editor.getOMById(id): null;
   const { t } = useTranslation();
 
   const [color, setColor] = useState<string>();
@@ -22,7 +21,7 @@ export const Color = () => {
   /**
    * 色属性の変更
    */
-  const changeColor = (e) => {
+  const changeColor = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (id) {
       editor.setArg(id, "color", e.target.value);
     }

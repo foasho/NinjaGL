@@ -5,7 +5,7 @@ import { useSnapshot } from "valtio";
 
 import { isNumber } from "@/commons/functional";
 
-import { landScapeStore } from "../Store/landscape";
+import { landScapeStore } from "../../Store/landscape";
 
 /**
  * 入力イベント / 入力の型
@@ -16,7 +16,7 @@ interface HTMLElementEvent<T extends HTMLElement> extends Event {
   button?: number;
 }
 
-export const LandScapeInspector = ({ onSave }) => {
+export const LandScapeInspector = () => {
   const landScapeState = useSnapshot(landScapeStore);
   const { t } = useTranslation();
 

@@ -6,6 +6,8 @@ import { PWAProvider } from "@/hooks/usePWA";
 import RootProvider from "@/root.container";
 import { mplus } from "@/styles/font";
 
+import { Toast } from "./_components/Toast";
+
 import "./global.css";
 
 const title = "NinjaGL";
@@ -44,7 +46,10 @@ export default function RootLayout({ children }: Props) {
         <NextTopLoader showSpinner={false} color='#43D9D9' />
         <SessionProvider>
           <RootProvider>
-            <PWAProvider>{children}</PWAProvider>
+            <PWAProvider>
+              {children}
+              <Toast />
+            </PWAProvider>
           </RootProvider>
         </SessionProvider>
       </body>

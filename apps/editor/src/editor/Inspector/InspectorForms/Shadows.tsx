@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -11,15 +10,15 @@ export const Shadows = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const [castShadow, setCastShadow] = useState<boolean>(true);
   const [receiveShadow, setReceiveShadow] = useState<boolean>(false);
 
   useEffect(() => {
     if (om) {
-      setCastShadow(om.args.castShadow);
-      setReceiveShadow(om.args.receiveShadow);
+      setCastShadow(!!om.args.castShadow);
+      setReceiveShadow(!!om.args.receiveShadow);
     }
   }, [om]);
 

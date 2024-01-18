@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 import React, { createContext, useContext, useEffect, useRef } from "react";
 
@@ -11,7 +10,7 @@ interface PWAContextType {
   availablePWA: React.MutableRefObject<boolean>;
   InstallApplication: () => void;
   reqNotifPermission: () => void;
-};
+}
 
 const PWAContext = createContext<PWAContextType>({
   browser: { current: "unknown" },
@@ -23,7 +22,7 @@ const PWAContext = createContext<PWAContextType>({
 export const usePWA = () => useContext(PWAContext);
 
 export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
-  const deferredPrompt = useRef<Event|null>(null);
+  const deferredPrompt = useRef<Event | null>(null);
   const browser = useRef<BrowserType>("unknown");
   const availablePWA = useRef<boolean>(false);
 
@@ -32,10 +31,10 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     switch (true) {
       case agent.indexOf("edge") > -1:
         return "edge";
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+
       case agent.indexOf("opr") > -1 && !!(window as any).opr:
         return "opera";
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+
       case agent.indexOf("chrome") > -1 && !!(window as any).chrome:
         return "chrome";
       case agent.indexOf("trident") > -1:
@@ -96,9 +95,8 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     if (deferredPrompt.current) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
       (deferredPrompt.current as any).prompt();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+
       (deferredPrompt.current as any).userChoice.then((choiceResult: any) => {
         if (choiceResult.outcome === "accepted") {
           // console.log('User accepted the install prompt');

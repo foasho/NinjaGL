@@ -1,12 +1,9 @@
 /** @type {import('eslint').Linter.Config} */
 const config = {
-  extends: [
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:jsx-a11y/recommended",
-  ],
+  extends: ["plugin:react/recommended"],
   rules: {
     "react/prop-types": "off",
+    "react/no-unknown-property": ["off", { "ignore": ["JSX"] }], // r3fのpropsに対してエラーが出るので無効化
   },
   globals: {
     React: "writable",

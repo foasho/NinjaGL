@@ -1,8 +1,6 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Loading2D } from "@/commons/Loading2D";
-import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import {
   IConfigParams,
   IObjectManagement,
@@ -13,6 +11,9 @@ import {
   NJCFile,
 } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
+
+import { Loading2D } from "@/commons/Loading2D";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 import { globalConfigStore } from "../Store/Store";
 
@@ -52,20 +53,14 @@ export const DebugPlay = () => {
   const [njcFile, setNJCFile] = useState<NJCFile | null>(null);
 
   useEffect(() => {
-    const _njcFile = ExportNjcFile(
-      editor.oms.current,
-      editor.ums.current,
-      editor.tms.current,
-      editor.sms.current,
-      {
-        physics: configState.physics,
-        dpr: undefined,
-        multi: configState.multi,
-        isApi: configState.isApi,
-        isDebug: configState.isDebug,
-        projectName: configState.projectName,
-      },
-    );
+    const _njcFile = ExportNjcFile(editor.oms.current, editor.ums.current, editor.tms.current, editor.sms.current, {
+      physics: configState.physics,
+      dpr: undefined,
+      multi: configState.multi,
+      isApi: configState.isApi,
+      isDebug: configState.isDebug,
+      projectName: configState.projectName,
+    });
     setNJCFile(_njcFile);
     setTimeout(() => {
       setReady(true);
@@ -87,10 +82,8 @@ export const DebugPlay = () => {
 
   return (
     <Suspense fallback={<Loading2D />}>
-      <div id="Ninjaviewer" className="relative h-full">
-        {ready && njcFile && (
-          <NinjaGL njc={njcFile} isSplashScreen={false}></NinjaGL>
-        )}
+      <div id='Ninjaviewer' className='relative h-full'>
+        {ready && njcFile && <NinjaGL njc={njcFile} isSplashScreen={false}></NinjaGL>}
       </div>
     </Suspense>
   );

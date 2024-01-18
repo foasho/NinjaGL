@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -12,7 +11,7 @@ export const WidthHeight = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const [width, setWidth] = useState<number>(1);
   const [height, setHeight] = useState<number>(1);
@@ -25,7 +24,7 @@ export const WidthHeight = () => {
   /**
    * Widthの変更
    */
-  const changeWidth = (e) => {
+  const changeWidth = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "width", Number(targetValue));
@@ -36,7 +35,7 @@ export const WidthHeight = () => {
   /**
    * Heightの変更
    */
-  const changeHeight = (e) => {
+  const changeHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "height", Number(targetValue));

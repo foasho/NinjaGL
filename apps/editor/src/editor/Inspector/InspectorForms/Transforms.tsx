@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { Euler, MathUtils, Vector3 } from "three";
 import { useSnapshot } from "valtio";
@@ -13,7 +12,7 @@ export const Transforms = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
   // --------------------------------------------------
   // 位置/回転/拡大縮小
   const inputXref = useRef<HTMLInputElement>(null);
@@ -73,7 +72,7 @@ export const Transforms = () => {
    * @param e
    * @param xyz
    */
-  const changePosition = (e, xyz: "x" | "y" | "z") => {
+  const changePosition = (e: React.ChangeEvent<HTMLInputElement>, xyz: "x" | "y" | "z") => {
     if (!om) return;
     const targetValue = e.target.value;
     const newPosition: Vector3 = om.args.position ? om.args.position.clone() : new Vector3();
@@ -98,23 +97,23 @@ export const Transforms = () => {
    * @param e
    * @param xyz
    */
-  const changeRotation = (e, xyz: "x" | "y" | "z") => {
+  const changeRotation = (e: React.ChangeEvent<HTMLInputElement>, xyz: "x" | "y" | "z") => {
     if (!om) return;
     const targetValue = e.target.value;
     const newRotation: Euler = om.args.rotation ? om.args.rotation.clone() : new Euler();
     if (xyz == "x") {
       if (isNumber(targetValue)) {
-        const targetRad = MathUtils.degToRad(targetValue);
+        const targetRad = MathUtils.degToRad(Number(targetValue));
         newRotation.set(Number(targetRad), newRotation.y, newRotation.z);
       }
     } else if (xyz == "y") {
       if (isNumber(targetValue)) {
-        const targetRad = MathUtils.degToRad(targetValue);
+        const targetRad = MathUtils.degToRad(Number(targetValue));
         newRotation.set(newRotation.x, Number(targetRad), newRotation.z);
       }
     } else if (xyz == "z") {
       if (isNumber(targetValue)) {
-        const targetRad = MathUtils.degToRad(targetValue);
+        const targetRad = MathUtils.degToRad(Number(targetValue));
         newRotation.set(newRotation.x, newRotation.y, Number(targetRad));
       }
     }
@@ -124,7 +123,7 @@ export const Transforms = () => {
   /**
    * 拡大縮小変更 Inspector -> Object
    */
-  const changeScale = (e, xyz: "x" | "y" | "z") => {
+  const changeScale = (e: React.ChangeEvent<HTMLInputElement>, xyz: "x" | "y" | "z") => {
     if (!om) return;
     const targetValue = e.target.value;
     const newScale: Vector3 = om.args.scale ? om.args.scale.clone() : new Vector3();

@@ -12,7 +12,7 @@ export const SystemContent = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const updateSystem = (e: any) => {
     if (id && e.target.value) {

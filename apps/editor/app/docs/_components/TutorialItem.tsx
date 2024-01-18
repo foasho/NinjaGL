@@ -1,7 +1,7 @@
 "use client";
-import { DropdownItem } from "@nextui-org/react";
 import Link from "next/link";
-import { FaReact } from "react-icons/fa";
+import { DropdownItem } from "@nextui-org/react";
+
 export const TutorialItem = () => {
   return (
     <DropdownItem

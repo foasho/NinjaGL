@@ -1,10 +1,9 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-
-import { Select, SelectItem, Button, RadioGroup, Radio, Spinner } from "@nextui-org/react";
-import { OMType } from "@ninjagl/core";
-import { useSession } from "@ninjagl/auth/react";
 import { useTranslation } from "react-i18next";
 import { FaCheck } from "react-icons/fa";
+import { Button, Radio, RadioGroup, Select, SelectItem, Spinner } from "@nextui-org/react";
+import { useSession } from "@ninjagl/auth/react";
+import { OMType } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 
 import { b64EncodeUnicode } from "@/commons/functional";
@@ -44,7 +43,7 @@ export const UrlArg = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id? editor.getOMById(id): null;
 
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -89,14 +88,14 @@ export const UrlArg = () => {
       try {
         const response = await fetch(`/api/storage/all?prefix=${prefix}&limit=1000`);
         const data = await response.json();
-        const _items = data.map((item) => {
+        const _items = data.map((item: any) => {
           return {
             value: item.url,
             label: item.filename,
           };
         });
         const accept = AcceptableFileType(om!.type);
-        const filtered = _items.filter((item) => {
+        const filtered = _items.filter((item: any) => {
           const ext = item.label.split(".").pop();
           return accept.includes(`.${ext}`);
         });
@@ -107,9 +106,9 @@ export const UrlArg = () => {
       setIsLoading(false);
     };
     const getValidationItem = async () => {
-      const val = await validateUrl(om!.args.url);
+      const val = await validateUrl(om!.args.url!);
       if (val) {
-        setUrl(om!.args.url);
+        setUrl(om!.args.url!);
       }
     };
     if (type === "url" && om && om.args.url) {

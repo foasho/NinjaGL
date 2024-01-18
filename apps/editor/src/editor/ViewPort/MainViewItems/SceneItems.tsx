@@ -1,5 +1,4 @@
 import { memo } from "react";
-
 import { useSnapshot } from "valtio";
 
 import { globalEditorStore } from "@/editor/Store/editor";

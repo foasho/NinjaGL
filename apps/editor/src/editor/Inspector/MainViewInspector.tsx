@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-
 import { useSnapshot } from "valtio";
 
 import { MySwal } from "@/commons/Swal";
@@ -41,7 +40,7 @@ export const MainViewInspector = () => {
     editor.removeOM(did);
   };
 
-  const onKeyDown = (e) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Delete" && id) {
       const om = editor.getOMById(id);
       if (om && om.type != "avatar") {

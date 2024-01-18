@@ -1,6 +1,6 @@
-import { Buffer } from "buffer";
+import type { Object3D, Vector3 } from "three";
 
-import { Object3D, Vector3 } from "three";
+import { Buffer } from "buffer";
 
 export const convertToGB = (number: number): number => {
   let gb = number / 1073741824; // 1 GB = 1,073,741,824 bytes
@@ -21,7 +21,7 @@ export const rtdp = (number: number, decimalPlaces: number): number => {
 /**
  * 数値化できるかどうか
  */
-export const isNumber = (value): boolean => {
+export const isNumber = (value: any): boolean => {
   return typeof value === "string" && !isNaN(Number(value));
 };
 

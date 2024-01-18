@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import type { OMVisibleType } from "@ninjagl/core";
 
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { useSnapshot } from "valtio";
@@ -8,12 +9,17 @@ import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { normalStyles } from "@/utils/styles";
 
+interface VisibleSelectProps {
+  value: OMVisibleType;
+  label: string;
+}
+
 export const Visible = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
   const [visibleType, setVisibleType] = useState<{ value: "none" | "auto" | "force"; label: string }>(
     om?.args.visibleType
       ? { value: om.args.visibleType, label: om.args.visibleType }
@@ -22,10 +28,9 @@ export const Visible = () => {
   const [distance, setDistance] = useState(25);
 
   // 描画種別の選択肢
-  const visibleTypeOptions: { value: "auto" | "force" | "none"; label: string }[] = [
+  const visibleTypeOptions: VisibleSelectProps[] = [
     { value: "auto", label: t("autoScaling") },
     { value: "force", label: t("visibleForce") },
-    { value: "none", label: t("visibleNone") },
   ];
 
   useEffect(() => {
@@ -40,7 +45,7 @@ export const Visible = () => {
   /**
    * 描画種別の変更
    */
-  const changeVisibleType = (selectVisibleType) => {
+  const changeVisibleType = (selectVisibleType: VisibleSelectProps) => {
     if (id) editor.setVisibleType(id, selectVisibleType.value);
     setVisibleType(selectVisibleType);
   };
@@ -48,7 +53,7 @@ export const Visible = () => {
   /**
    * オート表示の場合のみ設定可
    */
-  const changeDistance = (e) => {
+  const changeDistance = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (id) editor.setArg(id, "distance", Number(e.target.value));
     setDistance(Number(e.target.value));
   };
@@ -61,7 +66,7 @@ export const Visible = () => {
           <Select
             options={visibleTypeOptions}
             value={visibleType}
-            onChange={(select) => changeVisibleType(select)}
+            onChange={(select) => changeVisibleType(select as VisibleSelectProps)}
             styles={normalStyles}
           />
         </div>

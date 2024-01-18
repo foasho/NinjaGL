@@ -3,6 +3,9 @@ import tunnel from "tunnel-rat";
 
 export const r3f = tunnel();
 
-export const Three = ({ children }) => {
+interface IThree {
+  children?: React.ReactNode;
+}
+export const Three = ({ children }: IThree) => {
   return <r3f.In>{children}</r3f.In>;
 };

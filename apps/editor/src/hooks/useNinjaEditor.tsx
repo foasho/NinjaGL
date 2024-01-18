@@ -3,18 +3,21 @@ import type {
   IScriptManagement,
   ITextureManagement,
   IUIManagement,
+  MaterialDataProps,
   NJCFile,
   OMArgsProps,
   OMPhysicsType,
-  MaterialDataProps
+  OMVisibleType,
 } from "@ninjagl/core";
 import type { Object3D } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { Euler, Group, MathUtils, Vector3 } from "three";
+
 import { MySwal } from "@/commons/Swal";
 import { globalEditorStore } from "@/editor/Store/editor";
 import { initTpOms, initTpUis } from "@/utils/initTpProjects";
-import { Euler, Group, MathUtils, Vector3 } from "three";
 
 /**
  * コンテンツブラウザの操作モード
@@ -70,7 +73,7 @@ interface NinjaEditorProp {
   undo: () => void;
   redo: () => void;
   setName: (id: string, name: string) => void;
-  setVisibleType: (id: string, visibleType: "force" | "auto") => void;
+  setVisibleType: (id: string, visibleType: OMVisibleType) => void;
   setVisible: (id: string, visible: boolean) => void;
   setPosition: (id: string, position: Vector3) => void;
   getPosition: (id: string) => Vector3;
@@ -78,13 +81,9 @@ interface NinjaEditorProp {
   getRotation: (id: string) => Euler;
   setScale: (id: string, scale: Vector3) => void;
   getScale: (id: string) => Vector3;
-  setMaterialData: (
-    id: string,
-    mtype: "standard" | "phong" | "toon" | "shader" | "reflection",
-    value: string,
-  ) => void;
+  setMaterialData: (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: string) => void;
   getMaterialData: (id: string) => MaterialDataProps | null;
-  setArg: (id: string, key: string, arg: OMArgsProps) => void;
+  setArg: (id: string, key: string, arg: any) => void;
   setPhysics: (id: string, physics: boolean) => void;
   setPhyType: (id: string, phyType: OMPhysicsType) => void;
   setMoveable: (id: string, moveable: boolean) => void;
@@ -493,7 +492,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
       updateOM(target);
     }
   };
-  const getMaterialData = (id: string): MaterialDataProps|null => {
+  const getMaterialData = (id: string): MaterialDataProps | null => {
     const target = oms.current.find((om) => om.id == id);
     if (!target?.args.materialData) {
       return null;
@@ -505,7 +504,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
    * argの変更
    * /CastShadow/Helper/Color/
    */
-  const setArg = (id: string, key: string, arg: OMArgsProps, notify = true) => {
+  const setArg = (id: string, key: string, arg: any, notify = true) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       target.args[key] = arg;
@@ -600,9 +599,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
       return false;
     }
     // Copyしたオブジェクトがわかりやすいように少し移動させる
-    const newPosition = om.args.position
-      ? om.args.position.clone()
-      : new Vector3(0, 0, 0);
+    const newPosition = om.args.position ? om.args.position.clone() : new Vector3(0, 0, 0);
     newPosition.add(new Vector3(0.5, 0.5, 0.5));
     const newOMArgs = { ...om.args, position: newPosition };
     copyOMRef.current = {
@@ -644,9 +641,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
   /**
    * 個別のOM変更リスナー
    */
-  const objectManagementIdChangedListeners = useRef<
-    Record<string, (() => void)[]>
-  >({});
+  const objectManagementIdChangedListeners = useRef<Record<string, (() => void)[]>>({});
   const onOMIdChanged = (id: string, listener: () => void) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       objectManagementIdChangedListeners.current[id] = [];
@@ -657,11 +652,8 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
     }
-    const updatedOMLisners =
-      objectManagementIdChangedListeners.current[id]?.filter(
-        (l) => l !== listener,
-      );
-    if (updatedOMLisners){
+    const updatedOMLisners = objectManagementIdChangedListeners.current[id]?.filter((l) => l !== listener);
+    if (updatedOMLisners) {
       objectManagementIdChangedListeners.current[id] = updatedOMLisners;
     }
   };
@@ -680,8 +672,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
     objectManagementChangedListeners.current.push(listener);
   };
   const offOMsChanged = (listener: () => void) => {
-    objectManagementChangedListeners.current =
-      objectManagementChangedListeners.current.filter((l) => l !== listener);
+    objectManagementChangedListeners.current = objectManagementChangedListeners.current.filter((l) => l !== listener);
   };
   // OMの変更を通知する
   const notifyOMsChanged = () => {
@@ -695,8 +686,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
     scriptManagementChangedListeners.current.push(listener);
   };
   const offSMsChanged = (listener: () => void) => {
-    scriptManagementChangedListeners.current =
-      scriptManagementChangedListeners.current.filter((l) => l !== listener);
+    scriptManagementChangedListeners.current = scriptManagementChangedListeners.current.filter((l) => l !== listener);
   };
   // SMの変更を通知する
   const notifySMsChanged = () => {
@@ -726,9 +716,7 @@ export const NinjaEditorProvider = ({ children }: { children: React.ReactNode })
     njcChangedListeners.current.push(listener);
   };
   const offNJCChanged = (listener: () => void) => {
-    njcChangedListeners.current = njcChangedListeners.current.filter(
-      (l) => l !== listener,
-    );
+    njcChangedListeners.current = njcChangedListeners.current.filter((l) => l !== listener);
   };
   // NJCの変更を通知する
   const notifyNJCChanged = () => {

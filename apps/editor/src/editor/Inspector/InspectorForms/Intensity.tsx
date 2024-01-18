@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -12,7 +11,7 @@ export const Intensity = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const [intensity, setIntensity] = useState<number>(1);
 
@@ -23,7 +22,7 @@ export const Intensity = () => {
   /**
    * Intensityの変更
    */
-  const changeIntensity = (e) => {
+  const changeIntensity = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "intensity", Number(targetValue));

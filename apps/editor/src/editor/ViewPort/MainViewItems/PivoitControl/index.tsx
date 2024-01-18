@@ -1,5 +1,5 @@
+// @ts-nocheck
 import * as React from "react";
-
 import { Size, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 

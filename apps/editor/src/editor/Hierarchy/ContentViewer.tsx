@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-
-import { Tooltip } from "@nextui-org/react";
-import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
-import Image from "next/image";
-import { useSession } from "@ninjagl/auth/react";
 import { useTranslation } from "react-i18next";
 import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { BsFolder } from "react-icons/bs";
 import { MdUploadFile } from "react-icons/md";
+import Image from "next/image";
+import { Tooltip } from "@nextui-org/react";
+import { useSession } from "@ninjagl/auth/react";
+import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
 import Swal from "sweetalert2";
 import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 
@@ -249,6 +248,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             return (
               <ContentViewer
                 {...file}
+                // @ts-ignore
                 onDoubleClick={onDoubleClick}
                 changeScriptEditor={props.changeScriptEditor}
                 onDeleteCallback={MoveDirectory}
@@ -258,7 +258,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
           })}
         </div>
         {isLoading && (
-          <div className='absolute z-50 hidden h-full w-full cursor-wait bg-[#000000b9]'>
+          <div className='absolute z-50 hidden size-full cursor-wait bg-[#000000b9]'>
             <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white'>
               <Loading2D className='h-32' />
             </div>
@@ -286,7 +286,7 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
             const files = e.target.files;
             if (files && files.length > 0) {
               const file = files[0];
-              _uploadFile(file);
+              if (file) _uploadFile(file);
             }
           }}
         />
@@ -358,7 +358,7 @@ export const ContentViewer = (props: IContenetViewerProps) => {
    * 右クリックメニューの表示
    * @param event
    */
-  const handleContextMenu = (event) => {
+  const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
     setShowMenu(true);
     setMenuPosition({ x: event.clientX, y: event.clientY });
@@ -554,83 +554,4 @@ export const ContentViewer = (props: IContenetViewerProps) => {
       </div>
     </>
   );
-};
-
-// const MANAGER = new LoadingManager();
-// const THREE_PATH = `https://unpkg.com/three@0.154.0`;
-// export const DRACO_LOADER = new DRACOLoader( MANAGER ).setDecoderPath(`${THREE_PATH}/examples/jsm/libs/draco/gltf/` );
-// export const KTX2_LOADER = new KTX2Loader( MANAGER ).setTranscoderPath( `${THREE_PATH}/examples/jsm/libs/basis/` );;
-
-/**
- * GLTFモデルの画像を生成して取得する
- * @param gltfUrl
- * @returns
- */
-const CreateGLTFImage = (gltfUrl): Promise<string | null> => {
-  const canvas = document.createElement("canvas");
-  canvas.width = 100;
-  canvas.height = 100;
-
-  // Making Scene
-  const scene = new Scene();
-
-  // Making Camera
-  const camera = new PerspectiveCamera(45, 1, 0.1, 1000);
-  camera.position.set(0, 0, 2);
-
-  // Making Renderer
-  const cleanup = () => {
-    if (renderer) {
-      renderer.dispose();
-    }
-    if (scene) {
-      scene.clear();
-    }
-    if (camera) {
-      camera.clear();
-    }
-  };
-
-  const renderer = new WebGLRenderer({
-    canvas: canvas,
-    alpha: true,
-  });
-  renderer.setClearColor(0x888888, 1);
-  renderer.setSize(35, 35);
-
-  // Making Light
-  const directionalLight = new DirectionalLight(0xffffff, 0.5);
-  directionalLight.position.set(10, 10, 10);
-  const spotLight = new SpotLight(0xffffff);
-  spotLight.position.set(-3, 3, -3);
-  scene.add(spotLight);
-  scene.add(directionalLight);
-
-  // Load GLTF and Making Image
-  return new Promise((resolve) => {
-    gltfLoader.load(
-      gltfUrl,
-      (gltf) => {
-        const model = gltf.scene || gltf.scenes[0];
-        scene.add(model);
-        renderer.render(scene, camera);
-        const dataUrl = canvas.toDataURL();
-        cleanup();
-        return resolve(dataUrl);
-      },
-      (progress) => {},
-      (error) => {
-        console.error(error);
-        cleanup();
-        Swal.fire({
-          title: "Error",
-          text: `Loading GLTF Error。\nFileName: ${gltfUrl}\n\n${error}`,
-          icon: "error",
-          confirmButtonText: "OK",
-        }).then((result) => {
-          return resolve(null);
-        });
-      },
-    );
-  });
 };

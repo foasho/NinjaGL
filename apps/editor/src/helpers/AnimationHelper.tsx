@@ -1,5 +1,4 @@
 import React from "react";
-
 import { useAnimations } from "@react-three/drei";
 import { Object3D } from "three";
 
@@ -9,8 +8,8 @@ export type AnimationHelperProps = {
   id: string;
   object: Object3D;
   visible?: boolean;
-  onClick?: (e) => void;
-  onPointerMissed?: (e) => void;
+  onClick?: (e: any) => void;
+  onPointerMissed?: (e: any) => void;
   initSelectAnimation?: string;
 };
 export const AnimationHelper = ({

@@ -1,5 +1,4 @@
 import { memo, useState } from "react";
-
 import { GizmoHelper, GizmoViewport, Text } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 import { Color, Vector3 } from "three";

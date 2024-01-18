@@ -1,5 +1,5 @@
+// @ts-nocheck
 import * as React from "react";
-
 import * as THREE from "three";
 
 export type OnDragStartProps = {

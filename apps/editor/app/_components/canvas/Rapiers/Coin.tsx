@@ -1,5 +1,4 @@
 import { useRef } from "react";
-
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
@@ -14,7 +13,7 @@ type ModelProps = {
 export const Coin = ({ children, color = "white", roughness = 0.75 }: ModelProps) => {
   const ref = useRef<Mesh>(null);
 
-  const { nodes, materials } = useGLTF("/top-models/coin.gltf") as any;
+  const { nodes, materials } = useGLTF("/top-models/coin.gltf");
 
   useFrame((_, delta) => {
     if (ref.current && ref.current.material) {
@@ -27,12 +26,14 @@ export const Coin = ({ children, color = "white", roughness = 0.75 }: ModelProps
     <group>
       {children ? (
         <>
+          {/* @ts-ignore */}
           <mesh geometry={nodes.coin.geometry} castShadow>
             {children}
           </mesh>
         </>
       ) : (
         <>
+          {/* @ts-ignore */}
           <mesh geometry={nodes.coin.geometry} material={materials["Gold.009"]} castShadow />
         </>
       )}

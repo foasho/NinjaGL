@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { useSnapshot } from "valtio";
@@ -9,23 +8,24 @@ import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { normalStyles } from "@/utils/styles";
 
+interface EnvironmentSelectProps {
+  value: "forest" | "sunset" | "dawn" | "night";
+  label: string;
+}
 export const EnvironmentParam = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   // Environmentの設定
   const [background, setBackground] = useState<boolean>(true);
   const [blur, setBlur] = useState<number>(0.5);
-  const [environmentPreset, setEnvironmentPreset] = useState<{
-    value: "forest" | "sunset" | "dawn" | "night";
-    label: string;
-  }>();
+  const [environmentPreset, setEnvironmentPreset] = useState<EnvironmentSelectProps>();
 
   // Environmentの選択肢
-  const environmentOptions: { value: "sunset" | "dawn" | "night" | "forest"; label: string }[] = [
+  const environmentOptions: EnvironmentSelectProps[] = [
     { value: "sunset", label: t("sunset") },
     { value: "dawn", label: t("dawn") },
     { value: "night", label: t("night") },
@@ -43,7 +43,7 @@ export const EnvironmentParam = () => {
   /**
    * EnvironmentのPresetを変更
    */
-  const changeEnvironmentPreset = (selectEnvironmentPreset) => {
+  const changeEnvironmentPreset = (selectEnvironmentPreset: EnvironmentSelectProps) => {
     if (id) editor.setArg(id, "preset", selectEnvironmentPreset.value);
     setEnvironmentPreset(selectEnvironmentPreset);
   };
@@ -51,7 +51,7 @@ export const EnvironmentParam = () => {
   /**
    * EnvironmentのBlurの変更
    */
-  const changeEnvironmentBlur = (e) => {
+  const changeEnvironmentBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "blur", Number(targetValue));
@@ -75,7 +75,7 @@ export const EnvironmentParam = () => {
           <Select
             options={environmentOptions}
             value={environmentPreset}
-            onChange={(select) => changeEnvironmentPreset(select)}
+            onChange={(select) => changeEnvironmentPreset(select as EnvironmentSelectProps)}
             styles={normalStyles}
           />
         </div>

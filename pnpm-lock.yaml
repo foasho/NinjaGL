@@ -71,9 +71,6 @@ importers:
       '@ninjagl/db':
         specifier: workspace:^0.1.0
         version: link:../../packages/db
-      '@ninjagl/dbapi':
-        specifier: workspace:^0.1.0
-        version: link:../../packages/dbapi
       '@react-three/drei':
         specifier: ^9.88.7
         version: 9.93.1(@react-three/fiber@8.15.14)(@types/three@0.160.0)(react-dom@18.2.0)(react@18.2.0)(three@0.160.0)
@@ -583,48 +580,14 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
 
-  packages/dbapi:
-    dependencies:
-      '@ninjagl/auth':
-        specifier: workspace:^0.1.0
-        version: link:../auth
-      '@ninjagl/db':
-        specifier: workspace:^0.1.0
-        version: link:../db
-      '@trpc/server':
-        specifier: next
-        version: 11.0.0-next-beta.193
-      superjson:
-        specifier: 2.2.1
-        version: 2.2.1
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-    devDependencies:
-      '@ninjagl/eslint-config':
-        specifier: workspace:^0.2.0
-        version: link:../../tooling/eslint
-      '@ninjagl/prettier-config':
-        specifier: workspace:^0.1.0
-        version: link:../../tooling/prettier
-      '@ninjagl/tsconfig':
-        specifier: workspace:^0.1.0
-        version: link:../../tooling/typescript
-      eslint:
-        specifier: ^8.56.0
-        version: 8.56.0
-      prettier:
-        specifier: ^3.1.1
-        version: 3.2.2
-      typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
-
   tooling/eslint:
     dependencies:
       '@next/eslint-plugin-next':
         specifier: ^14.0.4
         version: 14.0.4
+      '@react-three/eslint-plugin':
+        specifier: 0.1.1
+        version: 0.1.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.10.0
         version: 6.19.0(@typescript-eslint/parser@6.19.0)(eslint@8.56.0)(typescript@5.3.3)
@@ -6187,6 +6150,15 @@ packages:
       zustand: 3.7.2(react@18.2.0)
     transitivePeerDependencies:
       - '@types/three'
+    dev: false
+
+  /@react-three/eslint-plugin@0.1.1:
+    resolution: {integrity: sha512-n2tGHNhF3yzTar7lJkJPZeWFPH3C0jKb0Iws4zMelOQErqG3+xIfw3n8GQzL6olxuga/FP1tENl+UA+d6aa6Hg==}
+    dependencies:
+      '@babel/runtime': 7.23.8
+      eslint: 8.56.0
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@react-three/fiber@8.15.14(react-dom@18.2.0)(react@18.2.0)(three@0.160.0):

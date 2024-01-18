@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState, memo } from "react";
-
-import { IObjectManagement } from "@ninjagl/core";
+import { memo, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
 import { MdTerrain } from "react-icons/md";
+import { IObjectManagement } from "@ninjagl/core";
 import Swal from "sweetalert2";
 import { useSnapshot } from "valtio";
 
@@ -170,6 +169,5 @@ const TreeItem = (prop: ITreeItem) => {
     </>
   );
 };
-
 
 export const HierarchyTree = memo(_HierarchyTree);

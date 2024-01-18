@@ -1,12 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import {
-  index,
-  integer as int,
-  primaryKey,
-  text,
-  timestamp,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { index, integer as int, primaryKey, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./_table";
 
@@ -28,9 +21,7 @@ export const accounts = pgTable(
   "account",
   {
     userId: varchar("userId", { length: 255 }).notNull(),
-    type: varchar("type", { length: 255 })
-      .$type<"oauth" | "oidc" | "email">()
-      .notNull(),
+    type: varchar("type", { length: 255 }).$type<"oauth" | "oidc" | "email">().notNull(),
     provider: varchar("provider", { length: 255 }).notNull(),
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: varchar("refresh_token", { length: 255 }),
@@ -56,9 +47,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 export const sessions = pgTable(
   "session",
   {
-    sessionToken: varchar("sessionToken", { length: 255 })
-      .notNull()
-      .primaryKey(),
+    sessionToken: varchar("sessionToken", { length: 255 }).notNull().primaryKey(),
     userId: varchar("userId", { length: 255 }).notNull(),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },

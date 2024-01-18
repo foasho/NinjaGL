@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState, memo } from "react";
-
+import React, { memo, useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { useGLTF } from "@react-three/drei";
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";

@@ -1,7 +1,7 @@
 "use client";
+import { BsReplyFill } from "react-icons/bs";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { BsReplyFill } from "react-icons/bs";
 
 export default function LoginPage() {
   const getCallbackUrl = () => {
@@ -19,7 +19,7 @@ export default function LoginPage() {
   return (
     <>
       <Link href='/' className='fixed left-8 top-8 z-10 flex items-center justify-center'>
-        <BsReplyFill className='inline-block h-8 w-8 cursor-pointer text-gray-500' />
+        <BsReplyFill className='inline-block size-8 cursor-pointer text-gray-500' />
         <span className='inline-block cursor-pointer pl-2 text-gray-500'>Go to Home</span>
       </Link>
       <div className='flex min-h-screen flex-col items-center justify-center gap-2 bg-gray-100 p-10 text-center'>
@@ -34,7 +34,7 @@ export default function LoginPage() {
           className='flex min-w-[350px] max-w-xs items-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-800 shadow-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2'
         >
           <svg
-            className='mr-2 h-6 w-6'
+            className='mr-2 size-6'
             xmlns='http://www.w3.org/2000/svg'
             xmlnsXlink='http://www.w3.org/1999/xlink'
             viewBox='-0.5 0 48 48'

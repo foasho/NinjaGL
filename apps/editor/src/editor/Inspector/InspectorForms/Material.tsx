@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { useSnapshot } from "valtio";
@@ -13,7 +12,7 @@ export const MaterialForm = () => {
   const editor = useNinjaEditor();
   const { t } = useTranslation();
   const id = state.currentId;
-  const om = editor.getOMById(id);
+  const om = id? editor.getOMById(id): null;
   const [materialType, setMaterialType] = useState<{
     value: "standard" | "phong" | "toon" | "shader" | "reflection";
     label: string;
@@ -22,8 +21,8 @@ export const MaterialForm = () => {
 
   useEffect(() => {
     if (om) {
-      if (om.args.materialData !== undefined) {
-        setMaterialType(materialOptions.find((option) => option.value == om.args.materialData.type));
+      if (om.args.materialData) {
+        setMaterialType(materialOptions.find((option) => option.value == om.args.materialData!.type));
       } else {
         setMaterialType(materialOptions.find((option) => option.value == "standard"));
         setMaterialColor("#ffffff");
@@ -77,7 +76,7 @@ export const MaterialForm = () => {
               onChange={(e) => changeMaterial(materialType.value, e.target.value)}
               onFocus={() => (editorStore.editorFocus = true)}
               onBlur={() => (editorStore.editorFocus = false)}
-              className='h-7 w-7 cursor-pointer rounded-full border-none bg-transparent p-0 shadow-lg outline-none'
+              className='size-7 cursor-pointer rounded-full border-none bg-transparent p-0 shadow-lg outline-none'
             />
             <input
               type={"text"}

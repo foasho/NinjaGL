@@ -1,6 +1,5 @@
-import { IScriptManagement } from "@ninjagl/core";
-import { InitScriptManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
+import { InitScriptManagement, IScriptManagement } from "@ninjagl/core";
 import { MathUtils } from "three";
 import { useSnapshot } from "valtio";
 
@@ -60,7 +59,7 @@ export const ScriptNavigation = () => {
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault(); // ブラウザのデフォルト動作をキャンセルする
   };
 

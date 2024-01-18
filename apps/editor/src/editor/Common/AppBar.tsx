@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-
-import { Spinner } from "@nextui-org/react";
-import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
-import Link from "next/link";
-import { useSession } from "@ninjagl/auth/react";
 import { useTranslation } from "react-i18next";
 import { AiFillSave } from "react-icons/ai";
 import { BiEditAlt } from "react-icons/bi";
 import { BsCheck, BsPlay, BsStop } from "react-icons/bs";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+import Link from "next/link";
+import { Spinner } from "@nextui-org/react";
+import { useSession } from "@ninjagl/auth/react";
+import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 
 import { b64EncodeUnicode } from "@/commons/functional";
@@ -197,6 +196,7 @@ export const AppBar = () => {
       if (files && files.length > 0) {
         setLoading(true);
         const file = (target.files as FileList)[0];
+        if (!file) return;
         const njcFile = await loadNJCFile(file);
         console.info("### ロードしたnjcFileを確認 ###");
         console.info(njcFile);
@@ -210,7 +210,7 @@ export const AppBar = () => {
   useEffect(() => {
     // ※AutoSave調整中
     // AutoSaveが有効なら、AutoSaveを開始
-    let autoSaveInterval;
+    let autoSaveInterval: NodeJS.Timeout | null = null;
     if (autoSave && session) {
       autoSaveInterval = setInterval(() => {
         onSave(false);
@@ -226,7 +226,7 @@ export const AppBar = () => {
       {/** アプリNavヘッダー */}
       {appBar && (
         <div className={`relative flex w-full items-center justify-between bg-primary text-sm`}>
-          <ul className='relative mx-auto my-0  h-full w-full list-none overflow-hidden py-0 pl-0 pr-12 text-center'>
+          <ul className='relative mx-auto my-0  size-full list-none overflow-hidden py-0 pl-0 pr-12 text-center'>
             {/** Left */}
             <li className='float-left inline-block px-[3px] pt-[14px]'>
               <span
@@ -290,7 +290,7 @@ export const AppBar = () => {
                 {loading ? (
                   <Spinner className='inline pr-2' size='sm' />
                 ) : (
-                  <AiFillSave className='inline h-5 w-5 pr-1' />
+                  <AiFillSave className='inline size-5 pr-1' />
                 )}
                 <span className='hidden md:inline'>Save</span>
               </button>
@@ -303,11 +303,11 @@ export const AppBar = () => {
                 <span className='align-middle'>
                   {viewSelect == "debugplay" ? (
                     <>
-                      <BsStop className='inline h-6 w-6 pr-1' />
+                      <BsStop className='inline size-6 pr-1' />
                     </>
                   ) : (
                     <>
-                      <BsPlay className='inline h-6 w-6 pr-1' />
+                      <BsPlay className='inline size-6 pr-1' />
                     </>
                   )}
                 </span>

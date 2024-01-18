@@ -1,7 +1,7 @@
 "use client";
-import { Card, CardBody, CardFooter, Image } from "@nextui-org/react";
-import Link from "next/link";
 import { FaStopwatch } from "react-icons/fa";
+import Link from "next/link";
+import { Card, CardBody, CardFooter, Image } from "@nextui-org/react";
 
 import { cardItems } from "../_utils/tutorials";
 

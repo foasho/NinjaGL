@@ -1,5 +1,4 @@
 import React, { memo, useEffect, useRef, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { useGLTF } from "@react-three/drei";
 import { Group, Mesh, MeshStandardMaterial, TextureLoader } from "three";
@@ -28,12 +27,15 @@ const _LandScape = () => {
 };
 
 const MyLandScape = ({ ...om }: IObjectManagement) => {
-  const { nodes, materials } = useGLTF(om.args.url) as any;
+  const { nodes, materials } = useGLTF(om.args.url!);
 
   if (nodes) {
-    nodes.traverse((child) => {
-      // Only Recieve Shadow
-      child.receiveShadow = true;
+    Object.keys(nodes).forEach((key) => {
+      const node = nodes[key];
+      if (node) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
     });
   }
 
@@ -42,6 +44,7 @@ const MyLandScape = ({ ...om }: IObjectManagement) => {
 
   return (
     <LandScapeProvider om={om}>
+      {/** @ts-ignore */}
       <mesh geometry={nodes.Plane.geometry} material={nodes.Plane.material} rotation={[-Math.PI / 2, 0, 0]}>
         {/** ベースマテリアル */}
         {/** Blendingマテリアル */}
@@ -84,6 +87,7 @@ const LandScapeProvider = ({ om, children }: { om: IObjectManagement; children: 
           // ベースが画像の場合
           if (ls.args.base == "image") {
             const url = ls.args.url;
+            if (!url) return;
             const tex = new TextureLoader().load(url);
             (ref.current.children[0] as Mesh).material = new MeshStandardMaterial({ map: tex });
           }

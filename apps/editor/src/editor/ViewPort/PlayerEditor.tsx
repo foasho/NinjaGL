@@ -1,18 +1,18 @@
 import { Suspense, useEffect, useRef, useState } from "react";
-import { b64EncodeUnicode } from "@/commons/functional";
-import { Loading2D } from "@/commons/Loading2D";
-import { MySwal } from "@/commons/Swal";
-import { uploadFile } from "@/utils/upload";
+import { useTranslation } from "react-i18next";
+import { useSession } from "@ninjagl/auth/react";
 import { convertObjectToFile } from "@ninjagl/core";
 import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import { AnimationClip, Box3, Group, Vector3 } from "three";
 import { SkeletonUtils } from "three-stdlib";
 import tunnel from "tunnel-rat";
 
-import { useSession } from "@ninjagl/auth/react";
+import { b64EncodeUnicode } from "@/commons/functional";
+import { Loading2D } from "@/commons/Loading2D";
+import { MySwal } from "@/commons/Swal";
+import { uploadFile } from "@/utils/upload";
 
 import { globalEditorStore } from "../Store/editor";
 
@@ -119,11 +119,11 @@ export const PlayerEditor = () => {
   return (
     <>
       <div className='relative h-full'>
-        <div className='bg-cyber/50 absolute right-4 top-8 z-20 w-48 rounded-lg p-3'>
+        <div className='absolute right-4 top-8 z-20 w-48 rounded-lg bg-cyber/50 p-3'>
           <dom.Out />
         </div>
         {selected ? (
-          <Suspense fallback={<Loading2D className='bg-cyber h-full' />}>
+          <Suspense fallback={<Loading2D className='h-full bg-cyber' />}>
             <Canvas shadows>
               <Environment preset='dawn' blur={0.7} background />
               <OrbitControls />
@@ -414,7 +414,7 @@ const ModelPreview = ({ url, onSave }: ModelPreviewProps) => {
           {/** 保存ボタン */}
           <div>
             <button
-              className='bg-primary/50 hover:bg-primary/75 my-2 w-full rounded px-4 py-2 font-bold text-white'
+              className='my-2 w-full rounded bg-primary/50 px-4 py-2 font-bold text-white hover:bg-primary/75'
               onClick={() => {
                 onSave(
                   {

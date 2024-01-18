@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -12,7 +11,7 @@ export const CameraParams = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id? editor.getOMById(id): null;
   // カメラの設定
   const [fov, setFov] = useState<number>(50);
   const [near, setNear] = useState<number>(0.1);
@@ -29,8 +28,9 @@ export const CameraParams = () => {
   /**
    * Camera-Fovの変更
    */
-  const changeCameraFov = (e) => {
+  const changeCameraFov = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
+    const num = Number(targetValue);
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "fov", Number(targetValue));
       setFov(Number(targetValue));
@@ -39,7 +39,7 @@ export const CameraParams = () => {
   /**
    * Camera-Nearの変更
    */
-  const changeCameraNear = (e) => {
+  const changeCameraNear = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "near", Number(targetValue));
@@ -49,7 +49,7 @@ export const CameraParams = () => {
   /**
    * Camera-Farの変更
    */
-  const changeCameraFar = (e) => {
+  const changeCameraFar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "far", Number(targetValue));

@@ -1,5 +1,5 @@
 "use client";
-import { Stage, useGLTF, Clone, OrbitControls } from "@react-three/drei";
+import { Clone, OrbitControls, Stage, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 
 type ModelViewerProps = {

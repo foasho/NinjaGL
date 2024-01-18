@@ -1,14 +1,13 @@
 import { useState } from "react";
 import ReactDOM, { Root } from "react-dom/client";
-
-import { OMType } from "@ninjagl/core";
-import clsx from "clsx";
-import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { AiOutlineCodeSandbox } from "react-icons/ai";
 import { BiCapsule, BiCylinder, BiRectangle } from "react-icons/bi";
 import { ImSphere } from "react-icons/im";
 import { MdArrowLeft } from "react-icons/md";
+import Image from "next/image";
+import { OMType } from "@ninjagl/core";
+import clsx from "clsx";
 
 interface IResponse {
   x?: number;
@@ -84,7 +83,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
   return (
     <>
       <div
-        className='fixed left-0 top-0 z-10 flex h-screen w-screen items-center justify-center bg-transparent'
+        className='size-screen fixed left-0 top-0 z-10 flex items-center justify-center bg-transparent'
         onClick={handleClickOutside}
       ></div>
       <div

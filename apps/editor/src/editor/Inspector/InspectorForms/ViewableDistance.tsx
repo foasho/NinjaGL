@@ -1,5 +1,4 @@
 import { ChangeEvent, useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -12,7 +11,7 @@ export const ViewableDistance = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const [distance, setDistance] = useState<number>(25);
 

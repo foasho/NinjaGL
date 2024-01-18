@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-
 import { type Vector } from "@dimforge/rapier3d";
 import { MeshTransmissionMaterial } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";

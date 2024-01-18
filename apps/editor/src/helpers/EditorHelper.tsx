@@ -1,5 +1,4 @@
-import { memo, useRef, useEffect } from "react";
-
+import { memo, useEffect, useRef } from "react";
 import { useThree } from "@react-three/fiber";
 import { Raycaster, Vector3 } from "three";
 
@@ -9,7 +8,7 @@ import { addInitOM } from "@/utils/omControls";
 import { showSelectNewObjectDialog } from "../editor/Dialogs/SelectNewObjectDialog";
 
 const ray = new Raycaster();
-ray.firstHitOnly = true;
+// ray.firstHitOnly = true;
 // Memo化
 const ContextHelper = () => {
   const { camera, pointer, scene } = useThree();
@@ -24,7 +23,7 @@ const ContextHelper = () => {
       ray.setFromCamera(pointer, camera);
       const intersects = ray.intersectObjects(scene.children, true);
       if (intersects.length > 0) {
-        const pos = intersects[0].point;
+        const pos = intersects[0]!.point;
         position = new Vector3(pos.x, pos.y, pos.z);
       }
       const data = await showSelectNewObjectDialog({
@@ -42,7 +41,7 @@ const ContextHelper = () => {
       }
     };
     const canvas = document.getElementById("mainviewcanvas");
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       // SHIFT + A
       if (e.shiftKey && e.key === "A") {
         // 押された時のpointerの位置を取得
@@ -50,14 +49,15 @@ const ContextHelper = () => {
         onCreateMenu();
       }
     };
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       point.current.x = e.clientX;
       point.current.y = e.clientY;
     };
 
-    const handleTouchMove = (e) => {
-      point.current.x = e.touches[0].clientX;
-      point.current.y = e.touches[0].clientY;
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length == 0) return;
+      point.current.x = e.touches[0]!.clientX;
+      point.current.y = e.touches[0]!.clientY;
     };
 
     if (canvas) {

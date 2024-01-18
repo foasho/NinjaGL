@@ -1,23 +1,18 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended-type-checked",
-    "plugin:@typescript-eslint/stylistic-type-checked",
-    "prettier",
-  ],
+  extends: ["plugin:@react-three/recommended", "prettier", "plugin:tailwindcss/recommended"],
   env: {
     es2022: true,
     node: true,
   },
   parser: "@typescript-eslint/parser",
   parserOptions: { project: true },
-  "plugins": ["@typescript-eslint", "unused-imports", "simple-import-sort", "react", "import"],
+  plugins: ["@react-three", "@typescript-eslint", "unused-imports", "simple-import-sort", "react", "import"],
   rules: {
     "simple-import-sort/imports": [
       "error",
       {
-        "groups": [
+        groups: [
           // type (e.g. `import type { ... } from "..."`)
           ["^.*\\u0000$"],
           // `react`.
@@ -49,23 +44,17 @@ const config = {
     "import/first": "error",
     "import/newline-after-import": "error",
     "import/no-duplicates": "error",
-    "@typescript-eslint/ban-ts-comment": "off",// @ts-ignoreを許可する
+    "@typescript-eslint/ban-ts-comment": "off", // @ts-ignoreを許可する
     "@typescript-eslint/no-empty-function": "off",
+    "react/no-unknown-property": ["off", { "ignore": ["JSX"] }], // r3fのpropsに対してエラーが出るので無効化
   },
-  ignorePatterns: [
-    "**/*.config.js",
-    "**/*.config.cjs",
-    "**/.eslintrc.cjs",
-    ".next",
-    "dist",
-    "pnpm-lock.yaml",
-  ],
+  ignorePatterns: ["**/*.config.js", "**/*.config.cjs", "**/.eslintrc.cjs", ".next", "dist", "pnpm-lock.yaml"],
   reportUnusedDisableDirectives: true,
   settings: {
-    "react": {
-      "version": "detect"
-    }
-  }
+    react: {
+      version: "detect",
+    },
+  },
 };
 
 module.exports = config;

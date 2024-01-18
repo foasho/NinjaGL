@@ -1,15 +1,19 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
-
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { OrbitControls, PerspectiveCamera as DPerspectiveCamera } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Vector3, PerspectiveCamera } from "three";
+import { PerspectiveCamera, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useSnapshot } from "valtio";
 
 import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { globalContentStore, editorStore } from "../Store/Store";
+import { editorStore, globalContentStore } from "../Store/Store";
+
+const cd = new Vector3();
+const cp = new Vector3();
+const cr = new Vector3();
+const cl = new Vector3();
 
 /**
  * WASDカメラ視点移動
@@ -110,27 +114,27 @@ export const MoveableCameraControl = (props: ICameraControl) => {
     }
     if (!input.dash && (input.forward || input.backward || input.right || input.left)) {
       const st = props.cameraSpeed * delta * 10;
-      const cameraDirection = new Vector3();
+      const cameraDirection = cd;
       cameraRef.current!.getWorldDirection(cameraDirection);
-      const cameraPosition = cameraRef.current!.position.clone();
+      const cameraPosition = cp.copy(cameraRef.current!.position);
 
       if (input.forward) {
-        cameraPosition.add(cameraDirection.clone().multiplyScalar(st));
+        cameraPosition.add(cd.multiplyScalar(st));
       }
       if (input.backward) {
-        cameraPosition.sub(cameraDirection.clone().multiplyScalar(st));
+        cameraPosition.sub(cd.multiplyScalar(st));
       }
       if (input.right) {
-        const cameraRight = new Vector3();
+        const cameraRight = cr.set(0, 0, 0);
         cameraRight.crossVectors(cameraDirection, cameraRef.current!.up).normalize();
         cameraPosition.add(cameraRight.multiplyScalar(st));
       }
       if (input.left) {
-        const cameraLeft = new Vector3();
+        const cameraLeft = cl.set(0, 0, 0);
         cameraLeft.crossVectors(cameraDirection, cameraRef.current!.up).normalize();
         cameraPosition.sub(cameraLeft.multiplyScalar(st));
       }
-      globalContentStore.cameraPosition.copy(cameraPosition.clone());
+      globalContentStore.cameraPosition.copy(cameraPosition);
       cameraRef.current!.position.copy(cameraPosition);
       ref.current!.target.copy(cameraPosition.add(cameraDirection));
     } else if (ref.current && cameraRef.current) {

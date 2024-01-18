@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-
+import { IObjectManagement } from "@ninjagl/core";
 import { Environment, Float, Lightformer } from "@react-three/drei";
-import { Euler, Vector3, DoubleSide } from "three";
+import { DoubleSide, Euler, Matrix4, Vector3 } from "three";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
@@ -49,7 +49,7 @@ export const MyEnviroment = () => {
             frames={degraded && lightformers.length > 0 ? 1 : Infinity}
           >
             {lightformers.map((om) => {
-              return <LightFormer om={om} key={om.id} />;
+              return <LightFormer {...om} key={om.id} />;
             })}
           </Environment>
         </>
@@ -58,20 +58,20 @@ export const MyEnviroment = () => {
         <>
           <Environment frames={degraded && lightformers.length > 0 ? 1 : Infinity} resolution={512}>
             {lightformers.map((om, idx) => {
-              return <LightFormer om={om} key={idx} />;
+              return <LightFormer {...om} key={idx} />;
             })}
           </Environment>
         </>
       )}
       {/* LightFormerのコントローラは別にもつ */}
       {lightformers.map((om, idx) => {
-        return <LightFormerControl om={om} key={idx} />;
+        return <LightFormerControl {...om} key={idx} />;
       })}
     </>
   );
 };
 
-const LightFormerControl = ({ om }) => {
+const LightFormerControl = ({ ...om }: IObjectManagement) => {
   const editor = useNinjaEditor();
   const catchRef = useRef<any>();
   const state = useSnapshot(editorStore);
@@ -82,7 +82,7 @@ const LightFormerControl = ({ om }) => {
   };
   const onDragEnd = () => {};
 
-  const onDrag = (e) => {
+  const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
@@ -134,7 +134,7 @@ const LightFormerControl = ({ om }) => {
   );
 };
 
-const LightFormer = ({ om }) => {
+const LightFormer = ({ ...om }: IObjectManagement) => {
   const ref = useRef<any>();
   const editor = useNinjaEditor();
   const id = om.id;
@@ -164,7 +164,7 @@ const LightFormer = ({ om }) => {
             color={om.args.color}
             position={om.args.position}
             rotation={om.args.rotation}
-            scale={om.args.scale}
+            scale={om.args.scale as any}
             onUpdate={(self) => {
               if (om.args.lookAt) {
                 const newVector = new Vector3().copy(om.args.lookAt);
@@ -182,7 +182,7 @@ const LightFormer = ({ om }) => {
             color={om.args.color}
             position={om.args.position}
             rotation={om.args.rotation}
-            scale={om.args.scale}
+            scale={om.args.scale as any}
             onUpdate={(self) => {
               if (om.args.lookAt) {
                 const newVector = new Vector3().copy(om.args.lookAt);

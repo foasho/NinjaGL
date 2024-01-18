@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import { ThreeEvent, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 

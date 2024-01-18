@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
-import { Bloom, SSR, LUT, EffectComposer } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, LUT, SSR } from "@react-three/postprocessing";
 import { LUTCubeLoader } from "postprocessing";
 import { Texture } from "three";
 
@@ -48,7 +47,7 @@ const MyEffect = ({ om }: { om: IObjectManagement }) => {
   useEffect(() => {
     if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
-      loader.load(om.args.texture, (loadedTexture) => {
+      loader.load(om.args.texture, (loadedTexture: any) => {
         setTexture(loadedTexture);
       });
     } else {

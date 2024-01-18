@@ -2,14 +2,16 @@ import type { IObjectManagement } from "@ninjagl/core";
 import type { MutableRefObject } from "react";
 import type { Group, Matrix4, Object3D } from "three";
 import type { GLTF } from "three-stdlib";
+
 import { Suspense, useEffect, useRef, useState } from "react";
-import { Loading3D } from "@/commons/Loading3D";
-import { editorStore } from "@/editor/Store/Store";
-import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { Euler, Mesh, Vector3 } from "three";
 import { SkeletonUtils } from "three-stdlib";
 import { useSnapshot } from "valtio";
+
+import { Loading3D } from "@/commons/Loading3D";
+import { editorStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 import { PivotControls } from "./PivoitControl";
 
@@ -68,7 +70,8 @@ export const Player = ({ ...om }: IObjectManagement) => {
         if (materialData) {
           ref.current.traverse((node: any) => {
             if (node.isMesh && node instanceof Mesh) {
-              node.material = materialData.material;
+              // const material = new ... // TODO: マテリアルの作成
+              // node.material = materialData.material;
             }
           });
         }
@@ -112,11 +115,7 @@ export const Player = ({ ...om }: IObjectManagement) => {
     <Suspense fallback={<Loading3D />}>
       {!state.editorFocus && (
         <PivotControls
-          object={
-            state.currentId == id
-              ? (ref as MutableRefObject<Object3D>)
-              : undefined
-          }
+          object={state.currentId == id ? (ref as MutableRefObject<Object3D>) : undefined}
           visible={state.currentId == id}
           depthTest={false}
           lineWidth={2}
@@ -131,12 +130,8 @@ export const Player = ({ ...om }: IObjectManagement) => {
           <AnimationHelper
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
-            onClick={(e: React.PointerEvent) => (
-              e.stopPropagation(), (editorStore.currentId = id)
-            )}
-            onPointerMissed={(e: React.PointerEvent) =>
-              e.type === "click" && editorStore.init()
-            }
+            onClick={(e: React.PointerEvent) => (e.stopPropagation(), (editorStore.currentId = id))}
+            onPointerMissed={(e: React.PointerEvent) => e.type === "click" && editorStore.init()}
             object={clone}
           />
         </group>
@@ -207,13 +202,5 @@ const AnimationHelper = ({
     }
   }, [actions, defaultAnimation, animationLoop]);
 
-  return (
-    <primitive
-      ref={ref}
-      visible={visible}
-      onClick={onClick}
-      onPointerMissed={onPointerMissed}
-      object={object}
-    />
-  );
+  return <primitive ref={ref} visible={visible} onClick={onClick} onPointerMissed={onPointerMissed} object={object} />;
 };

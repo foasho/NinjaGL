@@ -1,5 +1,4 @@
-import { Suspense, memo, useEffect, useRef, useState } from "react";
-
+import { memo, Suspense, useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { Text, useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
@@ -31,13 +30,13 @@ const _MyWaters = () => {
   return (
     <>
       {waters.map((om) => {
-        return <MyWater om={om} key={om.id} />;
+        return <MyWater {...om} key={om.id} />;
       })}
     </>
   );
 };
 
-const _Water = ({ om }) => {
+const _Water = ({ ...om }: IObjectManagement) => {
   const ref = useRef<any>();
   const { camera } = useThree();
   const [width, setWidth] = useState<number>(5);
@@ -85,10 +84,10 @@ const _Water = ({ om }) => {
           matRef.current.color.set(om.args.color);
         }
       }
-      setWidth(om.args.width);
-      setHeight(om.args.height);
-      setWidthSegments(om.args.widthSegments);
-      setHeightSegments(om.args.heightSegments);
+      if (om.args.width) setWidth(om.args.width);
+      if (om.args.height) setHeight(om.args.height);
+      if (om.args.widthSegments) setWidthSegments(om.args.widthSegments);
+      if (om.args.heightSegments) setHeightSegments(om.args.heightSegments);
     };
     update();
     editor.onOMIdChanged(id, update);

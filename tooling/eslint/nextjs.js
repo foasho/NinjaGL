@@ -4,6 +4,7 @@ const config = {
   rules: {
     "@next/next/no-html-link-for-pages": "off",
     "@typescript-eslint/require-await": "off",
+    "react/no-unknown-property": ["off", { "ignore": ["JSX"] }], // r3fのpropsに対してエラーが出るので無効化
   },
 };
 

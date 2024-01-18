@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import type { AnimationClip } from "three";
 
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
-import type { AnimationClip } from "three";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
@@ -18,19 +18,18 @@ export const Animation = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = id?editor.getOMById(id): null;
+  const om = id ? editor.getOMById(id) : null;
 
   // Animationsの設定
   const [defalutAnim, setDefalutAnim] = useState<AnimationSelectProps>({ value: "", label: "" });
-  const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop? om.args.animationLoop: false);
+  const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop ? om.args.animationLoop : false);
 
   useEffect(() => {
     if (om) {
       if (om.args.defaultAnim) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         setDefalutAnim({ value: om.args.defaultAnim, label: om.args.defaultAnim });
       }
-      if (om.args.animLoop !== undefined) setAnimLoop(om.args.animationLoop? om.args.animationLoop: false);
+      if (om.args.animLoop !== undefined) setAnimLoop(om.args.animationLoop ? om.args.animationLoop : false);
     }
   }, [om]);
 
@@ -46,7 +45,7 @@ export const Animation = () => {
    * アニメーションループの切り替え
    */
   const onCheckAnimationLoop = () => {
-    if (id) editor.setArg(id, "animationLoop", !animLoop);
+    if (id) editor.setArg(id, "animationLoop", !!animLoop);
     setAnimLoop(!animLoop);
   };
 
@@ -59,10 +58,10 @@ export const Animation = () => {
             <div>
               <Select
                 options={om.args.animations.map((anim: AnimationClip) => {
-                  return { value: anim.name, label: anim.name };
+                  return { value: anim.name, label: anim.name } as AnimationSelectProps;
                 })}
                 value={defalutAnim}
-                onChange={(select) => changeDefaultAnimation(select)}
+                onChange={(select) => changeDefaultAnimation(select as AnimationSelectProps)}
                 styles={normalStyles}
               />
             </div>

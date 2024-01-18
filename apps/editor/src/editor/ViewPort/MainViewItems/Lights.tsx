@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { useHelper } from "@react-three/drei";
 import { Color, DirectionalLightHelper, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
@@ -52,7 +51,7 @@ export const MyLight = (prop: ILightProps) => {
   };
   const onDragEnd = () => {};
 
-  const onDrag = (e) => {
+  const onDrag = (e: THREE.Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);

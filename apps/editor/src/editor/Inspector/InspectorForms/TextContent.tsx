@@ -12,7 +12,7 @@ export const TextContent = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const updateContent = (e: any) => {
     if (id && e.target.value) {

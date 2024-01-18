@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -12,7 +11,7 @@ export const WidthHeightSegments = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = editor.getOMById(id);
+  const om = id ? editor.getOMById(id) : null;
 
   const [widthSegments, setWidthSegments] = useState<number>(12);
   const [heightSegments, setHeightSegments] = useState<number>(12);
@@ -25,7 +24,7 @@ export const WidthHeightSegments = () => {
   /**
    * WidthSegmentsの変更
    */
-  const changeWidthSegments = (e) => {
+  const changeWidthSegments = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "widthSegments", Number(targetValue));
@@ -36,7 +35,7 @@ export const WidthHeightSegments = () => {
   /**
    * HeightSegmentsの変更
    */
-  const changeHeightSegments = (e) => {
+  const changeHeightSegments = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetValue = e.target.value;
     if (isNumber(targetValue) && id) {
       editor.setArg(id, "heightSegments", Number(targetValue));
@@ -51,7 +50,14 @@ export const WidthHeightSegments = () => {
           {t("widthSegments")}: {widthSegments}
         </div>
         <div>
-          <input type={"range"} min={1} max={100} step={1} value={widthSegments} onChange={(e) => changeWidthSegments(e)} />
+          <input
+            type={"range"}
+            min={1}
+            max={100}
+            step={1}
+            value={widthSegments}
+            onChange={(e) => changeWidthSegments(e)}
+          />
         </div>
       </div>
       <div>
@@ -59,7 +65,14 @@ export const WidthHeightSegments = () => {
           {t("heightSegments")}: {heightSegments}
         </div>
         <div>
-          <input type={"range"} min={1} max={100} step={1} value={heightSegments} onChange={(e) => changeHeightSegments(e)} />
+          <input
+            type={"range"}
+            min={1}
+            max={100}
+            step={1}
+            value={heightSegments}
+            onChange={(e) => changeHeightSegments(e)}
+          />
         </div>
       </div>
     </>

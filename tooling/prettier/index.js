@@ -1,5 +1,3 @@
-import { fileURLToPath } from "url";
-
 /** @typedef {import("prettier").Config} PrettierConfig */
 /** @typedef {import("prettier-plugin-tailwindcss").PluginOptions} TailwindConfig */
 /** @typedef {import("@ianvs/prettier-plugin-sort-imports").PluginConfig} SortImportsConfig */
@@ -22,7 +20,7 @@ const config = {
   tabWidth: 2,
   trailingComma: "all",
   useTabs: false,
-  vueIndentScriptAndStyle: false
+  vueIndentScriptAndStyle: false,
 };
 
 export default config;
