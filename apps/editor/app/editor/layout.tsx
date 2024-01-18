@@ -1,4 +1,6 @@
-import "@/global.css";
-export default function EditorLayout({ children }) {
+interface EditorLayoutProps {
+  children: React.ReactNode;
+}
+export default function EditorLayout({ children }: EditorLayoutProps) {
   return <>{children}</>;
 }

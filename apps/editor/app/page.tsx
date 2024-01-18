@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-
 import Link from "next/link";
 
 import { Header } from "./_components/Header";

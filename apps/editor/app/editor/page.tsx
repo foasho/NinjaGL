@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
-
-import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
+import dynamic from "next/dynamic";
 
 import { NinjaEditorProvider } from "@/hooks/useNinjaEditor";
 
