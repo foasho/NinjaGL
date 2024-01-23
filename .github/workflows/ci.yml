@@ -31,8 +31,8 @@ jobs:
         shell: bash
         run: cp .env.example .env
 
-      - name: Lint
-        run: pnpm lint && pnpm lint:ws
+      - name: Build
+        run: pnpm build
 
   format:
     runs-on: ubuntu-latest
