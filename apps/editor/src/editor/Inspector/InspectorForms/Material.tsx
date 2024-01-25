@@ -12,7 +12,7 @@ export const MaterialForm = () => {
   const editor = useNinjaEditor();
   const { t } = useTranslation();
   const id = state.currentId;
-  const om = id? editor.getOMById(id): null;
+  const om = id ? editor.getOMById(id) : null;
   const [materialType, setMaterialType] = useState<{
     value: "standard" | "phong" | "toon" | "shader" | "reflection";
     label: string;

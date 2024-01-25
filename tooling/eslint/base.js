@@ -46,7 +46,7 @@ const config = {
     "import/no-duplicates": "error",
     "@typescript-eslint/ban-ts-comment": "off", // @ts-ignoreを許可する
     "@typescript-eslint/no-empty-function": "off",
-    "react/no-unknown-property": ["off", { "ignore": ["JSX"] }], // r3fのpropsに対してエラーが出るので無効化
+    "react/no-unknown-property": ["off", { ignore: ["JSX"] }], // r3fのpropsに対してエラーが出るので無効化
   },
   ignorePatterns: ["**/*.config.js", "**/*.config.cjs", "**/.eslintrc.cjs", ".next", "dist", "pnpm-lock.yaml"],
   reportUnusedDisableDirectives: true,

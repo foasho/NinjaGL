@@ -13,27 +13,25 @@ $ pnpm add @ninjagl/core
 ## 最もシンプルな例
 
 ```tsx
-import { NinjaGL } from '@ninjagl/core';
+import { NinjaGL } from "@ninjagl/core";
 
 function App() {
-  return (
-    <NinjaGL njcPath={"<YourNjcFile>"} />
-  );
+  return <NinjaGL njcPath={"<YourNjcFile>"} />;
 }
 ```
 
 ## R3Fを拡張した例
 
 ```tsx
-import { NinjaGL } from '@ninjagl/core';
+import { NinjaGL } from "@ninjagl/core";
 
 function App() {
   return (
     <NinjaGL njcPath={"<YourNjcFile>"}>
-      {/** childrenにR3Fのコンポーネントを書く */} 
+      {/** childrenにR3Fのコンポーネントを書く */}
       <mesh>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="hotpink" />
+        <meshStandardMaterial color='hotpink' />
       </mesh>
     </NinjaGL>
   );

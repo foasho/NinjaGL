@@ -11,7 +11,7 @@ export const CameraParams = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = id? editor.getOMById(id): null;
+  const om = id ? editor.getOMById(id) : null;
   // カメラの設定
   const [fov, setFov] = useState<number>(50);
   const [near, setNear] = useState<number>(0.1);

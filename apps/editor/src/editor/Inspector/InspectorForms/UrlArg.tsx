@@ -43,7 +43,7 @@ export const UrlArg = () => {
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
-  const om = id? editor.getOMById(id): null;
+  const om = id ? editor.getOMById(id) : null;
 
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);

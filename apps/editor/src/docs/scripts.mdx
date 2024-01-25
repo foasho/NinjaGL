@@ -14,16 +14,16 @@ async function initialize() {
  * 毎フレーム事の処理
  * @param state: { elapsedTime: 経過時間, mouse: { x, y } }
  * @param delta: 1フレーム時間(秒) ex)0.016
- * @param input: 
- *  { 
- *    forward: boolean, 
- *    backward: boolean, 
- *    left: boolean, 
- *    right: boolean, 
- *    jump: boolean, 
- *    dash: boolean, 
- *    actio: boolean, 
- *    pressedKeys: [] 
+ * @param input:
+ *  {
+ *    forward: boolean,
+ *    backward: boolean,
+ *    left: boolean,
+ *    right: boolean,
+ *    jump: boolean,
+ *    dash: boolean,
+ *    actio: boolean,
+ *    pressedKeys: []
  * }
  */
 async function frameLoop(state, delta, input) {
@@ -34,11 +34,13 @@ async function frameLoop(state, delta, input) {
 ## 関数の説明
 
 ### initialize
+
 - **説明**: アプリケーションが起動された際に最初に実行される初期化関数です。この関数はアプリケーションのセットアップや初期設定のために使用されます。
 - **パラメータ**: なし
 - **備考**: この関数はアプリケーションのライフサイクルで一度だけ呼び出されます。
 
 ### frameLoop
+
 - **説明**: この関数はアプリケーションのメインループ内で毎フレーム実行されます。ゲームの更新処理や描画処理を行うために使用されます。
 - **パラメータ**:
   - `state`: ゲームやアプリケーションの状態を含むオブジェクト。以下のプロパティを含みます:
@@ -56,61 +58,58 @@ async function frameLoop(state, delta, input) {
     - `pressedKeys`: 押されているキーの配列
 - **備考**: この関数はゲームのロジックやアニメーションの更新、ユーザー入力の処理など、フレーム毎の処理を担います。
 
-
-
-
 ## Transformの移動
+
 ### Position操作サンプル
+
 ```js
-async function initialize() {
-}
+async function initialize() {}
 
 async function frameLoop(state, delta, input) {
-  const om = await getOMByName({name: "movebox"});
+  const om = await getOMByName({ name: "movebox" });
   const { x, y, z } = om.args.position;
-  if (x + 0.01 < 10){
-    await setPosition({id: om.id, position: [x+0.01, y, z]});
+  if (x + 0.01 < 10) {
+    await setPosition({ id: om.id, position: [x + 0.01, y, z] });
   }
-}  
+}
 ```
 
 ### Rotation操作サンプル
+
 ```js
-async function initialize() {
-}
+async function initialize() {}
 
 async function frameLoop(state, delta, input) {
-  const om = await getOMByName({name: "movebox"});
+  const om = await getOMByName({ name: "movebox" });
   const { x, y, z } = om.args.rotation;
   const time = state.elapsedTime;
   // Y軸を時間で回転
-  await setRotation({id: om.id, rotation: [x, Math.sin(time)* 2 * Math.PI, z]});
+  await setRotation({ id: om.id, rotation: [x, Math.sin(time) * 2 * Math.PI, z] });
 }
 ```
 
 ### Scale操作サンプル
+
 ```js
-async function initialize() {
-}
+async function initialize() {}
 
 async function frameLoop(state, delta, input) {
-    const om = await getOMByName({name: "movebox"});
+  const om = await getOMByName({ name: "movebox" });
   const { x, y, z } = om.args.scale;
   const time = state.elapsedTime;
   // 0.5 ~ 1.5 倍の拡縮
-  const s = 0.5 * Math.sin(time)
-  await setScale({id: om.id, rotation: [1 + s, 1 + s, 1 + s]});
+  const s = 0.5 * Math.sin(time);
+  await setScale({ id: om.id, rotation: [1 + s, 1 + s, 1 + s] });
 }
 ```
 
 ## 新しいオブジェクト追加
 
 ```js
-async function initialize() {
-}
+async function initialize() {}
 
 async function frameLoop(state, delta, input) {
-  if (input.action){
+  if (input.action) {
     // Boxオブジェクトの追加
     NW.addOM({
       type: "three",
@@ -120,38 +119,40 @@ async function frameLoop(state, delta, input) {
           type: "standard",
           value: "#4785FF",
         },
-      }
+      },
     });
   }
 }
 ```
 
 ## クリック時の操作
+
 クリック時に黄色に変える
+
 ```js
 const onMyClick = (id) => {
-  setArg({ id: id, key: "materialData", value: { type: "standard", "value": "#F1D353" } })
-}
+  setArg({ id: id, key: "materialData", value: { type: "standard", value: "#F1D353" } });
+};
 async function initialize() {
-  const om = await getOMByName({name: "movebox"});
-  useClickEvent(om.id, () => onMyClick(om.id))
+  const om = await getOMByName({ name: "movebox" });
+  useClickEvent(om.id, () => onMyClick(om.id));
 }
 
-async function frameLoop(state, delta, input) {
-}
+async function frameLoop(state, delta, input) {}
 ```
 
 ## ダブルクリック時の操作
+
 クリック時に黄色に変える
+
 ```js
 const onMyDblclick = (id) => {
-  setArg({ id: id, key: "materialData", value: { type: "reflection", "value": "#43D9D9" } })
-}
+  setArg({ id: id, key: "materialData", value: { type: "reflection", value: "#43D9D9" } });
+};
 async function initialize() {
-  const om = await getOMByName({name: "movebox"});
-  useDblclickEvent(om.id, () => onMyDblclick(om.id))
+  const om = await getOMByName({ name: "movebox" });
+  useDblclickEvent(om.id, () => onMyDblclick(om.id));
 }
 
-async function frameLoop(state, delta, input) {
-}
+async function frameLoop(state, delta, input) {}
 ```

@@ -1,8 +1,0 @@
-varying vec2 vUv;
-varying vec4 vShadowCoord;
-void main() {
-  vUv = uv;
-  // 影の射影行列をかけた座標を計算する
-  vShadowCoord = shadowMatrix * modelMatrix * vec4(position, 1.0);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}

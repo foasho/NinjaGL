@@ -9,7 +9,7 @@ export const Color = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
-  const om = id? editor.getOMById(id): null;
+  const om = id ? editor.getOMById(id) : null;
   const { t } = useTranslation();
 
   const [color, setColor] = useState<string>();

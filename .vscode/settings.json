@@ -13,7 +13,19 @@
   "eslint.workingDirectories": [
     {
       "mode": "auto"
-    }
+    },
+    { "pattern": "apps/*/" },
+    { "pattern": "packages/*/" },
+    { "pattern": "tooling/*/" }
   ],
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "tailwindCSS.experimental.configFile": "./tooling/tailwind/index.ts",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.autoImportFileExcludePatterns": ["next/router.d.ts", "next/dist/client/router.d.ts"],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

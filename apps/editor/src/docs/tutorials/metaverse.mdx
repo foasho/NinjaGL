@@ -5,30 +5,37 @@ import Image from "next/image";
 このチュートリアルでは、
 NinjaGLを使用してメタバースを作成するチュートリアルです。
 `所要時間: 15分`
+
 - エンジニア/非エンジニア問わず作成可能です
 - 作りこみに応じて所要時間は前後します。
 
 ## ランドスケープの作成(⏱5分)
 
 ## 3Dモデル/音楽/メディアの設置(⏱10分)
+
 - 3Dモデル
 - 素材
 - 音源
 
 ## マルチプレイヤー設定(⏱5分)
+
 - Skywayの発行
 - OpenAIのAPIの発行
 
 ## デプロイ(⏱5分)
+
 ### NextJSでのビルド
+
 - Visual Studio Codeのインストール
 - Gitのインストール
 - Vercelのインストール
 - nodeのインストール
 
 #### クローン
+
 以下のコマンドでNextProjectの作成
 [Next公式ドキュメント](https://nextjs.org/docs/app/api-reference/create-next-app)
+
 ```
 npm install -g pnpm
 pnpm create next-app
@@ -43,42 +50,50 @@ Would you like to customize the default import alias (@/*)?  Np
 ```
 
 #### ローカルでの実行
+
 1. VisualStudioCodeで開きます。
 2. 『File』-> 『Open Folder』からクローンした『ninjagl-next』を開く。
 3. 左サイドメニューから``アイコンから直下に`.env`ファイルを追加し、以下の内容を記述します。
+
 ```
 SKYWAY_APP_KEY=(キー1: あなたのSkywayで発行した用APPキー)
 SKYWAY_SECRET_KEY=(キー2: あなたのOpenAI用APIキー)
 OPEN_AI_API_KEY=(キー3: あなたのOpenAI用APIキー)
 ```
+
 (参考画像)
 
 4. publicフォルダにビルドした`.njc`のファイルをいれる。
 
-4. 『Terminal』から『New Terminal』を開き、以下のコマンドで起動
-NinjaGLのCoreライブラリをインストールします。
+5. 『Terminal』から『New Terminal』を開き、以下のコマンドで起動
+   NinjaGLのCoreライブラリをインストールします。
+
 ```bash
 pnpm install @ninjagl/core
 ```
+
 次に、appフォルダにあるpage.tsxファイルを以下のように変更します。
+
 ```tsx
 // app/page.tsx
 "use client";
 import { NinjaGL } from "@ninjagl/core";
 
 export default function Home() {
-  return <NinjaGL className="w-screen h-screen" njcPath="metaverse.njc" />
-};
+  return <NinjaGL className='w-screen h-screen' njcPath='metaverse.njc' />;
+}
 ```
+
 最後、ターミナルで以下を実行
+
 ```bash
 pnpm dev
 ```
+
 (localhost:3000)[http://localhost:3000]にアクセスすると、確認できるかと思います。
 
 (実際のメタバースのブラウザ画像イメージ)
 
-
 ## Vercelでサービス化
-1. GithubにPushします。
 
+1. GithubにPushします。

@@ -1,28 +1,29 @@
 import type { Config } from "tailwindcss";
-import { nextui } from '@nextui-org/react';
+
+import { nextui } from "@nextui-org/react";
 import baseConfig from "@ninjagl/tailwind-config";
 
 export default {
-  mode: 'jit',
+  mode: "jit",
   content: [
-    './app/**/*.{js,ts,jsx,tsx}',
-    './src/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
     "../../packages/ui/**/*.{ts,tsx}",
-    ...baseConfig.content, 
+    ...baseConfig.content,
   ],
   presets: [baseConfig],
-  darkMode: 'class', // or 'media' or 'class'
+  darkMode: "class", // or 'media' or 'class'
   theme: {
     extend: {
       keyframes: {
         slowspin: {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
         },
       },
       animation: {
-        slowspin: 'slowspin 4s linear infinite',
+        slowspin: "slowspin 4s linear infinite",
       },
     },
   },
@@ -40,9 +41,9 @@ export default {
               DEFAULT: "#222121",
             },
             // @ts-ignore
-            cyber: '#49D9D9',
-            main: '#BA68C8',
-            accent: '#FFBD4D',
+            cyber: "#49D9D9",
+            main: "#BA68C8",
+            accent: "#FFBD4D",
           },
         },
         dark: {
@@ -52,27 +53,27 @@ export default {
               DEFAULT: "#222121",
             },
             // @ts-ignore
-            cyber: '#49D9D9',
-            main: '#BA68C8',
-            accent: '#FFBD4D',
+            cyber: "#49D9D9",
+            main: "#BA68C8",
+            accent: "#FFBD4D",
           },
         },
       },
     }),
     function ({ addUtilities }: any) {
       const newUtilities = {
-        '.vertical-rl': {
-          writingMode: 'vertical-rl',
+        ".vertical-rl": {
+          writingMode: "vertical-rl",
         },
-        '.vertical-lr': {
-          writingMode: 'vertical-lr',
+        ".vertical-lr": {
+          writingMode: "vertical-lr",
         },
-        '.horizontal-tb': {
-          writingMode: 'horizontal-tb',
+        ".horizontal-tb": {
+          writingMode: "horizontal-tb",
         },
       };
       addUtilities(newUtilities);
     },
-    require('@tailwindcss/typography'),
+    require("@tailwindcss/typography"),
   ],
 } as Config;

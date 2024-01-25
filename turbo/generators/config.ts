@@ -30,8 +30,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         if ("name" in answers && typeof answers.name === "string") {
           if (answers.name.startsWith("@ninjagl/")) {
             answers.name = answers.name.replace("@ninjagl/", "");
-          } else if (answers.name.startsWith("@ninjagl/")) {
-            answers.name = answers.name.replace("@ninjagl/", "");
           }
         }
         return "Config sanitized";
