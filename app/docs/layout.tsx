@@ -13,7 +13,6 @@ export const metadata: Metadata = {
   description: description,
   applicationName: title,
   manifest: "/manifest.json",
-  themeColor: "#000000",
   formatDetection: {
     telephone: false,
   },
@@ -28,7 +27,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DocsLayout({ children }) {
+type Props = {
+  children: React.ReactNode;
+};
+export default function DocsLayout({ children }: Props) {
   return (
     <>
       <SideBar />

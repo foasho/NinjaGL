@@ -1,13 +1,46 @@
 {
   "extends": [
     // "eslint:recommended",
+    "plugin:@react-three/recommended", 
     "plugin:tailwindcss/recommended",
     "next/core-web-vitals",
     "prettier"
   ],
-  "plugins": ["import", "unused-imports"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": { "project": true },
+  "plugins": ["@react-three", "@typescript-eslint", "unused-imports", "simple-import-sort", "react", "import"],
   "root": true,
   "rules": {
+    "simple-import-sort/imports": [
+      "error",
+      {
+        "groups": [
+          // type (e.g. `import type { ... } from "..."`)
+          ["^.*\\u0000$"],
+          // `react`.
+          [
+            "^react",
+            // `next`
+            "^next\\/",
+            // things that start with a letter (or digit or underscore), or `@` followed by a letter
+            "^@?\\w"
+          ],
+          // internal
+          ["^@/"],
+          // relative parent (e.g. `import ... from ".."`)
+          ["^\\.\\.(?!/?$)"],
+          ["^\\.\\./?$"],
+          // relative same folder (e.g. `import ... from "./"`)
+          ["^\\./(?=.*/)(?!/?$)"],
+          ["^\\.(?!/?$)"],
+          ["^\\./?$"],
+          // side effect (e.g. `import "./foo"`)
+          ["^\\u0000"],
+          // css
+          ["^.+\\.s?css$"]
+        ]
+      }
+    ],
     "@typescript-eslint/no-unused-vars": "off",
     "unused-imports/no-unused-imports": "warn",
     "quotes": [
@@ -17,44 +50,13 @@
         "allowTemplateLiterals": true
       }
     ],
-    "semi": ["warn", "always"],
-    "semi-spacing": ["warn", { "after": true, "before": false }],
-    "semi-style": ["warn", "last"],
-    "no-extra-semi": "warn",
-    "no-unexpected-multiline": "warn",
-    "no-unreachable": "warn",
-    "import/prefer-default-export": "off",
-    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
-    "no-var": "warn",
-    "no-html-link-for-pages": "off",
-    "import/order": [
-      "warn",
-      {
-        "groups": [
-          "builtin", // Node.jsの組み込みモジュール
-          "external", // node_modulesからのインポート
-          "internal", // 同じパッケージ内の他のモジュールからのインポート
-          "parent", // 現在のディレクトリの親ディレクトリからのインポート
-          "sibling", // 同じディレクトリ内の他のモジュールからのインポート
-          "index", // 現在のディレクトリのインデックスファイルからのインポート
-          "object", // オブジェクトのインポート
-          "type" // TypeScriptの型のインポート
-        ],
-        // それぞれのgroupsとの間は1行分空けます。
-        "newlines-between": "always",
-        // 特定のグループの import 文を除外するかどうかを指定します。
-        "pathGroupsExcludedImportTypes": ["builtin"],
-        // order オプションは、アルファベット順にします。
-        // caseInsensitive オプションは、大文字小文字を無視してアルファベット順に並べるかどうかを指定します。
-        "alphabetize": { "order": "asc", "caseInsensitive": true },
-        "pathGroups": [
-          {
-            "pattern": "{react,react-dom/**,react-router-dom}", // このパターンに一致するインポート
-            "group": "builtin", // 上記のインポートをbuiltinグループとして扱う。
-            "position": "before" // そのグループの前に配置
-          }
-        ]
-      }
-    ]
+    "simple-import-sort/exports": "error",
+    // "unused-imports/no-unused-imports": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
+    "@typescript-eslint/ban-ts-comment": "off", // @ts-ignoreを許可する
+    "@typescript-eslint/no-empty-function": "off",
+    "react/no-unknown-property": ["off", { "ignore": ["JSX"] }] // r3fのpropsに対してエラーが出るので無効化
   }
 }

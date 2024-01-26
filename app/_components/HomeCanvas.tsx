@@ -1,8 +1,7 @@
 "use client";
 import { Suspense } from "react";
-
-import { Environment, SoftShadows } from "@react-three/drei";
 import dynamic from "next/dynamic";
+import { Environment, SoftShadows } from "@react-three/drei";
 
 import { CenterRapier } from "./canvas/CenterRapier";
 import { Effects } from "./canvas/Effects";
@@ -12,7 +11,7 @@ const View = dynamic(() => import("@/commons/View").then((mod) => mod.View), {
   ssr: false,
   loading: () => (
     <div className='flex h-96 w-full flex-col items-center justify-center'>
-      <svg className='-ml-1 mr-3 h-5 w-5 animate-spin text-black' fill='none' viewBox='0 0 24 24'>
+      <svg className='-ml-1 mr-3 size-5 animate-spin text-black' fill='none' viewBox='0 0 24 24'>
         <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
         <path
           className='opacity-75'
@@ -26,7 +25,7 @@ const View = dynamic(() => import("@/commons/View").then((mod) => mod.View), {
 
 export const HomeCanvas = () => {
   return (
-    <View className='h-full w-full'>
+    <View className='size-full'>
       <Lighting />
       <Suspense fallback={null}>
         <Effects />

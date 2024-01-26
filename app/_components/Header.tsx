@@ -1,13 +1,13 @@
 "use client";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
-import { signOut, useSession } from "next-auth/react";
+import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
+import { useSession, signOut } from "next-auth/react";
 
 export const Header = () => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   return (
     <>
-      <Navbar className='fixed top-0 w-screen bg-transparent text-white'>
+      <Navbar className='fixed top-0 z-30 w-screen bg-transparent p-3 text-white'>
         <NavbarBrand>
           {/* <AcmeLogo /> */}
           <p className='cursor-pointer font-bold text-inherit'>

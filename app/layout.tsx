@@ -1,4 +1,4 @@
-import "./global.css";
+import { SessionProvider } from "next-auth/react";
 import { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 
@@ -7,6 +7,8 @@ import RootProvider from "@/root.container";
 import { mplus } from "@/styles/font";
 
 import { Toast } from "./_components/Toast";
+
+import "./global.css";
 
 const title = "NinjaGL";
 const description = "WebGL 3D Editor";
@@ -19,7 +21,6 @@ export const metadata: Metadata = {
   description: description,
   applicationName: title,
   manifest: "/manifest.json",
-  themeColor: "#000000",
   formatDetection: {
     telephone: false,
   },
@@ -34,16 +35,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+interface Props {
+  children: React.ReactNode;
+}
+export default function RootLayout({ children }: Props) {
   return (
     <html lang='ja' className='antialiased'>
       <head />
       <body className={`${mplus.variable}`}>
         <NextTopLoader showSpinner={false} color='#43D9D9' />
-        <RootProvider>
-          <PWAProvider>{children}</PWAProvider>
-          <Toast />
-        </RootProvider>
+        <SessionProvider>
+          <RootProvider>
+            <PWAProvider>
+              {children}
+              <Toast />
+            </PWAProvider>
+          </RootProvider>
+        </SessionProvider>
       </body>
     </html>
   );
