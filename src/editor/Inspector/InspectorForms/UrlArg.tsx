@@ -1,10 +1,9 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-
-import { Select, SelectItem, Button, RadioGroup, Radio, Spinner } from "@nextui-org/react";
-import { OMType } from "@ninjagl/core";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { FaCheck } from "react-icons/fa";
+import { Button, Radio, RadioGroup, Select, SelectItem, Spinner } from "@nextui-org/react";
+import { OMType } from "@ninjagl/core";
+import { useSession } from "next-auth/react";
 import { useSnapshot } from "valtio";
 
 import { b64EncodeUnicode } from "@/commons/functional";
@@ -107,9 +106,9 @@ export const UrlArg = () => {
       setIsLoading(false);
     };
     const getValidationItem = async () => {
-      const val = await validateUrl(om!.args.url);
+      const val = await validateUrl(om!.args.url!);
       if (val) {
-        setUrl(om!.args.url);
+        setUrl(om!.args.url!);
       }
     };
     if (type === "url" && om && om.args.url) {

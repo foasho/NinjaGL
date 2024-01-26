@@ -1,7 +1,6 @@
-import { Suspense, memo, useEffect, useRef, useState } from "react";
-
+import { memo, Suspense, useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
-import { Text, useHelper } from "@react-three/drei";
+import { useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from "three";
 import { useSnapshot } from "valtio";

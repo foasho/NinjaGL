@@ -1,10 +1,9 @@
 import { Suspense, useEffect, useRef, useState } from "react";
-
+import { useTranslation } from "react-i18next";
 import { convertObjectToFile } from "@ninjagl/core";
 import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useSession } from "next-auth/react";
-import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import { AnimationClip, Box3, Group, Vector3 } from "three";
 import { SkeletonUtils } from "three-stdlib";

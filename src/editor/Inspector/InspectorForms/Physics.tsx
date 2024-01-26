@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-
-import { OMPhysicsType } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
+import { OMPhysicsType } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";

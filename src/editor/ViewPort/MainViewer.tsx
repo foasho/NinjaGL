@@ -1,7 +1,6 @@
-import { Suspense, memo } from "react";
-
-import { Canvas } from "@react-three/fiber";
+import { memo, Suspense } from "react";
 import dynamic from "next/dynamic";
+import { Canvas } from "@react-three/fiber";
 
 import { Loading3D } from "@/commons/Loading3D";
 import { ViewHelperControls } from "@/helpers/ViewHelperControls";

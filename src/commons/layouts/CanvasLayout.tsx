@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-
 import dynamic from "next/dynamic";
+
 const Scene = dynamic(() => import("@/commons/Scene"), { ssr: false });
 
 const CanvasLayout = ({ children }) => {

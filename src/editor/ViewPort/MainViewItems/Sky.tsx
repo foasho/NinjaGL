@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { Sky } from "@react-three/drei";
 

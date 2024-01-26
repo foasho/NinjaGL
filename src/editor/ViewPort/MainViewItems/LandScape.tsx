@@ -1,5 +1,4 @@
 import React, { memo, useEffect, useRef, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { useGLTF } from "@react-three/drei";
 import { Group, Mesh, MeshStandardMaterial, TextureLoader } from "three";
@@ -28,7 +27,7 @@ const _LandScape = () => {
 };
 
 const MyLandScape = ({ ...om }: IObjectManagement) => {
-  const { nodes, materials } = useGLTF(om.args.url) as any;
+  const { nodes, materials } = useGLTF(om.args.url!) as any;
 
   if (nodes) {
     nodes.traverse((child) => {
@@ -82,9 +81,9 @@ const LandScapeProvider = ({ om, children }: { om: IObjectManagement; children: 
             (ref.current.children[0] as Mesh).material = new MeshStandardMaterial({ color: color });
           }
           // ベースが画像の場合
-          if (ls.args.base == "image") {
+          if (ls.args.base == "image" && ls.args.url) {
             const url = ls.args.url;
-            const tex = new TextureLoader().load(url);
+            const tex = new TextureLoader().load(url!);
             (ref.current.children[0] as Mesh).material = new MeshStandardMaterial({ map: tex });
           }
         }

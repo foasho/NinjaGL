@@ -1,5 +1,4 @@
 import { Buffer } from "buffer";
-
 import { Object3D, Vector3 } from "three";
 
 export const convertToGB = (number: number): number => {

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { useSnapshot } from "valtio";
@@ -23,7 +22,7 @@ export const MaterialForm = () => {
   useEffect(() => {
     if (om) {
       if (om.args.materialData !== undefined) {
-        setMaterialType(materialOptions.find((option) => option.value == om.args.materialData.type));
+        setMaterialType(materialOptions.find((option) => option.value == om.args.materialData!.type));
       } else {
         setMaterialType(materialOptions.find((option) => option.value == "standard"));
         setMaterialColor("#ffffff");

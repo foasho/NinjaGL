@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default /* glsl */ `
 float Fresnel(float power) {
     vec3 normal = vNormal;

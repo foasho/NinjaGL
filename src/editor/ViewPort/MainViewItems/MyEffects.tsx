@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
-import { Bloom, SSR, LUT, EffectComposer } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, LUT, SSR } from "@react-three/postprocessing";
 import { LUTCubeLoader } from "postprocessing";
 import { Texture } from "three";
 

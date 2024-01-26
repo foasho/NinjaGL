@@ -1,5 +1,4 @@
 import { memo, useEffect, useRef, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { Text3D, useFont, useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";

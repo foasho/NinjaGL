@@ -57,6 +57,7 @@
     "import/no-duplicates": "error",
     "@typescript-eslint/ban-ts-comment": "off", // @ts-ignoreを許可する
     "@typescript-eslint/no-empty-function": "off",
+    "react-hooks/exhaustive-deps": "off", // useEffectのdepsがうるさいので無効化
     "react/no-unknown-property": ["off", { "ignore": ["JSX"] }] // r3fのpropsに対してエラーが出るので無効化
   }
 }

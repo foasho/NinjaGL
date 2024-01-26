@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { IInputMovement } from "@ninjagl/core";
 import { Vector2 } from "three";
 
@@ -634,7 +633,7 @@ export const useInputControl = ({
       // ゲームパッド対応
       clearInterval(gamepadInterval);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId, jumpId]);
 
   return {

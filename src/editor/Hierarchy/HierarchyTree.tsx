@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState, memo } from "react";
-
-import { IObjectManagement } from "@ninjagl/core";
+import { memo, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { BsBox, BsLightbulbFill, BsPersonFill } from "react-icons/bs";
 import { MdTerrain } from "react-icons/md";
+import { IObjectManagement } from "@ninjagl/core";
 import Swal from "sweetalert2";
 import { useSnapshot } from "valtio";
 
@@ -155,9 +154,9 @@ const TreeItem = (prop: ITreeItem) => {
   return (
     <>
       <div className={className} ref={ref}>
-        <div className='pr-0.75 inline-block align-middle text-sm'>{typeIcon}</div>
+        <div className='inline-block pr-0.5 align-middle text-sm'>{typeIcon}</div>
         <div
-          className='pl-0.75 inline-block cursor-pointer select-none'
+          className='inline-block cursor-pointer select-none pl-0.5'
           onClick={onSelectObject}
           onDoubleClick={changeName}
         >
@@ -170,6 +169,5 @@ const TreeItem = (prop: ITreeItem) => {
     </>
   );
 };
-
 
 export const HierarchyTree = memo(_HierarchyTree);

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -51,7 +50,14 @@ export const WidthHeightSegments = () => {
           {t("widthSegments")}: {widthSegments}
         </div>
         <div>
-          <input type={"range"} min={1} max={100} step={1} value={widthSegments} onChange={(e) => changeWidthSegments(e)} />
+          <input
+            type={"range"}
+            min={1}
+            max={100}
+            step={1}
+            value={widthSegments}
+            onChange={(e) => changeWidthSegments(e)}
+          />
         </div>
       </div>
       <div>
@@ -59,7 +65,14 @@ export const WidthHeightSegments = () => {
           {t("heightSegments")}: {heightSegments}
         </div>
         <div>
-          <input type={"range"} min={1} max={100} step={1} value={heightSegments} onChange={(e) => changeHeightSegments(e)} />
+          <input
+            type={"range"}
+            min={1}
+            max={100}
+            step={1}
+            value={heightSegments}
+            onChange={(e) => changeHeightSegments(e)}
+          />
         </div>
       </div>
     </>

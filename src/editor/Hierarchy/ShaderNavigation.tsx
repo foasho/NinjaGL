@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-
-import { IShaderManagement } from "@ninjagl/core";
 import { useTranslation } from "react-i18next";
+import { IShaderManagement } from "@ninjagl/core";
 
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
