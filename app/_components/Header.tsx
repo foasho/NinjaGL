@@ -1,6 +1,6 @@
 "use client";
 import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut,useSession } from "next-auth/react";
 
 export const Header = () => {
   const { data: session } = useSession();

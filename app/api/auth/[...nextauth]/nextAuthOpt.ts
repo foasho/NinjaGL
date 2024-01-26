@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+
 import GoogleProvider from "next-auth/providers/google";
 
 // For more information on each option (and a full list of options) go to

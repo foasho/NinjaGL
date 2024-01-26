@@ -1,5 +1,5 @@
-import { SessionProvider } from "next-auth/react";
 import { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 import NextTopLoader from "nextjs-toploader";
 
 import { PWAProvider } from "@/hooks/usePWA";
