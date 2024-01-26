@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default /* glsl */ `
 vec2 DistortUv(vec2 uv, float amount) {
     float time = uTime;

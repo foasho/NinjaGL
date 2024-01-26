@@ -1,6 +1,5 @@
 import { CgCommunity } from "react-icons/cg";
-import { FaGamepad } from "react-icons/fa";
-import { FaBookOpen } from "react-icons/fa";
+import { FaBookOpen, FaGamepad } from "react-icons/fa";
 
 export const cardItems = [
   {

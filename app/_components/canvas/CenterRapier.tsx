@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-
 import { type Vector } from "@dimforge/rapier3d";
 import { MeshTransmissionMaterial } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
@@ -100,7 +99,7 @@ type ConnectorProps = {
 };
 const Connector = ({ position, children, vec = new Vector3(), r = MathUtils.randFloatSpread }: ConnectorProps) => {
   const api = useRef<RapierRigidBody>(null);
-  const pos: Vector3 | [number, number, number] = useMemo(() => position || [r(10), r(10), r(10)], []);
+  const pos: Vector3 | [number, number, number] = useMemo(() => position || [r(10), r(10), r(10)], [position, r]);
 
   useFrame(() => {
     if (api.current) {

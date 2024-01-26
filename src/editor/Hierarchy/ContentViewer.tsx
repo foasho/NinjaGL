@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-
-import { Tooltip } from "@nextui-org/react";
-import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
-import Image from "next/image";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { BsFolder } from "react-icons/bs";
 import { MdUploadFile } from "react-icons/md";
+import Image from "next/image";
+import { Tooltip } from "@nextui-org/react";
+import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
+import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
 
@@ -397,28 +396,28 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     } else if (isNJC(props.name)) {
       icon = (
         <>
-          <img src={njc_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt="" src={njc_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "njc";
     } else if (isMP3(props.name)) {
       icon = (
         <>
-          <img src={mp3_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt="" src={mp3_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "mp3";
     } else if (isGLSL(props.name)) {
       icon = (
         <>
-          <img src={glsl_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt="" src={glsl_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "glsl";
     } else if (isJS(props.name)) {
       icon = (
         <>
-          <img src={js_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt="" src={js_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "js";

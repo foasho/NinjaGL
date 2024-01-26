@@ -80,14 +80,13 @@ export const TouchController = () => {
     <>
       <div
         ref={joystickRef}
-        className='joystick'
         style={{ position: "relative", width: "100%", height: "100%" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className='outer-circle' style={outerCircleStyle}></div>
-        <div className='inner-circle' style={innerCircleStyle}></div>
+        <div style={outerCircleStyle}></div>
+        <div style={innerCircleStyle}></div>
       </div>
     </>
   );

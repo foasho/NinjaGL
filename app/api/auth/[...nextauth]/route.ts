@@ -6,12 +6,12 @@ import { authOptions } from "./nextAuthOpt";
 const handler = NextAuth(authOptions);
 
 export {
+  authOptions,
+  handler as DELETE,
   handler as GET,
+  handler as HEAD,
+  handler as OPTIONS,
+  handler as PATCH,
   handler as POST,
   handler as PUT,
-  handler as DELETE,
-  handler as PATCH,
-  handler as OPTIONS,
-  handler as HEAD,
-  authOptions,
 };

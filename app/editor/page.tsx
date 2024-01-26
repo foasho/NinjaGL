@@ -1,15 +1,14 @@
 "use client";
 import React from "react";
-
-import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
+import dynamic from "next/dynamic";
 
 import { NinjaEditorProvider } from "@/hooks/useNinjaEditor";
 
 const NinjaEditor = dynamic(() => import("@/editor/NinjaEditor").then((mod) => mod.NinjaEditor), {
   ssr: false,
   loading: () => (
-    <div className='absolute left-0 top-0 h-full w-full bg-white'>
+    <div className='absolute left-0 top-0 size-full bg-white'>
       <svg
         style={{
           marginLeft: "-0.25rem",

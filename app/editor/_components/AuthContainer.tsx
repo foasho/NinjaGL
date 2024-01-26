@@ -1,6 +1,5 @@
 "use client";
 import React, { createContext, useEffect } from "react";
-
 import { redirect } from "next/navigation";
 import { Session } from "next-auth";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -39,7 +38,7 @@ export const AuthProvider = ({ children, type }: { children: React.ReactNode; ty
       const callbackUrl = window.location.pathname;
       redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [session, status]);
+  }, [session, status, type]);
 
   return (
     <AuthContext.Provider

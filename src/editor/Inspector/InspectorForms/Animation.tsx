@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { AnimationClip } from "three";
@@ -20,11 +19,13 @@ export const Animation = () => {
   const [defalutAnim, setDefalutAnim] = useState<{ value: string; label: string }>(
     om?.args.defaultAnim ? { value: om.args.defaultAnim, label: om.args.defaultAnim } : { value: "", label: "" },
   );
-  const [animLoop, setAnimLoop] = useState<boolean>(om?.args.animationLoop);
+  const [animLoop, setAnimLoop] = useState<boolean>(!!om?.args.animationLoop);
 
   useEffect(() => {
     if (om) {
-      if (om.args.defaultAnim) setDefalutAnim(om.args.defaultAnim);
+      if (om.args.defaultAnim) {
+        setDefalutAnim({ value: om.args.defaultAnim, label: om.args.defaultAnim });
+      }
       if (om.args.animLoop !== undefined) setAnimLoop(om.args.animLoop);
     }
   }, [om]);

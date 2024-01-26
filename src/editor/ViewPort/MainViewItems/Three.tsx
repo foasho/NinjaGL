@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";

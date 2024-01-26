@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@nextui-org/react";
 import Link from "next/link";
+import { Button } from "@nextui-org/react";
 
 export const StartedBtn = () => {
   return (

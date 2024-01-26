@@ -1,5 +1,4 @@
-import { useEffect, useState, memo } from "react";
-
+import { memo, useEffect, useState } from "react";
 import Moveable from "react-moveable";
 import { useSnapshot } from "valtio";
 
@@ -92,7 +91,8 @@ const UICanvasHelper = (props: IUICanvasHelper) => {
                     .map((_, j) => {
                       return (
                         <div
-                          className='target moveable relative z-10 box-border h-full border-[0.5px] border-dashed border-primary/75'
+                          // eslint-disable-next-line tailwindcss/no-custom-classname
+                          className='relative z-10 box-border h-full border-[0.5px] border-dashed border-primary/75'
                           style={{ width: `${gridwidth}%` }}
                           key={j + "-ui-grid"}
                         ></div>

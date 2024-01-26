@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import { useSnapshot } from "valtio";
 
@@ -18,8 +17,8 @@ export const Shadows = () => {
 
   useEffect(() => {
     if (om) {
-      setCastShadow(om.args.castShadow);
-      setReceiveShadow(om.args.receiveShadow);
+      setCastShadow(!!om.args.castShadow);
+      setReceiveShadow(!!om.args.receiveShadow);
     }
   }, [om]);
 

@@ -1,6 +1,5 @@
-import { useEffect, useRef, MutableRefObject, useState, Suspense } from "react";
-
-import { useGLTF, useAnimations } from "@react-three/drei";
+import { MutableRefObject, Suspense, useEffect, useRef, useState } from "react";
+import { useAnimations, useGLTF } from "@react-three/drei";
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
 import { GLTF, SkeletonUtils } from "three-stdlib";
 import { useSnapshot } from "valtio";
@@ -175,7 +174,7 @@ const AnimationHelper = ({
         if (_om.args.defaultAnimation) {
           setDefaultAnimation(_om.args.defaultAnimation);
         }
-        setAnimationLoop(_om.args.animationLoop);
+        setAnimationLoop(!!_om.args.animationLoop);
       }
     };
     init();

@@ -1,7 +1,5 @@
 import * as React from "react";
-
-import { Line } from "@react-three/drei";
-import { Html } from "@react-three/drei";
+import { Html, Line } from "@react-three/drei";
 import { ThreeEvent, useThree } from "@react-three/fiber";
 // @ts-ignore
 import clamp from "lodash.clamp";

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { useSnapshot } from "valtio";
@@ -8,13 +7,16 @@ import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { normalStyles } from "@/utils/styles";
 
+type VisibleType = "none" | "auto" | "force";
+type VisibleTypeOption = { value: VisibleType; label: string };
+
 export const Visible = () => {
   const state = useSnapshot(editorStore);
   const id = state.currentId;
   const editor = useNinjaEditor();
   const { t } = useTranslation();
   const om = editor.getOMById(id);
-  const [visibleType, setVisibleType] = useState<{ value: "none" | "auto" | "force"; label: string }>(
+  const [visibleType, setVisibleType] = useState<VisibleTypeOption>(
     om?.args.visibleType
       ? { value: om.args.visibleType, label: om.args.visibleType }
       : { value: "auto", label: t("autoScaling") },
@@ -22,7 +24,7 @@ export const Visible = () => {
   const [distance, setDistance] = useState(25);
 
   // 描画種別の選択肢
-  const visibleTypeOptions: { value: "auto" | "force" | "none"; label: string }[] = [
+  const visibleTypeOptions: VisibleTypeOption[] = [
     { value: "auto", label: t("autoScaling") },
     { value: "force", label: t("visibleForce") },
     { value: "none", label: t("visibleNone") },
@@ -35,7 +37,7 @@ export const Visible = () => {
         if (visibleType) setVisibleType(visibleType);
       }
     }
-  }, [om]);
+  }, [om, visibleTypeOptions]);
 
   /**
    * 描画種別の変更

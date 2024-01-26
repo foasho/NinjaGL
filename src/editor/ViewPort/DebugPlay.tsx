@@ -1,14 +1,13 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
-
 import {
-  NJCFile,
   IConfigParams,
   IObjectManagement,
-  IUIManagement,
-  ITextureManagement,
   IScriptManagement,
+  ITextureManagement,
+  IUIManagement,
   NinjaGL,
+  NJCFile,
 } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
 
@@ -82,7 +81,7 @@ export const DebugPlay = () => {
 
   return (
     <Suspense fallback={<Loading2D />}>
-      <div id='Ninjaviewer' className="relative h-full">
+      <div id='Ninjaviewer' className='relative h-full'>
         {ready && njcFile && <NinjaGL njc={njcFile} isSplashScreen={false}></NinjaGL>}
       </div>
     </Suspense>

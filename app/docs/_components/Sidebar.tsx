@@ -1,5 +1,5 @@
-import { Navbar, Input, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
 import { AiOutlineSearch } from "react-icons/ai";
+import { Input, Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
 
 import { InstallLink } from "./InstallLink";
 import { StartedBtn } from "./StartedBtn";
@@ -7,7 +7,7 @@ import { TutorialMenu } from "./TutorialMenu";
 
 export const SideBar = () => {
   return (
-    <Navbar className='bg-transparent shadow'>
+    <Navbar className='z-30 bg-transparent p-3 shadow'>
       <NavbarBrand>
         {/* <AcmeLogo /> */}
         <p className='font-bold text-inherit'>

@@ -1,16 +1,15 @@
-import "./Locale";
-import { loadNJCFileFromURL } from "@ninjagl/core";
-import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import {
   AiOutlineAppstore,
   AiOutlineCode,
+  AiOutlineDown,
   AiOutlineHighlight,
   AiOutlinePicture,
   AiOutlinePlus,
-  AiOutlineDown,
   AiOutlineUp,
 } from "react-icons/ai";
+import { loadNJCFileFromURL } from "@ninjagl/core";
+import clsx from "clsx";
 import { useSnapshot } from "valtio";
 
 import { MySwal } from "@/commons/Swal";
@@ -35,6 +34,8 @@ import { editorStore } from "./Store/Store";
 import { DebugPlay } from "./ViewPort/DebugPlay";
 import { ScriptEditor } from "./ViewPort/ScriptEditor";
 import { ShaderEditor } from "./ViewPort/ShaderEditor";
+
+import "./Locale";
 /**
  * NinjaEngineメインコンポネント
  */

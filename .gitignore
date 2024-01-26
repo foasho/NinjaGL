@@ -40,7 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vscode/*
+# VSCodeの設定ファイルは共有する
+# .vscode/*
 
 __pycache__/*
 .idea/*

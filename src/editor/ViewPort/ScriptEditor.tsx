@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 import MonacoEditor from "@monaco-editor/react";
 import { IScriptManagement } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
-import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 import { MathUtils } from "three";
 import { useSnapshot } from "valtio";
 

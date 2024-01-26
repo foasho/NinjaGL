@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { IObjectManagement } from "@ninjagl/core";
 import { Fog } from "three";
 

@@ -1,3 +1,5 @@
+import React from "react";
+import { RootState, useThree } from "@react-three/fiber";
 import {
   DepthFormat,
   DepthTexture,
@@ -12,16 +14,11 @@ import {
   Vector4,
   WebGLRenderTarget,
 } from "three";
-import React from "react";
-import { RootState, useThree } from "@react-three/fiber";
 
 const resolution = 512,
   reflectorOffset = 0;
 
-export function usePlanarReflections(
-  waterRef: React.MutableRefObject<Mesh>,
-  hasReflection: boolean
-) {
+export function usePlanarReflections(waterRef: React.MutableRefObject<Mesh>, hasReflection: boolean) {
   const gl = useThree(({ gl }) => gl);
   const camera = useThree(({ camera }) => camera);
   const [reflectorPlane] = React.useState(() => new Plane());
@@ -69,47 +66,18 @@ export function usePlanarReflections(
     virtualCamera.updateMatrixWorld();
     virtualCamera.projectionMatrix.copy(camera.projectionMatrix);
     // Update the texture matrix
-    textureMatrix.set(
-      0.5,
-      0.0,
-      0.0,
-      0.5,
-      0.0,
-      0.5,
-      0.0,
-      0.5,
-      0.0,
-      0.0,
-      0.5,
-      0.5,
-      0.0,
-      0.0,
-      0.0,
-      1.0
-    );
+    textureMatrix.set(0.5, 0.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0);
     textureMatrix.multiply(virtualCamera.projectionMatrix);
     textureMatrix.multiply(virtualCamera.matrixWorldInverse);
     textureMatrix.multiply(parent.matrixWorld);
     // Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
     // Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
-    reflectorPlane.setFromNormalAndCoplanarPoint(
-      normal,
-      reflectorWorldPosition
-    );
+    reflectorPlane.setFromNormalAndCoplanarPoint(normal, reflectorWorldPosition);
     reflectorPlane.applyMatrix4(virtualCamera.matrixWorldInverse);
-    clipPlane.set(
-      reflectorPlane.normal.x,
-      reflectorPlane.normal.y,
-      reflectorPlane.normal.z,
-      reflectorPlane.constant
-    );
+    clipPlane.set(reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant);
     const projectionMatrix = virtualCamera.projectionMatrix;
-    q.x =
-      (Math.sign(clipPlane.x) + projectionMatrix.elements[8]) /
-      projectionMatrix.elements[0];
-    q.y =
-      (Math.sign(clipPlane.y) + projectionMatrix.elements[9]) /
-      projectionMatrix.elements[5];
+    q.x = (Math.sign(clipPlane.x) + projectionMatrix.elements[8]) / projectionMatrix.elements[0];
+    q.y = (Math.sign(clipPlane.y) + projectionMatrix.elements[9]) / projectionMatrix.elements[5];
     q.z = -1.0;
     q.w = (1.0 + projectionMatrix.elements[10]) / projectionMatrix.elements[14];
     // Calculate the scaled plane vector
@@ -141,13 +109,10 @@ export function usePlanarReflections(
       uReflectedTexture: { value: fbo1.texture },
       uReflectionTextureMatrix: { value: textureMatrix },
     }),
-    []
+    [],
   );
 
-  React.useEffect(
-    () => void (uniforms.uReflectionEnabled.value = hasReflection),
-    [hasReflection]
-  );
+  React.useEffect(() => void (uniforms.uReflectionEnabled.value = hasReflection), [hasReflection]);
 
   return {
     uniforms,

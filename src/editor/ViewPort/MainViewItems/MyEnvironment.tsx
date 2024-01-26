@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-
 import { Environment, Float, Lightformer } from "@react-three/drei";
-import { Euler, Vector3, DoubleSide } from "three";
+import { DoubleSide, Euler, Vector3 } from "three";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
