@@ -37,6 +37,7 @@ function App() {
 }
 ```
 
-### ゲームエンジンをクローンするとき
+### DBマイグレーション
 
-(Prepare Vercel Clone Button)
+- [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)
+- [Drizzle Kit CMD](https://orm.drizzle.team/kit-docs/commands)

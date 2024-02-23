@@ -25,7 +25,7 @@ const View = dynamic(() => import("@/commons/View").then((mod) => mod.View), {
 
 export const HomeCanvas = () => {
   return (
-    <View className='size-full'>
+    <View className='absolute left-0 top-0 h-full w-full'>
       <Lighting />
       <Suspense fallback={null}>
         <Effects />
