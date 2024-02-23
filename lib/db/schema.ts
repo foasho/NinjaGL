@@ -6,59 +6,59 @@ export const users = pgTable("users", {
   name: text("name"),
   email: text("email").notNull(),
   image: text("image"),
-  createdAt: timestamp("createdAt", { mode: "date" }),
-  updatedAt: timestamp("updatedAt", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
 export const configs = pgTable("configs", {
   id: serial("id").primaryKey(),
-  projectName: text("projectName").notNull(),
+  projectName: text("project_name").notNull(),
   dpr: integer("dpr").notNull(),
   multi: boolean("multi").notNull().default(true),
-  isApi: boolean("isApi").notNull().default(true),
-  isDebug: boolean("isDebug").notNull().default(false),
+  isApi: boolean("is_api").notNull().default(true),
+  isDebug: boolean("is_debug").notNull().default(false),
 });
 
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  config_id: integer("config_id").references(() => configs.id),
+  configId: integer("config_id").references(() => configs.id),
   publish: boolean("publish").notNull().default(true),
-  createdAt: timestamp("createdAt", { mode: "date" }),
-  updatedAt: timestamp("updatedAt", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
 // projecsとusersの中間テーブル
-type RoleProps = "owner" | "viewer";
+export type RoleProps = "owner" | "viewer";
 export const members = pgTable("members", {
   id: serial("id").primaryKey(),
-  project_id: integer("project_id").references(() => projects.id),
-  user_id: integer("user_id").references(() => users.id),
+  projectId: integer("project_id").references(() => projects.id),
+  userId: integer("user_id").references(() => users.id),
   role: text("role").notNull().$type<RoleProps>().default("owner"),
-  createdAt: timestamp("createdAt", { mode: "date" }),
-  updatedAt: timestamp("updatedAt", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
 export const oms = pgTable("oms", {
-  project_id: integer("project_id").references(() => projects.id),
+  projectId: integer("project_id").references(() => projects.id),
   // 以下はOMのプロパティ
   id: text("id").notNull(), // IDはプロジェクト側でUUID生成される
   name: text("name"),
   type: text("type").notNull().$type<OMType>(),
-  filePath: text("filePath"),
-  visiableType: text("visiableType").$type<OMVisibleType>().default("auto"),
+  filePath: text("file_path"),
+  visiableType: text("visiable_type").$type<OMVisibleType>().default("auto"),
   visible: boolean("visible").notNull().default(true),
-  layerNum: integer("layerNum"),
+  layerNum: integer("layer_num"),
   args: text("args").$type<OMArgsProps>(),
   rules: text("rules"),
   physics: boolean("physics").notNull().default(true),
   moveable: boolean("moveable"),
-  phyType: text("phyType").notNull().$type<OMPhysicsType>().default("box"),
+  phyType: text("phy_type").notNull().$type<OMPhysicsType>().default("box"),
 });
 
 export const sms = pgTable("sms", {
-  project_id: integer("project_id").references(() => projects.id),
+  projectId: integer("project_id").references(() => projects.id),
   // 以下はSMのプロパティ
   id: text("id").notNull(), // IDはプロジェクト側でUUID生成される
   type: text("type").notNull(),

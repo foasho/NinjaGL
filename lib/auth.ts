@@ -4,6 +4,7 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { getOrCreateUserByEmail } from "@/db/crud/user";
+import { getMergedSessionServer } from "./middleware";
 
 export const authOptions: NextAuthOptions = {
   // debug: process.env.NODE_ENV === 'development',
@@ -19,16 +20,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async session({ token, session }) {
-      // GoogleSignOn
-      if (session.user && session.user.email) {
-        // メールアドレスがあれば作成
-        const user = await getOrCreateUserByEmail(session.user.email, session.user.name!, session.user.image!);
-
-        // @ts-ignore
-        session.user = user;
-      }
-
-      return session;
+      return getMergedSessionServer(session);
     },
   },
 };
