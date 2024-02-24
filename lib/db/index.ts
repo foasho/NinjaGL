@@ -1,8 +1,6 @@
 import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-console.info(">>> process.env.VERCEL_URL = ", process.env.VERCEL_URL);
-
 let DURL = process.env.POSTGRES_URL as string | undefined;
 // sslmode=require が必要
 if (!DURL) {

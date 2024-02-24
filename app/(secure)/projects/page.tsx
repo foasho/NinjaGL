@@ -1,10 +1,12 @@
 import { headers } from "next/headers";
 
+import { CurrentHostUrl } from "@/utils";
+
 import { CreateButton } from "./_create";
 import { ProjectsTable } from "./_table";
 
 const getProjects = async () => {
-  const projects = await fetch(`${process.env.NEXTAUTH_URL}/api/projects`, {
+  const projects = await fetch(`${CurrentHostUrl}/api/projects`, {
     // next: { revalidate: 3600, tags: ["all", "projects"] },
     cache: "no-store",
     headers: Object.fromEntries(headers()),
