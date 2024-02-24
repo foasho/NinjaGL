@@ -21,7 +21,7 @@
     "preinstall": "pnpm db:push",
     "lint": "next lint --fix --dir app",
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "pnpm db:push && next build",
     "build:debug": "INLINE_RUNTIME_CHUNK=false npm run build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
