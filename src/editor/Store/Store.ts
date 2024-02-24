@@ -132,7 +132,6 @@ export const globalPlayerStore = proxy<IGlobalPlayerStore>({
  */
 export const globalConfigStore = proxy<IConfigParams>({
   physics: true, // 物理エンジンの有無
-  dpr: undefined, // デバイスピクセル比
   multi: true, // マルチプレイヤーの有無
   isApi: true, // API(サーバーサイド)の有無
   isDebug: true, // デバッグモードかどうか // デバックプレイ時の補助線等

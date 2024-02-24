@@ -1,8 +1,7 @@
 /**
  * DBで扱うときの型を定義
  */
-
-import type { OMArgsProps, OMPhysicsType, OMType, OMVisibleType } from "@ninjagl/core";
+import type { IConfigParams, IObjectManagement, IScriptManagement, OMArgsProps, OMPhysicsType, OMType, OMVisibleType } from "@ninjagl/core";
 
 /**
  * Project
@@ -47,19 +46,7 @@ export type CreateMemberData = {
  */
 export type OMData = {
   projectId: number;
-  id: string;
-  name: string | null;
-  type: OMType;
-  filePath: string | null;
-  visiableType: OMVisibleType;
-  visible: boolean;
-  layerNum: number | null;
-  args: OMArgsProps | null;
-  rules: string | null;
-  physics: boolean;
-  moveable: boolean | null;
-  phyType: OMPhysicsType;
-};
+} & IObjectManagement;
 
 export type CreateOrUpdateOMData = {
   projectId: number;
@@ -75,4 +62,43 @@ export type CreateOrUpdateOMData = {
   physics: boolean;
   moveable?: boolean;
   phyType: OMPhysicsType;
+};
+
+/**
+ * SM
+ */
+export type SMData = {
+  projectId: number;
+} & IScriptManagement;
+
+export type CreateOrUpdateSMData = {
+  projectId: number;
+  id: string;
+  type: string;
+  name: string;
+  script: string;
+};
+
+/**
+ * Config
+ */
+export type ConfigData = {
+  id: number;
+  projectId: number;
+} & IConfigParams;
+
+export type CreateConfigData = {
+  id: number;
+  projectId: number;
+  physics: boolean;
+  multi: boolean;
+  isApi: boolean;
+  isDebug: boolean;
+};
+
+export type UpdateConfigData = {
+  physics?: boolean;
+  multi?: boolean;
+  isApi?: boolean;
+  isDebug?: boolean;
 };

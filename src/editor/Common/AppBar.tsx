@@ -119,7 +119,6 @@ export const AppBar = () => {
     }
     const njcFile = ExportNjcFile(oms.current, ums.current, tms.current, sms.current, {
       physics: configState.physics,
-      dpr: configState.dpr as number,
       isDebug: true,
       multi: configState.multi,
       isApi: configState.isApi,

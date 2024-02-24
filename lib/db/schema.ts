@@ -12,8 +12,8 @@ export const users = pgTable("users", {
 
 export const configs = pgTable("configs", {
   id: serial("id").primaryKey(),
-  projectName: text("project_name").notNull(),
-  dpr: integer("dpr").notNull(),
+  projectId: integer("project_id").references(() => projects.id),
+  physics: boolean("physics").notNull().default(true),
   multi: boolean("multi").notNull().default(true),
   isApi: boolean("is_api").notNull().default(true),
   isDebug: boolean("is_debug").notNull().default(false),
@@ -23,7 +23,6 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  configId: integer("config_id").references(() => configs.id),
   publish: boolean("publish").notNull().default(true),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
@@ -41,7 +40,7 @@ export const members = pgTable("members", {
 });
 
 export const oms = pgTable("oms", {
-  projectId: integer("project_id").references(() => projects.id),
+  projectId: integer("project_id").notNull().references(() => projects.id),
   // 以下はOMのプロパティ
   id: text("id").notNull(), // IDはプロジェクト側でUUID生成される
   name: text("name"),

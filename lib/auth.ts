@@ -3,7 +3,6 @@ import type { User } from "next-auth";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-import { getOrCreateUserByEmail } from "@/db/crud/user";
 import { getMergedSessionServer } from "./middleware";
 
 export const authOptions: NextAuthOptions = {

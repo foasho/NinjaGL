@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { members } from "@/db/schema";
@@ -16,6 +16,3 @@ export const getMembersByUserId = async (userId: number) => {
 export const createMember = async ({ projectId, userId, role }: CreateMemberData) => {
   return await db.insert(members).values({ projectId, userId, role }).returning();
 };
-
-
-

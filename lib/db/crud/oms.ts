@@ -3,10 +3,12 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { oms } from "@/db/schema";
 
-import { CreateOrUpdateOMData } from "../types";
+import { CreateOrUpdateOMData, OMData } from "../types";
 
 export const getOmsByProjectId = async (projectId: number) => {
-  return await db.select().from(oms).where(eq(oms.projectId, projectId));
+  // @ts-ignore
+  const oms = (await db.select().from(oms).where(eq(oms.projectId, projectId))) as OMData[];
+  return oms;
 };
 
 export const createOrUpdateOm = async (project_id: number, id: string, body: CreateOrUpdateOMData) => {

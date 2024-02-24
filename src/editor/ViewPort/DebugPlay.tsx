@@ -23,7 +23,7 @@ export const ExportNjcFile = (
   sms: IScriptManagement[],
   config: IConfigParams,
 ): NJCFile => {
-  const newConfig = { ...config, dpr: undefined };
+  const newConfig = { ...config };
   // EditorからOMを取得してJSON化する
   const _oms = [...oms];
   // Configパラメータを設定する
@@ -54,7 +54,6 @@ export const DebugPlay = () => {
   useEffect(() => {
     const _njcFile = ExportNjcFile(editor.oms.current, editor.ums.current, editor.tms.current, editor.sms.current, {
       physics: configState.physics,
-      dpr: undefined,
       multi: configState.multi,
       isApi: configState.isApi,
       isDebug: configState.isDebug,
