@@ -4,7 +4,7 @@ import postgres from "postgres";
 let DURL = process.env.POSTGRES_URL as string | undefined;
 // sslmode=require が必要
 if (!DURL) {
-  throw new Error("POSTGRES_URL is not defined");
+  throw new Error(`POSTGRES_URL is not defined: URL=${DURL}`);
 }
 if (!(DURL).includes("sslmode")) {
   DURL = DURL + "?sslmode=require";
