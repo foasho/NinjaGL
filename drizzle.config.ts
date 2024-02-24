@@ -1,10 +1,19 @@
 import type { Config } from "drizzle-kit";
 
+let DURL = process.env.DATABASE_URL as string | undefined;
+// sslmode=require が必要
+if (!DURL) {
+  throw new Error("POSTGRES_URL is not defined");
+}
+if (!(DURL).includes("sslmode")) {
+  DURL = DURL + "?sslmode=require";
+}
+
 export default {
   schema: "./lib/db/schema.ts",
   driver: "pg",
   dbCredentials: {
-    connectionString: process.env.POSTGRES_URL as string,
+    connectionString: DURL,
     ssl: true,
   },
   verbose: true,
