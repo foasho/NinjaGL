@@ -5,7 +5,7 @@ let DURL = process.env.POSTGRES_URL as string | undefined;
 if (!DURL) {
   throw new Error(`POSTGRES_URL is not defined: URL=${DURL}`);
 }
-console.log(process.env.NODE_ENV);
+console.info(`NODE_ENV=${process.env.NODE_ENV}`);
 if (!(DURL).includes("sslmode") && process.env.NODE_ENV === "production") {
   DURL = DURL + "?sslmode=require";
 }
