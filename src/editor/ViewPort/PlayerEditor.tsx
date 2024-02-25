@@ -15,6 +15,7 @@ import { MySwal } from "@/commons/Swal";
 import { uploadFile } from "@/utils/upload";
 
 import { globalEditorStore } from "../Store/editor";
+import toast from "react-hot-toast";
 
 const dom = tunnel();
 
@@ -79,6 +80,10 @@ export const PlayerEditor = () => {
           //バリデーションを入れたりしても良い
           if (inputStr.length == 0) {
             return MySwal.showValidationMessage(t("leastInput"));
+          }
+          if (!session) {
+            toast.error(t("requireLogin"));
+            return;
           }
           if (session) {
             // ログインしていればストレージに保存

@@ -1,16 +1,9 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
-import { getServerSession } from "next-auth";
 
-import { getConfigByProjectId } from "@/db/crud/config";
-import { getMembersByProjectId } from "@/db/crud/members";
-import { getOmsByProjectId } from "@/db/crud/oms";
-import { getProjectById } from "@/db/crud/projects";
-import { getSmsByProjectId } from "@/db/crud/sms";
-import { getMergedSessionServer } from "@/middleware";
+import { CurrentHostUrl } from "@/utils";
 
 import { Editor } from "./_editor";
-import { CurrentHostUrl } from "@/utils";
 
 type GetProjectData = {
   project: any;
@@ -19,13 +12,10 @@ type GetProjectData = {
   config: any;
 };
 const getProjectData = async (projectId: number) => {
-  const response = await fetch(
-    `${CurrentHostUrl}/api/projects?id=${projectId}`, 
-    { 
-      cache: "no-store",
-      headers: Object.fromEntries(headers()),
-    }
-    );
+  const response = await fetch(`${CurrentHostUrl}/api/projects?id=${projectId}`, {
+    cache: "no-store",
+    headers: Object.fromEntries(headers()),
+  });
   const project = await response.json();
   return project;
 };

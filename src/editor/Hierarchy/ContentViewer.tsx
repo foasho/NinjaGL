@@ -32,6 +32,7 @@ import { uploadFile } from "@/utils/upload";
 
 import { AssetsContextMenu } from "../Dialogs/AssetsContextMenu";
 import { globalContentStore, globalScriptStore } from "../Store/Store";
+import toast from "react-hot-toast";
 
 export interface IFileProps {
   url: string;
@@ -153,7 +154,10 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   };
 
   const _uploadFile = async (file: File) => {
-    if (!session) return;
+    if (!session) {
+      toast.error(t("requireLogin"));
+      return;
+    }
     const filename = file.name;
     // ClientUpload以外の時に、4.5MB以上のファイルはアップロードできない
     if (process.env.NEXT_PUBLIC_UPLOAD_TYPE !== "client" && file.size > 4.5 * 1024 * 1024) {

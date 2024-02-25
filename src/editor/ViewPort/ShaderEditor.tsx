@@ -3,9 +3,9 @@
 import type { languages } from "monaco-editor";
 
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
-import toast from "react-hot-toast";
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
 import { Environment, OrbitControls, Sky, SoftShadows } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
