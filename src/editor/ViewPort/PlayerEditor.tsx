@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { convertObjectToFile } from "@ninjagl/core";
 import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
@@ -15,7 +16,6 @@ import { MySwal } from "@/commons/Swal";
 import { uploadFile } from "@/utils/upload";
 
 import { globalEditorStore } from "../Store/editor";
-import toast from "react-hot-toast";
 
 const dom = tunnel();
 
