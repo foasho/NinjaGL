@@ -4,8 +4,6 @@ import NextTopLoader from "nextjs-toploader";
 import { PWAProvider } from "@/hooks/usePWA";
 import { mplus } from "@/styles/font";
 
-import { Toast } from "./_components/Toast";
-
 import RootProvider from "./provider";
 
 import "./global.css";
@@ -47,7 +45,6 @@ export default function RootLayout({ children }: Props) {
         <RootProvider>
           <PWAProvider>
             {children}
-            <Toast />
           </PWAProvider>
         </RootProvider>
       </body>

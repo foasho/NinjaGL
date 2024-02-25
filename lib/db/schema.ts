@@ -13,6 +13,7 @@ export const users = pgTable("users", {
 export const configs = pgTable("configs", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").references(() => projects.id),
+  projectName: text("project_name").notNull(),
   physics: boolean("physics").notNull().default(true),
   multi: boolean("multi").notNull().default(true),
   isApi: boolean("is_api").notNull().default(true),
@@ -39,28 +40,28 @@ export const members = pgTable("members", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
+export const sms = pgTable("sms", {
+  projectId: integer("project_id").references(() => projects.id),
+  // 以下はSMのプロパティ
+  id: text("id").notNull().primaryKey(), // IDはプロジェクト側でUUID生成される
+  type: text("type").notNull(),
+  name: text("name").notNull(),
+  script: text("script").notNull(),
+});
+
 export const oms = pgTable("oms", {
   projectId: integer("project_id").notNull().references(() => projects.id),
   // 以下はOMのプロパティ
-  id: text("id").notNull(), // IDはプロジェクト側でUUID生成される
+  id: text("id").notNull().primaryKey(), // IDはプロジェクト側でUUID生成される
   name: text("name"),
   type: text("type").notNull().$type<OMType>(),
   filePath: text("file_path"),
-  visiableType: text("visiable_type").$type<OMVisibleType>().default("auto"),
+  visiableType: text("visiable_type").$type<OMVisibleType>(),
   visible: boolean("visible").notNull().default(true),
   layerNum: integer("layer_num"),
   args: text("args").$type<OMArgsProps>(),
   rules: text("rules"),
   physics: boolean("physics").notNull().default(true),
   moveable: boolean("moveable"),
-  phyType: text("phy_type").notNull().$type<OMPhysicsType>().default("box"),
-});
-
-export const sms = pgTable("sms", {
-  projectId: integer("project_id").references(() => projects.id),
-  // 以下はSMのプロパティ
-  id: text("id").notNull(), // IDはプロジェクト側でUUID生成される
-  type: text("type").notNull(),
-  name: text("name").notNull(),
-  script: text("script").notNull(),
+  phyType: text("phy_type").notNull().$type<OMPhysicsType>(),
 });

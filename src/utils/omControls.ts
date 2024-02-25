@@ -9,9 +9,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "light":
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "light",
         args: {
+          // @ts-ignore
           type: value,
           castShadow: true,
           receiveShadow: false,
@@ -34,9 +35,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
       }
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "sky",
         args: {
+          // @ts-ignore
           type: value,
         },
         physics: false,
@@ -47,9 +49,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "three":
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "three",
         args: {
+          // @ts-ignore
           type: value,
         },
         physics: false,
@@ -70,9 +73,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
       }
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "fog",
         args: {
+          // @ts-ignore
           type: value,
         },
         physics: false,
@@ -93,9 +97,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
       }
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "environment",
         args: {
+          // @ts-ignore
           type: value,
         },
         physics: false,
@@ -106,7 +111,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "lightformer":
       return {
         id: MathUtils.generateUUID(),
-        name: `*LF-(${value})`,
+        name: `LF-(${value})`,
         type: "lightformer",
         args: {
           form: value,
@@ -123,7 +128,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
       if (value === "bloom") {
         return {
           id: MathUtils.generateUUID(),
-          name: `*${value}`,
+          name: `${value}`,
           type: "effect",
           args: {
             type: value,
@@ -146,9 +151,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "water":
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "water",
         args: {
+          // @ts-ignore
           type: value,
           width: 5,
           height: 5,
@@ -163,9 +169,10 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "landscape":
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "landscape",
         args: {
+          // @ts-ignore
           type: value,
         },
         physics: true,
@@ -176,7 +183,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "text":
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "text",
         args: {
           content: "テキスト",
@@ -190,7 +197,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
     case "text3d":
       return {
         id: MathUtils.generateUUID(),
-        name: `*${value}`,
+        name: `${value}`,
         type: "text3d",
         args: {
           content: "テキスト",

@@ -2,6 +2,8 @@ import { IConfigParams, IScriptManagement } from "@ninjagl/core";
 import { AnimationClip, Vector3 } from "three";
 import { proxy } from "valtio";
 
+import { globalEditorStore } from "./editor";
+
 export const HomeCameraPosition = new Vector3(5, 5, -5);
 
 /**
@@ -137,3 +139,13 @@ export const globalConfigStore = proxy<IConfigParams>({
   isDebug: true, // デバッグモードかどうか // デバックプレイ時の補助線等
   projectName: "NinjaGL", // プロジェクト名
 });
+
+export const setInitConfig = (config: IConfigParams) => {
+  globalConfigStore.physics = config.physics;
+  globalConfigStore.multi = config.multi;
+  globalConfigStore.isApi = config.isApi;
+  globalConfigStore.isDebug = config.isDebug;
+  globalConfigStore.projectName = config.projectName;
+  // projectNameはglobalEditorStore側も変更する
+  globalEditorStore.projectName = config.projectName;
+};

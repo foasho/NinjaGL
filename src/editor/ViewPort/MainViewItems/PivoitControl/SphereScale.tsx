@@ -105,7 +105,6 @@ export const SphereScale: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }
           z: dir.z * offset,
         } as THREE.Vector3);
 
-        console.log(targetOrigin);
         scale0.current = scale0.current + offset;
         scaleMatrix.makeScale(vScale.x, vScale.y, vScale.z);
         scaleMatrix.setPosition(

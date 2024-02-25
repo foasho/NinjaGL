@@ -24,8 +24,6 @@ export const ExportNjcFile = (
   config: IConfigParams,
 ): NJCFile => {
   const newConfig = { ...config };
-  // EditorからOMを取得してJSON化する
-  const _oms = [...oms];
   // Configパラメータを設定する
   const _config: IConfigParams = {
     ...newConfig,

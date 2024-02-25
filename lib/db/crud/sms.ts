@@ -10,14 +10,14 @@ export const getSmsByProjectId = async (projectId: number) => {
   return (await db.select().from(sms).where(eq(sms.projectId, projectId))) as SMData[];
 };
 
-export const createOrUpdateOm = async (project_id: number, id: string, body: CreateOrUpdateSMData) => {
+export const createOrUpdateSm = async (projectId: number, id: string, body: CreateOrUpdateSMData) => {
   // idが存在チェック
   const [sm] = await db.select().from(sms).where(eq(sms.id, id)).limit(1);
   if (sm) {
     // update
     const [_sm] = await db
       .update(sms)
-      .set({ ...body })
+      .set({ ...body, projectId })
       .where(eq(sms.id, id))
       .returning();
     return _sm;
@@ -25,7 +25,7 @@ export const createOrUpdateOm = async (project_id: number, id: string, body: Cre
     // create
     const [_sm] = await db
       .insert(sms)
-      .values({ ...body })
+      .values({ ...body, projectId })
       .returning();
     return _sm;
   }

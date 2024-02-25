@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { configs } from "@/db/schema";
 
-import { ConfigData, CreateConfigData, UpdateConfigData } from "../types";
+import { ConfigData, CreateConfigData } from "../types";
 
 export const getConfigByProjectId = async (projectId: number) => {
   // @ts-ignore
@@ -11,18 +11,23 @@ export const getConfigByProjectId = async (projectId: number) => {
   return config;
 };
 
-export const createConfig = async (body: CreateConfigData) => {
-  return await db
-    .insert(configs)
-    .values({ ...body })
-    .returning();
-};
-
-export const updateConfig = async (id: number, body: UpdateConfigData) => {
-  const [_config] = await db
-    .update(configs)
-    .set({ ...body })
-    .where(eq(configs.id, id))
-    .returning();
-  return _config;
+export const createOrUpdateConfig = async (projectId: number, body: CreateConfigData) => {
+  // idが存在チェック
+  const [config] = await db.select().from(configs).where(eq(configs.projectId, projectId)).limit(1);
+  if (config) {
+    // update
+    const [_config] = await db
+      .update(configs)
+      .set({ ...body })
+      .where(eq(configs.projectId, projectId))
+      .returning();
+    return _config;
+  } else {
+    // create
+    const [_config] = await db
+      .insert(configs)
+      .values({ ...body, projectId })
+      .returning();
+    return _config;
+  }
 };

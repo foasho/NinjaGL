@@ -88,13 +88,8 @@ export type ConfigData = {
 } & IConfigParams;
 
 export type CreateConfigData = {
-  id: number;
   projectId: number;
-  physics: boolean;
-  multi: boolean;
-  isApi: boolean;
-  isDebug: boolean;
-};
+} & IConfigParams;
 
 export type UpdateConfigData = {
   physics?: boolean;

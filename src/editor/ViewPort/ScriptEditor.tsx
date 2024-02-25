@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import MonacoEditor from "@monaco-editor/react";
 import { IScriptManagement } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
@@ -126,13 +126,6 @@ export const ScriptEditor = () => {
       }
       toast(t("completeSave"), {
         position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
     }
   };

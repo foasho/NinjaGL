@@ -41,6 +41,7 @@ const PreviewPage = async ({ searchParams }: PreviewPageProps) => {
 
   const { project, oms, sms, config } = projectData;
 
+  // @ts-ignore
   return <div>{project && <PreviewNinjaGL oms={oms} sms={sms} config={config} />}</div>;
 };
 

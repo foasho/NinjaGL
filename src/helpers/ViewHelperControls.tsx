@@ -11,12 +11,16 @@ import { isNumber } from "@/commons/functional";
 import { MySwal } from "@/commons/Swal";
 import { globalEditorStore } from "@/editor/Store/editor";
 import { globalConfigStore } from "@/editor/Store/Store";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { sendServerConfig } from "@/utils/dataSync";
 
 /**
  * 補助機能
  */
 const _ViewHelperControls = () => {
-  const { physics } = useSnapshot(globalConfigStore);
+  const { projectId } = useNinjaEditor();
+  const config = useSnapshot(globalConfigStore);
+  const { physics } = config;
   const { isGrid, showCanvas, isWorldHelper, isGizmo, cameraFar, cameraSpeed, uiMode, uiGridNum } =
     useSnapshot(globalEditorStore);
   const [isHovered, setIsHovered] = useState(false);
@@ -96,6 +100,9 @@ const _ViewHelperControls = () => {
                 checked={physics}
                 onChange={(e) => {
                   globalConfigStore.physics = e.target.checked;
+                  if (projectId) {
+                    sendServerConfig(projectId, config);
+                  }
                 }}
               />
             </div>

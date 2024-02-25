@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { AiFillSave } from "react-icons/ai";
 import { BiEditAlt } from "react-icons/bi";
@@ -10,10 +11,9 @@ import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
 import { useSnapshot } from "valtio";
 
-import { b64EncodeUnicode } from "@/commons/functional";
 import { MySwal } from "@/commons/Swal";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-import { uploadFile } from "@/utils/upload";
+import { sendServerConfig, updateProjectData } from "@/utils/dataSync";
 
 import { globalEditorStore } from "../Store/editor";
 import { globalConfigStore } from "../Store/Store";
@@ -29,7 +29,7 @@ export const AppBar = () => {
   const configState = useSnapshot(globalConfigStore);
   const editorState = useSnapshot(globalEditorStore);
   const { projectName, autoSave, viewSelect, appBar } = editorState;
-  const { oms, ums, tms, sms, setNJCFile } = useNinjaEditor();
+  const { oms, ums, tms, sms, setNJCFile, projectId } = useNinjaEditor();
   const [loading, setLoading] = useState(false);
 
   /**
@@ -94,6 +94,10 @@ export const AppBar = () => {
     }).then((result) => {
       if (result.value) {
         globalEditorStore.projectName = result.value;
+        globalConfigStore.projectName = result.value;
+        if (projectId) {
+          sendServerConfig(projectId, configState);
+        }
         return result.value;
       }
       return null;
@@ -117,51 +121,37 @@ export const AppBar = () => {
       }
       name = _name;
     }
-    const njcFile = ExportNjcFile(oms.current, ums.current, tms.current, sms.current, {
-      physics: configState.physics,
-      isDebug: true,
-      multi: configState.multi,
-      isApi: configState.isApi,
-      projectName: name,
-    });
+    const njcFile = ExportNjcFile(oms.current, ums.current, tms.current, sms.current, configState);
     const filename = `${name}.njc`;
     const blob = await saveNJCBlob(njcFile);
     const file = new File([blob], filename, { type: "application/octet-stream" });
-
+    const href = window.URL.createObjectURL(file);
     // Save to Storage
-    const uploadPath = `${b64EncodeUnicode(session.user!.email as string)}/SaveData`;
-    const filePath = (uploadPath + `/${name}.njc`).replaceAll("//", "/");
-
-    // サーバーに保存
-    const res = await uploadFile(file, filePath);
-    if (!res) {
-      setLoading(false);
-      throw new Error("Error uploading file");
-    }
-    // 成功したら、ローカルストレージの追加しておく
-    localStorage.setItem("recentproject", JSON.stringify({ name: name, path: filePath }));
-    if (completeAlert) {
-      const download = await MySwal.fire({
-        icon: "success",
-        title: t("success"),
-        text: t("saveSuccess") + `SaveData/${name}.njc`,
-        showCancelButton: true,
-        confirmButtonText: t("download"),
-        cancelButtonText: t("close"),
-      }).then((result) => {
-        if (result.isConfirmed) {
-          return true;
-        }
-        return false;
-      });
-      // fileをDownload
-      if (download) {
-        const a = document.createElement("a");
-        a.href = window.URL.createObjectURL(blob);
-        a.download = `${name}.njc`;
-        a.click();
-        a.remove();
+    if (projectId) {
+      // DBに同期する
+      await updateProjectData(projectId, configState, oms.current, sms.current);
+      if (completeAlert) {
+        toast(
+          <div>
+            {t("saveComplete")}
+            <br />
+            <a className='pt-2 text-xs text-cyan-400 underline' href={href} download={`${name}.njc`}>
+              ダウンロード
+            </a>
+          </div>,
+          {
+            duration: 7500,
+            position: "top-right",
+          },
+        );
       }
+    } else {
+      // ローカルでダウンロード
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = `${name}.njc`;
+      a.click();
+      a.remove();
     }
     setLoading(false);
   };
@@ -295,7 +285,7 @@ export const AppBar = () => {
             </li>
             <li className='float-right inline-block px-[3px] py-[12px]'>
               <a
-                className='cursor-pointer rounded-lg bg-gray-300 p-2 text-primary hover:bg-gray-500'
+                className='cursor-pointer rounded-lg bg-accent p-2 text-primary hover:bg-gray-500'
                 onClick={() => onPlayStop()}
               >
                 <span className='align-middle'>
