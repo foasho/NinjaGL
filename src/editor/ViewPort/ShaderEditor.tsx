@@ -3,9 +3,9 @@
 import type { languages } from "monaco-editor";
 
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
-import { toast } from "react-toastify";
 import MonacoEditor, { Monaco } from "@monaco-editor/react";
 import { Environment, OrbitControls, Sky, SoftShadows } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -54,13 +54,6 @@ export const ShaderEditor = (props: IShaderEditor) => {
   const onSave = () => {
     toast(t("completeSave"), {
       position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
     });
     if (fileName) {
     } else {

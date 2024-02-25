@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 import MonacoEditor from "@monaco-editor/react";
 import { IScriptManagement } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
@@ -102,6 +102,10 @@ export const ScriptEditor = () => {
    * @returns
    */
   const saveCode = async (filename: string) => {
+    if (!session) {
+      toast.error(t("requireLogin"));
+      return;
+    }
     if (session && code.current) {
       const file = await convertFile(code.current);
       const filePath = `${b64EncodeUnicode(session.user!.email as string)}/Scripts/${filename}`;
@@ -126,13 +130,6 @@ export const ScriptEditor = () => {
       }
       toast(t("completeSave"), {
         position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
     }
   };

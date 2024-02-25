@@ -1,12 +1,10 @@
 import { Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
 import NextTopLoader from "nextjs-toploader";
 
 import { PWAProvider } from "@/hooks/usePWA";
-import RootProvider from "@/root.container";
 import { mplus } from "@/styles/font";
 
-import { Toast } from "./_components/Toast";
+import RootProvider from "./provider";
 
 import "./global.css";
 
@@ -44,14 +42,11 @@ export default function RootLayout({ children }: Props) {
       <head />
       <body className={`${mplus.variable}`}>
         <NextTopLoader showSpinner={false} color='#43D9D9' />
-        <SessionProvider>
-          <RootProvider>
-            <PWAProvider>
-              {children}
-              <Toast />
-            </PWAProvider>
-          </RootProvider>
-        </SessionProvider>
+        <RootProvider>
+          <PWAProvider>
+            {children}
+          </PWAProvider>
+        </RootProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { convertObjectToFile } from "@ninjagl/core";
 import { ContactShadows, Environment, OrbitControls, Text, useAnimations, useGLTF } from "@react-three/drei";
@@ -79,6 +80,10 @@ export const PlayerEditor = () => {
           //バリデーションを入れたりしても良い
           if (inputStr.length == 0) {
             return MySwal.showValidationMessage(t("leastInput"));
+          }
+          if (!session) {
+            toast.error(t("requireLogin"));
+            return;
           }
           if (session) {
             // ログインしていればストレージに保存

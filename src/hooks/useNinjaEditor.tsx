@@ -1,5 +1,7 @@
+"use client";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
+  IConfigParams,
   IObjectManagement,
   IScriptManagement,
   ITextureManagement,
@@ -7,11 +9,15 @@ import {
   NJCFile,
   OMPhysicsType,
 } from "@ninjagl/core";
+import { throttle } from "lodash-es";
 import { Euler, Group, MathUtils, Object3D, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 import { MySwal } from "@/commons/Swal";
 import { globalEditorStore } from "@/editor/Store/editor";
+import { setInitConfig } from "@/editor/Store/Store";
+import { OMArgs2Class } from "@/utils/convs";
+import { sendServerOM } from "@/utils/dataSync";
 import { initTpOms, initTpUis } from "@/utils/initTpProjects";
 
 /**
@@ -52,6 +58,7 @@ export interface IPlayerManager {
 }
 
 type NinjaEditorProp = {
+  projectId?: number;
   oms: React.MutableRefObject<IObjectManagement[]>;
   ums: React.MutableRefObject<IUIManagement[]>;
   tms: React.MutableRefObject<ITextureManagement[]>;
@@ -108,10 +115,7 @@ type NinjaEditorProp = {
   getLights: () => IObjectManagement[];
 };
 const NinjaEditorContext = createContext<NinjaEditorProp>({
-  // oms: [],
-  // ums: [],
-  // tms: [],
-  // sms: [],
+  projectId: undefined,
   oms: { current: [] },
   ums: { current: [] },
   tms: { current: [] },
@@ -178,14 +182,22 @@ interface IHistory {
 }
 const HISTORY_MAX = 30; // 履歴の最大数
 
-export const NinjaEditorProvider = ({ children }) => {
+type NinjaEditorProviderProps = {
+  children: React.ReactNode;
+  projectId?: number;
+  initOMs?: IObjectManagement[];
+  initSMs?: IScriptManagement[];
+  initConfig?: IConfigParams;
+};
+export const NinjaEditorProvider = ({
+  children,
+  projectId,
+  initOMs = [],
+  initSMs = [],
+  initConfig,
+}: NinjaEditorProviderProps) => {
   const [ready, setReady] = useState<boolean>(false); // 初期化完了フラグ
   // コンテンツ管理
-  // const [oms, setOMs] = useState<IObjectManagement[]>([]);
-  // const [ums, setUMs] = useState<IUIManagement[]>([]);
-  // const [tms, setTMs] = useState<ITextureManagement[]>([]);
-  // const [sms, setSMs] = useState<IScriptManagement[]>([]);
-  // refに変更
   const oms = useRef<IObjectManagement[]>([]);
   const ums = useRef<IUIManagement[]>([]);
   const tms = useRef<ITextureManagement[]>([]);
@@ -223,10 +235,14 @@ export const NinjaEditorProvider = ({ children }) => {
    */
   const initialize = () => {
     // OM, UM, TM, SMを初期化
-    oms.current = [];
+    const _oms = initOMs.map(OMArgs2Class);
+    oms.current = _oms;
     ums.current = [];
     tms.current = [];
-    sms.current = [];
+    sms.current = initSMs;
+    if (initConfig) {
+      setInitConfig(initConfig);
+    }
     if (orbit.current) {
       orbit.current.reset();
     }
@@ -434,7 +450,7 @@ export const NinjaEditorProvider = ({ children }) => {
    * @param id
    * @param position
    */
-  const setPosition = (id: string, position: Vector3) => {
+  const _setPosition = (id: string, position: Vector3) => {
     const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.args.position = position;
@@ -449,13 +465,14 @@ export const NinjaEditorProvider = ({ children }) => {
     }
     return target.args.position;
   };
+  const setPosition = throttle(_setPosition, 100);
 
   /**
    * 特定のObjectのRotationを変更
    * @param id
    * @param rotation
    */
-  const setRotation = (id: string, rotation: Euler) => {
+  const _setRotation = (id: string, rotation: Euler) => {
     const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.args.rotation = rotation;
@@ -470,13 +487,14 @@ export const NinjaEditorProvider = ({ children }) => {
     }
     return target.args.rotation;
   };
+  const setRotation = throttle(_setRotation, 100);
 
   /**
    * 特定のObjectのScaleを変更
    * @param id
    * @param scale
    */
-  const setScale = (id: string, scale: Vector3) => {
+  const _setScale = (id: string, scale: Vector3) => {
     const target = oms.current.find((om) => om.id === id);
     if (target) {
       target.args.scale = scale;
@@ -491,6 +509,7 @@ export const NinjaEditorProvider = ({ children }) => {
     }
     return target.args.scale;
   };
+  const setScale = throttle(_setScale, 100);
 
   /**
    * マテリアルの変更
@@ -570,6 +589,7 @@ export const NinjaEditorProvider = ({ children }) => {
     oms.current = [...oms.current, om];
     // 更新
     notifyOMsChanged();
+    if (projectId) sendServerOM(projectId, om);
   };
   const updateOM = (om: IObjectManagement) => {
     // timeOutで1秒内の連続更新はされないようにする
@@ -672,6 +692,9 @@ export const NinjaEditorProvider = ({ children }) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
     }
+    if (projectId) {
+      sendServerOM(projectId, oms.current.find((om) => om.id === id) as IObjectManagement);
+    }
     objectManagementIdChangedListeners.current[id].forEach((l) => l());
   };
   /**
@@ -746,12 +769,13 @@ export const NinjaEditorProvider = ({ children }) => {
   // 初期設定
   useEffect(() => {
     initialize();
-    const initOms = initTpOms();
-    // const initSms = initTpSMs();
-    const initUis = initTpUis();
-    oms.current = initOms;
-    // setSMs(initSms);
-    ums.current = initUis;
+    // ProjectIdがない場合は初期化
+    if (!projectId) {
+      const initOms = initTpOms();
+      const initUis = initTpUis();
+      oms.current = initOms;
+      ums.current = initUis;
+    }
     setReady(true);
   }, []);
 
@@ -767,6 +791,7 @@ export const NinjaEditorProvider = ({ children }) => {
   return (
     <NinjaEditorContext.Provider
       value={{
+        projectId,
         oms,
         ums,
         tms,

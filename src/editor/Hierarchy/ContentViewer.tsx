@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { AiFillHome, AiOutlineDoubleLeft, AiOutlineDoubleRight, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { BsFolder } from "react-icons/bs";
@@ -153,7 +154,10 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   };
 
   const _uploadFile = async (file: File) => {
-    if (!session) return;
+    if (!session) {
+      toast.error(t("requireLogin"));
+      return;
+    }
     const filename = file.name;
     // ClientUpload以外の時に、4.5MB以上のファイルはアップロードできない
     if (process.env.NEXT_PUBLIC_UPLOAD_TYPE !== "client" && file.size > 4.5 * 1024 * 1024) {
@@ -396,28 +400,28 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     } else if (isNJC(props.name)) {
       icon = (
         <>
-          <Image width={32} height={32} alt="" src={njc_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt='' src={njc_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "njc";
     } else if (isMP3(props.name)) {
       icon = (
         <>
-          <Image width={32} height={32} alt="" src={mp3_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt='' src={mp3_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "mp3";
     } else if (isGLSL(props.name)) {
       icon = (
         <>
-          <Image width={32} height={32} alt="" src={glsl_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt='' src={glsl_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "glsl";
     } else if (isJS(props.name)) {
       icon = (
         <>
-          <Image width={32} height={32} alt="" src={js_icon} className={iconImgStyle} data-path={props.name} />
+          <Image width={32} height={32} alt='' src={js_icon} className={iconImgStyle} data-path={props.name} />
         </>
       );
       contentsSelectType = "js";

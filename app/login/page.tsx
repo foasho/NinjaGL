@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   const googleLogin = () => {
     const callbackUrl = getCallbackUrl();
-    signIn("google", { callbackUrl: callbackUrl ? callbackUrl : undefined });
+    signIn("google", { callbackUrl: callbackUrl ? callbackUrl : "/" });
   };
 
   return (

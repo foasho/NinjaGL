@@ -1,31 +1,11 @@
 "use client";
 import React, { createContext, useEffect } from "react";
 import { redirect } from "next/navigation";
-import { Session } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 import { Loading2D } from "@/commons/Loading2D";
 
-/**
- * 認証済みかどうかを判定して、認証済みなら子コンポーネントを表示する
- */
 export type AuthProviderProps = "secure" | "optional" | "public";
-const AuthContainer = ({
-  children,
-  session,
-  type,
-}: {
-  children: React.ReactNode;
-  session?: Session;
-  type: AuthProviderProps;
-}) => {
-  return (
-    <SessionProvider session={session} refetchInterval={0}>
-      <AuthProvider type={type}>{children}</AuthProvider>
-    </SessionProvider>
-  );
-};
-
 const AuthContext = createContext<{ type: AuthProviderProps; user: any }>({} as { type: AuthProviderProps; user: any });
 export const useAuth = () => React.useContext(AuthContext);
 export const AuthProvider = ({ children, type }: { children: React.ReactNode; type: AuthProviderProps }) => {
@@ -38,7 +18,7 @@ export const AuthProvider = ({ children, type }: { children: React.ReactNode; ty
       const callbackUrl = window.location.pathname;
       redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [session, status, type]);
+  }, [session, status]);
 
   return (
     <AuthContext.Provider
@@ -51,5 +31,3 @@ export const AuthProvider = ({ children, type }: { children: React.ReactNode; ty
     </AuthContext.Provider>
   );
 };
-
-export default AuthContainer;
