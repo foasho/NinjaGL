@@ -21,6 +21,13 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      # .envの作成
+      - name: Create dot env file
+        shell: bash
+        run: |
+          touch .env
+          echo "POSTGRES_URL=${{ secrets.POSTGRES_URL }}" >> .env
+
       - name: Install Dependencies
         run: pnpm install
 
