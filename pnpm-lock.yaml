@@ -42,8 +42,8 @@ dependencies:
     specifier: ^1.0.4
     version: 1.0.4
   '@ninjagl/core':
-    specifier: ^1.1.49
-    version: 1.1.49(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.13.0)
+    specifier: ^1.1.50
+    version: 1.1.50(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.14.2)
   '@planetscale/database':
     specifier: ^1.13.0
     version: 1.14.0
@@ -4184,8 +4184,8 @@ packages:
       - debug
     dev: false
 
-  /@ninjagl/core@1.1.49(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.13.0):
-    resolution: {integrity: sha512-JBPfyvgfbBnRvmH9WLb0Irsh7lHW/6MTQYlopAsenkBgdXmeW8ajEYegcUjOv1FLtKTQF/AgH/KXkFJwqxjIWA==}
+  /@ninjagl/core@1.1.50(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.14.2):
+    resolution: {integrity: sha512-ihXFPEFaPPBuiYz8582ZU5VZ3RzDmZrVXA70B4SUCf8bSvs9PVE0Zief0UVePwII9Nd8KkWLHphojZJHK0Xvzg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18.2.0
@@ -4196,8 +4196,8 @@ packages:
       '@react-three/drei': 9.88.17(@react-three/fiber@8.15.11)(@types/three@0.160.0)(react-dom@18.2.0)(react@18.2.0)(three@0.157.0)
       '@react-three/fiber': 8.15.11(react-dom@18.2.0)(react@18.2.0)(three@0.157.0)
       '@react-three/postprocessing': 2.15.11(@react-three/fiber@8.15.11)(@types/three@0.160.0)(react@18.2.0)(three@0.157.0)
-      '@skyway-sdk/core': 1.6.2(ws@8.13.0)
-      '@skyway-sdk/room': 1.6.2(ws@8.13.0)
+      '@skyway-sdk/core': 1.6.2(ws@8.14.2)
+      '@skyway-sdk/room': 1.6.2(ws@8.14.2)
       axios: 1.6.7
       file-saver: 2.0.5
       gl-noise: 1.6.1
@@ -6012,10 +6012,10 @@ packages:
       - debug
     dev: false
 
-  /@skyway-sdk/core@1.6.2(ws@8.13.0):
+  /@skyway-sdk/core@1.6.2(ws@8.14.2):
     resolution: {integrity: sha512-z1jmEsdXBiIn5NunN3YUUA6H6zwGh//dogCSsJ3mnIrYRvkT8NDrWjJ1Rfwzsn+uQs9I8wKlZyC9GgRduL5PUg==}
     dependencies:
-      '@skyway-sdk/rtc-api-client': 1.4.6(ws@8.13.0)
+      '@skyway-sdk/rtc-api-client': 1.4.6(ws@8.14.2)
       '@skyway-sdk/signaling-client': 1.0.3
       bowser: 2.11.0
       deepmerge: 4.3.1
@@ -6034,11 +6034,11 @@ packages:
     resolution: {integrity: sha512-tMMptnun0r/jYsoSbFn6C468DtPlp51CLxvSbhzvVhhFIxhJsbE8F3DaW6Or5VSz5o8wjY2q/EyADGpjI0KUXA==}
     dev: false
 
-  /@skyway-sdk/room@1.6.2(ws@8.13.0):
+  /@skyway-sdk/room@1.6.2(ws@8.14.2):
     resolution: {integrity: sha512-9GbPz3/c9ssID9CMfFQaUsE5wuh0I5sg1eQ4sqk3ggKJ7/Aj8iwRoneZ8DIAsLIC3XcUTG3Ycu16qq50VBHvMQ==}
     dependencies:
-      '@skyway-sdk/core': 1.6.2(ws@8.13.0)
-      '@skyway-sdk/sfu-bot': 1.6.2(ws@8.13.0)
+      '@skyway-sdk/core': 1.6.2(ws@8.14.2)
+      '@skyway-sdk/sfu-bot': 1.6.2(ws@8.14.2)
       uuid: 9.0.1
     transitivePeerDependencies:
       - bufferutil
@@ -6048,10 +6048,10 @@ packages:
       - ws
     dev: false
 
-  /@skyway-sdk/rtc-api-client@1.4.6(ws@8.13.0):
+  /@skyway-sdk/rtc-api-client@1.4.6(ws@8.14.2):
     resolution: {integrity: sha512-Ucq2NKZBnNkYrayirdgS0z+PzTnPMIXow0px1azjfhhRfHbL9slC+gTnAgW5Fhp/kNmMGQfrnY+EWPxJBjCrLw==}
     dependencies:
-      '@skyway-sdk/rtc-rpc-api-client': 1.4.6(ws@8.13.0)
+      '@skyway-sdk/rtc-rpc-api-client': 1.4.6(ws@8.14.2)
       '@skyway-sdk/token': 1.4.6
       deepmerge: 4.3.1
       uuid: 9.0.1
@@ -6060,12 +6060,12 @@ packages:
       - ws
     dev: false
 
-  /@skyway-sdk/rtc-rpc-api-client@1.4.6(ws@8.13.0):
+  /@skyway-sdk/rtc-rpc-api-client@1.4.6(ws@8.14.2):
     resolution: {integrity: sha512-HT5XSdL8DIdpFWrvftMR+jqjgw1Hpl6vayoWESB4ASS93YcwMDnwo50WxoHJqv98xrnVjHnsIWnIaBr0rF/Wnw==}
     dependencies:
       '@skyway-sdk/common': 1.4.6
       '@skyway-sdk/model': 1.0.1
-      isomorphic-ws: 4.0.1(ws@8.13.0)
+      isomorphic-ws: 4.0.1(ws@8.14.2)
       uuid: 9.0.1
     transitivePeerDependencies:
       - debug
@@ -6081,10 +6081,10 @@ packages:
       - debug
     dev: false
 
-  /@skyway-sdk/sfu-bot@1.6.2(ws@8.13.0):
+  /@skyway-sdk/sfu-bot@1.6.2(ws@8.14.2):
     resolution: {integrity: sha512-U33RRPLUnd47t4hSMdSM38U9RJqEFIV2X8b5OXW0lakzUfZFWfo1Y+RxBvrf70RGBBtVdB60CuPn9PdtNeulnw==}
     dependencies:
-      '@skyway-sdk/core': 1.6.2(ws@8.13.0)
+      '@skyway-sdk/core': 1.6.2(ws@8.14.2)
       '@skyway-sdk/sfu-api-client': 1.4.6
       lodash: 4.17.21
       mediasoup-client: 3.6.82
@@ -10673,12 +10673,12 @@ packages:
       ws: 7.5.9
     dev: false
 
-  /isomorphic-ws@4.0.1(ws@8.13.0):
+  /isomorphic-ws@4.0.1(ws@8.14.2):
     resolution: {integrity: sha512-BhBvN2MBpWTaSHdWRb/bwdZJ1WaehQ2L1KngkCkfLUGF0mAWAT1sQUQacEmQ0jXkFw/czDXPNQSL5u2/Krsz1w==}
     peerDependencies:
       ws: '*'
     dependencies:
-      ws: 8.13.0
+      ws: 8.14.2
     dev: false
 
   /isstream@0.1.2:
@@ -16709,6 +16709,19 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  /ws@8.14.2:
+    resolution: {integrity: sha512-wEBG1ftX4jcglPxgFCMJmZ2PLtSbJ2Peg6TmpJFTbe9GZYOQCDPdMYu/Tm0/bGZkw8paZnJY45J4K2PZrLYq8g==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: false
 
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
