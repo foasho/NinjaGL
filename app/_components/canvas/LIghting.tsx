@@ -8,7 +8,7 @@ export const Lighting = () => {
       <ambientLight intensity={0.75} />
       <directionalLight castShadow position={[0, 5, 0]} intensity={10} />
       <PointerLighting />
-      <rectAreaLight intensity={3} position={[-2, 3, 2]} width={30} height={30} castShadow />
+      <rectAreaLight intensity={3} position={[-2, 3, 2]} width={30} height={30} />
     </>
   );
 };
