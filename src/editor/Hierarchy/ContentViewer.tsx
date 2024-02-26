@@ -188,7 +188,10 @@ export const ContentsBrowser = (props: IContentsBrowser) => {
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!session) return;
+    if (!session) {
+      toast.error(t("requireLogin"));
+      return;
+    }
     const files = e.dataTransfer.files;
     if (files.length > 0 && session) {
       const file = files[0];

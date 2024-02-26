@@ -110,7 +110,6 @@ export const AppBar = () => {
    */
   const onSave = async (completeAlert: boolean = true) => {
     // Loadingでblobにまとめる
-    if (!session) return;
     setLoading(true);
     let name = projectName;
     if (!name) {
