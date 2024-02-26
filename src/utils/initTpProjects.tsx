@@ -287,24 +287,6 @@ export const initTpOms = (): IObjectManagement[] => {
     //   visibleType: "auto",
     //   visible: true,
     // },
-    // AnimationObject
-    {
-      id: MathUtils.generateUUID(),
-      name: "object01",
-      type: "object",
-      args: {
-        url: "/models/ybot.glb",
-        position: new Vector3(3, 0, -1),
-        rotation: new Euler(0, Math.PI / 4, 0),
-        castShadow: true,
-        receiveShadow: true,
-        defaultAnimation: "Idle",
-      },
-      physics: false,
-      phyType: "box",
-      visibleType: "auto",
-      visible: true,
-    },
     // NPCの追加
     {
       id: MathUtils.generateUUID(),

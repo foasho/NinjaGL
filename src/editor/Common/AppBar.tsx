@@ -6,7 +6,7 @@ import { BiEditAlt } from "react-icons/bi";
 import { BsCheck, BsPlay, BsStop } from "react-icons/bs";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import Link from "next/link";
-import { Spinner } from "@nextui-org/react";
+import { Spinner, useDisclosure } from "@nextui-org/react";
 import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
 import { useSnapshot } from "valtio";
@@ -15,6 +15,7 @@ import { MySwal } from "@/commons/Swal";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { sendServerConfig, updateProjectData } from "@/utils/dataSync";
 
+import { TemplateModal } from "../Dialogs/TemplateModal";
 import { globalEditorStore } from "../Store/editor";
 import { globalConfigStore } from "../Store/Store";
 import { ExportNjcFile } from "../ViewPort/DebugPlay";
@@ -24,8 +25,7 @@ export const AppBar = () => {
   const { data: session } = useSession();
   const { t, i18n } = useTranslation();
   const [showFileMenu, setShowFileMenu] = useState<boolean>(false);
-  const [showSubMenu, setShowSubMenu] = useState(false);
-  const [recentProgects, setRecentProjects] = useState<{ name: string; path: string }[]>([]);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const configState = useSnapshot(globalConfigStore);
   const editorState = useSnapshot(globalEditorStore);
   const { projectName, autoSave, viewSelect, appBar } = editorState;
@@ -38,15 +38,14 @@ export const AppBar = () => {
    * Environment(Sunset)を追加
    */
   useEffect(() => {
-    // 最近開いたプロジェクトを取得
-    const recentProjects = localStorage.getItem("recentProjects");
-    if (recentProjects) {
-      setRecentProjects(JSON.parse(recentProjects));
-    }
     // AutoSaveが有効かどうかを取得
     const autoSave = localStorage.getItem("autoSave");
     if (autoSave) {
       globalEditorStore.autoSave = true;
+    }
+    // ProjectIdがない場合は、テンプレートを開く
+    if (!projectId) {
+      onOpen();
     }
   }, []);
 
@@ -163,12 +162,6 @@ export const AppBar = () => {
   };
   const handleFileMenuLeave = () => {
     setShowFileMenu(false);
-  };
-  const handleRecentProjectsHover = () => {
-    setShowSubMenu(true);
-  };
-  const handleSubMenuMouseLeave = () => {
-    setShowSubMenu(false);
   };
 
   /**
@@ -312,32 +305,10 @@ export const AppBar = () => {
                     {t("open")}
                   </a>
                 </li>
-                <li
-                  className='relative'
-                  onMouseEnter={() => handleRecentProjectsHover()}
-                  onMouseLeave={() => handleSubMenuMouseLeave()}
-                >
-                  <a className='block cursor-pointer rounded-sm p-2 no-underline'>{t("recentProjects")}</a>
-                  {showSubMenu && (
-                    <ul
-                      className='absolute left-[160px] top-0 z-10 min-w-[160px] overflow-hidden whitespace-nowrap bg-primary shadow-sm'
-                      onMouseLeave={() => handleSubMenuMouseLeave()}
-                    >
-                      {recentProgects.map((pf, idx) => {
-                        return (
-                          <li key={idx} className='flex'>
-                            <a className='block cursor-pointer p-2 no-underline'>{pf.name}</a>
-                            <a className='block cursor-pointer p-2 no-underline'>{pf.path}</a>
-                          </li>
-                        );
-                      })}
-                      {recentProgects.length == 0 && (
-                        <li className='flex'>
-                          <a className=' p-2'>{t("noRecentData")}</a>
-                        </li>
-                      )}
-                    </ul>
-                  )}
+                <li className='relative'>
+                  <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={onOpen}>
+                    {t("templates")}
+                  </a>
                 </li>
                 <li className='relative'>
                   <a
@@ -356,6 +327,7 @@ export const AppBar = () => {
               </ul>
             </div>
           )}
+          <TemplateModal isOpen={isOpen} onOpen={onOpen} onOpenChange={onOpenChange} />
         </div>
       )}
 
