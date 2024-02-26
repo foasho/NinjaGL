@@ -11,7 +11,12 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-export const InviteButton = () => {
+import { inviteUserInvitationAction } from "./_actions";
+
+type InviteButtonProps = {
+  projectId: number;
+};
+export const InviteButton = ({ projectId }: InviteButtonProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
@@ -22,7 +27,7 @@ export const InviteButton = () => {
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
-            <form action={() => null}>
+            <form action={inviteUserInvitationAction}>
               <ModalHeader className='flex flex-col gap-1'>プロジェクトに招待</ModalHeader>
               <ModalBody>
                 {/** Emailで招待 */}
@@ -34,6 +39,7 @@ export const InviteButton = () => {
                   placeholder=''
                   variant='bordered'
                 />
+                <Input name='projectId' type='number' className='hidden' value={projectId.toString()} />
               </ModalBody>
               <ModalFooter>
                 <Button color='danger' variant='light' onPress={onClose}>

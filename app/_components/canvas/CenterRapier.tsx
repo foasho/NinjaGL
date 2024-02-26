@@ -37,21 +37,8 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <XBox>
-          <meshPhongMaterial color='#D3D3D3' specular={"#171717"} shininess={30} emissive={1.0} />
-        </XBox>
-      </Connector>
-      <Connector>
-        <XBox>
           <meshPhongMaterial color='#123242' specular={"#171717"} shininess={30} emissive={1.0} />
         </XBox>
-      </Connector>
-      <Connector>
-        <Shuriken />
-      </Connector>
-      <Connector>
-        <Shuriken>
-          <meshPhongMaterial color='#2EA9DF' specular={"#171717"} shininess={30} emissive={1.0} />
-        </Shuriken>
       </Connector>
       <Connector>
         <Shuriken>
@@ -65,19 +52,6 @@ export const CenterRapier = () => {
       </Connector>
       <Connector>
         <OculusTouch />
-      </Connector>
-      <Connector>
-        <OculusTouch>
-          <meshPhongMaterial color='#F2F2F2' specular={"#171717"} shininess={30} emissive={1.0} />
-        </OculusTouch>
-      </Connector>
-      <Connector>
-        <OculusRift />
-      </Connector>
-      <Connector>
-        <OculusRift>
-          <meshPhongMaterial color='#8B81C3' specular={"#171717"} shininess={30} emissive={1.0} />
-        </OculusRift>
       </Connector>
       <Connector>
         <Bomb />

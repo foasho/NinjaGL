@@ -18,13 +18,13 @@
     "dist"
   ],
   "scripts": {
-    "preinstall": "pnpm db:push",
     "lint": "next lint --fix --dir app",
     "dev": "next dev -p 3001",
     "build": "pnpm db:push && next build",
     "build:debug": "INLINE_RUNTIME_CHUNK=false npm run build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
+    "db:generate": "drizzle-kit generate:pg",
     "db:push": "drizzle-kit push:pg",
     "db:studio": "drizzle-kit studio",
     "test": "jest --watch",
@@ -43,7 +43,7 @@
     "@next/mdx": "^14.0.4",
     "@nextui-org/react": "^2.2.9",
     "@ninjagl/api": "^1.0.4",
-    "@ninjagl/core": "^1.1.49",
+    "@ninjagl/core": "^1.1.50",
     "@planetscale/database": "^1.13.0",
     "@react-three/drei": "^9.88.7",
     "@react-three/fiber": "^8.14.5",

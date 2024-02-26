@@ -1,9 +1,11 @@
 "use client";
-import { HiRocketLaunch } from "react-icons/hi2";
+import { HiPlay, HiRocketLaunch } from "react-icons/hi2";
 import Link from "next/link";
 import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
 
 import { ProjectData } from "@/db/types";
+
+import { InviteButton } from "./_invite";
 
 export const ProjectsTable = ({ projects = [] }: { projects: ProjectData[] }) => {
   return (
@@ -13,7 +15,7 @@ export const ProjectsTable = ({ projects = [] }: { projects: ProjectData[] }) =>
         <TableColumn>説明</TableColumn>
         <TableColumn>公開状態</TableColumn>
         <TableColumn>更新日</TableColumn>
-        <TableColumn>操作</TableColumn>
+        <TableColumn className="min-w-48">操作</TableColumn>
       </TableHeader>
       <TableBody>
         {projects.map((project) => (
@@ -22,7 +24,7 @@ export const ProjectsTable = ({ projects = [] }: { projects: ProjectData[] }) =>
             <TableCell>{project.description}</TableCell>
             <TableCell>{project.publish ? "公開中" : "非公開"}</TableCell>
             <TableCell>{project.updatedAt?.toString()}</TableCell>
-            <TableCell>
+            <TableCell className="grid grid-cols-3 gap-4">
               <Button
                 target='_blank'
                 color='primary'
@@ -33,6 +35,15 @@ export const ProjectsTable = ({ projects = [] }: { projects: ProjectData[] }) =>
               >
                 開く
               </Button>
+              <InviteButton projectId={project.id} />
+              <Button
+                target='_blank'
+                color='primary'
+                size='sm'
+                as={Link}
+                href={`/editor/preview?projectId=${project.id}`}
+                startContent={<HiPlay className='inline' />}
+              ></Button>
             </TableCell>
           </TableRow>
         ))}

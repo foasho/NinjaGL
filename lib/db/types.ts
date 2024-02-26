@@ -22,6 +22,12 @@ export type CreateProjectData = {
   userId: number;
 };
 
+export type InviteProjectData = {
+  projectId: number;
+  inviterId: number;
+  role: "owner" | "viewer";
+};
+
 
 /**
  * Member
