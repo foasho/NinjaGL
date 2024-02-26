@@ -1,4 +1,5 @@
 import { MutableRefObject, Suspense, useEffect, useRef, useState } from "react";
+import { IObjectManagement } from "@ninjagl/core";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
 import { GLTF, SkeletonUtils } from "three-stdlib";
@@ -11,10 +12,23 @@ import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { PivotControls } from "./PivoitControl";
 
 export const Avatar = () => {
-  const { getAvatarOM } = useNinjaEditor();
-  const om = getAvatarOM();
+  // const { getAvatarOM } = useNinjaEditor();
+  // const om = getAvatarOM();
+  const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
+  const [player, setPlayer] = useState<IObjectManagement>();
+  useEffect(() => {
+    const update = () => {
+      const _player = oms.current.find((om) => om.type === "avatar");
+      setPlayer(_player);
+    };
+    update();
+    onOMsChanged(update);
+    return () => {
+      offOMsChanged(update);
+    };
+  }, [offOMsChanged, oms, onOMsChanged]);
 
-  return <>{om && <Player om={om} />}</>;
+  return <>{player && <Player om={player} />}</>;
 };
 
 /**

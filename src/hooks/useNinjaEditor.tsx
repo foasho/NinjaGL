@@ -18,7 +18,7 @@ import { globalEditorStore } from "@/editor/Store/editor";
 import { setInitConfig } from "@/editor/Store/Store";
 import { OMArgs2Class } from "@/utils/convs";
 import { sendServerOM } from "@/utils/dataSync";
-import { initTpOms, initTpUis } from "@/utils/initTpProjects";
+import { initTpOms, initTpSms, initTpUis } from "@/utils/initTpProjects";
 
 /**
  * コンテンツブラウザの操作モード
@@ -42,6 +42,8 @@ export enum ECBSelectType {
   AVT = "avt",
   CAMERA = "camera",
 }
+
+export type TemplateProps = "third_person_metaverse";
 
 /**
  * プレイヤー
@@ -113,6 +115,7 @@ type NinjaEditorProp = {
   getSMById: (id: string) => IScriptManagement | undefined;
   getAvatarOM: () => IObjectManagement | undefined;
   getLights: () => IObjectManagement[];
+  selectTemplate: (template: TemplateProps) => void;
 };
 const NinjaEditorContext = createContext<NinjaEditorProp>({
   projectId: undefined,
@@ -170,6 +173,7 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   getSMById: () => undefined,
   getAvatarOM: () => undefined,
   getLights: () => [],
+  selectTemplate: (template: TemplateProps) => {},
 });
 
 export const useNinjaEditor = () => useContext(NinjaEditorContext);
@@ -769,13 +773,6 @@ export const NinjaEditorProvider = ({
   // 初期設定
   useEffect(() => {
     initialize();
-    // ProjectIdがない場合は初期化
-    if (!projectId) {
-      const initOms = initTpOms();
-      const initUis = initTpUis();
-      oms.current = initOms;
-      ums.current = initUis;
-    }
     setReady(true);
   }, []);
 
@@ -787,6 +784,23 @@ export const NinjaEditorProvider = ({
       document.removeEventListener("keydown", undoEvent);
     };
   });
+
+  const selectTemplate = (template: TemplateProps) => {
+    switch (template) {
+      case "third_person_metaverse":
+        const initOms = initTpOms();
+        const initSMs = initTpSms();
+        const initUis = initTpUis();
+        oms.current = initOms;
+        sms.current = initSMs;
+        ums.current = initUis;
+        notifyOMsChanged();
+        notifySMsChanged();
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <NinjaEditorContext.Provider
@@ -846,6 +860,7 @@ export const NinjaEditorProvider = ({
         getSMById,
         getAvatarOM,
         getLights,
+        selectTemplate,
       }}
     >
       {ready && <>{children}</>}

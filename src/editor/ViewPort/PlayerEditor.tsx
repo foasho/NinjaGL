@@ -62,13 +62,45 @@ export const PlayerEditor = () => {
   /**
    * 保存する
    */
-  const onSave = async (config: ITpConfig, scene, animations) => {
+  const onSave = async (config: ITpConfig, scene, animations: AnimationClip[]) => {
     // 最低限typeが選択されていればOK
     if (scene) {
       //ファイル名の確認
       const target = SkeletonUtils.clone(scene);
-      target.animations = animations;
-      target.userData = config;
+      /**
+       * 以下の設定でアニメーションキーを変更する
+       * - 静止: Idle
+       * - 歩く: Walk
+       * - 走る: Run
+       * - ジャンプ: Jump
+       * - 武器: Weapon
+       * - サブウェポン: SubWeapon
+       */
+      const changedAnimations: AnimationClip[] = [];
+      for (const anim of animations) {
+        if (anim.name === config.idle) {
+          anim.name = "Idle";
+          changedAnimations.push(anim);
+        } else if (anim.name === config.walk) {
+          anim.name = "Walk";
+          changedAnimations.push(anim);
+        } else if (anim.name === config.run) {
+          anim.name = "Run";
+          changedAnimations.push(anim);
+        } else if (anim.name === config.jump) {
+          anim.name = "Jump";
+          changedAnimations.push(anim);
+        } else if (anim.name === config.weapon) {
+          anim.name = "Weapon";
+          changedAnimations.push(anim);
+        } else if (anim.name === config.subWeapon) {
+          anim.name = "SubWeapon";
+          changedAnimations.push(anim);
+        }
+      }
+      target.animations = changedAnimations;
+      // userDataにmode: "player"を追加
+      target.userData.mode = "player"; // プレイヤーモデルとして検知するロジック
       const file = await convertObjectToFile(target);
       MySwal.fire({
         title: t("inputFileName"),

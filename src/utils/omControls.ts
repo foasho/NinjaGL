@@ -55,7 +55,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
           // @ts-ignore
           type: value,
         },
-        physics: false,
+        physics: true,
         phyType: "box",
         visibleType: "auto",
         visible: true,

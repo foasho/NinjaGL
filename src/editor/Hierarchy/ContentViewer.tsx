@@ -6,7 +6,7 @@ import { BsFolder } from "react-icons/bs";
 import { MdUploadFile } from "react-icons/md";
 import Image from "next/image";
 import { Tooltip } from "@nextui-org/react";
-import { gltfLoader, InitScriptManagement } from "@ninjagl/core";
+import { gltfLoader, InitScriptManagement, loadGLTF } from "@ninjagl/core";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 import { DirectionalLight, MathUtils, PerspectiveCamera, Scene, SpotLight, WebGLRenderer } from "three";
@@ -492,22 +492,56 @@ export const ContentViewer = (props: IContenetViewerProps) => {
     } else if (props.isFile && type == "njc") {
       if (props.onDoubleClick) props.onDoubleClick("njc", props.url, name);
     } else if (props.isFile && type == "gltf") {
-      // モデルを配置
-      editor.addOM({
-        id: MathUtils.generateUUID(),
-        name: `*model`,
-        type: "object",
-        args: {
-          url: props.url,
-          castShadow: true,
-          receiveShadow: false,
-          distance: 25,
-        },
-        physics: false,
-        phyType: "box",
-        visibleType: "auto",
-        visible: true,
-      });
+      // userDataにmode: "player"がある場合は、プレイヤーオブジェクトとして扱う
+      const model = await loadGLTF(props.url);
+      const userDatas = model.children.map((node) => node.userData);
+      const isModePlayer = userDatas.some((userData) => userData?.mode === "player");
+      if (model && isModePlayer) {
+        // プレイヤーオブジェクトは１つしか配置できないため確認
+        const _players = editor.oms.current.filter((om) => om.type === "avatar");
+        if (_players.length > 0) {
+          MySwal.fire({
+            title: t("playerObjectError"),
+            text: t("onlyOnePlayerObjectErrorText"),
+            icon: "error",
+          });
+          return;
+        }
+        editor.addOM({
+          id: MathUtils.generateUUID(),
+          name: "player",
+          type: "avatar",
+          args: {
+            type: "avatar",
+            url: props.url,
+            castShadow: true,
+            receiveShadow: true,
+            animationLoop: true,
+            offsetY: 3.0,
+          },
+          physics: false,
+          phyType: "capsule",
+          visibleType: "force",
+          visible: true,
+        });
+      } else {
+        // モデルを配置
+        editor.addOM({
+          id: MathUtils.generateUUID(),
+          name: `*model`,
+          type: "object",
+          args: {
+            url: props.url,
+            castShadow: true,
+            receiveShadow: false,
+            distance: 25,
+          },
+          physics: false,
+          phyType: "box",
+          visibleType: "auto",
+          visible: true,
+        });
+      }
     }
   };
 
