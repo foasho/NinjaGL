@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { HiEnvelope } from "react-icons/hi2";
 import {
   Button,
@@ -18,6 +19,7 @@ type InviteButtonProps = {
 };
 export const InviteButton = ({ projectId }: InviteButtonProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div>
@@ -27,7 +29,14 @@ export const InviteButton = ({ projectId }: InviteButtonProps) => {
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
-            <form action={inviteUserInvitationAction}>
+            <form
+              action={async (formData) => {
+                setIsLoading(true);
+                await inviteUserInvitationAction(formData);
+                onClose();
+                setIsLoading(false);
+              }}
+            >
               <ModalHeader className='flex flex-col gap-1'>プロジェクトに招待</ModalHeader>
               <ModalBody>
                 {/** Emailで招待 */}
