@@ -24,6 +24,8 @@ export const PreviewComponent = ({ oms, sms, config }: PreviewNinjaProps) => {
   useEffect(() => {
     const _config = config || initTpConfig();
     const _njcFile = ExportNjcFile(oms, [], [], sms, _config, {});
+    // Previewモードでは、debugModeをfalseにする
+    _njcFile.config.isDebug = false;
     setNjcFile(_njcFile);
   }, []);
 
