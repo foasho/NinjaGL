@@ -13,9 +13,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-import { createProjectAction } from "./_actions";
-
-export const CreateButton = () => {
+export const CreateButton = ({ createProjectAction }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
   const [publish, setPublish] = useState(true);

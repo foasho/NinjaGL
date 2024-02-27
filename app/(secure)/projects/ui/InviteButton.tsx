@@ -12,12 +12,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-import { inviteUserInvitationAction } from "./_actions";
-
-type InviteButtonProps = {
-  projectId: number;
-};
-export const InviteButton = ({ projectId }: InviteButtonProps) => {
+export const InviteButton = ({ projectId, inviteUserInvitationAction }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
 

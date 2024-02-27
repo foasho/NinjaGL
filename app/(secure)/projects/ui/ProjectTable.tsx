@@ -5,9 +5,9 @@ import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow
 
 import { ProjectData } from "@/db/types";
 
-import { InviteButton } from "./_invite";
+import { InviteButton } from "./InviteButton";
 
-export const ProjectsTable = ({ projects = [] }: { projects: ProjectData[] }) => {
+export const ProjectsTable = ({ projects, inviteUserInvitationAction }) => {
   return (
     <Table aria-label='Example static collection table'>
       <TableHeader>
@@ -35,7 +35,7 @@ export const ProjectsTable = ({ projects = [] }: { projects: ProjectData[] }) =>
               >
                 開く
               </Button>
-              <InviteButton projectId={project.id} />
+              <InviteButton projectId={project.id} inviteUserInvitationAction={inviteUserInvitationAction} />
               <Button
                 target='_blank'
                 color='primary'

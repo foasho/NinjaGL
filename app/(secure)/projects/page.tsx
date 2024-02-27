@@ -2,8 +2,10 @@ import { headers } from "next/headers";
 
 import { CurrentHostUrl } from "@/utils";
 
-import { CreateButton } from "./_create";
-import { ProjectsTable } from "./_table";
+import { CreateButton } from "./ui/CreateButton";
+import { ProjectsTable } from "./ui/ProjectTable";
+
+import { createProjectAction, inviteUserInvitationAction } from "./actions";
 
 const getProjects = async () => {
   const projects = await fetch(`${CurrentHostUrl}/api/projects`, {
@@ -20,9 +22,9 @@ const ProjectsPage = async () => {
     <div className='px-16 pt-32'>
       <div className='mb-3 flex justify-between'>
         <div className='text-2xl text-white'>Projects</div>
-        <CreateButton />
+        <CreateButton createProjectAction={createProjectAction} />
       </div>
-      <ProjectsTable projects={projects} />
+      <ProjectsTable projects={projects} inviteUserInvitationAction={inviteUserInvitationAction} />
     </div>
   );
 };
