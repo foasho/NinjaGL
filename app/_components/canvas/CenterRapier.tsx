@@ -8,7 +8,6 @@ import { MathUtils, Vector3 } from "three";
 import { Apple } from "./Rapiers/Apple";
 import { Bomb } from "./Rapiers/Bomb";
 import { Coin } from "./Rapiers/Coin";
-import { OculusRift } from "./Rapiers/OculusRift";
 import { OculusTouch } from "./Rapiers/OculusTouch";
 import { Shuriken } from "./Rapiers/Shuriken";
 import { Star } from "./Rapiers/Star";

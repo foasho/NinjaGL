@@ -42,7 +42,7 @@ const PreviewPage = async ({ searchParams }: PreviewPageProps) => {
   const { project, oms, sms, config } = projectData;
 
   // @ts-ignore
-  return <div>{project && <PreviewNinjaGL oms={oms} sms={sms} config={config} />}</div>;
+  return <div className="h-screen w-full">{project && <PreviewNinjaGL oms={oms} sms={sms} config={config} />}</div>;
 };
 
 export default PreviewPage;

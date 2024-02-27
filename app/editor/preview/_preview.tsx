@@ -1,5 +1,6 @@
 "use client";
-import { ExportNjcFile, IConfigParams, IObjectManagement, IScriptManagement, NinjaGL } from "@ninjagl/core";
+import dynamic from "next/dynamic";
+import { type IConfigParams, type IObjectManagement, type IScriptManagement } from "@ninjagl/core";
 
 type PreviewNinjaProps = {
   oms: IObjectManagement[];
@@ -7,6 +8,8 @@ type PreviewNinjaProps = {
   config: IConfigParams;
 };
 export const PreviewNinjaGL = ({ oms, sms, config }: PreviewNinjaProps) => {
-  const njcFile = ExportNjcFile(oms, [], [], sms, config, {});
-  return <>{njcFile && <NinjaGL njc={njcFile} isSplashScreen={false}></NinjaGL>}</>;
+  const Preview = dynamic(() => import("@/commons/Preview").then((mod) => mod.PreviewComponent), {
+    ssr: false,
+  });
+  return <Preview oms={oms} sms={sms} config={config} />;
 };
