@@ -29,7 +29,9 @@ const withPWA = nextPWA({
 
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {},
+  experimental: {
+    serverActions: true,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
