@@ -98,7 +98,8 @@
     "three-custom-shader-material": "^5.4.0",
     "three-stdlib": "^2.26.13",
     "tunnel-rat": "^0.1.2",
-    "valtio": "^1.10.4"
+    "valtio": "^1.10.4",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@auth/core": "^0.19.0",
