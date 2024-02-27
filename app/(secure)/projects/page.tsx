@@ -5,8 +5,6 @@ import { CurrentHostUrl } from "@/utils";
 import { CreateButton } from "./ui/CreateButton";
 import { ProjectsTable } from "./ui/ProjectTable";
 
-import { createProjectAction, inviteUserInvitationAction } from "./actions";
-
 const getProjects = async () => {
   const projects = await fetch(`${CurrentHostUrl}/api/projects`, {
     // next: { revalidate: 3600, tags: ["all", "projects"] },
@@ -22,9 +20,9 @@ const ProjectsPage = async () => {
     <div className='px-16 pt-32'>
       <div className='mb-3 flex justify-between'>
         <div className='text-2xl text-white'>Projects</div>
-        <CreateButton createProjectAction={createProjectAction} />
+        <CreateButton />
       </div>
-      <ProjectsTable projects={projects} inviteUserInvitationAction={inviteUserInvitationAction} />
+      <ProjectsTable projects={projects} />
     </div>
   );
 };

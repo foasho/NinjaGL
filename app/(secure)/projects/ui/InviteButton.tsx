@@ -12,7 +12,10 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-export const InviteButton = ({ projectId, inviteUserInvitationAction }) => {
+import { inviteUserInvitationAction } from "../actions";
+
+export const InviteButton = ({ projectId }) => {
+  const inviteUserInvitationActionBind = inviteUserInvitationAction.bind(null, projectId);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,7 +30,7 @@ export const InviteButton = ({ projectId, inviteUserInvitationAction }) => {
             <form
               action={async (formData) => {
                 setIsLoading(true);
-                await inviteUserInvitationAction(formData);
+                await inviteUserInvitationActionBind(formData);
                 onClose();
                 setIsLoading(false);
               }}

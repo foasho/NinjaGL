@@ -8,7 +8,7 @@ import { getUserByEmail } from "@/db/crud/user";
 import { CreateProjectData, InviteProjectData } from "@/db/types";
 import { getMergedSessionServer } from "@/middleware";
 
-const _createProjectAction = async (project: FormData) => {
+const _createProjectAction = async (_blank, project: FormData) => {
   const session = await getServerSession();
   if (!session) return;
   const { user } = await getMergedSessionServer(session);

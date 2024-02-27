@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { HiCube, HiInformationCircle } from "react-icons/hi2";
 import {
   Button,
@@ -13,9 +14,12 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-export const CreateButton = ({ createProjectAction }) => {
+import { createProjectAction } from "../actions";
+
+export const CreateButton = () => {
+  const { pending } = useFormStatus();
+  const createProjectActionBind = createProjectAction.bind(null, {});
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [isLoading, setIsLoading] = useState(false);
   const [publish, setPublish] = useState(true);
 
   return (
@@ -28,10 +32,8 @@ export const CreateButton = ({ createProjectAction }) => {
           {(onClose) => (
             <form
               action={async (formData) => {
-                setIsLoading(true);
-                await createProjectAction(formData);
+                await createProjectActionBind(formData);
                 onClose();
-                setIsLoading(false);
               }}
             >
               <ModalHeader className='flex flex-col gap-1'>新しいプロジェクトを作成</ModalHeader>
@@ -64,7 +66,7 @@ export const CreateButton = ({ createProjectAction }) => {
                 <Button color='danger' variant='light' onPress={onClose}>
                   キャンセル
                 </Button>
-                <Button color='primary' type='submit' isLoading={isLoading} disabled={isLoading}>
+                <Button color='primary' type='submit' isLoading={pending} disabled={pending}>
                   作成
                 </Button>
               </ModalFooter>
