@@ -93,3 +93,13 @@ export const OMArgs2Class = (om: IObjectManagement): IObjectManagement => {
   data.args = args;
   return data;
 };
+
+/**
+ * OMのDeepCopy
+ */
+export const DeepCopyOM = (om: IObjectManagement): IObjectManagement => {
+  // return JSON.parse(JSON.stringify(om));
+  const omonj = JSON.stringify(om);
+  const omclass = OMArgs2Class(JSON.parse(omonj));
+  return omclass;
+};

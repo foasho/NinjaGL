@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import { OMPhysicsType } from "@ninjagl/core";
@@ -14,11 +14,8 @@ export const Physics = () => {
   const { t } = useTranslation();
   const om = getOMById(id);
 
-  const [isPhysics, setIsPhysics] = useState(false);
-  const [isMoveable, setIsMoveable] = useState(false);
-
-  const [phyTypeOpt, setPhyTypeOpt] = useState<{ value: OMPhysicsType; label: string }>();
-
+  const [isPhysics, setIsPhysics] = useState(om?.physics);
+  const [isMoveable, setIsMoveable] = useState(om?.moveable);
   // 物理判定選択肢
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const physicsOptions: { value: OMPhysicsType; label: string }[] = [
@@ -26,19 +23,8 @@ export const Physics = () => {
     { value: "capsule", label: t("capsule") },
     { value: "sphere", label: t("sphere") },
   ];
-
-  useEffect(() => {
-    if (om) {
-      setIsPhysics(om.physics);
-      setIsMoveable(om.moveable ? true : false);
-      const opt = physicsOptions.find((option) => option.value == om.phyType);
-      if (opt) setPhyTypeOpt(opt);
-      else if (phyTypeOpt !== physicsOptions[0]) {
-        // boxがデフォルト
-        setPhyTypeOpt(physicsOptions[0]);
-      }
-    }
-  }, [om, phyTypeOpt, physicsOptions]);
+  const opt = physicsOptions.find((option) => option.value == om?.phyType);
+  const [phyTypeOpt, setPhyTypeOpt] = useState<{ value: OMPhysicsType; label: string }>(opt ?? physicsOptions[0]);
 
   /**
    * 物理判定の有無

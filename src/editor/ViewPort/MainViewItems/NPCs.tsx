@@ -9,7 +9,7 @@ import { editorStore } from "@/editor/Store/Store";
 import { AnimationHelper } from "@/helpers/AnimationHelper";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from "./PivoitControl";
+import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 const _NPCs = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -38,14 +38,19 @@ const _NPCs = () => {
 
 const _NPC = ({ ...om }: IObjectManagement) => {
   const ref = useRef<Group>(null);
+  const grapComponent = useRef<DragStartComponentProps | null>(null);
   const state = useSnapshot(editorStore);
   const { scene, animations } = useGLTF(om.args.url || "/models/ybot.glb") as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const editor = useNinjaEditor();
+  const id = om.id;
 
-  // 操作系
-  const onDragStart = () => {
+  const onDragStart = (props: OnDragStartProps) => {
     editorStore.pivotControl = true;
+    grapComponent.current = props.component;
+  };
+  const onDragEnd = () => {
+    grapComponent.current = null;
   };
 
   const onDrag = (e: Matrix4) => {
@@ -53,10 +58,13 @@ const _NPC = ({ ...om }: IObjectManagement) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(om.id, position);
-    editor.setScale(om.id, scale);
-    editor.setRotation(om.id, rotation);
-    editorStore.pivotControl = true;
+    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
+      editor.setPosition(id, position);
+    } else if (grapComponent.current === "Scale") {
+      editor.setScale(id, scale);
+    } else if (grapComponent.current === "Rotator") {
+      editor.setRotation(id, rotation);
+    }
   };
 
   useEffect(() => {
@@ -83,7 +91,7 @@ const _NPC = ({ ...om }: IObjectManagement) => {
       // animationsもコピー
       clone.animations = animations;
       if (om.id) {
-        editor.setArg(om.id, "animations", animations);
+        editor.setArg(om.id, "animations", animations, false);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {
@@ -107,7 +115,8 @@ const _NPC = ({ ...om }: IObjectManagement) => {
           lineWidth={2}
           anchor={[0, 0, 0]}
           onDrag={(e) => onDrag(e)}
-          onDragStart={() => onDragStart()}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
         />
       )}
       {clone && (

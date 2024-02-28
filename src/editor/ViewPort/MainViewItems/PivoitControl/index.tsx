@@ -4,9 +4,11 @@ import * as THREE from "three";
 
 import { AxisArrow } from "./AxisArrow";
 import { AxisRotator } from "./AxisRotator";
-import { context, OnDragStartProps, resolveObject } from "./context";
+import { context, DragStartComponentProps, OnDragStartProps, resolveObject } from "./context";
 import { PlaneSlider } from "./PlaneSlider";
 import { SphereScale } from "./SphereScale";
+
+export type { DragStartComponentProps, OnDragStartProps };
 
 const tV0 = new THREE.Vector3();
 const tV1 = new THREE.Vector3();
@@ -107,6 +109,8 @@ type PivotControlsProps = {
   opacity?: number;
   visible?: boolean;
   userData?: { [key: string]: any };
+  rockScale?: boolean; // Scale比率をロック
+  hiddenScale?: boolean; // Scaleを非表示
   children?: React.ReactNode;
 };
 
@@ -139,6 +143,8 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
       opacity = 1,
       visible = true,
       userData,
+      rockScale = false,
+      hiddenScale = false,
       children,
     },
     fRef,
@@ -301,9 +307,9 @@ export const PivotControls = React.forwardRef<THREE.Group, PivotControlsProps>(
               {!disableAxes && activeAxes[1] && <AxisArrow axis={1} direction={yDir} />}
               {!disableAxes && activeAxes[2] && <AxisArrow axis={2} direction={zDir} />}
 
-              {!disableAxes && activeAxes[0] && <SphereScale axis={0} direction={xDir} />}
-              {!disableAxes && activeAxes[1] && <SphereScale axis={1} direction={yDir} />}
-              {!disableAxes && activeAxes[2] && <SphereScale axis={2} direction={zDir} />}
+              {!hiddenScale && !disableAxes && activeAxes[0] && <SphereScale axis={0} direction={xDir} />}
+              {!hiddenScale && !disableAxes && activeAxes[1] && <SphereScale axis={1} direction={yDir} />}
+              {!hiddenScale && !disableAxes && activeAxes[2] && <SphereScale axis={2} direction={zDir} />}
 
               {!disableSliders && activeAxes[0] && activeAxes[1] && <PlaneSlider axis={2} dir1={xDir} dir2={yDir} />}
               {!disableSliders && activeAxes[0] && activeAxes[2] && <PlaneSlider axis={1} dir1={zDir} dir2={xDir} />}

@@ -10,7 +10,7 @@ import { editorStore } from "@/editor/Store/Store";
 import { AnimationHelper } from "@/helpers/AnimationHelper";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from "./PivoitControl";
+import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 /**
  * シーン上で構築される基本的なオブジェクト
@@ -47,6 +47,7 @@ export const StaticObjects = () => {
  * @returns
  */
 const StaticObject = ({ om }) => {
+  const grapComponent = useRef<DragStartComponentProps|null>(null);
   const state = useSnapshot(editorStore);
   const [modelUrl, setModelUrl] = useState<string>(om.args.url);
   const { scene, animations } = useGLTF(modelUrl) as GLTF;
@@ -54,19 +55,27 @@ const StaticObject = ({ om }) => {
   const ref = useRef<Group>(null);
   const { setPosition, setRotation, setScale, setArg, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
   const id = om.id;
-  const onDragStart = () => {
+
+  const onDragStart = (props: OnDragStartProps) => {
     editorStore.pivotControl = true;
+    grapComponent.current = props.component;
   };
-  const onDragEnd = () => {};
+  const onDragEnd = () => {
+    grapComponent.current = null;
+  };
+
   const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    setPosition(id, position);
-    setScale(id, scale);
-    setRotation(id, rotation);
-    editorStore.pivotControl = true;
+    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
+      setPosition(id, position);
+    } else if (grapComponent.current === "Scale") {
+      setScale(id, scale);
+    } else if (grapComponent.current === "Rotator") {
+      setRotation(id, rotation);
+    }
   };
 
   useEffect(() => {
@@ -118,7 +127,7 @@ const StaticObject = ({ om }) => {
       // animationsもコピー
       clone.animations = animations;
       if (id) {
-        setArg(id, "animations", animations);
+        setArg(id, "animations", animations, false);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {
@@ -148,7 +157,7 @@ const StaticObject = ({ om }) => {
           lineWidth={2}
           anchor={[0, 0, 0]}
           onDrag={(e) => onDrag(e)}
-          onDragStart={() => onDragStart()}
+          onDragStart={onDragStart}
           onDragEnd={() => onDragEnd()}
         />
       )}

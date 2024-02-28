@@ -9,7 +9,7 @@ import { EnableClickTrigger } from "@/commons/functional";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from "./PivoitControl";
+import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 const _MyTexts = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -37,6 +37,7 @@ const _MyTexts = () => {
 
 const _Text = ({ om }) => {
   const ref = useRef<any>();
+  const grapComponent = useRef<DragStartComponentProps | null>(null);
   const { camera } = useThree();
   const font = om.args.font || "/fonts/MPLUS.ttf";
   const state = useSnapshot(editorStore);
@@ -46,8 +47,12 @@ const _Text = ({ om }) => {
   const id = om.id;
 
   // 操作系
-  const onDragStart = () => {
+  const onDragStart = (props: OnDragStartProps) => {
     editorStore.pivotControl = true;
+    grapComponent.current = props.component;
+  };
+  const onDragEnd = () => {
+    grapComponent.current = null;
   };
 
   const onDrag = (e: Matrix4) => {
@@ -55,10 +60,13 @@ const _Text = ({ om }) => {
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
-    editorStore.pivotControl = true;
+    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
+      editor.setPosition(id, position);
+    } else if (grapComponent.current === "Scale") {
+      editor.setScale(id, scale);
+    } else if (grapComponent.current === "Rotator") {
+      editor.setRotation(id, rotation);
+    }
   };
 
   useEffect(() => {
@@ -101,7 +109,8 @@ const _Text = ({ om }) => {
           lineWidth={2}
           anchor={[0, 0, 0]}
           onDrag={(e) => onDrag(e)}
-          onDragStart={() => onDragStart()}
+          onDragStart={onDragStart}
+          onDragEnd={() => onDragEnd()}
         />
       )}
       <Text
