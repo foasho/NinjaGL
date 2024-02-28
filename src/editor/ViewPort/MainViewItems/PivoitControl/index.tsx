@@ -4,11 +4,11 @@ import * as THREE from "three";
 
 import { AxisArrow } from "./AxisArrow";
 import { AxisRotator } from "./AxisRotator";
-import { context, OnDragStartProps, resolveObject, DragStartComponentProps } from "./context";
+import { context, DragStartComponentProps, OnDragStartProps, resolveObject } from "./context";
 import { PlaneSlider } from "./PlaneSlider";
 import { SphereScale } from "./SphereScale";
 
-export type { OnDragStartProps, DragStartComponentProps };
+export type { DragStartComponentProps, OnDragStartProps };
 
 const tV0 = new THREE.Vector3();
 const tV1 = new THREE.Vector3();
