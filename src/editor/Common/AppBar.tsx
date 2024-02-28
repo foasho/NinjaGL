@@ -131,7 +131,7 @@ export const AppBar = () => {
       if (completeAlert) {
         toast(
           <div>
-            {t("saveComplete")}
+            {t("completeSave")}
             <br />
             <a className='pt-2 text-xs text-cyan-400 underline' href={href} download={`${name}.njc`}>
               ダウンロード

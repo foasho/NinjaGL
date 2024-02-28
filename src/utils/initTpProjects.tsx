@@ -10,7 +10,9 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "avatar",
         url: "/models/ybot.glb",
-        position: new Vector3(0, 0, 0),
+        position: new Vector3(0, 3.5, 0),
+        rotation: new Euler(0, 0, 0),
+        scale: new Vector3(1, 1, 1),
         castShadow: true,
         receiveShadow: true,
         animationLoop: true,
