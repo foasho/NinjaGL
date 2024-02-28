@@ -317,12 +317,14 @@ export const initTpOms = (): IObjectManagement[] => {
         talkSpeed: 1.5,
         isSpeak: true,
         defaultAnimation: "Idle",
+        system:
+          "あなたはゲームのNPCとしての会話をふるまってください。私がPlayerで、これから会話シミュレーションを行います。返答はこれから行う入力言語に合わせてください。",
       },
       physics: false,
       phyType: "capsule",
       visibleType: "force",
       visible: true,
-    }
+    },
   ];
 };
 

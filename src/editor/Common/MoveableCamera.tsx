@@ -81,9 +81,12 @@ export const MoveableCameraControl = (props: ICameraControl) => {
       upDirection.multiplyScalar(distance);
       rightDirection.multiplyScalar(distance);
       forwardDirection.multiplyScalar(distance);
+      // 縦方向を0.75倍の高さに
+      upDirection.y = upDirection.y * 0.5;
 
       // ターゲットに上方向ベクトル、右方向ベクトル、背後方向ベクトルを加算して、フォーカス位置を計算
       const focusPosition = new Vector3().addVectors(target, upDirection).add(rightDirection).add(forwardDirection);
+
 
       cameraRef.current!.position.copy(focusPosition);
       cameraRef.current!.lookAt(target);
@@ -112,7 +115,7 @@ export const MoveableCameraControl = (props: ICameraControl) => {
     if (focusOnObject && state.currentId) {
       targetFocusCamera(state.currentId);
     }
-    if (!input.dash && (input.forward || input.backward || input.right || input.left)) {
+    if (!input.dash && (input.forward || input.backward || input.right || input.left) && !state.currentId) {
       const st = props.cameraSpeed * delta * 10;
       const cameraDirection = cd;
       cameraRef.current!.getWorldDirection(cameraDirection);

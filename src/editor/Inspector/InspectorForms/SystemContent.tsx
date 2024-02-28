@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Textarea } from "@nextui-org/react";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
@@ -22,13 +23,13 @@ export const SystemContent = () => {
 
   return (
     <div className='mt-2'>
-      <div className='text-sm font-bold'>{t("system")}</div>
+      <div className='text-sm font-bold'>{t("systemPropmt")}</div>
       <div className='flex w-full justify-between'>
-        <input
-          type='text'
+        <Textarea
+          label={"System (GPT-3.5)"}
           placeholder={om && om.args.system ? om.args.system : ""}
           onChange={updateSystem}
-          className='mr-0.5 w-[calc(100%-10px)] rounded-md border-none bg-[#3a3939] px-2.5 py-1.5 text-right text-[#f2f2f2] shadow-lg outline-none'
+          w-full
         />
       </div>
     </div>
