@@ -7,6 +7,7 @@ import { MutableRefObject, useEffect, useRef } from "react";
 import { throttle } from "lodash-es";
 
 import { globalEditorStore } from "@/editor/Store/editor";
+import { DeepCopyOM } from "@/utils/convs";
 
 interface IHistory {
   type: "add" | "remove" | "update";
@@ -46,7 +47,7 @@ export const useRedoUndo = ({
       }
     }
   };
-  const addHistory = throttle(_addHistory, 500);
+  const addHistory = throttle(_addHistory, 1500);
 
   /**
    * 元に戻す
@@ -59,13 +60,14 @@ export const useRedoUndo = ({
     if (!last) {
       return;
     }
+
     if (last.objectType === "object" && last.om !== undefined) {
       if (last.type === "add") {
         // OMにidがあれば削除
         if (oms.current.find((om) => om.id === last.om!.id)) {
           oms.current = oms.current.filter((om) => om.id !== last.om!.id);
           // historyに追加
-          addHistory("redo", {
+          _addHistory("redo", {
             type: "remove",
             objectType: "object",
             changedArg: last.changedArg,
@@ -80,7 +82,7 @@ export const useRedoUndo = ({
           // setOMs([...oms, last.om]);
           oms.current = [...oms.current, last.om];
           // historyに追加
-          addHistory("redo", {
+          _addHistory("redo", {
             type: "add",
             objectType: "object",
             changedArg: last.changedArg,
@@ -90,23 +92,20 @@ export const useRedoUndo = ({
         }
       }
       if (last.type === "update") {
-        console.log("uhdo =>", history.current.undo);
         // OMを更新
         const target = oms.current.find((om) => om.id === last.om!.id);
         if (!target) {
           return;
         }
-        console.log("prev args.position =>", target.args);
-        target.args = { ...last.om!.args };
-        console.log("next args.position =>", last.om!.args);
-        notifyOMIdChanged(target.id);
         // historyに追加
-        addHistory("redo", {
+        _addHistory("redo", {
           type: "update",
           objectType: "object",
           changedArg: last.changedArg,
-          om: target,
+          om: DeepCopyOM(target),
         });
+        target.args = DeepCopyOM(last.om).args;
+        notifyOMIdChanged(target.id);
       }
     }
   };
@@ -128,7 +127,7 @@ export const useRedoUndo = ({
         if (!oms.current.find((om) => om.id === last.om!.id)) {
           oms.current = [...oms.current, last.om];
           // historyに追加
-          addHistory("undo", {
+          _addHistory("undo", {
             type: "add",
             objectType: "object",
             changedArg: last.changedArg,
@@ -142,7 +141,7 @@ export const useRedoUndo = ({
         if (oms.current.find((om) => om.id === last.om!.id)) {
           oms.current = oms.current.filter((om) => om.id !== last.om!.id);
           // historyに追加
-          addHistory("undo", {
+          _addHistory("undo", {
             type: "remove",
             objectType: "object",
             changedArg: last.changedArg,
@@ -158,8 +157,9 @@ export const useRedoUndo = ({
           return;
         }
         target.args = last.om.args;
+        notifyOMIdChanged(target.id);
         // historyに追加
-        addHistory("undo", {
+        _addHistory("undo", {
           type: "update",
           objectType: "object",
           changedArg: last.changedArg,

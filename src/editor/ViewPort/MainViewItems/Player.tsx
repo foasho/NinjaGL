@@ -9,11 +9,9 @@ import { Loading3D } from "@/commons/Loading3D";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from "./PivoitControl";
+import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 export const Avatar = () => {
-  // const { getAvatarOM } = useNinjaEditor();
-  // const om = getAvatarOM();
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
   const [player, setPlayer] = useState<IObjectManagement>();
   useEffect(() => {
@@ -35,6 +33,7 @@ export const Avatar = () => {
  * アバターデータ
  */
 export const Player = ({ om }) => {
+  const grapComponent = useRef<DragStartComponentProps|null>(null);
   const state = useSnapshot(editorStore);
   const { scene, animations } = useGLTF(om.args.url) as GLTF;
   const [clone, setClone] = useState<Object3D>();
@@ -52,19 +51,26 @@ export const Player = ({ om }) => {
     offOMIdChanged,
   } = useNinjaEditor();
   const id = om.id;
-  const onDragStart = () => {
+  const onDragStart = (props: OnDragStartProps) => {
     editorStore.pivotControl = true;
+    grapComponent.current = props.component;
   };
-  const onDragEnd = () => {};
+  const onDragEnd = () => {
+    grapComponent.current = null;
+  };
+
   const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    setPosition(id, position);
-    setScale(id, scale);
-    setRotation(id, rotation);
-    editorStore.pivotControl = true;
+    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
+      setPosition(id, position);
+    } else if (grapComponent.current === "Scale") {
+      setScale(id, scale);
+    } else if (grapComponent.current === "Rotator") {
+      setRotation(id, rotation);
+    }
   };
 
   useEffect(() => {
@@ -127,7 +133,7 @@ export const Player = ({ om }) => {
           lineWidth={2}
           anchor={[0, 0, 0]}
           onDrag={(e) => onDrag(e)}
-          onDragStart={() => onDragStart()}
+          onDragStart={onDragStart}
           onDragEnd={() => onDragEnd()}
         />
       )}

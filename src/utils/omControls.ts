@@ -16,6 +16,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
           type: value,
           castShadow: true,
           receiveShadow: false,
+          position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: false,
         phyType: "box",
@@ -40,6 +43,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         args: {
           // @ts-ignore
           type: value,
+          position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: false,
         phyType: "box",
@@ -54,6 +60,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         args: {
           // @ts-ignore
           type: value,
+          position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: true,
         phyType: "box",
@@ -156,6 +165,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         args: {
           // @ts-ignore
           type: value,
+          position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
           width: 5,
           height: 5,
           widthSegments: 12,
@@ -174,6 +186,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         args: {
           // @ts-ignore
           type: value,
+          position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: true,
         phyType: "box",
@@ -187,7 +202,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         type: "text",
         args: {
           content: "テキスト",
+          position: new Vector3(0, 0, 0),
           rotation: new Euler(0, -Math.PI, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: false,
         phyType: "box",
@@ -201,7 +218,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         type: "text3d",
         args: {
           content: "テキスト",
+          position: new Vector3(0, 0, 0),
           rotation: new Euler(0, -Math.PI, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: false,
         phyType: "box",
@@ -222,6 +241,9 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
           talkSpeed: 1.0,
           isSpeak: true,
           defaultAnimation: "Idle",
+          position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
         },
         physics: false,
         phyType: "capsule",
@@ -236,6 +258,8 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
         args: {
           url: "/audios/planetarium_garden.mp3",
           position: new Vector3(0, 0, 0),
+          rotation: new Euler(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
           distance: 16,
           loop: true,
           autoplay: true,

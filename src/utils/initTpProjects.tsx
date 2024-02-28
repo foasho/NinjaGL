@@ -28,6 +28,7 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "box",
         position: new Vector3(-5, 0.5, 5),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(1, 1, 1),
         materialData: {
           type: "standard",
@@ -48,6 +49,7 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "box",
         position: new Vector3(0, 2, 16),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(32, 4, 0.2),
         materialData: {
           type: "standard",
@@ -68,6 +70,8 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "directional",
         position: new Vector3(14, 7, 8),
+        rotation: new Euler(0, 0, 0),
+        scale: new Vector3(1, 1, 1),
         materialData: {
           type: "standard",
           value: "#e3dfcc",
@@ -87,6 +91,8 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "spot",
         position: new Vector3(-6, 10, -22),
+        rotation: new Euler(0, 0, 0),
+        scale: new Vector3(1, 1, 1),
         materialData: {
           type: "standard",
           value: "#FDF1D9",
@@ -144,6 +150,7 @@ export const initTpOms = (): IObjectManagement[] => {
         color: "#ffeb38",
         intensity: 1,
         position: new Vector3(-5, 5, -5),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(3, 3, 3),
         lookAt: new Vector3(0, 0, 0),
         isFloat: true,
@@ -162,6 +169,7 @@ export const initTpOms = (): IObjectManagement[] => {
         color: "#e60b0b",
         intensity: 10,
         position: new Vector3(10, 5, 10),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(3, 3, 3),
         lookAt: new Vector3(0, 0, 0),
         isFloat: true,
@@ -178,10 +186,11 @@ export const initTpOms = (): IObjectManagement[] => {
       type: "text3d",
       args: {
         content: "Welcome to \nNinjaGL!",
+        position: new Vector3(4, 7, 9),
         rotation: new Euler(0, -Math.PI, 0),
+        scale: new Vector3(1, 1, 1),
         color: "#4785FF",
         intensity: 10,
-        position: new Vector3(4, 7, 9),
       },
       physics: false,
       phyType: "box",
@@ -196,6 +205,7 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "box",
         position: new Vector3(-5, 1, 5),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(2, 2, 3),
         materialData: {
           type: "standard",
@@ -216,6 +226,7 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "box",
         position: new Vector3(-5, 0.5, 2.5),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(2, 1, 2),
         materialData: {
           type: "standard",
@@ -236,6 +247,7 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "box",
         position: new Vector3(-1, 1, 6),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(6, 2, 1),
         materialData: {
           type: "standard",
@@ -256,6 +268,7 @@ export const initTpOms = (): IObjectManagement[] => {
       args: {
         type: "box",
         position: new Vector3(2, 1, 8.5),
+        rotation: new Euler(0, 0, 0),
         scale: new Vector3(1, 2, 6),
         materialData: {
           type: "standard",
@@ -297,6 +310,7 @@ export const initTpOms = (): IObjectManagement[] => {
         url: "/models/ybot.glb",
         position: new Vector3(3, 0, 3),
         rotation: new Euler(0, Math.PI / 4, 0),
+        scale: new Vector3(1, 1, 1),
         trackingRotation: true,
         castShadow: true,
         receiveShadow: true,

@@ -1,8 +1,9 @@
 import * as React from "react";
 import * as THREE from "three";
 
+export type DragStartComponentProps = "Arrow" | "Slider" | "Rotator" | "Scale";
 export type OnDragStartProps = {
-  component: "Arrow" | "Slider" | "Rotator" | "Scale";
+  component: DragStartComponentProps;
   axis: 0 | 1 | 2;
   origin: THREE.Vector3;
   directions: THREE.Vector3[];

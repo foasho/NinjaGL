@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Environment, Float, Lightformer } from "@react-three/drei";
-import { DoubleSide, Euler, Vector3 } from "three";
+import { DoubleSide, Euler, Matrix4, Vector3 } from "three";
 import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
-import { PivotControls } from "./PivoitControl";
+import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 /**
  * Environment
@@ -71,25 +71,32 @@ export const MyEnviroment = () => {
 };
 
 const LightFormerControl = ({ om }) => {
+  const grapComponent = useRef<DragStartComponentProps|null>(null);
   const editor = useNinjaEditor();
   const catchRef = useRef<any>();
   const state = useSnapshot(editorStore);
   const id = om.id;
 
-  const onDragStart = () => {
+  const onDragStart = (props: OnDragStartProps) => {
     editorStore.pivotControl = true;
+    grapComponent.current = props.component;
   };
-  const onDragEnd = () => {};
+  const onDragEnd = () => {
+    grapComponent.current = null;
+  };
 
-  const onDrag = (e) => {
+  const onDrag = (e: Matrix4) => {
     // 位置/回転率の確認
     const position = new Vector3().setFromMatrixPosition(e);
     const rotation = new Euler().setFromRotationMatrix(e);
     const scale = new Vector3().setFromMatrixScale(e);
-    editor.setPosition(id, position);
-    editor.setScale(id, scale);
-    editor.setRotation(id, rotation);
-    editorStore.pivotControl = true;
+    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
+      editor.setPosition(id, position);
+    } else if (grapComponent.current === "Scale") {
+      editor.setScale(id, scale);
+    } else if (grapComponent.current === "Rotator") {
+      editor.setRotation(id, rotation);
+    }
   };
 
   useEffect(() => {
@@ -112,7 +119,7 @@ const LightFormerControl = ({ om }) => {
           lineWidth={2}
           anchor={[0, 0, 0]}
           onDrag={(e) => onDrag(e)}
-          onDragStart={() => onDragStart()}
+          onDragStart={onDragStart}
           onDragEnd={() => onDragEnd()}
         />
       )}

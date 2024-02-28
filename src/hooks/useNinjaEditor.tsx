@@ -310,7 +310,7 @@ export const NinjaEditorProvider = ({
    */
   const _setPosition = (id: string, position: Vector3) => {
     const target = oms.current.find((om) => om.id === id);
-    if (target) {
+    if (target && target.args.position !== position) {
       target.args.position = position;
       notifyOMIdChanged(id);
       updateOM(target, "position");
@@ -323,7 +323,7 @@ export const NinjaEditorProvider = ({
     }
     return target.args.position;
   };
-  const setPosition = debounce(_setPosition, 100);
+  const setPosition = throttle(_setPosition, 100);
 
   /**
    * 特定のObjectのRotationを変更
@@ -332,7 +332,7 @@ export const NinjaEditorProvider = ({
    */
   const _setRotation = (id: string, rotation: Euler) => {
     const target = oms.current.find((om) => om.id === id);
-    if (target) {
+    if (target && target.args.rotation !== rotation) {
       target.args.rotation = rotation;
       notifyOMIdChanged(id);
       updateOM(target, "rotation");
@@ -354,7 +354,7 @@ export const NinjaEditorProvider = ({
    */
   const _setScale = (id: string, scale: Vector3) => {
     const target = oms.current.find((om) => om.id === id);
-    if (target) {
+    if (target && target.args.scale !== scale) {
       target.args.scale = scale;
       notifyOMIdChanged(id);
       updateOM(target, "scale");
@@ -374,7 +374,7 @@ export const NinjaEditorProvider = ({
    * @param id
    * @param material Material
    */
-  const setMaterialData = (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => {
+  const _setMaterialData = (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
       updateOM(target, "materialData");
@@ -392,6 +392,7 @@ export const NinjaEditorProvider = ({
     }
     return target.args.materialData;
   };
+  const setMaterialData = debounce(_setMaterialData, 100);
 
   /**
    * argの変更
@@ -450,8 +451,7 @@ export const NinjaEditorProvider = ({
     notifyOMsChanged();
     if (projectId) sendServerOM(projectId, om);
   };
-  const _updateOM = (om: IObjectManagement, changedArg: string) => {
-    console.log(om.args.materialData)
+  const updateOM = (om: IObjectManagement, changedArg: string) => {
     // historyに追加
     addHistory("undo", {
       type: "update",
@@ -460,7 +460,6 @@ export const NinjaEditorProvider = ({
       om: DeepCopyOM(om),
     });
   };
-  const updateOM = throttle(_updateOM, 1500);
   const removeOM = (id: string) => {
     // historyに追加
     addHistory("undo", {
