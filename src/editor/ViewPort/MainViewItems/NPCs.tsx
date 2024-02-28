@@ -83,7 +83,7 @@ const _NPC = ({ ...om }: IObjectManagement) => {
       // animationsもコピー
       clone.animations = animations;
       if (om.id) {
-        editor.setArg(om.id, "animations", animations);
+        editor.setArg(om.id, "animations", animations, false);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {

@@ -97,7 +97,7 @@ export const Player = ({ om }) => {
       // animationsもコピー
       clone.animations = animations;
       if (id) {
-        setArg(id, "animations", animations);
+        setArg(id, "animations", animations, false);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {

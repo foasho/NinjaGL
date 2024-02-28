@@ -1,6 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import {
+import type {
   IConfigParams,
   IObjectManagement,
   IScriptManagement,
@@ -9,14 +8,16 @@ import {
   NJCFile,
   OMPhysicsType,
 } from "@ninjagl/core";
-import { throttle } from "lodash-es";
+
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { debounce, throttle } from "lodash-es";
 import { Euler, Group, MathUtils, Object3D, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 import { MySwal } from "@/commons/Swal";
-import { globalEditorStore } from "@/editor/Store/editor";
 import { setInitConfig } from "@/editor/Store/Store";
-import { OMArgs2Class } from "@/utils/convs";
+import { useRedoUndo } from "@/services/redoundo";
+import { DeepCopyOM, OMArgs2Class } from "@/utils/convs";
 import { sendServerOM } from "@/utils/dataSync";
 import { initTpOms, initTpSms, initTpUis } from "@/utils/initTpProjects";
 
@@ -79,8 +80,6 @@ type NinjaEditorProp = {
   setCamera: (camera: OrbitControlsImpl) => void;
   setPlayerManager: (pm: IPlayerManager) => void;
   setSelectPlayerAnimation: (anim: string) => void;
-  undo: () => void;
-  redo: () => void;
   setName: (id: string, name: string) => void;
   setVisibleType: (id: string, visibleType: "force" | "auto") => void;
   setVisible: (id: string, visible: boolean) => void;
@@ -92,7 +91,7 @@ type NinjaEditorProp = {
   getScale: (id: string) => Vector3;
   setMaterialData: (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => void;
   getMaterialData: (id: string) => any;
-  setArg: (id: string, key: string, arg: any) => void;
+  setArg: (id: string, key: string, arg: any, notify?: boolean) => void;
   setPhysics: (id: string, physics: boolean) => void;
   setPhyType: (id: string, phyType: OMPhysicsType) => void;
   setMoveable: (id: string, moveable: boolean) => void;
@@ -137,8 +136,6 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   setCamera: () => {},
   setPlayerManager: () => {},
   setSelectPlayerAnimation: () => {},
-  undo: () => {},
-  redo: () => {},
   setName: () => {},
   setVisibleType: () => {},
   setVisible: () => {},
@@ -178,14 +175,6 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
 
 export const useNinjaEditor = () => useContext(NinjaEditorContext);
 
-interface IHistory {
-  type: "add" | "remove" | "update";
-  objectType: "object" | "ui"; // 今のところobjectのみ
-  om?: IObjectManagement;
-  um?: IUIManagement;
-}
-const HISTORY_MAX = 30; // 履歴の最大数
-
 type NinjaEditorProviderProps = {
   children: React.ReactNode;
   projectId?: number;
@@ -217,9 +206,6 @@ export const NinjaEditorProvider = ({
   const contentsSelect = useRef<boolean>(false);
   const contentsSelectType = useRef<ECBSelectType | null>(null);
   const contentsSelectPath = useRef<string | null>(null);
-  // 操作履歴
-  const updateTimeOut = useRef<NodeJS.Timeout | null>(null);
-  const history = useRef<{ undo: IHistory[]; redo: IHistory[] }>({ undo: [], redo: [] });
   // プレイヤーパラメータ
   const playerManager = useRef<IPlayerManager>({
     type: "avatar",
@@ -273,138 +259,6 @@ export const NinjaEditorProvider = ({
     };
   };
 
-  /**
-   * 元に戻す
-   */
-  const undo = () => {
-    if (history.current.undo.length === 0) {
-      return;
-    }
-    const last = history.current.undo.pop();
-    if (!last) {
-      return;
-    }
-    if (last.objectType === "object" && last.om !== undefined) {
-      if (last.type === "add") {
-        // OMにidがあれば削除
-        if (oms.current.find((om) => om.id === last.om!.id)) {
-          oms.current = oms.current.filter((om) => om.id !== last.om!.id);
-          // historyに追加
-          addHistory("redo", {
-            type: "remove",
-            objectType: "object",
-            om: last.om,
-          });
-          notifyOMsChanged();
-        }
-      }
-      if (last.type === "remove") {
-        // すでに同じIDがなければOMを追加
-        if (!oms.current.find((om) => om.id === last.om!.id)) {
-          // setOMs([...oms, last.om]);
-          oms.current = [...oms.current, last.om];
-          // historyに追加
-          addHistory("redo", {
-            type: "add",
-            objectType: "object",
-            om: last.om,
-          });
-          notifyOMsChanged();
-        }
-      }
-      if (last.type === "update") {
-        // OMを更新
-        const target = oms.current.find((om) => om.id === last.om!.id);
-        if (!target) {
-          return;
-        }
-        // console.log('prev args', target.args);
-        target.args = { ...last.om!.args };
-        // console.log('next args', target.args);
-        notifyOMIdChanged(target.id);
-        // historyに追加
-        addHistory("redo", {
-          type: "update",
-          objectType: "object",
-          om: target,
-        });
-      }
-    }
-  };
-
-  /**
-   * やり直し
-   */
-  const redo = () => {
-    if (history.current.redo.length === 0) {
-      return;
-    }
-    const last = history.current.redo.pop();
-    if (!last) {
-      return;
-    }
-    if (last.objectType === "object" && last.om !== undefined) {
-      if (last.type === "add") {
-        // すでに同じIDがなければOMを追加
-        if (!oms.current.find((om) => om.id === last.om!.id)) {
-          oms.current = [...oms.current, last.om];
-          // historyに追加
-          addHistory("undo", {
-            type: "add",
-            objectType: "object",
-            om: last.om,
-          });
-          notifyOMsChanged();
-        }
-      }
-      if (last.type === "remove") {
-        // OMにIDがあれば削除
-        if (oms.current.find((om) => om.id === last.om!.id)) {
-          oms.current = oms.current.filter((om) => om.id !== last.om!.id);
-          // historyに追加
-          addHistory("undo", {
-            type: "remove",
-            objectType: "object",
-            om: last.om,
-          });
-          notifyOMsChanged();
-        }
-      }
-      if (last.type === "update") {
-        // OMを更新
-        const target = oms.current.find((om) => om.id === last.om!.id);
-        if (!target) {
-          return;
-        }
-        target.args = last.om.args;
-        // historyに追加
-        addHistory("undo", {
-          type: "update",
-          objectType: "object",
-          om: target,
-        });
-      }
-    }
-  };
-
-  /**
-   * undo/redo用の履歴を追加
-   */
-  const addHistory = (type: "undo" | "redo", newHistory: IHistory) => {
-    if (type === "undo") {
-      history.current.undo.push(newHistory);
-      if (history.current.undo.length > HISTORY_MAX) {
-        history.current.undo.shift();
-      }
-    }
-    if (type === "redo") {
-      history.current.redo.push(newHistory);
-      if (history.current.redo.length > HISTORY_MAX) {
-        history.current.redo.shift();
-      }
-    }
-  };
-
   const setCamera = (camera: OrbitControlsImpl) => {
     orbit.current = camera;
   };
@@ -425,7 +279,7 @@ export const NinjaEditorProvider = ({
     if (target) {
       target.name = name;
       notifyOMIdChanged(id);
-      updateOM(target);
+      updateOM(target, "name");
     }
   };
 
@@ -437,7 +291,7 @@ export const NinjaEditorProvider = ({
     if (target) {
       target.visibleType = visibleType;
       notifyOMIdChanged(id);
-      updateOM(target);
+      updateOM(target, "visibleType");
     }
   };
   const setVisible = (id: string, visible: boolean) => {
@@ -445,7 +299,7 @@ export const NinjaEditorProvider = ({
     if (target) {
       target.visible = visible;
       notifyOMIdChanged(id);
-      updateOM(target);
+      updateOM(target, "visible");
     }
   };
 
@@ -459,7 +313,7 @@ export const NinjaEditorProvider = ({
     if (target) {
       target.args.position = position;
       notifyOMIdChanged(id);
-      updateOM(target);
+      updateOM(target, "position");
     }
   };
   const getPosition = (id: string): Vector3 => {
@@ -469,7 +323,7 @@ export const NinjaEditorProvider = ({
     }
     return target.args.position;
   };
-  const setPosition = throttle(_setPosition, 100);
+  const setPosition = debounce(_setPosition, 100);
 
   /**
    * 特定のObjectのRotationを変更
@@ -481,7 +335,7 @@ export const NinjaEditorProvider = ({
     if (target) {
       target.args.rotation = rotation;
       notifyOMIdChanged(id);
-      updateOM(target);
+      updateOM(target, "rotation");
     }
   };
   const getRotation = (id: string): Euler => {
@@ -503,7 +357,7 @@ export const NinjaEditorProvider = ({
     if (target) {
       target.args.scale = scale;
       notifyOMIdChanged(id);
-      updateOM(target);
+      updateOM(target, "scale");
     }
   };
   const getScale = (id: string): Vector3 => {
@@ -523,12 +377,12 @@ export const NinjaEditorProvider = ({
   const setMaterialData = (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
+      updateOM(target, "materialData");
       target.args.materialData = {
         type: mtype,
         value: value,
       };
       notifyOMIdChanged(id);
-      updateOM(target);
     }
   };
   const getMaterialData = (id: string): any => {
@@ -546,9 +400,9 @@ export const NinjaEditorProvider = ({
   const setArg = (id: string, key: string, arg: any, notify = true) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
+      if (notify) updateOM({ ...target }, key);
       target.args[key] = arg;
       if (notify) notifyOMIdChanged(id);
-      updateOM(target);
     }
   };
 
@@ -588,6 +442,7 @@ export const NinjaEditorProvider = ({
     addHistory("undo", {
       type: "add",
       objectType: "object",
+      changedArg: "",
       om: om,
     });
     oms.current = [...oms.current, om];
@@ -595,25 +450,23 @@ export const NinjaEditorProvider = ({
     notifyOMsChanged();
     if (projectId) sendServerOM(projectId, om);
   };
-  const updateOM = (om: IObjectManagement) => {
-    // timeOutで1秒内の連続更新はされないようにする
-    if (updateTimeOut.current) {
-      clearTimeout(updateTimeOut.current);
-    }
-    updateTimeOut.current = setTimeout(() => {
-      // historyに追加
-      addHistory("undo", {
-        type: "update",
-        objectType: "object",
-        om: om,
-      });
-    }, 1000);
+  const _updateOM = (om: IObjectManagement, changedArg: string) => {
+    console.log(om.args.materialData)
+    // historyに追加
+    addHistory("undo", {
+      type: "update",
+      objectType: "object",
+      changedArg: changedArg,
+      om: DeepCopyOM(om),
+    });
   };
+  const updateOM = throttle(_updateOM, 1500);
   const removeOM = (id: string) => {
     // historyに追加
     addHistory("undo", {
       type: "remove",
       objectType: "object",
+      changedArg: "",
       om: oms.current.find((om) => om.id === id),
     });
     const newOms = oms.current.filter((om) => om.id !== id);
@@ -760,30 +613,11 @@ export const NinjaEditorProvider = ({
     njcChangedListeners.current.forEach((l) => l());
   };
 
-  const undoEvent = (e: KeyboardEvent) => {
-    // mainviewのときのみ
-    if (globalEditorStore.viewSelect !== "mainview") return;
-    if (e.ctrlKey && e.key === "z") {
-      undo();
-    } else if (e.ctrlKey && e.key === "y") {
-      redo();
-    }
-  };
-
   // 初期設定
   useEffect(() => {
     initialize();
     setReady(true);
   }, []);
-
-  // Undo/Redoの履歴を初期化
-  useEffect(() => {
-    // Ctrl + Zでundo
-    document.addEventListener("keydown", undoEvent);
-    return () => {
-      document.removeEventListener("keydown", undoEvent);
-    };
-  });
 
   const selectTemplate = (template: TemplateProps) => {
     switch (template) {
@@ -801,6 +635,9 @@ export const NinjaEditorProvider = ({
         break;
     }
   };
+
+  // 操作履歴
+  const { addHistory } = useRedoUndo({ oms, notifyOMsChanged, notifyOMIdChanged });
 
   return (
     <NinjaEditorContext.Provider
@@ -824,8 +661,6 @@ export const NinjaEditorProvider = ({
         setCamera,
         setPlayerManager,
         setSelectPlayerAnimation,
-        undo,
-        redo,
         setName,
         setVisibleType,
         setVisible,
