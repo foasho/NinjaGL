@@ -91,7 +91,7 @@ type NinjaEditorProp = {
   getScale: (id: string) => Vector3;
   setMaterialData: (id: string, mtype: "standard" | "phong" | "toon" | "shader" | "reflection", value: any) => void;
   getMaterialData: (id: string) => any;
-  setArg: (id: string, key: string, arg: any, notify?: boolean) => void;
+  setArg: (id: string, key: string, arg: any, notify?: boolean, updated?: boolean) => void;
   setPhysics: (id: string, physics: boolean) => void;
   setPhyType: (id: string, phyType: OMPhysicsType) => void;
   setMoveable: (id: string, moveable: boolean) => void;
@@ -398,10 +398,10 @@ export const NinjaEditorProvider = ({
    * argの変更
    * /CastShadow/Helper/Color/
    */
-  const setArg = (id: string, key: string, arg: any, notify = true) => {
+  const setArg = (id: string, key: string, arg: any, notify = true, updated = true) => {
     const target = oms.current.find((om) => om.id == id);
     if (target) {
-      if (notify) updateOM({ ...target }, key);
+      if (updated) updateOM({ ...target }, key);
       target.args[key] = arg;
       if (notify) notifyOMIdChanged(id);
     }

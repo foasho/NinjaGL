@@ -103,7 +103,7 @@ export const Player = ({ om }) => {
       // animationsもコピー
       clone.animations = animations;
       if (id) {
-        setArg(id, "animations", animations, false);
+        setArg(id, "animations", animations, true, false);
       }
       if (om.args.castShadow) {
         clone.traverse((node) => {
