@@ -108,6 +108,7 @@ export const AppBar = () => {
    * ビルド処理
    */
   const onSave = async (completeAlert: boolean = true) => {
+    if (loading) return;
     // Loadingでblobにまとめる
     setLoading(true);
     let name = projectName;
