@@ -30,3 +30,7 @@ export const createOrUpdateSm = async (projectId: number, id: string, body: Crea
     return _sm;
   }
 };
+
+export const deleteSmsByProjectId = async (projectId: number) => {
+  return await db.delete(sms).where(eq(sms.projectId, projectId));
+}

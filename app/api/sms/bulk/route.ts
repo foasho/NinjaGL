@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { getProjectsByUserId } from "@/db/crud/projects";
-import { createOrUpdateSm } from "@/db/crud/sms";
+import { createOrUpdateSm, deleteSmsByProjectId } from "@/db/crud/sms";
 import { getMergedSessionServer } from "@/middleware";
 
 export async function POST(req: Request) {
@@ -15,6 +15,8 @@ export async function POST(req: Request) {
   if (!projects.some((project) => project.id === Number(projectId))) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+  // smsの削除
+  await deleteSmsByProjectId(projectId);
   // smsの更新
   sms.forEach(async (sm) => {
     await createOrUpdateSm(projectId, sm.id, sm);

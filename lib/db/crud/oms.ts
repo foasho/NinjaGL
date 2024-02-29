@@ -55,3 +55,7 @@ export const createOrUpdateOm = async (projectId: number, id: string, body: Crea
 export const deleteOm = async (id: string) => {
   return await db.delete(oms).where(eq(oms.id, id));
 };
+
+export const deleteOmsByProjectId = async (projectId: number) => {
+  return await db.delete(oms).where(eq(oms.projectId, projectId));
+}
