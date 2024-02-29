@@ -21,7 +21,7 @@ export const createProjectAction = async (session: Session, project: FormData) =
 export const inviteUserInvitationAction = async (session: Session, form: FormData) => {
   const rawInvitationData = {
     projectId: Number(form.get("projectId")),
-    inviteeEmail: session?.user.id!,
+    inviteeEmail: form.get("email"),
     role: "owner",
   } as InviteProjectClient;
 
