@@ -9,4 +9,8 @@ if (process.env.VERCEL_URL){
   CurrentHostUrl = process.env.NEXTAUTH_URL;
 }
 
-export { CurrentHostUrl };
+const getCurrentHostUrl = () => {
+  return CurrentHostUrl;
+}
+
+export { CurrentHostUrl, getCurrentHostUrl };

@@ -6,12 +6,17 @@ import { CreateButton } from "./ui/CreateButton";
 import { ProjectsTable } from "./ui/ProjectTable";
 
 const getProjects = async () => {
-  const projects = await fetch(`${CurrentHostUrl}/api/projects`, {
-    // next: { revalidate: 3600, tags: ["all", "projects"] },
-    cache: "no-store",
-    headers: Object.fromEntries(headers()),
-  }).then((res) => res.json());
-  return projects;
+  try {
+    const projects = await fetch(`${CurrentHostUrl}/api/projects`, {
+      // next: { revalidate: 3600, tags: ["all", "projects"] },
+      cache: "no-store",
+      headers: Object.fromEntries(headers()),
+    }).then((res) => res.json());
+    return projects;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 };
 
 const ProjectsPage = async () => {

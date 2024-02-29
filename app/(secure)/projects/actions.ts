@@ -35,7 +35,7 @@ export const inviteUserInvitationAction = async (form: FormData) => {
 
   const rawInvitationData = {
     projectId: Number(form.get("projectId")),
-    inviterId: Number(user.id),
+    inviteeId: Number(user.id),
     role: "owner",
   } as InviteProjectData;
 

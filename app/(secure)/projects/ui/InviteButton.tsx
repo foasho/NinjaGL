@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { HiEnvelope } from "react-icons/hi2";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Input,
@@ -11,13 +12,17 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
+import { useSession } from "next-auth/react";
 
-import { inviteUserInvitationAction } from "../actions";
+import { inviteUserInvitationAction } from "../client-actions";
 
 export const InviteButton = ({ projectId }) => {
-  const inviteUserInvitationActionBind = inviteUserInvitationAction.bind(null, projectId);
+  const { pending } = useFormStatus();
+  const router = useRouter();
+  // ClientActionsで実装
+  // const inviteUserInvitationActionBind = inviteUserInvitationAction.bind(null, projectId);
+  const { data: session } = useSession();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div>
@@ -29,10 +34,9 @@ export const InviteButton = ({ projectId }) => {
           {(onClose) => (
             <form
               action={async (formData) => {
-                setIsLoading(true);
-                await inviteUserInvitationActionBind(formData);
+                await inviteUserInvitationAction(session!, formData);
                 onClose();
-                setIsLoading(false);
+                router.push("/projects");
               }}
             >
               <ModalHeader className='flex flex-col gap-1'>プロジェクトに招待</ModalHeader>
@@ -52,7 +56,7 @@ export const InviteButton = ({ projectId }) => {
                 <Button color='danger' variant='light' onPress={onClose}>
                   キャンセル
                 </Button>
-                <Button color='primary' type='submit'>
+                <Button color='primary' type='submit' isLoading={pending} disabled={pending}>
                   招待
                 </Button>
               </ModalFooter>

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { HiCube, HiInformationCircle } from "react-icons/hi2";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Checkbox,
@@ -13,12 +14,16 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
+import { useSession } from "next-auth/react";
 
-import { createProjectAction } from "../actions";
+import { createProjectAction } from "../client-actions";
 
 export const CreateButton = () => {
   const { pending } = useFormStatus();
-  const createProjectActionBind = createProjectAction.bind(null, {});
+  const router = useRouter();
+  // ClientActionsで実装
+  // const createProjectActionBind = createProjectAction.bind(null, {});
+  const { data: session } = useSession();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [publish, setPublish] = useState(true);
 
@@ -32,8 +37,10 @@ export const CreateButton = () => {
           {(onClose) => (
             <form
               action={async (formData) => {
-                await createProjectActionBind(formData);
+                // await createProjectActionBind(formData);
+                await createProjectAction(session!, formData);
                 onClose();
+                router.push("/projects");
               }}
             >
               <ModalHeader className='flex flex-col gap-1'>新しいプロジェクトを作成</ModalHeader>

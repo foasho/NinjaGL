@@ -12,7 +12,12 @@ if (!DURL.includes("sslmode") && !process.env.NEXTAUTH_URL?.includes("localhost"
   DURL = DURL + "?sslmode=require";
 }
 
-export const connection = postgres(DURL);
+export const connection = postgres(DURL, {
+  // issue: https://github.com/porsager/postgres/issues/630
+  transform: {
+    undefined: null,
+  },
+});
 
 // @ts-ignore
 export const db: PostgresJsDatabase = drizzle(connection, { schema, mode: "planetscale" });

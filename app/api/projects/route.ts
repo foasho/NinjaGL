@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { getConfigByProjectId } from "@/db/crud/config";
 import { getMembersByProjectId } from "@/db/crud/members";
 import { getOmsByProjectId } from "@/db/crud/oms";
-import { getProjectById, getProjectsByUserId } from "@/db/crud/projects";
+import { createProject, getProjectById, getProjectsByUserId } from "@/db/crud/projects";
 import { deleteSmsById, getSmsByProjectId } from "@/db/crud/sms";
 import { getMergedSessionServer } from "@/middleware";
 
@@ -16,7 +16,7 @@ export async function GET(req: Request) {
   if (searchParams.get("id")) {
     const projectId = Number(searchParams.get("id"));
     const [project] = await getProjectById(projectId);
-    if (!project) return;
+    if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
     if (!project.publish) {
       const members = await getMembersByProjectId(projectId);
       // プロジェクトのメンバーでない場合はプレビューできない
@@ -30,6 +30,16 @@ export async function GET(req: Request) {
   }
   const projects = await getProjectsByUserId(mergedSession.user.id);
   return NextResponse.json(projects);
+}
+
+export async function POST(req: Request) {
+  const { name, description, publish, userId } = await req.json();
+  const session = await getServerSession();
+  if (!session) return NextResponse.json([]);
+  const mergedSession = await getMergedSessionServer(session);
+  if (mergedSession.user.id !== userId) return NextResponse.json([]);
+  const project = await createProject({ name, description, publish, userId });
+  return NextResponse.json(project);
 }
 
 export async function DELETE(req: Request) {

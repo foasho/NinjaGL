@@ -24,7 +24,12 @@ export type CreateProjectData = {
 
 export type InviteProjectData = {
   projectId: number;
-  inviterId: number;
+  inviteeId: number;
+  role: "owner" | "viewer";
+};
+export type InviteProjectClient = {
+  projectId: number;
+  inviteeEmail: string;
   role: "owner" | "viewer";
 };
 
