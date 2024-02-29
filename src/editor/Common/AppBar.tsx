@@ -188,10 +188,10 @@ export const AppBar = () => {
   };
 
   useEffect(() => {
-    // ※AutoSave調整中
     // AutoSaveが有効なら、AutoSaveを開始
     let autoSaveInterval;
-    if (autoSave && session) {
+    if (autoSave) {
+      // 15分ごとに自動保存
       autoSaveInterval = setInterval(() => {
         onSave(false);
       }, 900 * 1000);
@@ -253,9 +253,7 @@ export const AppBar = () => {
                   <>
                     <BiEditAlt className='inline-block' />
                     <span className='text-cyber'>*</span>
-                    <span className='hidden md:inline'>
-                      {t("nontitle")}
-                    </span>
+                    <span className='hidden md:inline'>{t("nontitle")}</span>
                   </>
                 )}
               </a>
@@ -319,7 +317,7 @@ export const AppBar = () => {
                     className='block cursor-pointer select-none rounded-sm p-2 no-underline'
                     onClick={() => (globalEditorStore.autoSave = !autoSave)}
                   >
-                    {autoSave ? <BsCheck className='inline-block pl-3 text-white' /> : <> </>}
+                    {autoSave ? <BsCheck className='mr-0.5 inline-block text-white' /> : <> </>}
                     {t("autoSave")}
                   </a>
                 </li>
