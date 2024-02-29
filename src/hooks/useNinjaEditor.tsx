@@ -473,7 +473,7 @@ export const NinjaEditorProvider = ({
     oms.current = newOms;
     // 更新
     notifyOMsChanged();
-    if (projectId) deleteServerOM(id);
+    if (projectId) deleteServerOM(projectId, id);
   };
   const copyOM = (om: IObjectManagement) => {
     // typeがEnvironment/Sky/Player/Effect/LandScape以外のときのみ

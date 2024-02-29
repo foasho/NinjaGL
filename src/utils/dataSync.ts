@@ -20,13 +20,13 @@ const _sendServerOM = async (projectId: number, om: IObjectManagement) => {
 };
 export const sendServerOM = debounce(_sendServerOM, 500);
 
-export const deleteServerOM = async (id: string) => {
+export const deleteServerOM = async (projectId: number, id: string) => {
   return fetch(`/api/oms`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ omId: id }),
+    body: JSON.stringify({ projectId, omId: id }),
   });
 }
 
@@ -58,13 +58,13 @@ export const sendServerSM = async (projectId: number, sm: IScriptManagement) => 
   });
 };
 
-export const deleteServerSM = async (id: string) => {
+export const deleteServerSM = async (projectId: number, id: string) => {
   return fetch(`/api/sms`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ smId: id }),
+    body: JSON.stringify({ projectId, smId: id }),
   });
 }
 
