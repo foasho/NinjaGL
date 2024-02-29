@@ -40,7 +40,7 @@ export const CreateButton = () => {
                 // await createProjectActionBind(formData);
                 await createProjectAction(session!, formData);
                 onClose();
-                router.push("/projects");
+                router.refresh();
               }}
             >
               <ModalHeader className='flex flex-col gap-1'>新しいプロジェクトを作成</ModalHeader>
@@ -65,7 +65,7 @@ export const CreateButton = () => {
                   variant='bordered'
                 />
                 {/** Publish */}
-                <Checkbox isSelected={publish} onValueChange={setPublish} size='md' name='publish' color='primary'>
+                <Checkbox isSelected={publish} value={publish.toString()} onValueChange={setPublish} size='md' name='publish' color='primary' defaultSelected>
                   プレビューを常に公開する
                 </Checkbox>
               </ModalBody>

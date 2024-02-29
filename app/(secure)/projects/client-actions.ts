@@ -2,7 +2,7 @@
 
 import { Session } from "next-auth";
 
-import { CreateProjectData, InviteProjectClient, InviteProjectData } from "@/db/types";
+import { CreateProjectData, InviteProjectClient } from "@/db/types";
 
 export const createProjectAction = async (session: Session, project: FormData) => {
   const rawProjectData = {

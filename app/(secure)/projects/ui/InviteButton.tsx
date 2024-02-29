@@ -36,7 +36,7 @@ export const InviteButton = ({ projectId }) => {
               action={async (formData) => {
                 await inviteUserInvitationAction(session!, formData);
                 onClose();
-                router.push("/projects");
+                router.refresh();
               }}
             >
               <ModalHeader className='flex flex-col gap-1'>プロジェクトに招待</ModalHeader>
