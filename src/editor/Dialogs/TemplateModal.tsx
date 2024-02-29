@@ -14,6 +14,7 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 
+import { MySwal } from "@/commons/Swal";
 import { TemplateProps, useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 type TeplateItemProps = {
@@ -30,7 +31,7 @@ type Props = {
 export const TemplateModal = ({ isOpen, onOpen, onOpenChange }: Props) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const { selectTemplate } = useNinjaEditor();
+  const { selectTemplate, projectId } = useNinjaEditor();
 
   const templates = [
     {
@@ -59,13 +60,35 @@ export const TemplateModal = ({ isOpen, onOpen, onOpenChange }: Props) => {
                       shadow='sm'
                       key={index}
                       isPressable
-                      onPress={() => {
+                      onPress={async () => {
                         setIsLoading(true);
-                        selectTemplate(item.value);
-                        setTimeout(() => {
-                          setIsLoading(false);
-                          onClose();
-                        }, 5000);
+                        if (projectId) {
+                          // プロジェクトのデータが上書きされます。よろしいですか？
+                          MySwal.fire({
+                            title: t("overwriteProjectData"),
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "OK",
+                            cancelButtonText: "Cancel",
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              selectTemplate(item.value);
+                              setTimeout(() => {
+                                setIsLoading(false);
+                                onClose();
+                              }, 3000);
+                            } else {
+                              setIsLoading(false);
+                            }
+                          });
+                          return;
+                        } else {
+                          selectTemplate(item.value);
+                          setTimeout(() => {
+                            setIsLoading(false);
+                            onClose();
+                          }, 3000);
+                        }
                       }}
                     >
                       <CardBody className='overflow-visible p-0'>

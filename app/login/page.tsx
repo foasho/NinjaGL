@@ -1,9 +1,13 @@
 "use client";
+import { useEffect } from "react";
 import { BsReplyFill } from "react-icons/bs";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 export default function LoginPage() {
+  const { status } = useSession();
+  const router = useRouter();
   const getCallbackUrl = () => {
     let url = new URL(window.location.href);
     let params = url.searchParams;
@@ -15,6 +19,17 @@ export default function LoginPage() {
     const callbackUrl = getCallbackUrl();
     signIn("google", { callbackUrl: callbackUrl ? callbackUrl : "/" });
   };
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      const callbackUrl = getCallbackUrl();
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        router.push("/");
+      }
+    }
+  }, [status]);
 
   return (
     <>

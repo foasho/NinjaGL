@@ -18,7 +18,7 @@ import { MySwal } from "@/commons/Swal";
 import { setInitConfig } from "@/editor/Store/Store";
 import { useRedoUndo } from "@/services/redoundo";
 import { DeepCopyOM, OMArgs2Class } from "@/utils/convs";
-import { sendServerOM } from "@/utils/dataSync";
+import { sendServerOM, updateProjectData } from "@/utils/dataSync";
 import { initTpOms, initTpSms, initTpUis } from "@/utils/initTpProjects";
 
 /**
@@ -632,6 +632,9 @@ export const NinjaEditorProvider = ({
         break;
       default:
         break;
+    }
+    if (projectId) {
+      updateProjectData(projectId, null, oms.current, sms.current);
     }
   };
 

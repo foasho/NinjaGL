@@ -80,7 +80,7 @@ export const sendServerConfig = debounce(_sendServerConfig, 500);
  */
 export const updateProjectData = async (
   projectId: number,
-  config: IConfigParams,
+  config: IConfigParams | null,
   oms: IObjectManagement[],
   sms: IScriptManagement[],
 ) => {
@@ -90,12 +90,11 @@ export const updateProjectData = async (
     // await sendServerSMs(projectId, sms);
     // Promise.allでまとめて送信し、全ての送信が終わるまで待つ
     await Promise.all([
-      sendServerConfig(projectId, config),
+      config ? sendServerConfig(projectId, config) : null,
       sendServerOMs(projectId, oms),
       sendServerSMs(projectId, sms),
     ]);
-  }
-  catch (e) {
+  } catch (e) {
     console.error(e);
     return false;
   }
