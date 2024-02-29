@@ -33,5 +33,5 @@ export const updateProject = async (id: number, name: string) => {
  * Projectにユーザーを招待する
  */
 export const inviteUserInvitation = async (body: InviteProjectData) => {
-  return await db.insert(members).values({ ...body });
+  return await db.insert(members).values({ ...body, userId: body.inviteeId });
 }
