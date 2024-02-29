@@ -20,6 +20,16 @@ const _sendServerOM = async (projectId: number, om: IObjectManagement) => {
 };
 export const sendServerOM = debounce(_sendServerOM, 500);
 
+export const deleteServerOM = async (id: string) => {
+  return fetch(`/api/oms`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ omId: id }),
+  });
+}
+
 /**
  * OMSのデータを一括で送信する
  */
@@ -47,6 +57,16 @@ export const sendServerSM = async (projectId: number, sm: IScriptManagement) => 
     body: JSON.stringify({ projectId, sm }),
   });
 };
+
+export const deleteServerSM = async (id: string) => {
+  return fetch(`/api/sms`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ smId: id }),
+  });
+}
 
 /**
  * TODO: SMSのデータを一括で送信する

@@ -5,7 +5,7 @@ import { getConfigByProjectId } from "@/db/crud/config";
 import { getMembersByProjectId } from "@/db/crud/members";
 import { getOmsByProjectId } from "@/db/crud/oms";
 import { getProjectById, getProjectsByUserId } from "@/db/crud/projects";
-import { getSmsByProjectId } from "@/db/crud/sms";
+import { deleteSmsById, getSmsByProjectId } from "@/db/crud/sms";
 import { getMergedSessionServer } from "@/middleware";
 
 export async function GET(req: Request) {
@@ -30,4 +30,19 @@ export async function GET(req: Request) {
   }
   const projects = await getProjectsByUserId(mergedSession.user.id);
   return NextResponse.json(projects);
+}
+
+export async function DELETE(req: Request) {
+  const { projectId, smId } = await req.json();
+  const session = await getServerSession();
+  if (!session) return NextResponse.json([]);
+  const mergedSession = await getMergedSessionServer(session);
+  const projects = await getProjectsByUserId(mergedSession.user.id);
+  // projectIdがprojectsに含まれているかチェック
+  if (!projects.some((project) => project.id === Number(projectId))) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+  // smsの削除
+  await deleteSmsById(smId);
+  return NextResponse.json({ message: "OK" });
 }

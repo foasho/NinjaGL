@@ -18,7 +18,7 @@ import { MySwal } from "@/commons/Swal";
 import { setInitConfig } from "@/editor/Store/Store";
 import { useRedoUndo } from "@/services/redoundo";
 import { DeepCopyOM, OMArgs2Class } from "@/utils/convs";
-import { sendServerOM, updateProjectData } from "@/utils/dataSync";
+import { deleteServerOM, sendServerOM, updateProjectData } from "@/utils/dataSync";
 import { initTpOms, initTpSms, initTpUis } from "@/utils/initTpProjects";
 
 /**
@@ -459,6 +459,7 @@ export const NinjaEditorProvider = ({
       changedArg: changedArg,
       om: DeepCopyOM(om),
     });
+    if (projectId) sendServerOM(projectId, om);
   };
   const removeOM = (id: string) => {
     // historyに追加
@@ -472,6 +473,7 @@ export const NinjaEditorProvider = ({
     oms.current = newOms;
     // 更新
     notifyOMsChanged();
+    if (projectId) deleteServerOM(id);
   };
   const copyOM = (om: IObjectManagement) => {
     // typeがEnvironment/Sky/Player/Effect/LandScape以外のときのみ
@@ -547,9 +549,6 @@ export const NinjaEditorProvider = ({
   const notifyOMIdChanged = (id: string) => {
     if (!objectManagementIdChangedListeners.current[id]) {
       return;
-    }
-    if (projectId) {
-      sendServerOM(projectId, oms.current.find((om) => om.id === id) as IObjectManagement);
     }
     objectManagementIdChangedListeners.current[id].forEach((l) => l());
   };
