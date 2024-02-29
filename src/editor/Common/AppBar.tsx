@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { AiFillSave } from "react-icons/ai";
 import { BiEditAlt } from "react-icons/bi";
 import { BsCheck, BsPlay, BsStop } from "react-icons/bs";
-import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaFile, FaGithub, FaLanguage } from "react-icons/fa";
 import Link from "next/link";
 import { Spinner, useDisclosure } from "@nextui-org/react";
 import { loadNJCFile, saveNJCBlob } from "@ninjagl/core";
@@ -210,38 +210,36 @@ export const AppBar = () => {
             {/** Left */}
             <li className='float-left inline-block px-[3px] pt-[14px]'>
               <span
-                className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
+                className='h-full cursor-pointer select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 onClick={() => openFileMenu()}
               >
-                {t("file")}
+                <FaFile className='mr-2 inline pb-0.5' />
+                <span className='hidden md:inline'>{t("file")}</span>
               </span>
             </li>
             <li className='float-left inline-block px-[3px] pt-[14px]'>
               <a
-                className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
+                className='h-full cursor-pointer select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 onClick={() => onClickSelectLang()}
               >
-                {t("lang")}
+                <FaLanguage className='mr-2 inline pb-0.5' />
+                <span className='hidden md:inline'>{t("lang")}</span>
               </a>
             </li>
-            <li className='float-left hidden px-[3px] pt-[14px] md:inline-block'>
+            <li className='float-left inline-block px-[3px] pt-[14px]'>
               <Link
-                className='h-full select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
+                className='h-full cursor-pointer select-none rounded-sm px-[10px] text-white no-underline hover:text-cyber'
                 href='https://github.com/foasho/NinjaGL'
                 target='_blank'
               >
-                Github
-              </Link>
-            </li>
-            <li className='float-left inline-block cursor-pointer px-[3px] pt-[14px] text-white'>
-              <Link href='/docs' target='_blank'>
-                {t("docs")}
+                <FaGithub className='mr-2 inline pb-0.5' />
+                <span className='hidden md:inline'>Github</span>
               </Link>
             </li>
             {/** Center */}
             <li className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
               <span className='hidden h-full rounded-sm px-[10px] py-[5px] text-white no-underline hover:text-cyber md:inline-block'>
-                NinjaGL
+                <span className='hidden md:inline'>NinjaGL</span>
               </span>
               <a
                 className='inline-block cursor-pointer text-white'
@@ -255,7 +253,9 @@ export const AppBar = () => {
                   <>
                     <BiEditAlt className='inline-block' />
                     <span className='text-cyber'>*</span>
-                    {t("nontitle")}
+                    <span className='hidden md:inline'>
+                      {t("nontitle")}
+                    </span>
                   </>
                 )}
               </a>
@@ -299,18 +299,22 @@ export const AppBar = () => {
           {showFileMenu && (
             <div className='fixed left-0 top-[45px] z-50 w-[160px] bg-primary text-white shadow-sm'>
               <ul className='m-0 list-none p-0 text-xs font-bold' onMouseLeave={() => handleFileMenuLeave()}>
-                {/* <li><a>{t("newProject")}</a></li> ##WEBなので不要?  */}
-                <li className='relative'>
+                <li className='relative hover:bg-white/25'>
+                  <Link href='/docs' target='_blank' className='block cursor-pointer rounded-sm p-2 no-underline'>
+                    {t("docs")}
+                  </Link>
+                </li>
+                <li className='relative hover:bg-white/25'>
                   <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={() => openProject()}>
                     {t("open")}
                   </a>
                 </li>
-                <li className='relative'>
+                <li className='relative hover:bg-white/25'>
                   <a className='block cursor-pointer rounded-sm p-2 no-underline' onClick={onOpen}>
                     {t("templates")}
                   </a>
                 </li>
-                <li className='relative'>
+                <li className='relative hover:bg-white/25'>
                   <a
                     className='block cursor-pointer select-none rounded-sm p-2 no-underline'
                     onClick={() => (globalEditorStore.autoSave = !autoSave)}
@@ -319,7 +323,7 @@ export const AppBar = () => {
                     {t("autoSave")}
                   </a>
                 </li>
-                <li className='relative'>
+                <li className='relative hover:bg-white/25'>
                   <Link href='/docs/help' className='block cursor-pointer rounded-sm p-2 no-underline'>
                     {t("help")}
                   </Link>
