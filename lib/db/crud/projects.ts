@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 
 import { db } from "@/db";
 import { members, projects } from "@/db/schema";
@@ -18,6 +18,17 @@ export const getProjectsByUserId = async (userId: number) => {
   return await db.select().from(projects).where(inArray(projects.id, projectIds));
 };
 
+// 公開中のプロジェクトを取得する
+export const getPublishedProjects = async (q?: string) => {
+  if (q) {
+    return await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.publish, true), like(projects.name, `%${q}%`)));
+  }
+  return await db.select().from(projects).where(eq(projects.publish, true));
+};
+
 export const createProject = async ({ name, description, publish, userId }: CreateProjectData) => {
   const [project] = await db.insert(projects).values({ name, description, publish }).returning();
   // user_idとmember_idを紐付ける
@@ -34,4 +45,4 @@ export const updateProject = async (id: number, name: string) => {
  */
 export const inviteUserInvitation = async (body: InviteProjectData) => {
   return await db.insert(members).values({ ...body, userId: body.inviteeId });
-}
+};
