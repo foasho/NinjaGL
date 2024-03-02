@@ -22,7 +22,7 @@ export const ProjectsTable = ({ projects }) => {
             <TableCell>{project.description}</TableCell>
             <TableCell>{project.publish ? "公開中" : "非公開"}</TableCell>
             <TableCell>{project.updatedAt?.toString()}</TableCell>
-            <TableCell className='grid grid-cols-3 gap-4'>
+            <TableCell className='flex gap-2'>
               <Button
                 target='_blank'
                 color='primary'
