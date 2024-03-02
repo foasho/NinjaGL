@@ -1,6 +1,6 @@
 "use client";
 import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
-import { signOut,useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 export const Header = () => {
   const { data: session } = useSession();
@@ -26,10 +26,17 @@ export const Header = () => {
             </Link>
           </NavbarItem>
           <NavbarItem className='lg:flex'>
-            <Link href='/docs' className='text-white'>
-              Docs
+            <Link href='/gallery' className='text-white'>
+              Gallery
             </Link>
           </NavbarItem>
+          {session && (
+            <NavbarItem className='lg:flex'>
+              <Link href='/projects' className='text-white'>
+                Projects
+              </Link>
+            </NavbarItem>
+          )}
 
           <NavbarItem className='lg:flex'>
             {!session && (
