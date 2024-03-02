@@ -11,6 +11,8 @@ export type ProjectData = {
   name: string;
   description: string | null;
   publish: boolean;
+  image: string | null;
+  preview: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -20,6 +22,7 @@ export type CreateProjectData = {
   description?: string;
   publish: boolean;
   userId: number;
+  image: string;
 };
 
 export type InviteProjectData = {

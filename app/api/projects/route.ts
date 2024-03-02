@@ -33,12 +33,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { name, description, publish, userId } = await req.json();
+  const { name, description, publish, userId, image } = await req.json();
   const session = await getServerSession();
   if (!session) return NextResponse.json([]);
   const mergedSession = await getMergedSessionServer(session);
   if (mergedSession.user.id !== userId) return NextResponse.json([]);
-  const project = await createProject({ name, description, publish, userId });
+  const project = await createProject({ name, description, publish, userId, image });
   return NextResponse.json(project);
 }
 

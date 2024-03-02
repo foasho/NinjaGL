@@ -25,6 +25,8 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description"),
   publish: boolean("publish").notNull().default(true),
+  image: text("image"),
+  preview: text("preview"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });

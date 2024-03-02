@@ -29,8 +29,8 @@ export const getPublishedProjects = async (q?: string) => {
   return await db.select().from(projects).where(eq(projects.publish, true));
 };
 
-export const createProject = async ({ name, description, publish, userId }: CreateProjectData) => {
-  const [project] = await db.insert(projects).values({ name, description, publish }).returning();
+export const createProject = async ({ name, description, publish, userId, image }: CreateProjectData) => {
+  const [project] = await db.insert(projects).values({ name, description, publish, image }).returning();
   // user_idとmember_idを紐付ける
   await db.insert(members).values({ projectId: project.id, userId });
   return project;

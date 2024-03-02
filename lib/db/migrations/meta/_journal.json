@@ -8,6 +8,13 @@
       "when": 1708936266372,
       "tag": "0000_clever_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1709356585987,
+      "tag": "0001_slippery_mentallo",
+      "breakpoints": true
     }
   ]
 }
