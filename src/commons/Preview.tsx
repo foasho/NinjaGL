@@ -10,6 +10,8 @@ import {
   NJCFile,
 } from "@ninjagl/core";
 
+import { DeepCopyOM } from "@/utils/convs";
+
 type PreviewNinjaProps = {
   oms: IObjectManagement[];
   sms: IScriptManagement[];
@@ -23,7 +25,8 @@ export const PreviewComponent = ({ oms, sms, config }: PreviewNinjaProps) => {
 
   useEffect(() => {
     const _config = config || initTpConfig();
-    const _njcFile = ExportNjcFile(oms, [], [], sms, _config, {});
+    const deepOms = oms.map((om) => DeepCopyOM(om));
+    const _njcFile = ExportNjcFile(deepOms, [], [], sms, _config, {});
     // Previewモードでは、debugModeをfalseにする
     _njcFile.config.isDebug = false;
     setNjcFile(_njcFile);
