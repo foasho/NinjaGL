@@ -4,7 +4,8 @@
 
 # NinjaGL Web First GameEngine🎮
 
-[Starter Scene](https://github.com/j1m-ryan/threejs-starter-bun/assets/20595836/c7e5c8f7-ea47-4ee3-b55c-403d4998c7a4)
+[Starter Scene](https://github.com/foasho/NinjaGL/assets/57359515/924347bd-9a8a-4f4b-b186-e2142796f608
+)
 
 
 [デモ](https://ninjagl.vercel.app) | [ドキュメント](https://ninjagl.vercel.app/docs) | [チュートリアル](https://ninjagl.vercel.app/docs/tutorial)
