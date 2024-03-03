@@ -4,15 +4,17 @@ import { Canvas } from "@react-three/fiber";
 
 import { Loading3D } from "@/commons/Loading3D";
 import { ViewHelperControls } from "@/helpers/ViewHelperControls";
+import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
 import { UICanvas } from "./MainViewUIs/UICanvas";
 
 const SceneItems = dynamic(() => import("./MainViewItems/SceneItems").then((mod) => mod.SceneItems), { ssr: false });
 
 const _MainViewer = () => {
+  const { canvasRef } = useNinjaEditor();
   return (
     <div className='relative h-full bg-[#e2e2e2]'>
-      <Canvas id='mainviewcanvas' className='relative h-full'>
+      <Canvas id='mainviewcanvas' className='relative h-full' gl={{ preserveDrawingBuffer: true }} ref={canvasRef}>
         <Suspense fallback={<Loading3D />}>
           <SceneItems />
         </Suspense>

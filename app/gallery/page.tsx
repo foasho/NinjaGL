@@ -16,8 +16,8 @@ const Page = async ({ searchParams: { search } }: Props) => {
   const projects = await getProjects(search);
 
   return (
-    <div className='container mx-auto px-4 pt-24 sm:px-4 max-h-screen overflow-y-auto'>
-      <h1 className="py-4 text-white">Gallery</h1>
+    <div className='container mx-auto max-h-screen overflow-y-auto px-4 pt-24 sm:px-4'>
+      <h1 className='py-4 text-white'>Gallery</h1>
       <SearchInput search={search} />
       <ShowcaseCards projects={projects} />
     </div>

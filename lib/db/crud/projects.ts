@@ -3,7 +3,7 @@ import { and, eq, inArray, like } from "drizzle-orm";
 import { db } from "@/db";
 import { members, projects } from "@/db/schema";
 
-import { CreateProjectData, InviteProjectData } from "../types";
+import { CreateProjectData, InviteProjectData, UpdateProjectData } from "../types";
 
 export const getProjectById = async (id: number) => {
   return await db.select().from(projects).where(eq(projects.id, id)).limit(1);
@@ -36,8 +36,17 @@ export const createProject = async ({ name, description, publish, userId, image 
   return project;
 };
 
-export const updateProject = async (id: number, name: string) => {
-  return await db.update(projects).set({ name }).where(eq(projects.id, id));
+export const updateProject = async (id: number, { description, publish, image, preview }: UpdateProjectData) => {
+  // undefinedの場合は更新しない
+  const body = { description, publish, image, preview };
+  const keys = Object.keys(body);
+  keys.forEach((key) => {
+    if (body[key] === undefined) delete body[key];
+  });
+  console.log(body);
+  return await db.update(projects).set(
+    { ...body },
+  ).where(eq(projects.id, id));
 };
 
 /**

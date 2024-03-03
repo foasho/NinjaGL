@@ -15,10 +15,11 @@ export const ShowcaseCards = ({ projects }: ShowcaseTableProps) => {
         <Card isFooterBlurred radius='lg' className='border-none' key={idx}>
           <Image
             alt='Woman listing to music'
-            className='object-cover'
+            className='max-h-[200px] w-full object-cover text-center '
             height={200}
             src={project.preview ?? "/docs/starter.png"}
-            width={200}
+            width={320}
+            isZoomed
           />
           <CardFooter className='absolute bottom-1 z-10 ml-1 flex w-[calc(100%_-_8px)] justify-between overflow-hidden rounded-large border-1 border-white/20 py-1 shadow-small before:rounded-xl before:bg-white/10'>
             <div>{project.name}</div>

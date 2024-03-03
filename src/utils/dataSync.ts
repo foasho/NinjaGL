@@ -3,6 +3,7 @@ import { IConfigParams, IObjectManagement, IScriptManagement } from "@ninjagl/co
 import { debounce } from "lodash-es";
 
 import { OMArgs2Obj } from "./convs";
+import { uploadFile } from "./upload";
 
 /**
  * OMのデータを送信する
@@ -28,7 +29,7 @@ export const deleteServerOM = async (projectId: number, id: string) => {
     },
     body: JSON.stringify({ projectId, omId: id }),
   });
-}
+};
 
 /**
  * OMSのデータを一括で送信する
@@ -66,7 +67,7 @@ export const deleteServerSM = async (projectId: number, id: string) => {
     },
     body: JSON.stringify({ projectId, smId: id }),
   });
-}
+};
 
 /**
  * TODO: SMSのデータを一括で送信する
@@ -103,7 +104,9 @@ export const updateProjectData = async (
   config: IConfigParams | null,
   oms: IObjectManagement[],
   sms: IScriptManagement[],
+  canvas: React.MutableRefObject<HTMLCanvasElement | null>,
 ) => {
+  console.log("updateProjectData", canvas);
   try {
     // await sendServerConfig(projectId, config);
     // await sendServerOMs(projectId, oms);
@@ -114,6 +117,27 @@ export const updateProjectData = async (
       sendServerOMs(projectId, oms),
       sendServerSMs(projectId, sms),
     ]);
+    if (canvas.current) {
+      const base64 = canvas.current.toDataURL("image/png");
+      const blob = await (await fetch(base64)).blob();
+      // blobをFileに変換
+      const file = new File([blob], `${projectId}.png`, { type: "image/png" });
+      // upload to blob
+      const res = await uploadFile(file, `projects-preview/${projectId}.png`);
+      if (!res) {
+        throw new Error("Error uploading file");
+      }
+      if (!res.url) {
+        throw new Error("Error uploading file");
+      }
+      await fetch(`/api/projects`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ projectId, preview: res.url }),
+      });
+    }
   } catch (e) {
     console.error(e);
     return false;

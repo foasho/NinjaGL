@@ -25,6 +25,14 @@ export type CreateProjectData = {
   image: string;
 };
 
+export type UpdateProjectData = {
+  name?: string;
+  description?: string;
+  publish?: boolean;
+  image?: string;
+  preview?: string;
+};
+
 export type InviteProjectData = {
   projectId: number;
   inviteeId: number;
