@@ -19,6 +19,8 @@ export const createProjectAction = async ({}, project: FormData) => {
     description: project.get("description"),
     publish: project.get("publish") === "true",
     userId: user.id,
+    // TODO: 画像のアップロード
+    image: "https://via.placeholder.com/150",
   } as CreateProjectData;
 
   await createProject(rawProjectData);

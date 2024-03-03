@@ -1,15 +1,16 @@
-"use client";
-import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
-import { signOut,useSession } from "next-auth/react";
+import { Link } from "@nextui-org/link";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/navbar";
+import { getServerSession } from "next-auth";
 
-export const Header = () => {
-  const { data: session } = useSession();
+import { LogoutItem } from "./Logout";
+
+export const Header = async () => {
+  const session = await getServerSession();
 
   return (
     <>
       <Navbar className='fixed top-0 z-30 w-screen bg-transparent p-3 text-white'>
         <NavbarBrand>
-          {/* <AcmeLogo /> */}
           <p className='cursor-pointer font-bold text-inherit'>
             <Link href='/' className='text-white'>
               NinjaGL
@@ -17,7 +18,7 @@ export const Header = () => {
           </p>
         </NavbarBrand>
         <NavbarContent justify='end'>
-          <NavbarItem className='lg:flex'>
+          <NavbarItem className='md:flex'>
             <Link
               href='/editor'
               className='cursor-pointer rounded-full bg-cyber px-4 py-2 text-primary hover:bg-cyber/75 hover:text-white'
@@ -25,24 +26,27 @@ export const Header = () => {
               Start
             </Link>
           </NavbarItem>
-          <NavbarItem className='lg:flex'>
-            <Link href='/docs' className='text-white'>
-              Docs
+          <NavbarItem className='hidden md:flex'>
+            <Link href='/gallery' className='text-white'>
+              Gallery
             </Link>
           </NavbarItem>
+          {session && (
+            <NavbarItem className='md:flex'>
+              <Link href='/projects' className='text-white'>
+                Projects
+              </Link>
+            </NavbarItem>
+          )}
 
-          <NavbarItem className='lg:flex'>
-            {!session && (
+          {!session && (
+            <NavbarItem className='md:flex'>
               <Link href='/login' className='text-white'>
                 Login
               </Link>
-            )}
-            {session && (
-              <span className='text-white' onClick={() => signOut()}>
-                Logout
-              </span>
-            )}
-          </NavbarItem>
+            </NavbarItem>
+          )}
+          {session && <LogoutItem />}
         </NavbarContent>
       </Navbar>
     </>

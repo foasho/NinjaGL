@@ -29,7 +29,7 @@ export const AppBar = () => {
   const configState = useSnapshot(globalConfigStore);
   const editorState = useSnapshot(globalEditorStore);
   const { projectName, autoSave, viewSelect, appBar } = editorState;
-  const { oms, ums, tms, sms, setNJCFile, projectId } = useNinjaEditor();
+  const { oms, ums, tms, sms, setNJCFile, projectId, canvasRef } = useNinjaEditor();
   const [loading, setLoading] = useState(false);
 
   /**
@@ -128,7 +128,7 @@ export const AppBar = () => {
     // Save to Storage
     if (projectId) {
       // DBに同期する
-      await updateProjectData(projectId, configState, oms.current, sms.current);
+      await updateProjectData(projectId, configState, oms.current, sms.current, canvasRef);
       if (completeAlert) {
         toast(
           <div>

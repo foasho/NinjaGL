@@ -115,6 +115,7 @@ type NinjaEditorProp = {
   getAvatarOM: () => IObjectManagement | undefined;
   getLights: () => IObjectManagement[];
   selectTemplate: (template: TemplateProps) => void;
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 };
 const NinjaEditorContext = createContext<NinjaEditorProp>({
   projectId: undefined,
@@ -171,6 +172,7 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   getAvatarOM: () => undefined,
   getLights: () => [],
   selectTemplate: (template: TemplateProps) => {},
+  canvasRef: { current: null },
 });
 
 export const useNinjaEditor = () => useContext(NinjaEditorContext);
@@ -219,6 +221,8 @@ export const NinjaEditorProvider = ({
   });
   // Copy/Paste用
   const copyOMRef = useRef<IObjectManagement | null>(null);
+  // CanvasRef
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   /**
    * 初期化関数
@@ -633,7 +637,7 @@ export const NinjaEditorProvider = ({
         break;
     }
     if (projectId) {
-      updateProjectData(projectId, null, oms.current, sms.current);
+      updateProjectData(projectId, null, oms.current, sms.current, canvasRef);
     }
   };
 
@@ -697,6 +701,7 @@ export const NinjaEditorProvider = ({
         getAvatarOM,
         getLights,
         selectTemplate,
+        canvasRef
       }}
     >
       {ready && <>{children}</>}

@@ -1,11 +1,13 @@
 "use client";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { HiCube, HiInformationCircle } from "react-icons/hi2";
+import toast from "react-hot-toast";
+import { HiCamera, HiCube, HiInformationCircle } from "react-icons/hi2";
 import { useRouter } from "next/navigation";
 import {
   Button,
   Checkbox,
+  Image,
   Input,
   Modal,
   ModalBody,
@@ -20,6 +22,7 @@ import { createProjectAction } from "../client-actions";
 
 export const CreateButton = () => {
   const { pending } = useFormStatus();
+  const [logo, setLogo] = useState<File | null>(null);
   const router = useRouter();
   // ClientActionsで実装
   // const createProjectActionBind = createProjectAction.bind(null, {});
@@ -37,7 +40,11 @@ export const CreateButton = () => {
           {(onClose) => (
             <form
               action={async (formData) => {
-                // await createProjectActionBind(formData);
+                // validate
+                if (!formData.get("name") || !formData.get("image")) {
+                  toast.error("プロジェクト名と画像は必須です");
+                  return;
+                }
                 await createProjectAction(session!, formData);
                 onClose();
                 router.refresh();
@@ -53,6 +60,7 @@ export const CreateButton = () => {
                   label='プロジェクト名'
                   placeholder=''
                   variant='bordered'
+                  required
                 />
                 {/** Description */}
                 <Input
@@ -64,8 +72,43 @@ export const CreateButton = () => {
                   placeholder=''
                   variant='bordered'
                 />
+                <label htmlFor='logo' className='block text-sm font-medium text-gray-700'>
+                  プロジェクトのロゴ
+                </label>
+                <div className='flex'>
+                  <Image
+                    alt='logo'
+                    height={52}
+                    radius='sm'
+                    className='p-2'
+                    src={logo ? URL.createObjectURL(logo) : "/icons/photo-camera.png"}
+                    width={52}
+                  />
+                  <Input
+                    name='image'
+                    type='file'
+                    accept='image/*'
+                    size='sm'
+                    className='pl-2'
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setLogo(file);
+                      }
+                    }}
+                    endContent={<HiCamera className='pointer-events-none shrink-0 text-2xl text-default-400' />}
+                  />
+                </div>
                 {/** Publish */}
-                <Checkbox isSelected={publish} value={publish.toString()} onValueChange={setPublish} size='md' name='publish' color='primary' defaultSelected>
+                <Checkbox
+                  isSelected={publish}
+                  value={publish.toString()}
+                  onValueChange={setPublish}
+                  size='md'
+                  name='publish'
+                  color='primary'
+                  defaultSelected
+                >
                   プレビューを常に公開する
                 </Checkbox>
               </ModalBody>

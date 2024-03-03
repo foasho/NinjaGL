@@ -1,9 +1,9 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 
 import { db } from "@/db";
 import { members, projects } from "@/db/schema";
 
-import { CreateProjectData, InviteProjectData } from "../types";
+import { CreateProjectData, InviteProjectData, UpdateProjectData } from "../types";
 
 export const getProjectById = async (id: number) => {
   return await db.select().from(projects).where(eq(projects.id, id)).limit(1);
@@ -18,15 +18,35 @@ export const getProjectsByUserId = async (userId: number) => {
   return await db.select().from(projects).where(inArray(projects.id, projectIds));
 };
 
-export const createProject = async ({ name, description, publish, userId }: CreateProjectData) => {
-  const [project] = await db.insert(projects).values({ name, description, publish }).returning();
+// 公開中のプロジェクトを取得する
+export const getPublishedProjects = async (q?: string) => {
+  if (q) {
+    return await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.publish, true), like(projects.name, `%${q}%`)));
+  }
+  return await db.select().from(projects).where(eq(projects.publish, true));
+};
+
+export const createProject = async ({ name, description, publish, userId, image }: CreateProjectData) => {
+  const [project] = await db.insert(projects).values({ name, description, publish, image }).returning();
   // user_idとmember_idを紐付ける
   await db.insert(members).values({ projectId: project.id, userId });
   return project;
 };
 
-export const updateProject = async (id: number, name: string) => {
-  return await db.update(projects).set({ name }).where(eq(projects.id, id));
+export const updateProject = async (id: number, { description, publish, image, preview }: UpdateProjectData) => {
+  // undefinedの場合は更新しない
+  const body = { description, publish, image, preview };
+  const keys = Object.keys(body);
+  keys.forEach((key) => {
+    if (body[key] === undefined) delete body[key];
+  });
+  console.log(body);
+  return await db.update(projects).set(
+    { ...body },
+  ).where(eq(projects.id, id));
 };
 
 /**
@@ -34,4 +54,4 @@ export const updateProject = async (id: number, name: string) => {
  */
 export const inviteUserInvitation = async (body: InviteProjectData) => {
   return await db.insert(members).values({ ...body, userId: body.inviteeId });
-}
+};
