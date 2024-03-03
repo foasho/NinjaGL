@@ -1,5 +1,4 @@
 "use client";
-import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { IConfigParams, IObjectManagement, IScriptManagement } from "@ninjagl/core";
 
@@ -45,10 +44,8 @@ type EditorProps = {
 };
 export const Editor = async ({ projectId, initOMs = [], initSMs = [], initConfig }: EditorProps) => {
   return (
-    <Suspense fallback={null}>
-      <NinjaEditorProvider projectId={projectId} initOMs={initOMs} initSMs={initSMs} initConfig={initConfig}>
-        <NinjaEditor />
-      </NinjaEditorProvider>
-    </Suspense>
+    <NinjaEditorProvider projectId={projectId} initOMs={initOMs} initSMs={initSMs} initConfig={initConfig}>
+      <NinjaEditor />
+    </NinjaEditorProvider>
   );
 };

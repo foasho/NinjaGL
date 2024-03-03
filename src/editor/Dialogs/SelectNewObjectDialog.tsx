@@ -12,10 +12,11 @@ import clsx from "clsx";
 interface IResponse {
   x?: number;
   y?: number;
+  initSelectType?: string;
   response: (data: ISelectNewObjectDialog) => void;
 }
 const SelectNewObjectDialog = (prop: IResponse) => {
-  const [selectType, setSelectType] = useState<string | null>(null);
+  const [selectType, setSelectType] = useState<string | null>(prop.initSelectType ?? null);
   const { t } = useTranslation();
   const handleClickOutside = () => {
     prop.response({ type: null, value: null });
@@ -634,6 +635,7 @@ const SelectNewObjectDialog = (prop: IResponse) => {
 interface ISelectNewObjectDialog {
   type: OMType | null;
   value: string | null;
+  initSelectType?: string;
 }
 /**
  * 新しいオブジェクトの選択ダイアログ表示
@@ -642,12 +644,14 @@ interface ISelectNewObjectDialog {
 type NewObjectDialogProps = {
   x?: number;
   y?: number;
+  initSelectType?: string;
 };
 // rootインスタンスを格納するための変数を定義
 let dialogRoot: Root | null = null;
 export const showSelectNewObjectDialog = async ({
   x = undefined,
   y = undefined,
+  initSelectType = undefined,
 }: NewObjectDialogProps): Promise<ISelectNewObjectDialog> => {
   return new Promise((resolve) => {
     const dialogContainer = document.getElementById("myDialog") as HTMLElement;
@@ -665,7 +669,9 @@ export const showSelectNewObjectDialog = async ({
 
     // rootが存在する場合のみレンダリングを実行
     if (dialogRoot) {
-      dialogRoot.render(<SelectNewObjectDialog x={x} y={y} response={handleDialogClose} />);
+      dialogRoot.render(
+        <SelectNewObjectDialog x={x} y={y} initSelectType={initSelectType} response={handleDialogClose} />,
+      );
     }
   });
 };

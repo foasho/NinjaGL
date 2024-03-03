@@ -133,6 +133,8 @@ const resources = {
       fogExistAlert: "Fog can only be created once",
       environmentExistAlert: "Environment can only be created once",
       requireLogin: "Login required",
+      selectMode: "Select Mode",
+      landscapeMode: "Landscape Mode",
     },
   },
   ja: {
@@ -271,6 +273,8 @@ const resources = {
       fogExistAlert: "霧(Fog)は1つしか作成できません",
       environmentExistAlert: "Environmentは1つしか作成できません",
       requireLogin: "ログインが必要です",
+      selectMode: "選択モード",
+      landscapeMode: "ランドスケープ",
     },
   },
 };
