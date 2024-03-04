@@ -104,6 +104,13 @@ export const MoveableCameraControl = (props: ICameraControl) => {
   };
 
   useFrame((_, delta) => {
+    if (ref.current){
+      // カメラ操作を停止する
+      ref.current.enabled = !editor.cameraStop.current;
+    }
+    if (editor.cameraStop.current){
+      return;
+    }
     // Fキーが押された瞬間の検出
     if (input.pressedKeys.includes("KeyF") && !focusOnObject) {
       setFocusOnObject(true);

@@ -66,6 +66,7 @@ type NinjaEditorProp = {
   ums: React.MutableRefObject<IUIManagement[]>;
   tms: React.MutableRefObject<ITextureManagement[]>;
   sms: React.MutableRefObject<IScriptManagement[]>;
+  cameraStop: React.MutableRefObject<boolean>;
   transformDecimal: number;
   mode: ECBMode;
   gltfViewerObj: Object3D | null;
@@ -123,6 +124,7 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   ums: { current: [] },
   tms: { current: [] },
   sms: { current: [] },
+  cameraStop: { current: false },
   transformDecimal: 2,
   mode: ECBMode.POSITION,
   gltfViewerObj: null,
@@ -198,6 +200,7 @@ export const NinjaEditorProvider = ({
   const tms = useRef<ITextureManagement[]>([]);
   const sms = useRef<IScriptManagement[]>([]);
   const orbit = useRef<OrbitControlsImpl | null>(null);
+  const cameraStop = useRef<boolean>(false);
   const transformDecimal = 2;
   // コンテンツブラウザで利用
   const mode = useRef<ECBMode>(ECBMode.POSITION);
@@ -652,6 +655,7 @@ export const NinjaEditorProvider = ({
         ums,
         tms,
         sms,
+        cameraStop,
         transformDecimal,
         mode: mode.current,
         gltfViewerObj: gltfViewerObj.current,

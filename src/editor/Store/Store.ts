@@ -1,7 +1,9 @@
+import type { Selection } from "@nextui-org/react";
+
 import { IConfigParams, IScriptManagement } from "@ninjagl/core";
 import { AnimationClip, Vector3 } from "three";
 import { proxy } from "valtio";
-import type { Selection } from '@nextui-org/react'
+
 import { globalEditorStore } from "./editor";
 
 export const HomeCameraPosition = new Vector3(5, 5, -5);
