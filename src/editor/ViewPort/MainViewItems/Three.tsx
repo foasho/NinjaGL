@@ -120,6 +120,7 @@ const ThreeObject = (props: IThreeObject) => {
         if (om.args.receiveShadow !== undefined) {
           ref.current.receiveShadow = om.args.receiveShadow;
         }
+        ref.current.visible = om.visible;
       }
     };
     init();
