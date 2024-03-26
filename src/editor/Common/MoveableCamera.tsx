@@ -108,9 +108,6 @@ export const MoveableCameraControl = (props: ICameraControl) => {
       // カメラ操作を停止する
       ref.current.enabled = !editor.cameraStop.current;
     }
-    if (editor.cameraStop.current){
-      return;
-    }
     // Fキーが押された瞬間の検出
     if (input.pressedKeys.includes("KeyF") && !focusOnObject) {
       setFocusOnObject(true);
@@ -122,6 +119,7 @@ export const MoveableCameraControl = (props: ICameraControl) => {
     if (focusOnObject && state.currentId) {
       targetFocusCamera(state.currentId);
     }
+    const mode = state.mode;
     if (!input.dash && (input.forward || input.backward || input.right || input.left) && !state.currentId) {
       const st = props.cameraSpeed * delta * 10;
       const cameraDirection = cd;

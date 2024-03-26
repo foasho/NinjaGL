@@ -8,7 +8,8 @@ import {
   Mesh,
   type MeshStandardMaterial,
   type Object3D,
-  PerspectiveCamera,
+  type PerspectiveCamera,
+  type PointLight,
   Raycaster,
   Vector2,
   Vector3,
@@ -57,33 +58,61 @@ const getVertexes = (intersects: Intersection[], radius: number): { vertexIndexe
 };
 
 /**
+ * Color1とColor2の間の色を取得
+ * @param color1 hex
+ * @param color2 hex
+ * @param value 0~1
+ */
+const getColorBetween = (color1: Color, color2: Color, value: number): Color => {
+  const r = color1.r * value + color2.r * (1 - value);
+  const g = color1.g * value + color2.g * (1 - value);
+  const b = color1.b * value + color2.b * (1 - value);
+  return new Color(r, g, b);
+};
+
+/**
  * マウスを動かしたとき
  * @param event
  * @returns
  */
 type onMouseMoveProps = {
+  mode: "edit" | "view";
+  pointLightRef: React.MutableRefObject<PointLight>;
   meshRef: React.MutableRefObject<Mesh>;
-  cameraRef: React.MutableRefObject<PerspectiveCamera>;
+  camera: PerspectiveCamera;
   raycaster: Raycaster;
-  mouse: Vector2;
-  brush: string;
+  pointer: Vector2;
+  brush: "normal" | "flat" | "paint";
   isMouseDown: React.MutableRefObject<boolean>;
   radius: number;
-  type: string;
   power: number;
   isReverse: React.MutableRefObject<boolean>;
   colorStr: ColorRepresentation;
   mouseCircleRef: React.MutableRefObject<Mesh>;
+  colorBlend: number;
 };
-const onMouseMove = (
-  { meshRef, cameraRef, raycaster, mouse, brush, isMouseDown, radius, type, power, isReverse, colorStr, mouseCircleRef }: onMouseMoveProps,
-) => {
-  if (!meshRef.current || !cameraRef.current) {
+const onMouseMove = ({
+  mode,
+  pointLightRef,
+  meshRef,
+  camera,
+  raycaster,
+  pointer,
+  brush,
+  isMouseDown,
+  radius,
+  power,
+  isReverse,
+  colorStr,
+  mouseCircleRef,
+  colorBlend,
+}: onMouseMoveProps) => {
+  if (!meshRef.current) {
     return;
   }
-  raycaster.setFromCamera(mouse, cameraRef.current);
+  raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObject(meshRef.current);
-  if (isMouseDown.current) {
+  if (isMouseDown.current && mode == "edit") {
     if (brush == "normal" || brush == "flat") {
       const { vertexIndexes, values } = getVertexes(intersects, radius);
       if (intersects.length > 0 && intersects[0]) {
@@ -95,104 +124,65 @@ const onMouseMove = (
           if (brush == "normal") {
             let position = object.geometry.attributes.position;
             if (position instanceof GLBufferAttribute) return;
-            if (type == "create") {
-              position.setZ(index, position.getZ(index) + power * value * (isReverse.current ? -1 : 1));
-            } else {
-              position.setY(index, position.getY(index) + power * value * (isReverse.current ? -1 : 1));
-            }
+            position.setZ(index, position.getZ(index) + power * value * (isReverse.current ? -1 : 1));
             position.needsUpdate = true;
           } else if (brush == "flat") {
             let position = object.geometry.attributes.position;
             if (position instanceof GLBufferAttribute) return;
-            if (type == "create") {
-              position.setZ(index, intersectPosition.z);
-            } else {
-              position.setY(index, intersectPosition.y);
-            }
+            position.setZ(index, intersectPosition.z);
             position.needsUpdate = true;
           }
         });
       }
     } else if (brush == "paint") {
+      // ペイント処理
       if (intersects.length > 0 && intersects[0]) {
-        if (type == "create") {
-          const intersectPosition = intersects[0].point;
-          const object: Mesh = intersects[0].object as Mesh;
-          if (!object) return;
-          const cloneGeometry = object.geometry.clone();
-          if (!cloneGeometry.attributes.color) {
-            const count = cloneGeometry.attributes.position.count;
-            const buffer = new BufferAttribute(new Float32Array(count * 3), 3);
-            cloneGeometry.setAttribute("color", buffer);
-          }
-          if (
-            cloneGeometry.attributes.color instanceof GLBufferAttribute ||
-            cloneGeometry.attributes.position instanceof GLBufferAttribute
-          )
-            return;
-          const numVertices = cloneGeometry.attributes.color.array;
-          let colors = new Float32Array(numVertices);
-          const color = new Color(colorStr);
-          const vertex = new Vector3();
-          const positionArray = Array.from(cloneGeometry.attributes.position.array);
-          for (let i = 0; i <= positionArray.length - 3; i += 3) {
-            vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
-            if (type == "create") vertex.applyMatrix4(meshRef.current.matrixWorld); // Consider rotation
-            const distance = vertex.distanceTo(intersectPosition);
-            if (distance <= radius) {
-              colors.set(color.toArray(), i);
-            }
-          }
-          cloneGeometry.setAttribute("color", new BufferAttribute(colors, 3));
-          object.geometry.copy(cloneGeometry);
-        } else {
-          const intersectPosition = intersects[0].point;
-          const object: Mesh = intersects[0].object as Mesh;
-          if (!object) return;
+        const intersectPosition = intersects[0].point;
+        const object: Mesh = intersects[0].object as Mesh;
+        if (!object) return;
 
-          object.traverse((node: Object3D) => {
-            if (node instanceof Mesh && node.isMesh) {
-              if (node.geometry) {
-                const geometry = node.geometry;
+        object.traverse((node: Object3D) => {
+          if (node instanceof Mesh && node.isMesh) {
+            if (node.geometry) {
+              const geometry = node.geometry;
 
-                if (!geometry.attributes.color) {
-                  const count = geometry.attributes.position.count;
-                  const buffer = new BufferAttribute(new Float32Array(count * 3), 3);
-                  geometry.setAttribute("color", buffer);
-                }
-
-                const numVertices = geometry.attributes.color.array;
-                let colors = new Float32Array(numVertices);
-                let originalColors = Array.from(geometry.attributes.color.array) as number[];
-
-                const color = new Color(colorStr);
-                const vertex = new Vector3();
-                const positionArray = Array.from(geometry.attributes.position.array) as number[];
-
-                for (let i = 0; i <= positionArray.length - 3; i += 3) {
-                  vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
-                  vertex.applyMatrix4(meshRef.current.matrixWorld);
-                  const distance = vertex.distanceTo(intersectPosition);
-
-                  if (distance <= radius) {
-                    const blendedColor = new Color()
-                      .fromArray(originalColors.slice(i, i + 3))
-                      .lerp(color, 1 - distance / radius);
-                    colors.set(blendedColor.toArray(), i);
-                  } else {
-                    colors.set(originalColors.slice(i, i + 3), i);
-                  }
-                }
-
-                geometry.setAttribute("color", new BufferAttribute(colors, 3));
-                const newMaterial = node.material.clone() as MeshStandardMaterial;
-                newMaterial.vertexColors = true;
-                newMaterial.color.set(0xffffff); // Set material color to white
-                node.material = newMaterial;
+              if (!geometry.attributes.color) {
+                const count = geometry.attributes.position.count;
+                const buffer = new BufferAttribute(new Float32Array(count * 3), 3);
+                geometry.setAttribute("color", buffer);
               }
+
+              const numVertices = geometry.attributes.color.array;
+              let colors = new Float32Array(numVertices);
+              let originalColors = Array.from(geometry.attributes.color.array) as number[];
+
+              const color = new Color(colorStr);
+              const vertex = new Vector3();
+              const positionArray = Array.from(geometry.attributes.position.array) as number[];
+
+              for (let i = 0; i <= positionArray.length - 3; i += 3) {
+                vertex.set(positionArray[i], positionArray[i + 1], positionArray[i + 2]);
+                vertex.applyMatrix4(meshRef.current.matrixWorld);
+                const distance = vertex.distanceTo(intersectPosition);
+
+                if (distance <= radius) {
+                  const blendedColor = new Color()
+                    .fromArray(originalColors.slice(i, i + 3))
+                    .lerp(color, 1 - distance / radius);
+                  colors.set(blendedColor.toArray(), i);
+                } else {
+                  colors.set(originalColors.slice(i, i + 3), i);
+                }
+              }
+
+              geometry.setAttribute("color", new BufferAttribute(colors, 3));
+              const newMaterial = node.material.clone() as MeshStandardMaterial;
+              newMaterial.vertexColors = true;
+              newMaterial.color.set(0xffffff); // Set material color to white
+              node.material = newMaterial;
             }
-          });
-        }
+          }
+        });
       }
     }
   }
@@ -202,6 +192,11 @@ const onMouseMove = (
     const intersectPosition = intersects[0].point;
     const mouseCirclePos = new Vector3().addVectors(intersectPosition, new Vector3(0, 0.01, 0));
     mouseCircleRef.current.position.copy(mouseCirclePos);
+  }
+  // Point Light
+  if (intersects.length > 0 && pointLightRef.current) {
+    const intersectPosition = intersects[0].point;
+    pointLightRef.current.position.set(intersectPosition.x, 10, intersectPosition.z);
   }
 };
 
