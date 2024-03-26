@@ -189,6 +189,7 @@ export const addInitOM = (oms: IObjectManagement[], type: OMType, value: string 
           position: new Vector3(0, 0, 0),
           rotation: new Euler(0, 0, 0),
           scale: new Vector3(1, 1, 1),
+          url: `/landscapes/${value}.glb`,
         },
         physics: true,
         phyType: "box",

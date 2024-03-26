@@ -81,6 +81,7 @@ const _Text3d = ({ om }) => {
           ref.current.scale.copy(om.args.scale);
         }
         if (om.args.helper !== undefined) setHelper(om.args.helper);
+        ref.current.visible = om.visible;
       }
       if (matRef.current) {
         if (om.args.color !== undefined) {

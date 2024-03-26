@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { headers } from "next/headers";
 
 import { CurrentHostUrl } from "@/utils";
@@ -39,11 +38,7 @@ const EditorPage = async ({ searchParams: { id } }: EditorPageProps) => {
     }
   }
 
-  return (
-    <Suspense fallback={null}>
-      <Editor projectId={id} initOMs={projectData.oms} initSMs={projectData.sms} initConfig={projectData.config} />
-    </Suspense>
-  );
+  return <Editor projectId={id} initOMs={projectData.oms} initSMs={projectData.sms} initConfig={projectData.config} />;
 };
 
 export default EditorPage;

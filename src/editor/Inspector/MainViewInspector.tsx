@@ -4,6 +4,7 @@ import { useSnapshot } from "valtio";
 import { MySwal } from "@/commons/Swal";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { InspectorDom } from "@/utils/landscape";
 
 import { Animation } from "./InspectorForms/Animation";
 import { CameraParams } from "./InspectorForms/CameraParams";
@@ -86,6 +87,7 @@ export const MainViewInspector = () => {
     <>
       {otype && (
         <div className='mb-16'>
+          <InspectorDom.Out />
           {(otype == "object" ||
             otype == "ai-npc" ||
             otype == "avatar" ||

@@ -6,6 +6,7 @@ import { EditorHelper } from "@/helpers/EditorHelper";
 import { ViewHelper } from "@/helpers/ViewHelper";
 
 import { FogComponent } from "./Fog";
+import { LandScape } from "./LandScape";
 import { MyLights } from "./Lights";
 import { MyEffects } from "./MyEffects";
 import { MyEnviroment } from "./MyEnvironment";
@@ -34,6 +35,7 @@ const _SceneItems = () => {
       <MyEffects />
       <MyWaters />
       <NPCs />
+      <LandScape />
       <ViewHelper />
       <EditorHelper />
     </group>
