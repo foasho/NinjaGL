@@ -30,15 +30,6 @@ const nextConfig = {
     turbo: {
       // @docs: https://nextjs.org/docs/app/api-reference/next-config-js/turbo
       rules: {
-        resolveExtensions: [
-          '.mdx',
-          '.tsx',
-          '.ts',
-          '.jsx',
-          '.js',
-          '.mjs',
-          '.json',
-        ],
         // Option format
         '*.md': [
           {
@@ -57,7 +48,9 @@ const nextConfig = {
       "_components/*",
       "_components/**/*",
       "provider",
-      'websocket'
+      'websocket',
+      "postprocessing",
+      "fs",
     ]
   },
   typescript: {

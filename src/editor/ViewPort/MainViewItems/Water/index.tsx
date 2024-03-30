@@ -1,7 +1,7 @@
 import React from "react";
 import { useTexture } from "@react-three/drei";
 import { GroupProps, ThreeEvent, useFrame, useThree } from "@react-three/fiber";
-import { patchShaders } from "gl-noise";
+import { patchShaders } from 'gl-noise/build/glNoise.m';
 import {
   Color,
   DepthTexture,

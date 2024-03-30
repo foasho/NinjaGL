@@ -76,6 +76,7 @@
     "next-transpile-modules": "^10.0.0",
     "nextjs-toploader": "^1.6.4",
     "postgres": "^3.4.3",
+    "postprocessing": "6.35.2",
     "r3f-perf": "^7.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
