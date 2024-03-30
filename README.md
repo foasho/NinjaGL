@@ -44,5 +44,5 @@ function App() {
 
 ### WSL on Docker
 ```bash
-sudo apt install docker-compose -y
+cp .env.example.docker .env
 ```
