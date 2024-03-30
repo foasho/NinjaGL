@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
-    image: next-app
-    container_name: next-app
+    image: ninjagl-editor
+    container_name: ninjagl-editor
     ports:
       - '3001:3001'
     volumes:

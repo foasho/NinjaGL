@@ -1,3 +1,4 @@
+"use client";
 import { createContext, useContext, useRef } from "react";
 
 type kvsProps = {

@@ -41,3 +41,8 @@ function App() {
 
 - [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)
 - [Drizzle Kit CMD](https://orm.drizzle.team/kit-docs/commands)
+
+### WSL on Docker
+```bash
+sudo apt install docker-compose -y
+```

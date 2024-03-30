@@ -3,9 +3,6 @@ import nextBundleAnalyzer from '@next/bundle-analyzer';
 import nextMDX from '@next/mdx';
 import remarkGfm from 'remark-gfm';
 import rehypePrism from "@mapbox/rehype-prism";
-import urlLoader from 'url-loader';
-import fileLoader from 'file-loader';
-// import TerserPlugin from 'terser-webpack-plugin';
 
 const withBundleAnalyzer = nextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -30,6 +27,32 @@ const withPWA = nextPWA({
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
+    turbo: {
+      // @docs: https://nextjs.org/docs/app/api-reference/next-config-js/turbo
+      rules: {
+        resolveExtensions: [
+          '.mdx',
+          '.tsx',
+          '.ts',
+          '.jsx',
+          '.js',
+          '.mjs',
+          '.json',
+        ],
+        // Option format
+        '*.md': [
+          {
+            loader: '@mdx-js/loader',
+            options: {
+              format: 'md',
+            },
+          },
+        ],
+        '*.mdx': ['./my-mdx-loader'],
+        // Option-less format
+        // '*.mdx': ['@mdx-js/loader'],
+      },
+    },
     optimizePackageImports: [
       "_components/*",
       "_components/**/*",

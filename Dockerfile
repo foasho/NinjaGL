@@ -27,6 +27,7 @@ COPY postcss.config.js .
 COPY mdx-components.tsx .
 COPY drizzle.config.ts .
 COPY .npmrc .
+COPY my-mdx-loader.js .
 
 CMD ["pnpm", "fast"]
 
