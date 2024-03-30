@@ -27,7 +27,7 @@ export const MyEffects = () => {
     <>
       {effects.length > 0 && (
         <>
-          <EffectComposer disableNormalPass>
+          <EffectComposer>
             {effects.map((om) => {
               return <MyEffect om={om} key={om.id} />;
             })}

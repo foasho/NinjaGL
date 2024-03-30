@@ -29,7 +29,14 @@ const withPWA = nextPWA({
 
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {},
+  experimental: {
+    optimizePackageImports: [
+      "_components/*",
+      "_components/**/*",
+      "provider",
+      'websocket'
+    ]
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -87,6 +94,8 @@ const nextConfig = {
     //     type: 'javascript/auto'
     //   }
     // );
+
+    config.resolve.fallback = { fs: false };
 
     return config;
   },
