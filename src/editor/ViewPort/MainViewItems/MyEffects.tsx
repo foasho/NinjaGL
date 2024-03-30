@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { Bloom, EffectComposer, LUT, SSR } from "@react-three/postprocessing";
-import { LUTCubeLoader } from "postprocessing";
 import { Texture } from "three";
+import { LUTCubeLoader } from "three-stdlib";
 
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
