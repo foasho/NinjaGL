@@ -17,7 +17,6 @@ services:
       - ./public:/app/public
       - ./app:/app/app
       - ./lib:/app/lib
-      - node_modules:/app/node_modules
     restart: always
     tty: true
     stdin_open: true
@@ -39,7 +38,6 @@ services:
       - app_network
 
 volumes:
-  node_modules:
   postgres-data:
 
 networks:

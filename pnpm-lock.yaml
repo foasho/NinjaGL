@@ -39,8 +39,8 @@ dependencies:
     specifier: ^1.0.4
     version: 1.0.4
   '@ninjagl/core':
-    specifier: ^1.1.53
-    version: 1.1.53(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.14.2)
+    specifier: ^1.1.58
+    version: 1.1.58(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.14.2)
   '@planetscale/database':
     specifier: ^1.13.0
     version: 1.14.0
@@ -123,7 +123,7 @@ dependencies:
     specifier: ^1.4.5-lts.1
     version: 1.4.5-lts.1
   next:
-    specifier: 14.1.4
+    specifier: ^14.1.4
     version: 14.1.4(@babel/core@7.22.9)(react-dom@18.2.0)(react@18.2.0)
   next-auth:
     specifier: 4.24.5
@@ -4159,8 +4159,8 @@ packages:
       - debug
     dev: false
 
-  /@ninjagl/core@1.1.53(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.14.2):
-    resolution: {integrity: sha512-IWlJhsuU8jRuI6Ivo+T/VC4JH1oMz+JJa0CihsOrkMTtWyOF7VC8wqRBgWPkLpW1UY04r37kX/024ujRQlk0Nw==}
+  /@ninjagl/core@1.1.58(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2)(ws@8.14.2):
+    resolution: {integrity: sha512-rFZWeRYep5x+g2GbJh+vPgoRj45y5v1L0SneSJlefEPu8ldbPvEMGaajbCABwJyFoxGtlgJQ/2kWWHARZmXunA==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18.2.0

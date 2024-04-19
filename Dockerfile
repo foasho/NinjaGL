@@ -6,12 +6,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+RUN corepack enable pnpm && pnpm i --frozen-lockfile;
 
 ENV LANG=C.UTF-8 \
     TZ=Asia/Tokyo 
@@ -29,5 +24,9 @@ COPY drizzle.config.ts .
 COPY .npmrc .
 COPY my-mdx-loader.js .
 
-CMD ["pnpm", "fast"]
+# TODO: next14.2安定版のときに利用
+# Error: Infinite loop detected
+# CMD ["pnpm", "fast"]
+
+CMD ["pnpm", "dev"]
 
