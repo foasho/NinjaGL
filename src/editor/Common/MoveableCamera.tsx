@@ -119,8 +119,7 @@ export const MoveableCameraControl = (props: ICameraControl) => {
     if (focusOnObject && state.currentId) {
       targetFocusCamera(state.currentId);
     }
-    const mode = state.mode;
-    if (!input.dash && (input.forward || input.backward || input.right || input.left) && !state.currentId) {
+    if (( input.action && (input.forward || input.backward || input.right || input.left)) && !state.currentId) {
       const st = props.cameraSpeed * delta * 10;
       const cameraDirection = cd;
       cameraRef.current!.getWorldDirection(cameraDirection);

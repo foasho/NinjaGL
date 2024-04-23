@@ -24,9 +24,5 @@ COPY drizzle.config.ts .
 COPY .npmrc .
 COPY my-mdx-loader.js .
 
-# TODO: next14.2安定版のときに利用
-# Error: Infinite loop detected
-# CMD ["pnpm", "fast"]
-
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "fast"]
 

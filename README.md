@@ -52,7 +52,12 @@ cp .env.example.docker .env
 
 #### Packages Update
 
+[NVMのInstall](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
+
 ```
+nvm install 20.12.2
+nvm use 20.12.2
+npm install -g pnpm
 chmod +x update.sh
 ./update.sh
 ```

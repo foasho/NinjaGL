@@ -39,7 +39,7 @@ const nextConfig = {
             },
           },
         ],
-        '*.mdx': ['./my-mdx-loader'],
+        '*.mdx': ['./my-mdx-loader.js'],
         // Option-less format
         // '*.mdx': ['@mdx-js/loader'],
       },
