@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import {
   IConfigParams,
   IObjectManagement,
   IScriptManagement,
   ITextureManagement,
   IUIManagement,
+  NinjaGL,
   NJCFile,
 } from "@ninjagl/core";
 import { useSnapshot } from "valtio";
@@ -46,10 +46,6 @@ export const DebugPlay = () => {
   const configState = useSnapshot(globalConfigStore);
   const editor = useNinjaEditor();
   const [njcFile, setNJCFile] = useState<NJCFile | null>(null);
-
-  const NinjaGL = dynamic(() => import("@ninjagl/core").then((mod) => mod.NinjaGL), {
-    ssr: false,
-  });
 
   useEffect(() => {
     const _njcFile = ExportNjcFile(editor.oms.current, editor.ums.current, editor.tms.current, editor.sms.current, {
