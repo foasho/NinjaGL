@@ -17,7 +17,7 @@ interface IEditorStore {
   editorFocus: boolean;
   pivotControl: boolean;
   hiddenList: string[];
-  init: () => void;
+  init: (e?: MouseEvent) => void;
   setMode: (mode: Selection) => void;
 }
 export const editorStore = proxy<IEditorStore>({
@@ -26,7 +26,7 @@ export const editorStore = proxy<IEditorStore>({
   editorFocus: false,
   pivotControl: false,
   hiddenList: [],
-  init: () => {
+  init: (e?: MouseEvent) => {
     editorStore.currentId = null;
     editorStore.editorFocus = false;
     editorStore.pivotControl = false;

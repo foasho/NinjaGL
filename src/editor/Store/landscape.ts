@@ -4,7 +4,6 @@ import { proxy } from "valtio";
  * 地形メーカー操作状態管理
  */
 interface ILandScapeStore {
-  landMode: "edit" | "view";
   brush: "normal" | "flat" | "paint";
   color: string;
   active: {
@@ -17,7 +16,6 @@ interface ILandScapeStore {
   init: () => void;
 }
 export const landScapeStore = proxy<ILandScapeStore>({
-  landMode: "view",
   brush: "normal",
   color: "#00ff00",
   active: { current: false },
@@ -26,7 +24,6 @@ export const landScapeStore = proxy<ILandScapeStore>({
   radius: 3,
   colorBlend: 0.75,
   init: () => {
-    landScapeStore.landMode = "view";
     landScapeStore.brush = "normal";
     landScapeStore.color = "#00ff00";
     landScapeStore.active = { current: false };

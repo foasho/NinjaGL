@@ -42,8 +42,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       '@ninjagl/core':
-        specifier: ^1.1.58
-        version: 1.1.58(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2(@types/node@20.11.6)(typescript@5.3.3))(ws@7.5.9)
+        specifier: ^1.1.60
+        version: 1.1.60(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2(@types/node@20.11.6)(typescript@5.3.3))(ws@7.5.9)
       '@planetscale/database':
         specifier: ^1.13.0
         version: 1.14.0
@@ -2126,8 +2126,8 @@ packages:
   '@ninjagl/api@1.0.4':
     resolution: {integrity: sha512-rErhG/2qr/NowQGONZJS2BSzWbe+k2Pjsb8+WoxflLZ6oMdzO0efyShiEmV1Zo7u+dFrvkRVrMN7pePwdINQNQ==}
 
-  '@ninjagl/core@1.1.58':
-    resolution: {integrity: sha512-rFZWeRYep5x+g2GbJh+vPgoRj45y5v1L0SneSJlefEPu8ldbPvEMGaajbCABwJyFoxGtlgJQ/2kWWHARZmXunA==}
+  '@ninjagl/core@1.1.60':
+    resolution: {integrity: sha512-e4593xfSyDa4F71rwr12VKAAGtjhy+2abRg0dGovGv7ZMAvb24kpetwVwzm8rnEcS2KVJ65fb4FH8TTuJ1eLpA==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18.2.0
@@ -10786,7 +10786,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@ninjagl/core@1.1.58(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2(@types/node@20.11.6)(typescript@5.3.3))(ws@7.5.9)':
+  '@ninjagl/core@1.1.60(@babel/core@7.22.9)(@types/react@18.2.14)(@types/three@0.160.0)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2(@types/node@20.11.6)(typescript@5.3.3))(ws@7.5.9)':
     dependencies:
       '@khmyznikov/pwa-install': 0.3.6
       '@minchat/react-chat-ui': 0.13.17(@babel/core@7.22.9)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)(rollup@2.79.1)(ts-node@10.9.2(@types/node@20.11.6)(typescript@5.3.3))

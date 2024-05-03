@@ -76,7 +76,6 @@ const getColorBetween = (color1: Color, color2: Color, value: number): Color => 
  * @returns
  */
 type onMouseMoveProps = {
-  mode: "edit" | "view";
   pointLightRef: React.MutableRefObject<PointLight>;
   meshRef: React.MutableRefObject<Mesh>;
   camera: PerspectiveCamera;
@@ -92,7 +91,6 @@ type onMouseMoveProps = {
   colorBlend: number;
 };
 const onMouseMove = ({
-  mode,
   pointLightRef,
   meshRef,
   camera,
@@ -112,7 +110,7 @@ const onMouseMove = ({
   }
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObject(meshRef.current);
-  if (isMouseDown.current && mode == "edit") {
+  if (isMouseDown.current) {
     if (brush == "normal" || brush == "flat") {
       const { vertexIndexes, values } = getVertexes(intersects, radius);
       if (intersects.length > 0 && intersects[0]) {

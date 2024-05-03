@@ -48,6 +48,7 @@ const MyEffect = ({ om }: { om: IObjectManagement }) => {
     if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
       loader.load(om.args.texture, (loadedTexture) => {
+        // @ts-ignore
         setTexture(loadedTexture);
       });
     } else {

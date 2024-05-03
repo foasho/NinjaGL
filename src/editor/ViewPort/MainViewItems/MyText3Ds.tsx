@@ -2,14 +2,12 @@ import { memo, useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { Text3D, useFont, useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { BoxHelper, Euler, Matrix4, MeshStandardMaterial, Vector3 } from "three";
+import { BoxHelper, MeshStandardMaterial } from "three";
 import { useSnapshot } from "valtio";
 
 import { EnableClickTrigger } from "@/commons/functional";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-
-import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 const _MyText3Ds = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -37,36 +35,13 @@ const _MyText3Ds = () => {
 
 const _Text3d = ({ om }) => {
   const ref = useRef<any>();
-  const grapComponent = useRef<DragStartComponentProps|null>(null);
   const { camera } = useThree();
   const font = useFont("/fonts/MPLUS.json");
   const state = useSnapshot(editorStore);
   const matRef = useRef<MeshStandardMaterial>(null);
-  const editor = useNinjaEditor();
+  const { pivotRef, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
   const [helper, setHelper] = useState<boolean>(false);
   const id = om.id;
-
-  const onDragStart = (props: OnDragStartProps) => {
-    editorStore.pivotControl = true;
-    grapComponent.current = props.component;
-  };
-  const onDragEnd = () => {
-    grapComponent.current = null;
-  };
-
-  const onDrag = (e: Matrix4) => {
-    // 位置/回転率の確認
-    const position = new Vector3().setFromMatrixPosition(e);
-    const rotation = new Euler().setFromRotationMatrix(e);
-    const scale = new Vector3().setFromMatrixScale(e);
-    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
-      editor.setPosition(id, position);
-    } else if (grapComponent.current === "Scale") {
-      editor.setScale(id, scale);
-    } else if (grapComponent.current === "Rotator") {
-      editor.setRotation(id, rotation);
-    }
-  };
 
   useEffect(() => {
     const init = () => {
@@ -90,9 +65,9 @@ const _Text3d = ({ om }) => {
       }
     };
     init();
-    editor.onOMIdChanged(id, init);
+    onOMIdChanged(id, init);
     return () => {
-      editor.offOMIdChanged(id, init);
+      offOMIdChanged(id, init);
     };
   });
 
@@ -100,29 +75,22 @@ const _Text3d = ({ om }) => {
 
   return (
     <>
-      {!state.editorFocus && (
-        <PivotControls
-          // @ts-ignore
-          object={state.currentId == id ? ref : null}
-          visible={state.currentId == id}
-          depthTest={false}
-          lineWidth={2}
-          anchor={[0, 0, 0]}
-          onDrag={(e) => onDrag(e)}
-          onDragStart={onDragStart}
-          onDragEnd={() => onDragEnd()}
-        />
-      )}
       <Text3D
         ref={ref}
         font={font.data}
         onClick={(e) => {
-          e.stopPropagation();
-          if (EnableClickTrigger(camera.position.clone(), ref.current!)) {
+          if (!state.currentId) e.stopPropagation();
+          if (EnableClickTrigger(camera.position.clone(), ref.current!) && state.currentId !== id) {
+            pivotRef.current = ref.current;
             editorStore.currentId = id;
           }
         }}
-        onPointerMissed={(e) => e.type === "click" && editorStore.init()}
+        onPointerMissed={(e) => {
+          if (e.type === "click" && state.currentId == id) {
+            editorStore.init(e)
+            e.preventDefault();
+          }
+        }}
       >
         {om.args.content}
         <meshStandardMaterial ref={matRef} color={om.args.color || "#43D9D9"} />

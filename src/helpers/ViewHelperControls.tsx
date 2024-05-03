@@ -171,20 +171,25 @@ const _ViewHelperControls = () => {
           disableSelectorIconRotation
           selectorIcon={<HiOutlineSelector />}
           onSelectionChange={async (selection) => {
-            let landscape = oms.current.find((o) => o.type === "landscape");
-            if (!landscape) {
-              const data = await showSelectNewObjectDialog({ initSelectType: "landscape" });
-              if (!data) return;
-              if (!data.type || data.type !== "landscape") return;
-              const _om = addInitOM(oms.current, data.type!, data.value);
-              if (_om) {
-                addOM(_om);
-                landscape = _om;
+            if (selection !== "all" && selection.has("landscape")) {
+              editorState.setMode(selection);
+              let landscape = oms.current.find((o) => o.type === "landscape");
+              if (!landscape) {
+                const data = await showSelectNewObjectDialog({ initSelectType: "landscape" });
+                if (!data) return;
+                if (!data.type || data.type !== "landscape") return;
+                const _om = addInitOM(oms.current, data.type!, data.value);
+                if (_om) {
+                  addOM(_om);
+                  landscape = _om;
+                }
               }
+              // 選択中にする
+              if (landscape) editorStore.currentId = landscape.id;
+            } else {
+              editorState.setMode(selection);
+              editorStore.currentId = null;
             }
-            editorState.setMode(selection);
-            // 選択中にする
-            if (landscape) editorStore.currentId = landscape.id;
           }}
         >
           <SelectItem key='select' value='select' className='text-xs'>

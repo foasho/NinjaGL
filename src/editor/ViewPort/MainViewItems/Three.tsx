@@ -2,14 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { MeshReflectorMaterial, useHelper } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { BoxHelper, Color, Euler, Matrix4, Mesh, Vector3 } from "three";
+import { BoxHelper, Color, Mesh } from "three";
 import { useSnapshot } from "valtio";
 
 import { EnableClickTrigger } from "@/commons/functional";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-
-import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 export const ThreeObjects = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -37,14 +35,12 @@ export const ThreeObjects = () => {
 interface IThreeObject {
   om: IObjectManagement;
 }
-const tempMat4 = new Matrix4();
 const ThreeObject = (props: IThreeObject) => {
   const { om } = props;
-  const grapComponent = useRef<DragStartComponentProps|null>(null);
   const { camera } = useThree();
   const state = useSnapshot(editorStore);
   const ref = useRef<Mesh>(null);
-  const editor = useNinjaEditor();
+  const { onOMIdChanged, offOMIdChanged, pivotRef } = useNinjaEditor();
   const [helper, setHelper] = useState<boolean>(false);
   const id = props.om.id;
   const [material, setMaterial] = useState<any>();
@@ -61,29 +57,6 @@ const ThreeObject = (props: IThreeObject) => {
   } else if (om.args.type == "capsule") {
     geometry = <capsuleGeometry />;
   }
-
-  const onDragStart = (props: OnDragStartProps) => {
-    editorStore.pivotControl = true;
-    grapComponent.current = props.component;
-  };
-  const onDragEnd = () => {
-    grapComponent.current = null;
-  };
-
-  const onDrag = (e: Matrix4) => {
-    // 位置/回転率の確認
-    const position = new Vector3().setFromMatrixPosition(e);
-    const rotation = new Euler().setFromRotationMatrix(e);
-    const scale = new Vector3().setFromMatrixScale(e);
-    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
-      editor.setPosition(id, position);
-    } else if (grapComponent.current === "Scale") {
-      editor.setScale(id, scale);
-    } else if (grapComponent.current === "Rotator") {
-      editor.setRotation(id, rotation);
-    }
-    tempMat4.copy(e);
-  };
 
   useEffect(() => {
     const init = () => {
@@ -124,9 +97,9 @@ const ThreeObject = (props: IThreeObject) => {
       }
     };
     init();
-    editor.onOMIdChanged(id, init);
+    onOMIdChanged(id, init);
     return () => {
-      editor.offOMIdChanged(id, init);
+      offOMIdChanged(id, init);
     };
   }, []);
 
@@ -136,36 +109,27 @@ const ThreeObject = (props: IThreeObject) => {
   return (
     <>
       {geometry && (
-        <>
-          {!state.editorFocus && (
-            <PivotControls
-              // @ts-ignore
-              object={state.currentId == id ? ref : null}
-              visible={state.currentId == id}
-              depthTest={false}
-              lineWidth={2}
-              anchor={[0, 0, 0]}
-              onDrag={(e) => onDrag(e)}
-              onDragStart={onDragStart}
-              onDragEnd={onDragEnd}
-            />
-          )}
-          <mesh
-            ref={ref}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (EnableClickTrigger(camera.position.clone(), ref.current!)) {
-                editorStore.currentId = id;
-              }
-            }}
-            castShadow={true}
-            receiveShadow={true}
-            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
-          >
-            {geometry}
-            {material}
-          </mesh>
-        </>
+        <mesh
+          ref={ref}
+          castShadow={true}
+          receiveShadow={true}
+          onClick={(e) => {
+            if (!state.currentId) e.stopPropagation();
+            if (EnableClickTrigger(camera.position.clone(), ref.current!) && state.currentId !== id) {
+              pivotRef.current = ref.current;
+              editorStore.currentId = id;
+            }
+          }}
+          onPointerMissed={(e) => {
+            if (e.type === "click" && state.currentId == id) {
+              editorStore.init(e)
+              e.preventDefault();
+            }
+          }}
+        >
+          {geometry}
+          {material}
+        </mesh>
       )}
     </>
   );
