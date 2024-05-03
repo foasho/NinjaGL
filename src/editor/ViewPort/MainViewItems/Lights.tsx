@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { useHelper } from "@react-three/drei";
-import { Color, DirectionalLightHelper, Euler, Mesh, PointLightHelper, SpotLightHelper, Vector3 } from "three";
-import { useSnapshot } from "valtio";
+import { useThree } from "@react-three/fiber";
+import { Color, DirectionalLightHelper, Mesh, PointLightHelper, SpotLightHelper } from "three";
 
+import { EnableClickTrigger } from "@/commons/functional";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-
-import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 export const MyLights = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -39,35 +38,12 @@ interface ILightProps {
   om: IObjectManagement;
 }
 export const MyLight = (prop: ILightProps) => {
-  const grapComponent = useRef<DragStartComponentProps|null>(null);
-  const state = useSnapshot(editorStore);
-  const { setPosition, setRotation, setScale, onOMIdChanged, offOMIdChanged } = useNinjaEditor();
+  const { onOMIdChanged, offOMIdChanged, pivotRef } = useNinjaEditor();
   const catchRef = useRef<Mesh>(null);
   const ref = useRef<any>();
   const { om } = prop;
+  const { camera } = useThree();
   const id = om.id;
-
-  const onDragStart = (props: OnDragStartProps) => {
-    editorStore.pivotControl = true;
-    grapComponent.current = props.component;
-  };
-  const onDragEnd = () => {
-    grapComponent.current = null;
-  };
-
-  const onDrag = (e) => {
-    // 位置/回転率の確認
-    const position = new Vector3().setFromMatrixPosition(e);
-    const rotation = new Euler().setFromRotationMatrix(e);
-    const scale = new Vector3().setFromMatrixScale(e);
-    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
-      setPosition(id, position);
-    } else if (grapComponent.current === "Scale") {
-      setScale(id, scale);
-    } else if (grapComponent.current === "Rotator") {
-      setRotation(id, rotation);
-    }
-  };
 
   useEffect(() => {
     const init = () => {
@@ -88,6 +64,29 @@ export const MyLight = (prop: ILightProps) => {
         ref.current.color.copy(new Color(om.args.color));
         ref.current.needsUpdate = true;
       }
+      if (om.args.mapSizeWidth && om.args.type === "directional") {
+        ref.current.shadow.mapSize.width = om.args.mapSizeWidth;
+      }
+      if (om.args.mapSizeHeight && om.args.type === "directional") {
+        ref.current.shadow.mapSize.height = om.args.mapSizeHeight;
+      }
+      if (om.args.bias) {
+        ref.current.shadow.mapSize.bias = om.args.bias;
+      }
+      if (om.args.normalBias) {
+        ref.current.shadow.mapSize.normalBias = om.args.normalBias;
+      }
+      if (om.args.shadowCameraSize) {
+        ref.current.shadow.camera.left = -om.args.shadowCameraSize / 2;
+        ref.current.shadow.camera.right = om.args.shadowCameraSize / 2;
+        ref.current.shadow.camera.top = om.args.shadowCameraSize / 2;
+        ref.current.shadow.camera.bottom = -om.args.shadowCameraSize / 2;
+      }
+      ref.current.castShadow = !!om.args.castShadow;
+      // update light
+      ref.current.shadow.map = null; // 既存のシャドウマップを破棄
+      ref.current.shadow.needsUpdate = true;
+
       // I wanna remove helper
       catchRef.current.updateMatrix();
     };
@@ -113,51 +112,24 @@ export const MyLight = (prop: ILightProps) => {
 
   return (
     <>
-      {om.args.type == "spot" && (
-        <>
-          <spotLight ref={ref} castShadow />
-        </>
-      )}
-      {om.args.type == "directional" && (
-        <>
-          <directionalLight ref={ref} castShadow />
-        </>
-      )}
-      {om.args.type == "point" && (
-        <>
-          <pointLight ref={ref} position={[0, 5, 0]} castShadow />
-        </>
-      )}
-
-      {/* ヘルパーはやはり一緒にいれる */}
-      {!state.editorFocus && (
-        <PivotControls
-          // @ts-ignore
-          object={state.currentId == id ? catchRef : undefined}
-          visible={state.currentId == id}
-          depthTest={false}
-          lineWidth={2}
-          anchor={[0, 0, 0]}
-          onDrag={(e) => onDrag(e)}
-          onDragStart={onDragStart}
-          onDragEnd={() => onDragEnd()}
-          hiddenScale={true}
-        />
-      )}
+      {om.args.type == "spot" && <spotLight ref={ref} castShadow />}
+      {om.args.type == "directional" && <directionalLight ref={ref} castShadow />}
+      {om.args.type == "point" && <pointLight ref={ref} position={[0, 5, 0]} castShadow />}
       <mesh
         onClick={(e) => {
-          e.stopPropagation();
-          editorStore.currentId = id;
-          editorStore.pivotControl = true;
+          if (!editorStore.currentId) e.stopPropagation();
+          if (EnableClickTrigger(camera.position.clone(), ref.current!) && editorStore.currentId !== id) {
+            pivotRef.current = catchRef.current;
+            editorStore.currentId = id;
+          }
         }}
         onPointerMissed={(e) => {
-          if (e.type === "click") {
-            editorStore.currentId = null;
-            editorStore.pivotControl = false;
+          if (e.type === "click" && editorStore.currentId == id) {
+            editorStore.init(e);
+            e.preventDefault();
           }
         }}
         ref={catchRef}
-        // onContextMenu={(e) => {e.stopPropagation()}}
       >
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial wireframe={true} visible={false} color={0x00ff00} />

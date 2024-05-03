@@ -6,6 +6,7 @@ import { useSnapshot } from "valtio";
 
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { normalStyles } from "@/utils/styles";
 
 export const Physics = () => {
   const state = useSnapshot(editorStore);
@@ -66,7 +67,7 @@ export const Physics = () => {
         </div>
         {isPhysics && (
           <>
-            <Select options={physicsOptions} value={phyTypeOpt} onChange={onChangePhyType} />
+            <Select options={physicsOptions} value={phyTypeOpt} onChange={onChangePhyType} styles={normalStyles} />
             <div>
               <div className='inline-block py-1.5 pl-3 font-bold'>{t("isMoveable")}</div>
               <div className='inline-block pl-3'>

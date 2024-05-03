@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { Bloom, EffectComposer, LUT, SSR } from "@react-three/postprocessing";
-import { LUTCubeLoader } from "postprocessing";
 import { Texture } from "three";
+import { LUTCubeLoader } from "three-stdlib";
 
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
@@ -27,7 +27,7 @@ export const MyEffects = () => {
     <>
       {effects.length > 0 && (
         <>
-          <EffectComposer disableNormalPass>
+          <EffectComposer>
             {effects.map((om) => {
               return <MyEffect om={om} key={om.id} />;
             })}
@@ -48,6 +48,7 @@ const MyEffect = ({ om }: { om: IObjectManagement }) => {
     if (om.args.type === "lut" && om.args.texture) {
       const loader = new LUTCubeLoader();
       loader.load(om.args.texture, (loadedTexture) => {
+        // @ts-ignore
         setTexture(loadedTexture);
       });
     } else {

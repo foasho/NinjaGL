@@ -1,13 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { OrbitControls, PerspectiveCamera as DPerspectiveCamera } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { PerspectiveCamera, Vector3 } from "three";
+import { MOUSE, PerspectiveCamera, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useSnapshot } from "valtio";
 
 import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 
+import { globalEditorStore } from "../Store/editor";
 import { editorStore, globalContentStore } from "../Store/Store";
 
 const cd = new Vector3();
@@ -26,7 +27,7 @@ interface ICameraControl {
   enable?: boolean;
 }
 export const MoveableCameraControl = (props: ICameraControl) => {
-  const state = useSnapshot(editorStore);
+  const { mode, currentId } = useSnapshot(editorStore);
   const contentState = useSnapshot(globalContentStore);
   const editor = useNinjaEditor();
   const ref = useRef<OrbitControlsImpl>(null);
@@ -35,6 +36,9 @@ export const MoveableCameraControl = (props: ICameraControl) => {
   const { input } = useInputControl({ device: EDeviceType.Desktop });
   // Fキーが押された瞬間にカメラをフォーカスするためのフラグ
   const [focusOnObject, setFocusOnObject] = useState(false);
+  // const { gl } = useThree();
+  // const { mode } = useSnapshot(editorStore);
+  const { cameraSpeed } = useSnapshot(globalEditorStore);
 
   useLayoutEffect(() => {
     if (cameraRef && cameraRef.current) {
@@ -87,7 +91,6 @@ export const MoveableCameraControl = (props: ICameraControl) => {
       // ターゲットに上方向ベクトル、右方向ベクトル、背後方向ベクトルを加算して、フォーカス位置を計算
       const focusPosition = new Vector3().addVectors(target, upDirection).add(rightDirection).add(forwardDirection);
 
-
       cameraRef.current!.position.copy(focusPosition);
       cameraRef.current!.lookAt(target);
       if (ref && ref.current) {
@@ -112,10 +115,10 @@ export const MoveableCameraControl = (props: ICameraControl) => {
     }
 
     // Fキーが押された瞬間にstate.currentIdにフォーカスする
-    if (focusOnObject && state.currentId) {
-      targetFocusCamera(state.currentId);
+    if (focusOnObject && currentId) {
+      targetFocusCamera(currentId);
     }
-    if (!input.dash && (input.forward || input.backward || input.right || input.left) && !state.currentId) {
+    if (input.mouseButtons.includes(2) && (input.forward || input.backward || input.right || input.left)) {
       const st = props.cameraSpeed * delta * 10;
       const cameraDirection = cd;
       cameraRef.current!.getWorldDirection(cameraDirection);
@@ -139,7 +142,8 @@ export const MoveableCameraControl = (props: ICameraControl) => {
       }
       globalContentStore.cameraPosition.copy(cameraPosition);
       cameraRef.current!.position.copy(cameraPosition);
-      ref.current!.target.copy(cameraPosition.add(cameraDirection));
+      if (ref.current) ref.current.target.copy(cameraPosition.add(cameraDirection));
+      else console.error("ref.current is null");
     } else if (ref.current && cameraRef.current) {
       cameraRef.current.position.copy(ref.current.object.position);
       cameraRef.current.rotation.copy(ref.current.object.rotation);
@@ -162,6 +166,12 @@ export const MoveableCameraControl = (props: ICameraControl) => {
         args={[cameraRef.current!, gl.domElement]}
         camera={cameraRef.current!}
         makeDefault={true}
+        mouseButtons={{
+          LEFT: mode !== "all" && mode.has("landscape") ? undefined : MOUSE.ROTATE,
+          MIDDLE: MOUSE.PAN,
+          RIGHT: MOUSE.ROTATE,
+        }}
+        panSpeed={cameraSpeed}
       />
     </>
   );

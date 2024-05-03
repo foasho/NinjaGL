@@ -35,10 +35,10 @@ export const globalEditorStore = proxy<IEditorStore>({
   worldGridSize: 8,
   worldSize: 32,
   cameraFar: 1000,
-  cameraSpeed: 1,
+  cameraSpeed: 2,
   viewDistance: 50,
   isGrid: false,
-  isWorldHelper: true,
+  isWorldHelper: false,
   isGizmo: true,
   showCanvas: true,
 });

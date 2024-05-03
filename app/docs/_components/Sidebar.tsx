@@ -1,3 +1,4 @@
+"use client";
 import { AiOutlineSearch } from "react-icons/ai";
 import { Input, Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
 

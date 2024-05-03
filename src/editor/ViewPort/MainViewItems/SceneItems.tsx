@@ -3,9 +3,11 @@ import { useSnapshot } from "valtio";
 
 import { globalEditorStore } from "@/editor/Store/editor";
 import { EditorHelper } from "@/helpers/EditorHelper";
+import { PivotControlHelper } from "@/helpers/PivotControlHelper";
 import { ViewHelper } from "@/helpers/ViewHelper";
 
 import { FogComponent } from "./Fog";
+import { LandScape } from "./LandScape";
 import { MyLights } from "./Lights";
 import { MyEffects } from "./MyEffects";
 import { MyEnviroment } from "./MyEnvironment";
@@ -34,7 +36,9 @@ const _SceneItems = () => {
       <MyEffects />
       <MyWaters />
       <NPCs />
+      <LandScape />
       <ViewHelper />
+      <PivotControlHelper />
       <EditorHelper />
     </group>
   );

@@ -40,7 +40,7 @@ export const ProjectsTable = ({ projects }) => {
                 href={`/editor?id=${project.id}`}
                 startContent={<HiRocketLaunch className='inline' />}
               >
-                開く
+                編集
               </Button>
               <InviteButton projectId={project.id} />
               <Button

@@ -1,24 +1,29 @@
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AiFillCamera, AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { HiOutlineSelector } from "react-icons/hi";
 import { ImEarth } from "react-icons/im";
 import { MdVideogameAsset, MdVideogameAssetOff } from "react-icons/md";
 import { TiSpanner } from "react-icons/ti";
+import { Select, SelectItem } from "@nextui-org/react";
 import clsx from "clsx";
 import { useSnapshot } from "valtio";
 
 import { isNumber } from "@/commons/functional";
 import { MySwal } from "@/commons/Swal";
+import { showSelectNewObjectDialog } from "@/editor/Dialogs/SelectNewObjectDialog";
 import { globalEditorStore } from "@/editor/Store/editor";
-import { globalConfigStore } from "@/editor/Store/Store";
+import { editorStore, globalConfigStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { sendServerConfig } from "@/utils/dataSync";
+import { addInitOM } from "@/utils/omControls";
 
 /**
  * 補助機能
  */
 const _ViewHelperControls = () => {
-  const { projectId } = useNinjaEditor();
+  const { projectId, oms, addOM } = useNinjaEditor();
+  const editorState = useSnapshot(editorStore);
   const config = useSnapshot(globalConfigStore);
   const { physics } = config;
   const { isGrid, showCanvas, isWorldHelper, isGizmo, cameraFar, cameraSpeed, uiMode, uiGridNum } =
@@ -156,6 +161,45 @@ const _ViewHelperControls = () => {
           </a>
         </>
       )}
+      <div className='pt-3'>
+        <Select
+          label=''
+          placeholder='Select an animal'
+          labelPlacement='outside'
+          className='max-w-xs text-xs'
+          selectedKeys={editorState.mode}
+          disableSelectorIconRotation
+          selectorIcon={<HiOutlineSelector />}
+          onSelectionChange={async (selection) => {
+            if (selection !== "all" && selection.has("landscape")) {
+              editorState.setMode(selection);
+              let landscape = oms.current.find((o) => o.type === "landscape");
+              if (!landscape) {
+                const data = await showSelectNewObjectDialog({ initSelectType: "landscape" });
+                if (!data) return;
+                if (!data.type || data.type !== "landscape") return;
+                const _om = addInitOM(oms.current, data.type!, data.value);
+                if (_om) {
+                  addOM(_om);
+                  landscape = _om;
+                }
+              }
+              // 選択中にする
+              if (landscape) editorStore.currentId = landscape.id;
+            } else {
+              editorState.setMode(selection);
+              editorStore.currentId = null;
+            }
+          }}
+        >
+          <SelectItem key='select' value='select' className='text-xs'>
+            {t("selectMode")}
+          </SelectItem>
+          <SelectItem key='landscape' value='landscape' className='text-xs'>
+            {t("landscapeMode")}
+          </SelectItem>
+        </Select>
+      </div>
     </div>
   );
 };

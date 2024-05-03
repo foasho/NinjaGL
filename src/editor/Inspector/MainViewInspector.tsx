@@ -4,9 +4,12 @@ import { useSnapshot } from "valtio";
 import { MySwal } from "@/commons/Swal";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
+import { InspectorDom } from "@/utils/landscape";
 
 import { Animation } from "./InspectorForms/Animation";
 import { CameraParams } from "./InspectorForms/CameraParams";
+import { Color } from "./InspectorForms/Color";
+import { DirectionalLightParams } from "./InspectorForms/DirectonalLightParams";
 import { EnvironmentParam } from "./InspectorForms/EnvironmentParam";
 import { FormType } from "./InspectorForms/FormType";
 import { Intensity } from "./InspectorForms/Intensity";
@@ -29,6 +32,7 @@ export const MainViewInspector = () => {
 
   const selectOM = id ? editor.getOMById(id) : null;
   const otype = selectOM ? selectOM.type : null;
+  const oatype = selectOM && selectOM.args.type ? selectOM.args.type : null;
 
   /**
    * 選択中Objectをdeleteする
@@ -86,6 +90,7 @@ export const MainViewInspector = () => {
     <>
       {otype && (
         <div className='mb-16'>
+          <InspectorDom.Out />
           {(otype == "object" ||
             otype == "ai-npc" ||
             otype == "avatar" ||
@@ -98,6 +103,7 @@ export const MainViewInspector = () => {
             otype == "lightformer") && <Transforms />}
 
           {otype == "three" && <MaterialForm />}
+          {otype == "light" && <Color />}
 
           {(otype == "object" || otype == "three") && <Physics />}
 
@@ -134,6 +140,8 @@ export const MainViewInspector = () => {
           {(otype == "text" || otype == "text3d") && <TextContent />}
           {otype == "ai-npc" && <SystemContent />}
           {otype == "camera" && <CameraParams />}
+
+          {oatype == "directional" && <DirectionalLightParams />}
         </div>
       )}
     </>

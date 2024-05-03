@@ -66,6 +66,7 @@ type NinjaEditorProp = {
   ums: React.MutableRefObject<IUIManagement[]>;
   tms: React.MutableRefObject<ITextureManagement[]>;
   sms: React.MutableRefObject<IScriptManagement[]>;
+  cameraStop: React.MutableRefObject<boolean>;
   transformDecimal: number;
   mode: ECBMode;
   gltfViewerObj: Object3D | null;
@@ -116,6 +117,7 @@ type NinjaEditorProp = {
   getLights: () => IObjectManagement[];
   selectTemplate: (template: TemplateProps) => void;
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  pivotRef: React.MutableRefObject<any>;
 };
 const NinjaEditorContext = createContext<NinjaEditorProp>({
   projectId: undefined,
@@ -123,6 +125,7 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   ums: { current: [] },
   tms: { current: [] },
   sms: { current: [] },
+  cameraStop: { current: false },
   transformDecimal: 2,
   mode: ECBMode.POSITION,
   gltfViewerObj: null,
@@ -173,6 +176,7 @@ const NinjaEditorContext = createContext<NinjaEditorProp>({
   getLights: () => [],
   selectTemplate: (template: TemplateProps) => {},
   canvasRef: { current: null },
+  pivotRef: { current: null },
 });
 
 export const useNinjaEditor = () => useContext(NinjaEditorContext);
@@ -198,6 +202,7 @@ export const NinjaEditorProvider = ({
   const tms = useRef<ITextureManagement[]>([]);
   const sms = useRef<IScriptManagement[]>([]);
   const orbit = useRef<OrbitControlsImpl | null>(null);
+  const cameraStop = useRef<boolean>(false);
   const transformDecimal = 2;
   // コンテンツブラウザで利用
   const mode = useRef<ECBMode>(ECBMode.POSITION);
@@ -223,6 +228,8 @@ export const NinjaEditorProvider = ({
   const copyOMRef = useRef<IObjectManagement | null>(null);
   // CanvasRef
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // 選択中Ref
+  const pivotRef = useRef<any>(null);
 
   /**
    * 初期化関数
@@ -652,6 +659,7 @@ export const NinjaEditorProvider = ({
         ums,
         tms,
         sms,
+        cameraStop,
         transformDecimal,
         mode: mode.current,
         gltfViewerObj: gltfViewerObj.current,
@@ -701,7 +709,8 @@ export const NinjaEditorProvider = ({
         getAvatarOM,
         getLights,
         selectTemplate,
-        canvasRef
+        canvasRef,
+        pivotRef,
       }}
     >
       {ready && <>{children}</>}

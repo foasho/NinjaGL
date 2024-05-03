@@ -1,15 +1,15 @@
-import { MutableRefObject, Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { IObjectManagement } from "@ninjagl/core";
 import { useAnimations, useGLTF } from "@react-three/drei";
-import { Euler, Group, Matrix4, Mesh, Object3D, Vector3 } from "three";
+import { useThree } from "@react-three/fiber";
+import { Group, Mesh, Object3D } from "three";
 import { GLTF, SkeletonUtils } from "three-stdlib";
 import { useSnapshot } from "valtio";
 
+import { EnableClickTrigger } from "@/commons/functional";
 import { Loading3D } from "@/commons/Loading3D";
 import { editorStore } from "@/editor/Store/Store";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
-
-import { DragStartComponentProps, OnDragStartProps, PivotControls } from "./PivoitControl";
 
 export const Avatar = () => {
   const { oms, onOMsChanged, offOMsChanged } = useNinjaEditor();
@@ -33,45 +33,14 @@ export const Avatar = () => {
  * アバターデータ
  */
 export const Player = ({ om }) => {
-  const grapComponent = useRef<DragStartComponentProps|null>(null);
+  const { camera } = useThree();
   const state = useSnapshot(editorStore);
   const { scene, animations } = useGLTF(om.args.url) as GLTF;
   const [clone, setClone] = useState<Object3D>();
   const ref = useRef<Group>(null);
-  const {
-    setPosition,
-    setRotation,
-    setScale,
-    getPosition,
-    getRotation,
-    getScale,
-    getMaterialData,
-    setArg,
-    onOMIdChanged,
-    offOMIdChanged,
-  } = useNinjaEditor();
+  const { pivotRef, getPosition, getRotation, getScale, getMaterialData, setArg, onOMIdChanged, offOMIdChanged } =
+    useNinjaEditor();
   const id = om.id;
-  const onDragStart = (props: OnDragStartProps) => {
-    editorStore.pivotControl = true;
-    grapComponent.current = props.component;
-  };
-  const onDragEnd = () => {
-    grapComponent.current = null;
-  };
-
-  const onDrag = (e: Matrix4) => {
-    // 位置/回転率の確認
-    const position = new Vector3().setFromMatrixPosition(e);
-    const rotation = new Euler().setFromRotationMatrix(e);
-    const scale = new Vector3().setFromMatrixScale(e);
-    if (grapComponent.current === "Arrow" || grapComponent.current === "Slider") {
-      setPosition(id, position);
-    } else if (grapComponent.current === "Scale") {
-      setScale(id, scale);
-    } else if (grapComponent.current === "Rotator") {
-      setRotation(id, rotation);
-    }
-  };
 
   useEffect(() => {
     const init = () => {
@@ -125,25 +94,24 @@ export const Player = ({ om }) => {
 
   return (
     <Suspense fallback={<Loading3D />}>
-      {!state.editorFocus && (
-        <PivotControls
-          object={state.currentId == id ? (ref as MutableRefObject<Object3D>) : undefined}
-          visible={state.currentId == id}
-          depthTest={false}
-          lineWidth={2}
-          anchor={[0, 0, 0]}
-          onDrag={(e) => onDrag(e)}
-          onDragStart={onDragStart}
-          onDragEnd={() => onDragEnd()}
-        />
-      )}
       {clone && (
         <group ref={ref}>
           <AnimationHelper
             id={id}
             visible={state.hiddenList.indexOf(id) == -1}
-            onClick={(e) => (e.stopPropagation(), (editorStore.currentId = id))}
-            onPointerMissed={(e) => e.type === "click" && editorStore.init()}
+            onClick={(e) => {
+              if (!state.currentId) e.stopPropagation();
+              if (EnableClickTrigger(camera.position.clone(), ref.current!) && state.currentId !== id) {
+                pivotRef.current = ref.current;
+                editorStore.currentId = id;
+              }
+            }}
+            onPointerMissed={(e) => {
+              if (e.type === "click" && state.currentId == id) {
+                editorStore.init(e);
+                e.preventDefault();
+              }
+            }}
             object={clone}
           />
         </group>

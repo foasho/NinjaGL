@@ -36,7 +36,7 @@ export const ViewableDistance = () => {
         {t("distance")}: {distance}
       </div>
       <div>
-        <input type={"range"} min={0} max={10} step={0.01} value={distance} onChange={(e) => changeDistance(e)} />
+        <input type={"range"} min={0} max={128} step={1} value={distance} onChange={(e) => changeDistance(e)} />
       </div>
     </div>
   );

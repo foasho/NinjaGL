@@ -1,8 +1,7 @@
 import React from "react";
 import { useTexture } from "@react-three/drei";
 import { GroupProps, ThreeEvent, useFrame, useThree } from "@react-three/fiber";
-// @ts-ignore
-import { patchShaders } from "gl-noise/build/glNoise.m";
+import { patchShaders } from 'gl-noise/build/glNoise.m';
 import {
   Color,
   DepthTexture,
@@ -491,8 +490,8 @@ const _Water = ({
           baseMaterial={MeshStandardMaterial}
           key={vertexShader + fragmentShader} //
           uniforms={uniforms}
-          vertexShader={patchShaders(vertexShader)}
-          fragmentShader={patchShaders(fragmentShader)}
+          vertexShader={patchShaders(vertexShader) as string}
+          fragmentShader={patchShaders(fragmentShader) as string}
           patchMap={{
             csm_FragNormal: {
               "#include <normal_fragment_maps>": /* glsl */ `

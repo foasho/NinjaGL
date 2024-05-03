@@ -47,11 +47,7 @@ const _HierarchyTree = () => {
         <div className='select-none pl-[10px] text-sm font-bold text-white'>{t("objects")}</div>
         <div className='m-0 h-[25vh] min-h-[100px] overflow-y-auto overflow-x-hidden rounded-sm border-1 border-[#6e6b6b] p-2'>
           {trees.map((om, idx) => {
-            let isSelect = false;
-            if (selectOM && selectOM == om) {
-              isSelect = true;
-            }
-            return <TreeItem om={om} index={idx} isSelect={isSelect} key={idx} />;
+            return <TreeItem om={om} index={idx} key={idx} />;
           })}
         </div>
       </div>
@@ -62,14 +58,12 @@ const _HierarchyTree = () => {
 interface ITreeItem {
   index: number;
   om: IObjectManagement;
-  isSelect: boolean;
 }
 const TreeItem = (prop: ITreeItem) => {
-  const state = useSnapshot(editorStore);
+  const { currentId, hiddenList } = useSnapshot(editorStore);
   const ref = useRef<HTMLDivElement>(null);
-  const { onOMIdChanged, offOMIdChanged, setName, setVisible } = useNinjaEditor();
+  const { setName, setVisible } = useNinjaEditor();
   const [visible, setLocalVisible] = useState<boolean>(true);
-  const { t } = useTranslation();
   const { om } = prop;
   const id = om.id;
   let lineStyle = "text-white bg-[#797272]";
@@ -77,7 +71,7 @@ const TreeItem = (prop: ITreeItem) => {
     lineStyle = "text-gray-300 bg-[#4b4848]";
   }
   let className = `text-xs py-0.5 px-1.25 items-center ${lineStyle}`;
-  if (prop.isSelect) {
+  if (currentId === id) {
     className += " border border-[1.5px] border-[#43D9D9]";
   }
   let typeIcon = <BsBox />; // デフォルトObject型
@@ -93,8 +87,6 @@ const TreeItem = (prop: ITreeItem) => {
   if (!visible) {
     visibleIcon = <AiFillEyeInvisible />;
   }
-
-  useEffect(() => {}, []);
 
   /**
    * 名前を変更
@@ -129,9 +121,9 @@ const TreeItem = (prop: ITreeItem) => {
   const changeVisible = () => {
     const changeVisible = !visible;
     if (!changeVisible) {
-      state.hiddenList.includes(id) ? null : editorStore.hiddenList.push(id);
+      hiddenList.includes(id) ? null : editorStore.hiddenList.push(id);
     } else {
-      const index = state.hiddenList.indexOf(id);
+      const index = hiddenList.indexOf(id);
       if (index !== -1) {
         editorStore.hiddenList.splice(index, 1);
       }
@@ -144,10 +136,11 @@ const TreeItem = (prop: ITreeItem) => {
    * 選択/非選択を切り替える
    */
   const onSelectObject = () => {
-    if (ref.current!.classList.contains("select")) {
-      state.init();
-    } else {
-      editorStore.currentId = prop.om.id;
+    editorStore.currentId = prop.om.id;
+    if (prop.om.type == "landscape") {
+      editorStore.setMode(
+        new Set(["landscape"])
+      );
     }
   };
 

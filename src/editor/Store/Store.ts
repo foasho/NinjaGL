@@ -1,3 +1,5 @@
+import type { Selection } from "@nextui-org/react";
+
 import { IConfigParams, IScriptManagement } from "@ninjagl/core";
 import { AnimationClip, Vector3 } from "three";
 import { proxy } from "valtio";
@@ -10,23 +12,27 @@ export const HomeCameraPosition = new Vector3(5, 5, -5);
  * Editor操作状態管理
  */
 interface IEditorStore {
-  mode: "select" | "landscape";
+  mode: Selection; // 選択モードとランドスケープモード "select" | "landscape"
   currentId: string | null;
   editorFocus: boolean;
   pivotControl: boolean;
   hiddenList: string[];
-  init: () => void;
+  init: (e?: MouseEvent) => void;
+  setMode: (mode: Selection) => void;
 }
 export const editorStore = proxy<IEditorStore>({
-  mode: "select",
+  mode: new Set(["select"]) as Selection,
   currentId: null,
   editorFocus: false,
   pivotControl: false,
   hiddenList: [],
-  init: () => {
+  init: (e?: MouseEvent) => {
     editorStore.currentId = null;
     editorStore.editorFocus = false;
     editorStore.pivotControl = false;
+  },
+  setMode: (mode: Selection) => {
+    editorStore.mode = mode;
   },
 });
 
