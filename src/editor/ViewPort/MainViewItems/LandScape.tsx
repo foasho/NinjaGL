@@ -1,18 +1,25 @@
 import React, { memo, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { GiFlatPlatform, GiMountaintop, GiPaintBrush } from "react-icons/gi";
 import { Button } from "@nextui-org/react";
-import { IObjectManagement } from "@ninjagl/core";
+import { convertObjectToFile, IObjectManagement } from "@ninjagl/core";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { useSession } from "next-auth/react";
 import { type Mesh, PerspectiveCamera, PointLight, Raycaster } from "three";
 import { useSnapshot } from "valtio";
 
+import { b64EncodeUnicode } from "@/commons/functional";
+import { MySwal } from "@/commons/Swal";
+import { globalEditorStore } from "@/editor/Store/editor";
 import { landScapeStore } from "@/editor/Store/landscape";
 import { editorStore } from "@/editor/Store/Store";
+import { LoginModal } from "@/helpers/LoginModal";
 import { EDeviceType, useInputControl } from "@/hooks/useInputControl";
 import { useNinjaEditor } from "@/hooks/useNinjaEditor";
 import { InspectorDom } from "@/utils/landscape";
+import { uploadFile } from "@/utils/upload";
 
 import { onMouseMove } from "./LandScape/Utils";
 
@@ -38,11 +45,13 @@ const _LandScape = () => {
 const MyLandScape = ({ ...om }: IObjectManagement) => {
   const { t } = useTranslation();
   const { cameraStop } = useNinjaEditor();
+  const { data: session } = useSession();
   const { radius, brush, color, power, colorBlend } = useSnapshot(landScapeStore);
   const meshRef = useRef<Mesh>(null!);
   const mouseCircleRef = useRef<Mesh>(null!);
   const { mode } = useSnapshot(editorStore);
   const [url, setUrl] = useState<string>(om.args.url!);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { nodes } = useGLTF(url) as any;
   // Inspector Params
   const raycaster = new Raycaster();
@@ -50,6 +59,63 @@ const MyLandScape = ({ ...om }: IObjectManagement) => {
   const isMouseDown = useRef(false);
   const isReverse = useRef(false);
   const pointerLight = useRef<PointLight>(null!);
+
+  const onSave = async () => {
+    // 最低限typeが選択されていればOK
+    if (meshRef.current) {
+      //ファイル名の確認
+      const target = meshRef.current.clone();
+      // userDataにmode: "player"を追加
+      target.userData.mode = "player"; // プレイヤーモデルとして検知するロジック
+      const file = await convertObjectToFile(target);
+      MySwal.fire({
+        title: t("inputFileName"),
+        input: "text",
+        showCancelButton: true,
+        confirmButtonText: t("confirmSave"),
+        showLoaderOnConfirm: true,
+        preConfirm: async (inputStr: string) => {
+          //バリデーションを入れたりしても良い
+          if (inputStr.length == 0) {
+            return MySwal.showValidationMessage(t("leastInput"));
+          }
+          if (!session) {
+            toast.error(t("requireLogin"));
+            return;
+          }
+          if (session) {
+            // ログインしていればストレージに保存
+            const formData = new FormData();
+            formData.append("file", file);
+            const filePath = `${b64EncodeUnicode(session.user!.email as string)}/LandScapes/${inputStr}.glb`;
+            try {
+              const res = await uploadFile(file, filePath);
+              if (!res || !res.url) {
+                throw new Error("Error uploading file");
+              }
+              MySwal.fire({
+                icon: "success",
+                title: t("success"),
+                text: t("saveSuccess") + `\nCharacters/${inputStr}.glb`,
+              });
+              globalEditorStore.viewSelect = "mainview";
+            } catch (error) {
+              console.error("Error:", error.message);
+            }
+          }
+        },
+        allowOutsideClick: function () {
+          return !MySwal.isLoading();
+        },
+      });
+    } else {
+      MySwal.fire({
+        icon: "error",
+        title: t("error"),
+        text: t("leastSelect"),
+      });
+    }
+  };
 
   useFrame(({ camera, pointer }) => {
     isMouseDown.current = input.mouseButtons.includes(0);
@@ -188,7 +254,21 @@ const MyLandScape = ({ ...om }: IObjectManagement) => {
                 </div>
               </div>
             )}
-            <div>{/* <a onClick={() => onSave()}>{t("saveTerrain")}</a> */}</div>
+            <div className='pt-4'>
+              <Button onClick={() => onSave()} disabled={!session}>
+                {t("saveTerrain")}
+              </Button>
+              {/** Loginしてない場合のエラー文言 */}
+              {!session && (
+                <div
+                  className='cursor-pointer pt-2 text-xs font-bold text-red-500 underline'
+                  onClick={() => setIsLoginModalOpen(true)}
+                >
+                  {t("requireLogin")}
+                </div>
+              )}
+            </div>
+            <LoginModal isOpen={isLoginModalOpen} />
           </div>
         )}
       </InspectorDom.In>

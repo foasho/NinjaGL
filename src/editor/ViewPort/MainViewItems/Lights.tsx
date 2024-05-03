@@ -64,8 +64,29 @@ export const MyLight = (prop: ILightProps) => {
         ref.current.color.copy(new Color(om.args.color));
         ref.current.needsUpdate = true;
       }
-      // ref.current.shadow.mapSize.width = 2024;
-      // ref.current.shadow.mapSize.height = 1024;
+      if (om.args.mapSizeWidth && om.args.type === "directional") {
+        ref.current.shadow.mapSize.width = om.args.mapSizeWidth;
+      }
+      if (om.args.mapSizeHeight && om.args.type === "directional") {
+        ref.current.shadow.mapSize.height = om.args.mapSizeHeight;
+      }
+      if (om.args.bias) {
+        ref.current.shadow.mapSize.bias = om.args.bias;
+      }
+      if (om.args.normalBias) {
+        ref.current.shadow.mapSize.normalBias = om.args.normalBias;
+      }
+      if (om.args.shadowCameraSize) {
+        ref.current.shadow.camera.left = -om.args.shadowCameraSize / 2;
+        ref.current.shadow.camera.right = om.args.shadowCameraSize / 2;
+        ref.current.shadow.camera.top = om.args.shadowCameraSize / 2;
+        ref.current.shadow.camera.bottom = -om.args.shadowCameraSize / 2;
+      }
+      ref.current.castShadow = !!om.args.castShadow;
+      // update light
+      ref.current.shadow.map = null; // 既存のシャドウマップを破棄
+      ref.current.shadow.needsUpdate = true;
+
       // I wanna remove helper
       catchRef.current.updateMatrix();
     };
@@ -92,9 +113,7 @@ export const MyLight = (prop: ILightProps) => {
   return (
     <>
       {om.args.type == "spot" && <spotLight ref={ref} castShadow />}
-      {om.args.type == "directional" && (
-        <directionalLight ref={ref} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
-      )}
+      {om.args.type == "directional" && <directionalLight ref={ref} castShadow />}
       {om.args.type == "point" && <pointLight ref={ref} position={[0, 5, 0]} castShadow />}
       <mesh
         onClick={(e) => {

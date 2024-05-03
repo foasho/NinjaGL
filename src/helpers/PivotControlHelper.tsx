@@ -18,7 +18,7 @@ const tempMat4 = new Matrix4();
  */
 export const PivotControlHelper = () => {
   const { oms, pivotRef, setPosition, setRotation, setScale } = useNinjaEditor();
-  const { currentId } = useSnapshot(editorStore);
+  const { currentId, mode } = useSnapshot(editorStore);
   const grapComponent = useRef<DragStartComponentProps | null>(null);
 
   const om = useMemo(() => {
@@ -60,34 +60,35 @@ export const PivotControlHelper = () => {
     tempMat4.copy(e);
   };
 
-  console.log("PivotControlHelper", om.type);
-
   return (
     <>
-      {(om.type === "three" ||
-        om.type === "text" ||
-        om.type === "text3d" ||
-        om.type === "image" ||
-        om.type === "object" ||
-        om.type === "video" ||
-        om.type === "ai-npc" ||
-        om.type === "light" ||
-        om.type === "audio" ||
-        om.type === "lightformer" ||
-        om.type === "avatar" ||
-        om.type === "water") && (
-        <PivotControls
-          //@ts-ignore
-          object={pivotRef}
-          depthTest={false}
-          visible={!!currentId}
-          lineWidth={2}
-          anchor={[0, 0, 0]}
-          onDrag={(e) => onDrag(e)}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-      )}
+      {/** 選択モードのときのみ利用可能 */}
+      {mode !== "all" &&
+        mode.has("select") &&
+        (om.type === "three" ||
+          om.type === "text" ||
+          om.type === "text3d" ||
+          om.type === "image" ||
+          om.type === "object" ||
+          om.type === "video" ||
+          om.type === "ai-npc" ||
+          om.type === "light" ||
+          om.type === "audio" ||
+          om.type === "lightformer" ||
+          om.type === "avatar" ||
+          om.type === "water") && (
+          <PivotControls
+            //@ts-ignore
+            object={pivotRef}
+            depthTest={false}
+            visible={!!currentId}
+            lineWidth={2}
+            anchor={[0, 0, 0]}
+            onDrag={(e) => onDrag(e)}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+          />
+        )}
     </>
   );
 };
