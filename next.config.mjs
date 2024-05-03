@@ -44,14 +44,7 @@ const nextConfig = {
         // '*.mdx': ['@mdx-js/loader'],
       },
     },
-    optimizePackageImports: [
-      "_components/*",
-      "_components/**/*",
-      "provider",
-      'websocket',
-      "postprocessing",
-      "fs",
-    ]
+    optimizePackageImports: []
   },
   typescript: {
     ignoreBuildErrors: true,
